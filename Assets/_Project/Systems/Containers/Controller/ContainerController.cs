@@ -1,0 +1,119 @@
+using UnityEngine;
+
+namespace SOLITUDE.Containers
+{
+    [RequireComponent(typeof(ContainerView))]
+    public class ContainerController : MonoBehaviour
+    {
+        [SerializeField] private ContainerInputBridge input;
+        [SerializeField] private ContainerView view;
+        [SerializeField] private ContainerTooltipView tooltip;
+
+        // Must be a component that implements IContainer (e.g. PlayerInventory, Chest, Locker).
+        // Unity can't serialize an interface reference directly, so this is
+        // assigned in the inspector as the concrete MonoBehaviour and cast below.
+        [SerializeField] private MonoBehaviour containerSource;
+
+        private IContainer container;
+        private ContainerInteractionController interaction;
+
+        private void Awake()
+        {
+            // Fall back to sibling components so most prefabs need only
+            // containerSource wired up by hand.
+            if (view == null) view = GetComponent<ContainerView>();
+            if (input == null) input = GetComponentInChildren<ContainerInputBridge>();
+        }
+
+        private void OnEnable()
+        {
+            container = containerSource as IContainer;
+            if (container == null)
+            {
+                Debug.LogError(
+                    $"{nameof(ContainerController)}: containerSource does not implement IContainer.",
+                    this);
+                return;
+            }
+
+            if (view == null)
+            {
+                Debug.LogError($"{nameof(ContainerController)}: no ContainerView assigned or found.", this);
+                return;
+            }
+
+            if (ContainerInteractionHub.Instance == null)
+            {
+                Debug.LogError(
+                    $"{nameof(ContainerController)}: no {nameof(ContainerInteractionHub)} found in the scene. " +
+                    "Add one instance of it somewhere persistent (e.g. your UI root).",
+                    this);
+                return;
+            }
+
+            // Shared across every open container - NOT constructed here -
+            // so an item can be picked up in one container and placed in
+            // another. See ContainerInteractionHub.
+            interaction = ContainerInteractionHub.Instance.Interaction;
+
+            view.Bind(container);
+            view.SlotHovered += OnSlotHovered;
+            view.SlotUnhovered += OnSlotUnhovered;
+            view.SlotSelected += OnSlotSelected;
+
+            if (input != null)
+            {
+                input.Point += OnPoint;
+                input.Click += OnClick;
+                input.Cancel += OnCancel;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (view != null)
+            {
+                view.SlotHovered -= OnSlotHovered;
+                view.SlotUnhovered -= OnSlotUnhovered;
+                view.SlotSelected -= OnSlotSelected;
+                view.Unbind();
+            }
+
+            tooltip?.Hide();
+
+            if (input != null)
+            {
+                input.Point -= OnPoint;
+                input.Click -= OnClick;
+                input.Cancel -= OnCancel;
+            }
+        }
+
+        private void OnSlotHovered(int index)
+        {
+            var slot = container.GetSlot(index);
+            interaction?.SetHover(slot);
+
+            if (slot.IsEmpty)
+                tooltip?.Hide();
+            else
+                tooltip?.Show(slot.Definition);
+        }
+
+        private void OnSlotUnhovered(int index)
+        {
+            interaction?.SetHover(null);
+            tooltip?.Hide();
+        }
+
+        // Click no longer drives item movement (that's now a drag gesture -
+        // see ContainerSlotView/ContainerInteractionHub). This is here as the
+        // hook point for future selection-based actions (a "use"/"drop"
+        // hotkey acting on whatever's selected, a context menu, etc).
+        private void OnSlotSelected(int index) { }
+
+        private void OnPoint(Vector2 pos) => tooltip?.SetPosition(pos);
+        private void OnClick() { }
+        private void OnCancel() => interaction?.Cancel();
+    }
+}
