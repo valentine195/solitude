@@ -2,6 +2,8 @@ using UnityEngine;
 using SOLITUDE.Features.Player;
 using SOLITUDE.Core.Systems;
 using SOLITUDE.Core.Animations;
+using SOLITUDE.Core.Input;
+using UnityEngine.InputSystem;
 
 namespace SOLITUDE.Features.Player
 {
@@ -32,24 +34,22 @@ namespace SOLITUDE.Features.Player
             rb = GetComponent<Rigidbody2D>();
             animationController = GetComponent<HumanAnimationController>();
 
+            GameInput.Actions.Gameplay.Move.performed += TryMove;
+
         }
 
         private void Update()
 
         {
 
-            if (InputRouter.Instance == null)
-
-                return;
-
-            moveInput = InputRouter.Instance.Move;
-
-            if (moveInput.sqrMagnitude > 1f)
-
-                moveInput.Normalize();
 
         }
+        public void TryMove(InputAction.CallbackContext ctx)
+        {
+            if (ctx.ReadValue<Vector2>().sqrMagnitude > 1f)
 
+                moveInput.Normalize();
+        }
         private void FixedUpdate()
 
         {

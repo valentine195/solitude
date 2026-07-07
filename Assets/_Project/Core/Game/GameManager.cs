@@ -1,3 +1,4 @@
+using SOLITUDE.Core.Input;
 using UnityEngine;
 
 namespace SOLITUDE.Core.Systems
@@ -10,8 +11,10 @@ namespace SOLITUDE.Core.Systems
     {
         public static GameManager Instance { get; private set; }
 
+        [SerializeField] private TimeSystem timeSystem;
+
         [Header("Game State")]
-        public bool IsPaused { get; private set; }
+        public bool IsPaused => timeSystem.IsPaused;
 
         private void Awake()
         {
@@ -25,16 +28,19 @@ namespace SOLITUDE.Core.Systems
             DontDestroyOnLoad(gameObject);
         }
 
+        public void Start()
+        {
+            InputRouter.Instance.SetMode(InputMode.Gameplay);
+        }
+
         public void PauseGame()
         {
-            IsPaused = true;
-            Time.timeScale = 0f;
+            timeSystem.Pause();
         }
 
         public void ResumeGame()
         {
-            IsPaused = false;
-            Time.timeScale = 1f;
+            timeSystem.Resume();
         }
 
         public void TogglePause()

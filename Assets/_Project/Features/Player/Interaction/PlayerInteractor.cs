@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using SOLITUDE.Core.Events;
+using SOLITUDE.Core.Input;
 using SOLITUDE.Core.Interaction;
 using SOLITUDE.Core.Systems;
 using SOLITUDE.Core.UI;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace SOLITUDE.Features.Player
 {
@@ -38,14 +40,12 @@ namespace SOLITUDE.Features.Player
                     new InteractionFocusChangedEvent(target)
                 );
             }
-
-            if (InputRouter.Instance != null &&
-                InputRouter.Instance.InteractPressed)
-            {
-                TryInteract();
-            }
         }
 
+        private void OnEnable()
+        {
+            GameInput.Actions.Gameplay.Interact.performed += TryInteract;
+        }
         private void OnDisable()
         {
             // Update() stops running while disabled (e.g. during a
@@ -58,9 +58,10 @@ namespace SOLITUDE.Features.Player
                 currentTarget = null;
                 InteractionEventBus.Publish(new InteractionFocusChangedEvent(null));
             }
+            GameInput.Actions.Gameplay.Interact.performed -= TryInteract;
         }
 
-        private void TryInteract()
+        private void TryInteract(InputAction.CallbackContext ctx)
         {
             if (currentTarget == null)
                 return;

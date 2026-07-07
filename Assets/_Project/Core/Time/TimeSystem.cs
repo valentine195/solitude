@@ -8,20 +8,14 @@ namespace SOLITUDE.Core.Systems
     /// </summary>
     public class TimeSystem : MonoBehaviour
     {
-        public static TimeSystem Instance { get; private set; }
 
         [Header("Time State")]
         public float CurrentTimeScale { get; private set; } = 1f;
+        public bool IsPaused => CurrentTimeScale == 1f;
 
         private void Awake()
         {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(gameObject);
-                return;
-            }
 
-            Instance = this;
         }
 
         public void SetTimeScale(float scale)
