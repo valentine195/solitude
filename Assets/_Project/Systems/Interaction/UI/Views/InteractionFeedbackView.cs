@@ -14,7 +14,6 @@ namespace SOLITUDE.Core.UI
 
         public void Show(string message, Color color)
         {
-            Debug.Log("[InteractionFeedbackView] Show called with message: " + message);
             if (routine != null)
                 StopCoroutine(routine);
             root.SetActive(true);

@@ -13,12 +13,10 @@ namespace SOLITUDE.Features.Interactables
     public class LockerContainer : MonoBehaviour, IContainer
     {
         [SerializeField] private int capacity = 12;
-        [SerializeField] private int columns = 2;
 
         private Container container;
-        
+
         public int Capacity => capacity;
-        public int Columns => columns;
 
         public event Action<int> SlotChanged
         {
@@ -30,7 +28,6 @@ namespace SOLITUDE.Features.Interactables
         {
             container = new Container(capacity);
         }
-
 
         public string Label => "Locker";
         public ContainerSlot GetSlot(int index) => container.GetSlot(index);

@@ -6,7 +6,6 @@ namespace SOLITUDE.Containers
     public interface IContainer
     {
         int Capacity { get; }
-        int Columns { get; }
 
         // Raised with the changed slot's index whenever a slot's contents change,
         // so any bound view can refresh just that slot instead of polling.

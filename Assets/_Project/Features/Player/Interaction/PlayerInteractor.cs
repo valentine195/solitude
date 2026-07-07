@@ -45,22 +45,49 @@ namespace SOLITUDE.Features.Player
                 TryInteract();
             }
         }
-        private void TryInteract()
 
+        private void OnDisable()
         {
+            // Update() stops running while disabled (e.g. during a
+            // cutscene), so without this the last-focused prompt would
+            // stay on screen with no further FocusChanged event to hide
+            // it. Explicitly clear focus so the UI hides the prompt, and
+            // let OnEnable's next Update() naturally recompute it.
+            if (currentTarget != null)
+            {
+                currentTarget = null;
+                InteractionEventBus.Publish(new InteractionFocusChangedEvent(null));
+            }
+        }
 
+        private void TryInteract()
+        {
             if (currentTarget == null)
-
                 return;
+
+            // CanInteract exists specifically so an interactable can be
+            // temporarily blocked (locked door, quest gate, etc.) - it must
+            // be checked here, not just declared on the interface, or a
+            // locked door opens anyway the moment CanInteract is ever wired
+            // up to return false.
+            if (!currentTarget.CanInteract(this))
+            {
+                InteractionFeedback.Handle(InteractionResult.Blocked());
+                return;
+            }
 
             var result = currentTarget.Interact(this);
 
             InteractionFeedback.Handle(result);
 
+            // "Triggered" means an interact attempt actually reached a
+            // target that allowed it - a blocked attempt above never
+            // publishes this, so listeners (achievements, quest tracking,
+            // etc.) can treat Triggered as "something really happened"
+            // rather than "the button was pressed".
             InteractionEventBus.Publish(
                 new InteractionTriggeredEvent(currentTarget, this)
             );
-
         }
 
         private IInteractable GetBestFromCache()
@@ -108,6 +135,9 @@ namespace SOLITUDE.Features.Player
             }
 
             nearby.Remove(interactable);
+
+            if (ReferenceEquals(currentTarget, interactable))
+                currentTarget = null;
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace SOLITUDE.Containers
 {
@@ -38,6 +37,12 @@ namespace SOLITUDE.Containers
         public bool IsHolding => state == InteractionState.HoldingItem;
         public ItemStack HeldItem => heldItem;
 
+        // Exposed so a ContainerController can check, on its own OnDisable,
+        // whether it's the source of the current hold (window closing
+        // mid-drag) and force a Cancel rather than leaving a phantom held
+        // item with no container left to drop it into.
+        public ContainerSlot OriginSlot => originSlot;
+
         public ContainerInteractionController(ContainerService service)
         {
             this.service = service;
@@ -53,7 +58,6 @@ namespace SOLITUDE.Containers
         // --------------------------------------------------
         public void BeginDrag(ContainerSlot slot)
         {
-            Debug.Log("[ContainerInteractionController] BeginDrag started");
             if (slot == null || slot.IsEmpty) return;
 
             // Already holding something (shouldn't normally happen since a
@@ -62,7 +66,6 @@ namespace SOLITUDE.Containers
 
             // Take() clears the slot AND hands us the stack we're now holding -
             // there is no second, stale reference to the slot's old contents.
-            Debug.Log("[ContainerInteractionController] BeginDrag Held set");
             SetHeld(slot.Take(), slot);
         }
 
@@ -108,10 +111,11 @@ namespace SOLITUDE.Containers
 
         /// <summary>
         /// Cancels the current hold and returns the item to its origin slot.
-        /// Called both by an explicit cancel input (e.g. Escape) and by
-        /// IEndDragHandler as a catch-all for "dropped on nothing" - if a
-        /// Drop already succeeded by the time this runs, IsHolding is false
-        /// and this is a no-op (Unity calls IDropHandler before IEndDragHandler).
+        /// Called both by an explicit cancel input (e.g. Escape, wired
+        /// globally in ContainerInteractionHub) and by IEndDragHandler as a
+        /// catch-all for "dropped on nothing" - if a Drop already succeeded
+        /// by the time this runs, IsHolding is false and this is a no-op
+        /// (Unity calls IDropHandler before IEndDragHandler).
         /// </summary>
         public void Cancel()
         {

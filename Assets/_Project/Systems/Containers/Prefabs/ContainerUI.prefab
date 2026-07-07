@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8115415701382592666}
   - component: {fileID: 1813139131689009571}
-  - component: {fileID: 2144125963154395582}
   - component: {fileID: 5115474866148438572}
   - component: {fileID: 4060496483241275869}
   m_Layer: 5
@@ -53,22 +52,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad5ec9b6a310c4747a523397181bedbe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Containers.ContainerController
-  input: {fileID: 2144125963154395582}
   view: {fileID: 0}
   tooltip: {fileID: 0}
   containerSource: {fileID: 0}
---- !u!114 &2144125963154395582
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1052255548619402596}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f451e7cdafb6e41479ef3a43594ae316, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Containers.ContainerInputBridge
 --- !u!114 &5115474866148438572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83,6 +69,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Containers.ContainerView
   slotViewPrefab: {fileID: 7370632015635191026, guid: ccaa4dfa4a3b14e6e934877d362cf557, type: 3}
   slotsParent: {fileID: 5518327450549581114}
+  gridLayoutGroup: {fileID: 0}
+  columns: 0
   label: {fileID: 4865893132950315630}
 --- !u!114 &4060496483241275869
 MonoBehaviour:
@@ -97,6 +85,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Containers.ContainerModalView
   root: {fileID: 1052255548619402596}
+  type: 0
 --- !u!1 &1661345471714422328
 GameObject:
   m_ObjectHideFlags: 0

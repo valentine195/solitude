@@ -65,8 +65,6 @@ namespace SOLITUDE.Containers
 
         private void OnHeldItemChanged(ItemStack item)
         {
-            Debug.Log($"{nameof(ContainerHeldItemView)}: HeldItemChanged with item: {item}");
-
             if (item == null || item.IsEmpty)
             {
                 Hide();

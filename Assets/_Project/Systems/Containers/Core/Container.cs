@@ -17,7 +17,6 @@ namespace SOLITUDE.Containers
         public string Label => "Container";
 
         public int Capacity => slots.Count;
-        public int Columns => 9;
 
         public event Action<int> SlotChanged;
 

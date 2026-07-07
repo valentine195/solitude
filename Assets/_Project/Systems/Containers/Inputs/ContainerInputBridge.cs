@@ -1,48 +1,64 @@
+using System;
+using SOLITUDE.Core.Input;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System;
 
 namespace SOLITUDE.Containers
 {
-    public class ContainerInputBridge : MonoBehaviour
+    /// <summary>
+    /// Thin wrapper over the "Container" action map on the single shared
+    /// GameInput.Actions asset (see GameInput).
+    ///
+    /// This used to be a MonoBehaviour, one per ContainerController, each
+    /// constructing and enabling its own copy of the "Container" action map.
+    /// That meant opening two containers at once double-fired every
+    /// Point/Click/Cancel callback, and Cancel only existed while at least
+    /// one container's bridge happened to be enabled - so closing every
+    /// open container mid-drag left no way to cancel a held item at all.
+    ///
+    /// Now there is exactly one of these, owned by ContainerInteractionHub
+    /// (see its Awake/OnDestroy), which wires Cancel directly to
+    /// Interaction.Cancel() so it always works regardless of which - or
+    /// whether any - container window is open.
+    /// </summary>
+    public class ContainerInputBridge
     {
-        private SOLITUDE_InputActions input;
+        private readonly SOLITUDE_InputActions.ContainerActions map;
+        private bool enabled;
 
         public event Action<Vector2> Point;
         public event Action Click;
         public event Action Cancel;
 
-        private void Awake()
+        public ContainerInputBridge()
         {
-            input = new SOLITUDE_InputActions();
+            map = GameInput.Actions.Container;
         }
 
-        private void OnEnable()
+        public void Enable()
         {
-            input.Container.Enable();
+            if (enabled) return;
+            enabled = true;
 
-            input.Container.Point.performed += OnPoint;
-            input.Container.Click.performed += OnClick;
-            input.Container.Cancel.performed += OnCancel;
+            map.Enable();
+            map.Point.performed += OnPoint;
+            map.Click.performed += OnClick;
+            map.Cancel.performed += OnCancel;
         }
 
-        private void OnDisable()
+        public void Disable()
         {
-            input.Container.Point.performed -= OnPoint;
-            input.Container.Click.performed -= OnClick;
-            input.Container.Cancel.performed -= OnCancel;
+            if (!enabled) return;
+            enabled = false;
 
-            input.Container.Disable();
+            map.Point.performed -= OnPoint;
+            map.Click.performed -= OnClick;
+            map.Cancel.performed -= OnCancel;
+            map.Disable();
         }
 
-        private void OnPoint(InputAction.CallbackContext ctx)
-            => Point?.Invoke(ctx.ReadValue<Vector2>());
-
-        private void OnClick(InputAction.CallbackContext ctx)
-            => Click?.Invoke();
-
-        private void OnCancel(InputAction.CallbackContext ctx)
-            => Cancel?.Invoke();
+        private void OnPoint(InputAction.CallbackContext ctx) => Point?.Invoke(ctx.ReadValue<Vector2>());
+        private void OnClick(InputAction.CallbackContext ctx) => Click?.Invoke();
+        private void OnCancel(InputAction.CallbackContext ctx) => Cancel?.Invoke();
     }
-
 }

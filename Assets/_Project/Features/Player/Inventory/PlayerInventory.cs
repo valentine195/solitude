@@ -13,12 +13,10 @@ namespace SOLITUDE.Features.Player
     public class PlayerInventory : MonoBehaviour, IContainer
     {
         [SerializeField] private int capacity = 30;
-        [SerializeField] private int columns = 10;
 
         private Container container;
 
         public int Capacity => capacity;
-        public int Columns => columns;
 
         public event Action<int> SlotChanged
         {

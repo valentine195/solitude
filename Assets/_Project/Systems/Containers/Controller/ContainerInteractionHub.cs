@@ -18,6 +18,15 @@ namespace SOLITUDE.Containers
     /// Awake() runs before another object's OnEnable() elsewhere in the
     /// scene, so anything that only worked "if Hub.Awake() already ran" would
     /// be a silent, order-dependent bug (this is exactly what was happening).
+    ///
+    /// This Hub also owns the single shared ContainerInputBridge and wires
+    /// its Cancel event directly to Interaction.Cancel(). Cancel used to be
+    /// routed through whichever ContainerController happened to have its own
+    /// input bridge enabled - which meant closing every open container
+    /// window mid-drag left no input path able to cancel the hold at all,
+    /// stranding the held item on the cursor with nowhere to drop it.
+    /// Routing Cancel through the Hub itself means it always works,
+    /// regardless of which - or whether any - container window is open.
     /// </summary>
     public class ContainerInteractionHub : MonoBehaviour
     {
@@ -32,7 +41,7 @@ namespace SOLITUDE.Containers
                     // Works even if this Hub's own Awake() hasn't run yet -
                     // FindFirstObjectByType only needs the component to exist
                     // in the scene, not to have executed Awake().
-                    instance = FindFirstObjectByType<ContainerInteractionHub>();
+                    instance = FindAnyObjectByType<ContainerInteractionHub>();
                 }
 
                 return instance;
@@ -44,6 +53,9 @@ namespace SOLITUDE.Containers
 
         private ContainerInteractionController interaction;
         public ContainerInteractionController Interaction => interaction ??= new ContainerInteractionController(Service);
+
+        private ContainerInputBridge input;
+        public ContainerInputBridge Input => input ??= new ContainerInputBridge();
 
         private void Awake()
         {
@@ -62,11 +74,31 @@ namespace SOLITUDE.Containers
             // first access - purely for predictability, not required for
             // correctness since the properties above are lazy either way.
             _ = Interaction;
+
+            Input.Cancel += OnGlobalCancel;
+            Input.Enable();
         }
 
         private void OnDestroy()
         {
-            if (instance == this) instance = null;
+            if (instance != this) return;
+
+            Input.Cancel -= OnGlobalCancel;
+            Input.Disable();
+
+            instance = null;
+        }
+
+        private void OnGlobalCancel() => Interaction.Cancel();
+
+        // Defensive reset for Unity's "Enter Play Mode without domain
+        // reload" option - without this, `instance` could survive between
+        // play sessions in the editor and point at a destroyed object from
+        // the previous session.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            instance = null;
         }
     }
 }

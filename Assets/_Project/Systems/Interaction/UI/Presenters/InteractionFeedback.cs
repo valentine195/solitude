@@ -11,14 +11,19 @@ namespace SOLITUDE.Core.UI
         public static void Initialize(InteractionFeedbackView feedbackView)
         {
             view = feedbackView;
-            Debug.Log("[InteractionFeedback] Initialized with view: " + (view != null ? view.name : "null"));
+
+            if (view == null)
+            {
+                // Without this, a missing inspector reference means every
+                // Handle() call silently no-ops for the rest of the game -
+                // feedback text just never appears, with zero diagnostic
+                // pointing at why.
+                Debug.LogWarning($"{nameof(InteractionFeedback)}: initialized with a null view - feedback messages will not be shown.");
+            }
         }
 
         public static void Handle(InteractionResult result)
         {
-
-            Debug.Log($"[InteractionFeedback] Handling result: IsSuccess={result.IsSuccess}, Message='{result.Message}'");
-
             if (result.IsSuccess)
             {
                 // Optional: only show success if you want feedback noise

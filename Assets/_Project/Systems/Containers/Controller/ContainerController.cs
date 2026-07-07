@@ -5,7 +5,6 @@ namespace SOLITUDE.Containers
     [RequireComponent(typeof(ContainerView))]
     public class ContainerController : MonoBehaviour
     {
-        [SerializeField] private ContainerInputBridge input;
         [SerializeField] private ContainerView view;
         [SerializeField] private ContainerTooltipView tooltip;
 
@@ -22,7 +21,6 @@ namespace SOLITUDE.Containers
             // Fall back to sibling components so most prefabs need only
             // containerSource wired up by hand.
             if (view == null) view = GetComponent<ContainerView>();
-            if (input == null) input = GetComponentInChildren<ContainerInputBridge>();
         }
 
         private void OnEnable()
@@ -61,12 +59,14 @@ namespace SOLITUDE.Containers
             view.SlotUnhovered += OnSlotUnhovered;
             view.SlotSelected += OnSlotSelected;
 
-            if (input != null)
-            {
-                input.Point += OnPoint;
-                input.Click += OnClick;
-                input.Cancel += OnCancel;
-            }
+            // Point is the only per-container concern left here (positioning
+            // this container's own tooltip) - Click was never wired to
+            // anything, and Cancel is now handled globally by the Hub so it
+            // still works even while no container window is open at all.
+            // There's exactly one ContainerInputBridge for the whole game
+            // now (owned by the Hub), so subscribing here doesn't enable a
+            // second copy of the "Container" action map.
+            ContainerInteractionHub.Instance.Input.Point += OnPoint;
         }
 
         private void OnDisable()
@@ -81,12 +81,33 @@ namespace SOLITUDE.Containers
 
             tooltip?.Hide();
 
-            if (input != null)
+            if (ContainerInteractionHub.Instance != null)
             {
-                input.Point -= OnPoint;
-                input.Click -= OnClick;
-                input.Cancel -= OnCancel;
+                ContainerInteractionHub.Instance.Input.Point -= OnPoint;
+
+                // If this container is closing while it's the source of the
+                // active hold, resolve that hold back into (what is now) an
+                // empty origin slot rather than leaving a phantom item held
+                // with no visible container left to drop it into. The global
+                // Escape cancel (see ContainerInteractionHub) covers "the
+                // player presses Escape"; this covers "the player just
+                // closed the window" without requiring that extra step.
+                if (interaction != null && interaction.IsHolding && OwnsSlot(interaction.OriginSlot))
+                    interaction.Cancel();
             }
+        }
+
+        private bool OwnsSlot(ContainerSlot slot)
+        {
+            if (slot == null || container == null) return false;
+
+            var slots = container.GetSlots();
+            for (int i = 0; i < slots.Count; i++)
+            {
+                if (ReferenceEquals(slots[i], slot)) return true;
+            }
+
+            return false;
         }
 
         private void OnSlotHovered(int index)
@@ -113,7 +134,5 @@ namespace SOLITUDE.Containers
         private void OnSlotSelected(int index) { }
 
         private void OnPoint(Vector2 pos) => tooltip?.SetPosition(pos);
-        private void OnClick() { }
-        private void OnCancel() => interaction?.Cancel();
     }
 }

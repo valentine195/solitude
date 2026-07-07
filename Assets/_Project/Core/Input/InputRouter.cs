@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,6 +6,8 @@ namespace SOLITUDE.Core.Systems
     public class InputRouter : MonoBehaviour
     {
         public static InputRouter Instance { get; private set; }
+
+        [SerializeField] private bool debugInput = false;
 
         public Vector2 Move { get; private set; }
         public bool InventoryPressed { get; private set; }
@@ -42,15 +43,39 @@ namespace SOLITUDE.Core.Systems
             inputActions.Gameplay.Pause.performed += OnPause;
         }
 
-        /*        private void OnDisable()
-                {
-                    inputActions.Disable();
-                }*/
+        private void OnDisable()
+        {
+            // This used to be commented out entirely, meaning every OnEnable
+            // stacked another subscription onto the same delegate without
+            // ever removing the previous one - harmless while these
+            // callbacks only set a bool/vector, but a ticking bug the
+            // moment one of them does something non-idempotent, and it also
+            // meant the action map was never actually disabled once enabled.
+            inputActions.Gameplay.Move.performed -= OnMove;
+            inputActions.Gameplay.Move.canceled -= OnMove;
+
+            inputActions.Gameplay.Interact.performed -= OnInteract;
+            inputActions.Gameplay.Inventory.performed -= OnInventory;
+            inputActions.Gameplay.Pause.performed -= OnPause;
+
+            inputActions.Disable();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+
+            // inputActions owns native Input System resources - without
+            // this, destroying/recreating this object (e.g. across editor
+            // play sessions or scene reloads that don't fully tear it down)
+            // leaks them.
+            inputActions?.Dispose();
+        }
 
         private void OnInventory(InputAction.CallbackContext ctx)
         {
             if (!InputEnabled) return;
-            Debug.Log("InventoryPressed");
+            if (debugInput) Debug.Log("InventoryPressed");
             InventoryPressed = ctx.performed;
 
         }
@@ -64,14 +89,14 @@ namespace SOLITUDE.Core.Systems
         private void OnInteract(InputAction.CallbackContext ctx)
         {
             if (!InputEnabled) return;
-            Debug.Log("InteractPressed");
+            if (debugInput) Debug.Log("InteractPressed");
             InteractPressed = ctx.performed;
         }
 
         private void OnPause(InputAction.CallbackContext ctx)
         {
             if (!InputEnabled) return;
-            Debug.Log("PausePressed");
+            if (debugInput) Debug.Log("PausePressed");
             PausePressed = ctx.performed;
         }
 

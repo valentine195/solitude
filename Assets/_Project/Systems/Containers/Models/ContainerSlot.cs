@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 namespace SOLITUDE.Containers
 {
@@ -49,6 +48,21 @@ namespace SOLITUDE.Containers
             return taken;
         }
 
-        private void OnStackChanged() => Changed?.Invoke();
+        private void OnStackChanged()
+        {
+            // Canonicalize "empty" as a null Stack rather than leaving a
+            // zeroed-out ItemStack sitting in the slot - anything that reads
+            // slot.Stack directly instead of checking IsEmpty first (a
+            // future TryAdd tweak, a debug view, etc.) sees one consistent
+            // "nothing here" state instead of two ("Stack == null" and
+            // "Stack != null but Definition == null / Quantity == 0").
+            if (stack != null && stack.IsEmpty)
+            {
+                Clear();
+                return;
+            }
+
+            Changed?.Invoke();
+        }
     }
 }
