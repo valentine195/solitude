@@ -9,7 +9,8 @@ namespace SOLITUDE.Core.Input
     {
         public static InputRouter Instance { get; private set; }
 
-        public InputMode Mode => Instance.Mode;
+        private InputMode _current;
+        public InputMode Mode => Instance._current;
 
         private Dictionary<InputMode, IInputRouter> routers = new();
 
@@ -45,6 +46,7 @@ namespace SOLITUDE.Core.Input
                 }
                 else router.Disable();
             }
+            _current = mode;
         }
     }
 

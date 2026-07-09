@@ -64,7 +64,10 @@ namespace SOLITUDE.Features.Player
         private void TryInteract(InputAction.CallbackContext ctx)
         {
             if (currentTarget == null)
+            {
+                Debug.Log("[PlayerInteractor] No target");
                 return;
+            }
 
             // CanInteract exists specifically so an interactable can be
             // temporarily blocked (locked door, quest gate, etc.) - it must

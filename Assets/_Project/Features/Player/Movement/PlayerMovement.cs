@@ -34,21 +34,33 @@ namespace SOLITUDE.Features.Player
             rb = GetComponent<Rigidbody2D>();
             animationController = GetComponent<HumanAnimationController>();
 
-            GameInput.Actions.Gameplay.Move.performed += TryMove;
 
         }
 
         private void Update()
-
         {
 
 
         }
+        private void OnEnable()
+        {
+            GameInput.Actions.Gameplay.Move.performed += TryMove;
+            GameInput.Actions.Gameplay.Move.canceled += StopMove;
+        }
+        private void OnDisable()
+        {
+            GameInput.Actions.Gameplay.Move.performed -= TryMove;
+            GameInput.Actions.Gameplay.Move.canceled -= StopMove;
+        }
         public void TryMove(InputAction.CallbackContext ctx)
         {
-            if (ctx.ReadValue<Vector2>().sqrMagnitude > 1f)
-
+            moveInput = ctx.ReadValue<Vector2>();
+            if (moveInput.sqrMagnitude > 1f)
                 moveInput.Normalize();
+        }
+        public void StopMove(InputAction.CallbackContext ctx)
+        {
+            moveInput = Vector2.zero;
         }
         private void FixedUpdate()
 
