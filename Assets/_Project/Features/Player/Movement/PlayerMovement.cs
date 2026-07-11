@@ -1,11 +1,11 @@
 using UnityEngine;
-using SOLITUDE.Features.Player;
+using SOLITUDE.Player;
 using SOLITUDE.Core.Systems;
 using SOLITUDE.Core.Animations;
 using SOLITUDE.Core.Input;
 using UnityEngine.InputSystem;
 
-namespace SOLITUDE.Features.Player
+namespace SOLITUDE.Player
 {
     /// <summary>
     /// Handles player locomotion only.

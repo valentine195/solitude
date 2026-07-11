@@ -1,6 +1,6 @@
 using UnityEngine;
 using SOLITUDE.Core.Interaction;
-using SOLITUDE.Features.Player;
+using SOLITUDE.Player;
 using System.Collections;
 
 namespace SOLITUDE.Features.Interactables

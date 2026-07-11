@@ -7,7 +7,7 @@ using SOLITUDE.Core.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace SOLITUDE.Features.Player
+namespace SOLITUDE.Player
 {
     public class PlayerInteractor : MonoBehaviour
     {

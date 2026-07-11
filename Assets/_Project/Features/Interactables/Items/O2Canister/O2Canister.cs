@@ -5,11 +5,11 @@ using SOLITUDE.Player;
 
 namespace SOLITUDE.Features.Interactables.Items
 {
-    public class Battery : MonoBehaviour, IInteractable
+    public class O2Canister : MonoBehaviour, IInteractable
     {
         [SerializeField]
         private ItemDefinition itemDefinition;
-        public string GetPrompt() => "Pick up battery";
+        public string GetPrompt() => "Pick up O2 Canister";
 
         public bool CanInteract(PlayerInteractor player) => true;
 
@@ -21,7 +21,7 @@ namespace SOLITUDE.Features.Interactables.Items
 
             Destroy(gameObject);
 
-            return InteractionResult.Success("Picked up battery");
+            return InteractionResult.Success("Picked up O2 Canister");
         }
     }
 }

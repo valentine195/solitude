@@ -1,5 +1,5 @@
 using UnityEngine;
-using SOLITUDE.Features.Player;
+using SOLITUDE.Player;
 
 namespace SOLITUDE.Core.Interaction
 {

@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc8a1ce05b8354e4dbae1c696d7e82ee, type: 3}
+  m_Name: O2Canister
+  m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Containers.ItemDefinition
+  DisplayName: O2 Canister
+  Icon: {fileID: 3068243408538488167, guid: 629703700d3084cccb010c7f13e7e0b9, type: 3}
+  Description: A small canister containing O2. Can be used to replenish oxygen levels.
+  PickupPrefab: {fileID: 2955792002551146583, guid: a50ef232c402e42ddb19bafa7edf2109, type: 3}
+  Stackable: 1
+  MaxStackSize: 99

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using SOLITUDE.Containers;
 
-namespace SOLITUDE.Features.Player
+namespace SOLITUDE.Player
 {
     /// <summary>
     /// Thin MonoBehaviour adapter over the shared Container model. A Chest or
@@ -12,7 +12,7 @@ namespace SOLITUDE.Features.Player
     /// </summary>
     public class PlayerInventory : MonoBehaviour, IContainer
     {
-        [SerializeField] private int capacity = 30;
+        [SerializeField] private int capacity = 24;
 
         private Container container;
 

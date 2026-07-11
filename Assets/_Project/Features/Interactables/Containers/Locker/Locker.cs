@@ -1,7 +1,7 @@
 using UnityEngine;
 using SOLITUDE.Core.Interaction;
 using SOLITUDE.Containers;
-using SOLITUDE.Features.Player;
+using SOLITUDE.Player;
 
 namespace SOLITUDE.Features.Interactables
 {

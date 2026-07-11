@@ -2,7 +2,7 @@ using UnityEngine;
 using SOLITUDE.Containers;
 using SOLITUDE.Core.Input;
 
-namespace SOLITUDE.Features.Player
+namespace SOLITUDE.Player
 {
     public class PlayerInventoryModalController : MonoBehaviour
     {

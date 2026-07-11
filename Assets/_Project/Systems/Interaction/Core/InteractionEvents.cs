@@ -1,5 +1,5 @@
 using SOLITUDE.Core.Interaction;
-using SOLITUDE.Features.Player;
+using SOLITUDE.Player;
 
 namespace SOLITUDE.Core.Events
 {
