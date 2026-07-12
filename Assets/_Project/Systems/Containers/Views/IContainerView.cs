@@ -1,4 +1,3 @@
-
 namespace SOLITUDE.Containers.Views
 {
     public interface IContainerView
@@ -6,7 +5,8 @@ namespace SOLITUDE.Containers.Views
     {
         ContainerUIType Type { get; }
 
-        void Open(Container container);
+        void Open(IContainerSource source);
+        void Close();
 
     }
 }

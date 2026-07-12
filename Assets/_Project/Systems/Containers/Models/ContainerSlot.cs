@@ -1,4 +1,5 @@
 using System;
+using SOLITUDE.Items;
 
 namespace SOLITUDE.Containers
 {
@@ -6,6 +7,7 @@ namespace SOLITUDE.Containers
     public class ContainerSlot
     {
         private ItemStack stack;
+        private readonly Func<ItemDefinition, bool> acceptFilter;
 
         public ItemStack Stack => stack;
 
@@ -13,6 +15,16 @@ namespace SOLITUDE.Containers
         public ItemDefinition Definition => stack?.Definition;
 
         public bool IsEmpty => stack == null || stack.IsEmpty;
+
+        public ContainerSlot(Func<ItemDefinition, bool> acceptFilter = null)
+        {
+            this.acceptFilter = acceptFilter;
+        }
+
+        // No filter means "accepts anything" - the common case (inventory,
+        // chest, locker). A generator/furnace/etc. passes one in via its
+        // Container's constructor instead of every slot needing its own rule.
+        public bool CanAccept(ItemDefinition item) => acceptFilter == null || acceptFilter(item);
 
         // Fires whenever this slot's contents change, whether the slot itself
         // was Set/Cleared or the ItemStack inside it changed quantity.

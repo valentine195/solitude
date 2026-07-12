@@ -27,6 +27,15 @@ namespace SOLITUDE.Containers
         public event Action<int> Unhovered;
         public event Action<int> Clicked;
 
+        // Fired once, at the end of Bind(), with this slot's real index.
+        // ContainerView instantiates one shared prefab per slot, so any
+        // sibling component that needs to know "which slot am I" (e.g. a
+        // hotbar number label/active-highlight decorator) can't rely on a
+        // serialized field baked into the prefab - every clone would report
+        // the same value. Subscribing to this in Awake (before Bind runs)
+        // is the reliable way to learn it instead.
+        public event Action<int> Bound;
+
         [SerializeField] private Image icon;
         [SerializeField] private TextMeshProUGUI count;
 
@@ -37,6 +46,7 @@ namespace SOLITUDE.Containers
         {
             Index = index;
             this.resolveSlot = resolveSlot;
+            Bound?.Invoke(index);
         }
 
         /// <summary>Updates the visuals for this slot. Safe to call with an empty slot.</summary>

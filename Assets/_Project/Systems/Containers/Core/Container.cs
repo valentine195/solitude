@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SOLITUDE.Items;
 using UnityEngine;
 
 namespace SOLITUDE.Containers
@@ -14,37 +15,89 @@ namespace SOLITUDE.Containers
     {
         private readonly List<ContainerSlot> slots;
 
-        public string Label => "Container";
+        // Optional - null means "accepts anything" (inventory, chest, locker).
+        // A generator/furnace/etc. passes a predicate here; it's threaded into
+        // every slot at creation time (including ones added by Resize) so
+        // ContainerService.PlaceHeld can ask the slot directly, without
+        // needing a back-reference to this Container.
+        private readonly Func<ItemDefinition, bool> acceptFilter;
 
         public int Capacity => slots.Count;
 
         public event Action<int> SlotChanged;
 
-        public Container(int capacity)
+        // Fires when Resize() changes the slot count - ContainerView listens
+        // and rebuilds its slot views. Not relevant to hotbar-style pre-placed
+        // slots, which have no supported resize path.
+        public event Action CapacityChanged;
+
+        public Container(int capacity, Func<ItemDefinition, bool> acceptFilter = null)
         {
+            this.acceptFilter = acceptFilter;
             slots = new List<ContainerSlot>(capacity);
 
             for (int i = 0; i < capacity; i++)
-            {
-                var slot = new ContainerSlot();
-                int index = i; // capture for the closure
-                slot.Changed += () => SlotChanged?.Invoke(index);
-                slots.Add(slot);
-            }
+                slots.Add(CreateSlot(i));
+        }
+
+        private ContainerSlot CreateSlot(int index)
+        {
+            var slot = new ContainerSlot(acceptFilter);
+            slot.Changed += () => SlotChanged?.Invoke(index);
+            return slot;
         }
 
         public ContainerSlot GetSlot(int index) => slots[index];
 
         public IReadOnlyList<ContainerSlot> GetSlots() => slots;
 
+        public bool IsEmpty(int index)
+        {
+            return slots[index].IsEmpty;
+        }
+
+        public bool CanAccept(ItemDefinition item) => acceptFilter == null || acceptFilter(item);
+
+        /// <summary>
+        /// Grows or shrinks the container. Shrinking refuses (logs a warning,
+        /// no-op) rather than discarding an occupied slot's contents - matches
+        /// TryAdd's own contract of never silently losing items.
+        /// </summary>
+        public void Resize(int newCapacity)
+        {
+            if (newCapacity == slots.Count) return;
+
+            if (newCapacity < slots.Count)
+            {
+                for (int i = newCapacity; i < slots.Count; i++)
+                {
+                    if (!slots[i].IsEmpty)
+                    {
+                        Debug.LogWarning($"{nameof(Container)}: cannot shrink to {newCapacity} - slot {i} is occupied.");
+                        return;
+                    }
+                }
+                slots.RemoveRange(newCapacity, slots.Count - newCapacity);
+            }
+            else
+            {
+                int startIndex = slots.Count;
+                for (int i = startIndex; i < newCapacity; i++)
+                    slots.Add(CreateSlot(i));
+            }
+
+            CapacityChanged?.Invoke();
+        }
+
         /// <summary>
         /// Best-effort add: fills existing stacks first, then empty slots.
         /// Returns false if the container couldn't fit the full quantity
-        /// (whatever did fit remains added - this is not transactional).
+        /// (whatever did fit remains added - this is not transactional), or
+        /// if the item is rejected outright by this container's accept filter.
         /// </summary>
         public bool TryAdd(ItemDefinition item, int quantity = 1)
         {
-            if (item == null || quantity <= 0) return false;
+            if (item == null || quantity <= 0 || !CanAccept(item)) return false;
 
             if (item.Stackable)
             {

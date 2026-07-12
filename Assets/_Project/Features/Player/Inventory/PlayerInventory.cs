@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using SOLITUDE.Containers;
+using SOLITUDE.Items;
 
 namespace SOLITUDE.Player
 {
@@ -10,11 +10,13 @@ namespace SOLITUDE.Player
     /// Locker should look almost identical to this - only the interaction
     /// trigger (always-open vs. requires-interact vs. requires-key) differs.
     /// </summary>
-    public class PlayerInventory : MonoBehaviour, IContainer
+    public class PlayerInventory : MonoBehaviour, IContainerSource
     {
         [SerializeField] private int capacity = 24;
 
         private Container container;
+        public Container Container => container ??= new Container(capacity);
+        public string Label => "Inventory";
 
         public int Capacity => capacity;
 
@@ -28,11 +30,6 @@ namespace SOLITUDE.Player
         {
             container = new Container(capacity);
         }
-
-        public string Label => "Inventory";
-        public ContainerSlot GetSlot(int index) => container.GetSlot(index);
-
-        public IReadOnlyList<ContainerSlot> GetSlots() => container.GetSlots();
 
         public bool Add(ItemDefinition item, int quantity = 1) => container.TryAdd(item, quantity);
     }

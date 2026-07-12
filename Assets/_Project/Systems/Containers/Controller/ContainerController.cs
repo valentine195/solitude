@@ -8,11 +8,10 @@ namespace SOLITUDE.Containers
         [SerializeField] private ContainerView view;
         [SerializeField] private ContainerTooltipView tooltip;
 
-        // Must be a component that implements IContainer (e.g. PlayerInventory, Chest, Locker).
-        // Unity can't serialize an interface reference directly, so this is
-        // assigned in the inspector as the concrete MonoBehaviour and cast below.
-        [SerializeField] private MonoBehaviour containerSource;
+        [Tooltip("Only needed for a panel permanently bound to one fixed source, e.g. the player's own inventory. Leave empty for a shared/reusable panel (Locker, Chest) - callers rebind it at runtime via Bind(source) each time it opens, since the same panel is reused across many world objects that can't all be wired into one Inspector field.")]
+        [SerializeField] private MonoBehaviour defaultContainerSource;
 
+        private IContainerSource currentSource;
         private IContainer container;
         private ContainerInteractionController interaction;
 
@@ -23,13 +22,38 @@ namespace SOLITUDE.Containers
             if (view == null) view = GetComponent<ContainerView>();
         }
 
+        // Called externally (e.g. Locker.Interact() -> ContainerModalView.Open())
+        // to point this controller at a specific source. Safe to call whether
+        // or not the panel is currently open - if it's already active, this
+        // rebinds immediately so re-opening on a different locker swaps its
+        // contents in place instead of waiting for a disable/enable cycle.
+        public void Bind(IContainerSource source)
+        {
+            currentSource = source;
+            if (isActiveAndEnabled)
+                BindToCurrentSource();
+        }
+
         private void OnEnable()
         {
-            container = containerSource as IContainer;
+            // Only fall back to the design-time default if nothing has been
+            // explicitly Bind()'d yet - covers the "always the same source"
+            // case (player inventory) without requiring every caller to
+            // Bind() something that never changes.
+            if (currentSource == null && defaultContainerSource != null)
+                currentSource = defaultContainerSource as IContainerSource;
+
+            BindToCurrentSource();
+        }
+
+        private void BindToCurrentSource()
+        {
+
+            container = currentSource?.Container;
             if (container == null)
             {
                 Debug.LogError(
-                    $"{nameof(ContainerController)}: containerSource does not implement IContainer.",
+                    $"{nameof(ContainerController)}: no source bound (neither Bind() was called nor is a Default Container Source assigned).",
                     this);
                 return;
             }
@@ -54,7 +78,7 @@ namespace SOLITUDE.Containers
             // another. See ContainerInteractionHub.
             interaction = ContainerInteractionHub.Instance.Interaction;
 
-            view.Bind(container);
+            view.Bind(currentSource);
             view.SlotHovered += OnSlotHovered;
             view.SlotUnhovered += OnSlotUnhovered;
             view.SlotSelected += OnSlotSelected;

@@ -2,23 +2,37 @@ using UnityEngine;
 using SOLITUDE.Modals;
 using SOLITUDE.Containers;
 using SOLITUDE.Containers.Views;
+
 namespace SOLITUDE.Containers
 {
     public class ContainerModalView : ModalView, IContainerView
     {
-
-        [SerializeField] ContainerUIType type = ContainerUIType.Generic;
+        [SerializeField] private ContainerUIType type = ContainerUIType.Generic;
         public ContainerUIType Type => type;
 
+        [SerializeField] private ContainerController controller;
 
-        public void Open(Container container)
+        private void Awake()
         {
+            if (controller == null) controller = GetComponent<ContainerController>();
+        }
+
+        // Rebinds the shared panel to whichever source is opening it (a
+        // specific Locker, Chest, etc.) before showing it - a modal reused
+        // across many world objects can't rely on a single Inspector-wired
+        // containerSource the way the player's own inventory panel can.
+        public void Open(IContainerSource source)
+        {
+            Debug.Log($"[ContainerModalView] Open called with source {source}");
+            Debug.Log($"[ContainerModalView] Binding to controller {controller}");
+
+            controller.Bind(source);
             base.Open();
         }
-        override public void Toggle()
+
+        public override void Toggle()
         {
             base.Toggle();
         }
-
     }
 }

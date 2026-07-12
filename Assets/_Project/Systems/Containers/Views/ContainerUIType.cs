@@ -7,6 +7,7 @@ namespace SOLITUDE.Containers
         Generic,
 
         PlayerInventory,
+        Hotbar,
 
         Chest,
 

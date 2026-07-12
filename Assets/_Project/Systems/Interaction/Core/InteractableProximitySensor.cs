@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using SOLITUDE.Player;
+using System;
 
 namespace SOLITUDE.Core.Interaction
 {
@@ -16,6 +17,8 @@ namespace SOLITUDE.Core.Interaction
         // rest of the play session. This way cleanup doesn't depend on every
         // IInteractable implementation remembering to unregister itself.
         private readonly List<PlayerInteractor> registeredWith = new();
+
+        public Action<bool> OnLeave;
 
         private void Awake()
         {
@@ -40,6 +43,7 @@ namespace SOLITUDE.Core.Interaction
 
             player.Unregister(interactable);
             registeredWith.Remove(player);
+            OnLeave?.Invoke(true);
         }
 
         private void OnDestroy()

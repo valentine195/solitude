@@ -9,6 +9,13 @@ namespace SOLITUDE.Containers
         public static ContainerUIController Instance;
 
         private Dictionary<ContainerUIType, IContainerView> views = new();
+        public IContainerView GetView(ContainerUIType type)
+        {
+            if (views.TryGetValue(type, out var view)) return view;
+
+            Debug.LogError($"[ContainerUIController] No view registered for {type}.");
+            return null;
+        }
 
         private void Awake()
 
@@ -23,7 +30,7 @@ namespace SOLITUDE.Containers
             Instance = this;
 
             var found = GetComponentsInChildren<IContainerView>(true);
-            foreach (var view in found) 
+            foreach (var view in found)
             {
                 if (views.ContainsKey(view.Type))
                 {

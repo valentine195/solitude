@@ -11,7 +11,7 @@ namespace SOLITUDE.Core.Systems
 
         [Header("Time State")]
         public float CurrentTimeScale { get; private set; } = 1f;
-        public bool IsPaused => CurrentTimeScale == 1f;
+        public bool IsPaused => CurrentTimeScale == 0f;
 
         private void Awake()
         {

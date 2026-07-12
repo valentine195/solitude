@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using SOLITUDE.Items;
 
 namespace SOLITUDE.Containers
 {

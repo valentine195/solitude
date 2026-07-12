@@ -10,11 +10,13 @@ namespace SOLITUDE.Features.Interactables
     /// Locker should look almost identical to this - only the interaction
     /// trigger (always-open vs. requires-interact vs. requires-key) differs.
     /// </summary>
-    public class LockerContainer : MonoBehaviour, IContainer
+    public class LockerContainer : MonoBehaviour, IContainerSource
     {
         [SerializeField] private int capacity = 12;
 
         private Container container;
+        public Container Container => container ??= new Container(capacity);
+        public string Label => "Locker";
 
         public int Capacity => capacity;
 
@@ -28,12 +30,5 @@ namespace SOLITUDE.Features.Interactables
         {
             container = new Container(capacity);
         }
-
-        public string Label => "Locker";
-        public ContainerSlot GetSlot(int index) => container.GetSlot(index);
-
-        public IReadOnlyList<ContainerSlot> GetSlots() => container.GetSlots();
-
-        public bool Add(ItemDefinition item, int quantity = 1) => container.TryAdd(item, quantity);
     }
 }

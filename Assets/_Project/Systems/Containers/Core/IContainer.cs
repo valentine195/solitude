@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SOLITUDE.Items;
 
 namespace SOLITUDE.Containers
 {
@@ -11,8 +12,13 @@ namespace SOLITUDE.Containers
         // so any bound view can refresh just that slot instead of polling.
         event Action<int> SlotChanged;
 
-        public string Label { get; }
+        // Raised when the slot count itself changes (Resize) - views rebuild
+        // entirely rather than trying to patch in the delta.
+        event Action CapacityChanged;
+
         ContainerSlot GetSlot(int index);
         IReadOnlyList<ContainerSlot> GetSlots();
+
+        bool CanAccept(ItemDefinition item);
     }
 }

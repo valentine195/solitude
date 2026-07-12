@@ -1,4 +1,5 @@
 using System;
+using SOLITUDE.Items;
 using UnityEngine;
 
 namespace SOLITUDE.Containers

@@ -8,7 +8,14 @@ namespace SOLITUDE.Containers
         Swapped,
         Merged,
         PartialMerged,
-        Failed
+        Failed,
+
+        // Distinct from Failed: the target slot's own accept filter refused
+        // this item outright (e.g. dropping a sword into a generator's fuel
+        // slot) - not "no room," but "doesn't belong here at all." Kept
+        // separate so a view can react differently (a rejected-cue flash/
+        // sound) instead of the same silent bounce-back as a full slot.
+        Rejected
     }
 
     public struct ContainerPlaceResult
@@ -31,6 +38,9 @@ namespace SOLITUDE.Containers
         {
             if (held == null || held.IsEmpty || target == null)
                 return new ContainerPlaceResult { Type = ContainerPlaceResultType.Failed, Remaining = held };
+
+            if (!target.CanAccept(held.Definition))
+                return new ContainerPlaceResult { Type = ContainerPlaceResultType.Rejected, Remaining = held };
 
             // MOVE
             if (target.IsEmpty)
@@ -57,7 +67,9 @@ namespace SOLITUDE.Containers
                 return new ContainerPlaceResult { Type = ContainerPlaceResultType.PartialMerged, Remaining = held };
             }
 
-            // SWAP
+            // SWAP - only reachable once target has passed CanAccept, but the
+            // displaced item itself doesn't need to satisfy target's filter to
+            // leave - it's exiting, not entering.
             var displaced = target.Take();
             target.Set(held);
 

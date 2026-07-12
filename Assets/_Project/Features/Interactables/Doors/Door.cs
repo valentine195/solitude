@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace SOLITUDE.Features.Interactables
 {
-    public class Door : MonoBehaviour, IInteractable
+    public class Door : InteractableBase
     {
         [SerializeField] private string promptText = "Press E";
         [SerializeField] private bool isOpen = false;
@@ -13,21 +13,12 @@ namespace SOLITUDE.Features.Interactables
         [SerializeField] private SpriteRenderer sprite;
         [SerializeField] private Collider2D blocker;
 
-        public string GetPrompt()
+        public override string GetPrompt()
         {
             return promptText;
         }
 
-        public bool CanInteract(PlayerInteractor player)
-        {
-            // Later you can add:
-            // - locked state
-            // - quest checks
-            // - time of day
-            return true;
-        }
-
-        public InteractionResult Interact(PlayerInteractor player)
+        public override InteractionResult Interact(PlayerInteractor player)
         {
             Debug.Log("Door interacted by: " + player.name);
             if (isOpen)

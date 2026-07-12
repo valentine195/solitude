@@ -34,6 +34,13 @@ namespace SOLITUDE.Containers
         /// </summary>
         public event Action<ItemStack> HeldItemChanged;
 
+        // Fires when a drop is refused by the target's own accept filter
+        // (not "slot's full" - "this doesn't belong here"). Separate from
+        // HeldItemChanged since nothing about the held item changes - this
+        // is purely a cue for a view to react to (e.g. flash the target slot
+        // red), which HeldItemChanged has no reason to carry.
+        public event Action<ContainerSlot> Rejected;
+
         public bool IsHolding => state == InteractionState.HoldingItem;
         public ItemStack HeldItem => heldItem;
 
@@ -102,6 +109,10 @@ namespace SOLITUDE.Containers
                 case ContainerPlaceResultType.Swapped:
                     // Continue holding the item that was displaced from target.
                     SetHeld(result.Remaining, target);
+                    break;
+
+                case ContainerPlaceResultType.Rejected:
+                    Rejected?.Invoke(target);
                     break;
 
                 case ContainerPlaceResultType.Failed:
