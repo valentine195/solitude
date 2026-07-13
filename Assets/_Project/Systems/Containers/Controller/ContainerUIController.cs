@@ -32,6 +32,7 @@ namespace SOLITUDE.Containers
             var found = GetComponentsInChildren<IContainerView>(true);
             foreach (var view in found)
             {
+                Debug.Log($"[ContainerUIController] found view of type {view.Type}");
                 if (views.ContainsKey(view.Type))
                 {
                     Debug.LogError($"[ContainerUIController] Duplicate views detected for view type: {view.Type}");

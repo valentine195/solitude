@@ -126,5 +126,27 @@ namespace SOLITUDE.Containers
 
             return quantity <= 0;
         }
+
+        /// <summary>Clears every slot. Used by save restoration before exact slots are applied.</summary>
+        public void Clear()
+        {
+            foreach (var slot in slots)
+                slot.Clear();
+        }
+
+        /// <summary>
+        /// Restores one exact slot without compacting or re-stacking the
+        /// container. Invalid saved data is rejected rather than coerced.
+        /// </summary>
+        public bool TrySetSlot(int index, ItemDefinition item, int quantity)
+        {
+            if (index < 0 || index >= slots.Count || item == null || quantity < 1 ||
+                !CanAccept(item) || (item.Stackable && quantity > item.MaxStackSize) ||
+                (!item.Stackable && quantity != 1))
+                return false;
+
+            slots[index].Set(new ItemStack(item, quantity));
+            return true;
+        }
     }
 }

@@ -12,29 +12,47 @@ namespace SOLITUDE.Features.Interactables
 
         private void Awake()
         {
-            sensor.OnLeave += HandleLeave;
             if (containerSource == null) containerSource = GetComponent<LockerContainer>();
+            if (sensor != null) sensor.OnLeave += HandleLeave;
+        }
+
+        private void OnDestroy()
+        {
+            if (sensor != null) sensor.OnLeave -= HandleLeave;
         }
         public override string GetPrompt() => "Open locker";
 
         private void HandleLeave(bool left)
         {
-            ContainerUIController.Instance.GetView(ContainerUIType.Locker)?.Close();
+            ContainerUIController.Instance?.GetView(ContainerUIType.Locker)?.Close();
         }
 
-        private bool viewOpened = false;
         public override InteractionResult Interact(PlayerInteractor player)
         {
+            if (containerSource == null)
+                return InteractionResult.Blocked("Locker is unavailable");
+
+            var uiController = ContainerUIController.Instance;
+            if (uiController == null)
+                return InteractionResult.Blocked("Locker UI is unavailable");
+
+            var lockerView = uiController.GetView(ContainerUIType.Locker);
+            if (lockerView == null)
+                return InteractionResult.Blocked("Locker UI is unavailable");
+
             // Pass this locker's own source, not just "open" - the modal is
             // shared across every Locker in the world, so it has to be told
             // which Container to bind on this specific open.
-            if (viewOpened)
+            if (lockerView.IsOpen)
             {
-                ContainerUIController.Instance.GetView(ContainerUIType.Locker)?.Open(containerSource);
+                lockerView.Close();
             }
             else
             {
-                ContainerUIController.Instance.GetView(ContainerUIType.Locker)?.Close();
+                if (!containerSource.EnsureInitialized())
+                    return InteractionResult.Blocked("Locker contents could not be loaded");
+
+                lockerView.Open(containerSource);
             }
             return InteractionResult.Success();
         }

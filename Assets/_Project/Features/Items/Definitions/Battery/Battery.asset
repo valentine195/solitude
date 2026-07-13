@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc8a1ce05b8354e4dbae1c696d7e82ee, type: 3}
-  m_Name: O2Canister
+  m_Name: Battery
   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Items.ItemDefinition
-  DisplayName: O2 Canister
-  Icon: {fileID: 3068243408538488167, guid: 629703700d3084cccb010c7f13e7e0b9, type: 3}
-  Description: A small canister containing O2. Can be used to replenish oxygen levels.
-  PickupPrefab: {fileID: 2955792002551146583, guid: a50ef232c402e42ddb19bafa7edf2109, type: 3}
+  DisplayName: Battery
+  Icon: {fileID: 4852641302039018602, guid: 086c0431133e94f6880b7193645d36e1, type: 3}
+  Description: A small battery still containing some charge. Can be used to power
+    a terminal.
+  PickupPrefab: {fileID: 2955792002551146583, guid: f40d0435983a2400ab7f87277957d6b4, type: 3}
   Stackable: 1
   MaxStackSize: 99
-  itemId: 8d158110df66c4994b8d575233f619c5
+  itemId: c756a156ba7f34cb2b65e32264413a60

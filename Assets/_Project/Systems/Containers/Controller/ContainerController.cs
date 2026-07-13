@@ -14,6 +14,7 @@ namespace SOLITUDE.Containers
         private IContainerSource currentSource;
         private IContainer container;
         private ContainerInteractionController interaction;
+        private bool isBound;
 
         private void Awake()
         {
@@ -22,16 +23,38 @@ namespace SOLITUDE.Containers
             if (view == null) view = GetComponent<ContainerView>();
         }
 
-        // Called externally (e.g. Locker.Interact() -> ContainerModalView.Open())
-        // to point this controller at a specific source. Safe to call whether
-        // or not the panel is currently open - if it's already active, this
-        // rebinds immediately so re-opening on a different locker swaps its
-        // contents in place instead of waiting for a disable/enable cycle.
+        // Called by its owning ContainerPanel. Safe while inactive: the source
+        // is remembered and bound by OnEnable when the modal opens.
         public void Bind(IContainerSource source)
         {
+            if (ReferenceEquals(currentSource, source) && isBound) return;
+
+            if (isActiveAndEnabled)
+                UnbindCurrentSource(cancelHeldItem: true);
+
             currentSource = source;
             if (isActiveAndEnabled)
                 BindToCurrentSource();
+        }
+
+        public void Unbind()
+        {
+            UnbindCurrentSource(cancelHeldItem: true);
+            currentSource = null;
+        }
+
+        /// <summary>Uses this panel's Inspector-wired fixed source.</summary>
+        public bool BindDefaultSource()
+        {
+            var source = defaultContainerSource as IContainerSource;
+            if (source == null)
+            {
+                Debug.LogError($"[{nameof(ContainerController)}] No valid Default Container Source is assigned.", this);
+                return false;
+            }
+
+            Bind(source);
+            return true;
         }
 
         private void OnEnable()
@@ -91,9 +114,15 @@ namespace SOLITUDE.Containers
             // now (owned by the Hub), so subscribing here doesn't enable a
             // second copy of the "Container" action map.
             ContainerInteractionHub.Instance.Input.Point += OnPoint;
+            isBound = true;
         }
 
         private void OnDisable()
+        {
+            UnbindCurrentSource(cancelHeldItem: true);
+        }
+
+        private void UnbindCurrentSource(bool cancelHeldItem)
         {
             if (view != null)
             {
@@ -105,9 +134,10 @@ namespace SOLITUDE.Containers
 
             tooltip?.Hide();
 
-            if (ContainerInteractionHub.Instance != null)
+            var hub = ContainerInteractionHub.Instance;
+            if (hub != null)
             {
-                ContainerInteractionHub.Instance.Input.Point -= OnPoint;
+                hub.Input.Point -= OnPoint;
 
                 // If this container is closing while it's the source of the
                 // active hold, resolve that hold back into (what is now) an
@@ -116,9 +146,13 @@ namespace SOLITUDE.Containers
                 // Escape cancel (see ContainerInteractionHub) covers "the
                 // player presses Escape"; this covers "the player just
                 // closed the window" without requiring that extra step.
-                if (interaction != null && interaction.IsHolding && OwnsSlot(interaction.OriginSlot))
+                if (cancelHeldItem && interaction != null && interaction.IsHolding && OwnsSlot(interaction.OriginSlot))
                     interaction.Cancel();
             }
+
+            interaction = null;
+            container = null;
+            isBound = false;
         }
 
         private bool OwnsSlot(ContainerSlot slot)

@@ -23,8 +23,11 @@ namespace SOLITUDE.Containers
         // containerSource the way the player's own inventory panel can.
         public void Open(IContainerSource source)
         {
-            Debug.Log($"[ContainerModalView] Open called with source {source}");
-            Debug.Log($"[ContainerModalView] Binding to controller {controller}");
+            if (controller == null)
+            {
+                Debug.LogError($"[{nameof(ContainerModalView)}] No {nameof(ContainerController)} is assigned.", this);
+                return;
+            }
 
             controller.Bind(source);
             base.Open();

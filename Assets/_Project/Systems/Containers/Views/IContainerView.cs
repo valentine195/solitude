@@ -4,6 +4,7 @@ namespace SOLITUDE.Containers.Views
 
     {
         ContainerUIType Type { get; }
+        bool IsOpen { get; }
 
         void Open(IContainerSource source);
         void Close();

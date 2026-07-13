@@ -7,7 +7,7 @@ namespace SOLITUDE.Player
 {
     public class PlayerInventoryModalController : MonoBehaviour
     {
-        [SerializeField] private ContainerModalView view;
+        [SerializeField] private PlayerInventory inventory;
         private bool IsOpen = false;
 
         private void OnEnable()
@@ -15,7 +15,7 @@ namespace SOLITUDE.Player
             GameInput.Actions.Gameplay.Enable();
             GameInput.Actions.Gameplay.Inventory.performed += OnInventoryPressed;
             IsOpen = false;
-            view.Close();
+            ContainerUIController.Instance?.GetView(ContainerUIType.PlayerInventory)?.Close();
         }
 
         private void OnDisable()
@@ -25,14 +25,17 @@ namespace SOLITUDE.Player
 
         private void OnInventoryPressed(UnityEngine.InputSystem.InputAction.CallbackContext ctx)
         {
-            view.Toggle();
-            IsOpen = !IsOpen;
-            if (IsOpen)
+
+            if (!IsOpen)
             {
+                IsOpen = true;
+                ContainerUIController.Instance?.GetView(ContainerUIType.PlayerInventory)?.Open(inventory);
                 GameManager.Instance.PauseGame();
             }
             else
             {
+                IsOpen = false;
+                ContainerUIController.Instance?.GetView(ContainerUIType.PlayerInventory)?.Close();
                 GameManager.Instance.ResumeGame();
             }
         }
