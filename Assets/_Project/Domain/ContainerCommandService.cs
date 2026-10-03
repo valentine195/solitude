@@ -108,8 +108,9 @@ namespace SOLITUDE.Containers
             }
             return quantity == 0;
         }
-        public CommandResult Remove(SlotAddress address, int quantity) => Execute(() => RemoveCore(address, quantity));
-        private CommandResult RemoveCore(SlotAddress address, int quantity)
+        public CommandResult Remove(SlotAddress address, int quantity) => Remove(address, quantity, null);
+        internal CommandResult Remove(SlotAddress address, int quantity, Action worldCommit) => Execute(() => RemoveCore(address, quantity, worldCommit));
+        private CommandResult RemoveCore(SlotAddress address, int quantity, Action worldCommit)
         {
             var status = Address(address, out var state);
             if (status != CommandStatus.Applied) return new CommandResult(status);
@@ -118,7 +119,7 @@ namespace SOLITUDE.Containers
             if (stack == null || quantity > stack.Quantity) return new CommandResult(CommandStatus.InsufficientQuantity);
             var plan = (ItemStack[])state.Slots.Clone();
             plan[address.Index] = quantity == stack.Quantity ? null : new ItemStack(stack.Definition, stack.Quantity - quantity);
-            Commit(new Dictionary<ContainerState, ItemStack[]> { [state] = plan });
+            Commit(new Dictionary<ContainerState, ItemStack[]> { [state] = plan }, worldCommit);
             return new CommandResult(CommandStatus.Applied, quantity, stack.Quantity - quantity, lastChanges);
         }
         public CommandResult Transfer(SlotAddress source, SlotAddress target) => Execute(() => TransferCore(source, target));

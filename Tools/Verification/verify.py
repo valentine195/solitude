@@ -6,10 +6,10 @@ p=argparse.ArgumentParser();p.add_argument('--workspace',type=pathlib.Path,defau
 a=p.parse_args();workspace=a.workspace.resolve();output=a.output.resolve();output.mkdir(parents=True,exist_ok=True)
 if workspace==ROOT or ROOT in workspace.parents or 'solitude-' not in workspace.name or str(workspace.parent) not in ('/private/tmp','/tmp'):raise SystemExit('Use a dedicated solitude-* workspace under /tmp.')
 env=os.environ.copy();env['SOLITUDE_VALIDATION_OUTPUT']=str(output/'validation');results=[]
-def run(cmd,name,timeout=360,expected=0):
+def run(cmd,name,timeout=360,expected=0,input_data=None):
  print(name,flush=True);start=time.monotonic()
  with (output/(name+'.runner.log')).open('w') as log:
-  proc=subprocess.run(list(map(str,cmd)),cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=timeout)
+  proc=subprocess.run(list(map(str,cmd)),cwd=ROOT,env=env,stdout=log,stderr=subprocess.STDOUT,timeout=timeout,input=input_data)
  if expected is not None and proc.returncode!=expected:raise RuntimeError(f'{name}: exit {proc.returncode}; see {output/name}.runner.log')
  results.append(dict(name=name,seconds=round(time.monotonic()-start,2),exit=proc.returncode));return proc
 
@@ -36,6 +36,16 @@ try:
  if not a.skip_build:
   workspace.mkdir(parents=True,exist_ok=True)
   for folder in ['Assets','Packages','ProjectSettings']:run(['rsync','-a','--delete',str(ROOT/folder)+'/',str(workspace/folder)+'/'],'copy-'+folder,120)
+  # Authoring validation queries tracked asset/meta pairs. Mirror the source index,
+  # not `git add Assets`, which would hide missing tracked metadata by staging it.
+  # This metadata-only repository owns its index; it never points at the source .git.
+  git_dir=workspace/'.git'
+  if git_dir.is_symlink() or (git_dir.exists() and not git_dir.is_dir()):
+   raise RuntimeError('Verification workspace must own its disposable .git directory')
+  tracked=subprocess.run(['git','ls-files','--stage','-z','--','Assets'],cwd=ROOT,check=True,stdout=subprocess.PIPE).stdout
+  run(['git','init',workspace],'prepare-git')
+  run(['git','-C',workspace,'read-tree','--empty'],'reset-verification-index')
+  run(['git','-C',workspace,'update-index','-z','--index-info'],'copy-verification-index',input_data=tracked)
   version=(ROOT/'ProjectSettings/ProjectVersion.txt').read_text().split('m_EditorVersion: ')[1].splitlines()[0]
   sdk=pathlib.Path('/Applications/Unity/Hub/Editor')/version/'Unity.app/Contents/Resources/Scripting/DotNetSdk/dotnet'
   nunit=next((ROOT/'Library/PackageCache').glob('com.unity.ext.nunit@*/net472/unity-custom/nunit.framework.dll'))

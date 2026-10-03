@@ -10,6 +10,9 @@ namespace SOLITUDE.Core.UI
     /// </summary>
     public class UIController : MonoBehaviour
     {
+        private IInteractable focused;
+        private string shownPrompt;
+
         [Header("Views")]
         [SerializeField] private InteractionPromptView interactionPrompt;
         [SerializeField] private InteractionFeedbackView feedbackView;
@@ -30,18 +33,30 @@ namespace SOLITUDE.Core.UI
         private void OnDisable()
         {
             InteractionEventBus.OnFocusChanged -= HandleFocusChanged;
+            focused = null; shownPrompt = null;
+            if (interactionPrompt != null) interactionPrompt.Hide();
         }
 
         private void HandleFocusChanged(InteractionFocusChangedEvent evt)
         {
-            Debug.Log($"[UIController] Focus changed -> {evt.interactable}");
-            if (evt.interactable == null)
+            focused = evt.interactable;
+            RefreshPrompt();
+        }
+
+        private void LateUpdate() => RefreshPrompt();
+
+        private void RefreshPrompt()
+        {
+            if (focused == null || (focused is Object target && target == null))
             {
-                interactionPrompt.Hide();
+                focused = null; shownPrompt = null;
+                if (interactionPrompt != null) interactionPrompt.Hide();
                 return;
             }
-
-            interactionPrompt.Show(evt.interactable.GetPrompt());
+            string current = focused.GetPrompt();
+            if (current == shownPrompt || interactionPrompt == null) return;
+            shownPrompt = current;
+            interactionPrompt.Show(current);
         }
     }
 }

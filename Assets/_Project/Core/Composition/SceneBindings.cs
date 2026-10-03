@@ -8,6 +8,7 @@ using SOLITUDE.Features.Interactables;
 using SOLITUDE.Items;
 using SOLITUDE.Player;
 using SOLITUDE.SaveLoad;
+using SOLITUDE.World.Restoration;
 using UnityEngine;
 namespace SOLITUDE.Composition
 {
@@ -25,6 +26,7 @@ namespace SOLITUDE.Composition
         [SerializeField] private ContainerTooltipView[] tooltips = new ContainerTooltipView[0];
         [SerializeField] private LockerContainer[] lockers = new LockerContainer[0];
         [SerializeField] private WorldPickup[] worldPickups = new WorldPickup[0];
+        [SerializeField] private RestorationJunction[] restorationJunctions = new RestorationJunction[0];
         private readonly List<ContainerSaveSession.ContainerBinding> bindings = new();
         private readonly List<WorldPickup> registeredPickups = new();
         [SerializeField] private UnityEngine.InputSystem.UI.InputSystemUIInputModule uiInput;
@@ -94,6 +96,8 @@ namespace SOLITUDE.Composition
                 if (!HasPlayer) return;
                 recoveryNotice.Initialize();
                 var inventoryBinding = session.Register(ContainerSaveSession.PlayerInventoryId, inventory.Capacity); bindings.Add(inventoryBinding); inventory.Initialize(inventoryBinding.Container);
+                foreach (var junction in restorationJunctions)
+                    if (junction != null) junction.Initialize(session.Commands, inventory.Container);
                 var hotbarBinding = session.Register(ContainerSaveSession.PlayerHotbarId, hotbar.Capacity); bindings.Add(hotbarBinding);
                 selection = new HotbarSelectionState(hotbarBinding.Container); hotbar.Initialize(hotbarBinding.Container, selection);
                 foreach (var controller in controllers)
@@ -207,6 +211,7 @@ namespace SOLITUDE.Composition
             selection?.Dispose(); selection = null;
             foreach (var pickup in registeredPickups) pickup.ReleaseBinding(); registeredPickups.Clear();
             foreach (var source in lockers) { source.Release(); if (source != null) source.GetComponent<Locker>()?.Release(); }
+            foreach (var junction in restorationJunctions) if (junction != null) junction.ReleaseBinding();
             foreach (var binding in bindings) binding.Dispose(); bindings.Clear();
             inventory?.Release(); hotbar?.Release(); session = null;
         }
