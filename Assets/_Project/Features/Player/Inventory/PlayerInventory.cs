@@ -1,36 +1,14 @@
-using System;
-using UnityEngine;
 using SOLITUDE.Containers;
-using SOLITUDE.Items;
-
+using UnityEngine;
 namespace SOLITUDE.Player
 {
-    /// <summary>
-    /// Thin MonoBehaviour adapter over the shared Container model. A Chest or
-    /// Locker should look almost identical to this - only the interaction
-    /// trigger (always-open vs. requires-interact vs. requires-key) differs.
-    /// </summary>
     public class PlayerInventory : MonoBehaviour, IContainerSource
     {
         [SerializeField] private int capacity = 24;
-
-        private Container container;
-        public Container Container => container ??= new Container(capacity);
+        public IContainerReader Container { get; private set; }
         public string Label => "Inventory";
-
-        public int Capacity => capacity;
-
-        public event Action<int> SlotChanged
-        {
-            add => container.SlotChanged += value;
-            remove => container.SlotChanged -= value;
-        }
-
-        private void Awake()
-        {
-            container = new Container(capacity);
-        }
-
-        public bool Add(ItemDefinition item, int quantity = 1) => container.TryAdd(item, quantity);
+        public int Capacity => Container?.Capacity ?? capacity;
+        public void Initialize(IContainerReader reader) => Container = reader;
+        public void Release() => Container = null;
     }
 }

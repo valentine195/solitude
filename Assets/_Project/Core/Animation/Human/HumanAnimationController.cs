@@ -3,7 +3,7 @@ using UnityEngine;
 namespace SOLITUDE.Core.Animations
 {
     [RequireComponent(typeof(Animator))]
-    public class HumanAnimationController : MonoBehaviour
+    public class HumanAnimationController : MonoBehaviour, ICreatureAnimationController
     {
         private Animator animator;
 

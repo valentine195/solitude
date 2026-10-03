@@ -70,7 +70,7 @@ PrefabInstance:
       objectReference: {fileID: 4852641302039018602, guid: 086c0431133e94f6880b7193645d36e1, type: 3}
     - target: {fileID: 3081551848520711288, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
       propertyPath: m_SortingLayer
-      value: 2
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3081551848520711288, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
       propertyPath: m_SortingLayerID
@@ -122,14 +122,17 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6443611208535386549, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7000982322901830629}
+      addedObject: {fileID: 5642791779304549715}
+    - targetCorrespondingSourceObject: {fileID: 6443611208535386549, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6463872340055339891}
   m_SourcePrefab: {fileID: 100100000, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
 --- !u!1 &2955792002551146583 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6443611208535386549, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
   m_PrefabInstance: {fileID: 8100105921356251618}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7000982322901830629
+--- !u!114 &5642791779304549715
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -138,6 +141,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 2955792002551146583}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b031f1dc556da45a39ed71c7223cb745, type: 3}
+  m_Script: {fileID: 11500000, guid: a2c91146ef91f41ad9a8d5c86ae0d1b7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Battery
+  m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.SaveLoad.SaveableId
+  id: 
+--- !u!114 &6463872340055339891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2955792002551146583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c923170122b90492098dfe6859f871fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Items.WorldPickup
+  prompt: Interact
+  definition: {fileID: 11400000, guid: 33337317483f44c01ad74c492a5f2b45, type: 2}

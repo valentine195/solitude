@@ -34,6 +34,7 @@ namespace SOLITUDE.Core.UI
 
         private void HandleFocusChanged(InteractionFocusChangedEvent evt)
         {
+            Debug.Log($"[UIController] Focus changed -> {evt.interactable}");
             if (evt.interactable == null)
             {
                 interactionPrompt.Hide();

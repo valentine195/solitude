@@ -19,12 +19,32 @@ namespace SOLITUDE.Player
 
         private IInteractable currentTarget;
 
+        private bool inputAllowed;
+        public void SetInputAllowed(bool allowed)
+        {
+            inputAllowed = allowed;
+            if (!allowed && currentTarget != null)
+            { currentTarget = null; InteractionEventBus.Publish(new InteractionFocusChangedEvent(null)); }
+        }
         void Update()
         {
+            if (!inputAllowed) return;
             IInteractable target = GetBestFromCache();
+
 
             if (target != currentTarget)
             {
+                if (debugInteraction)
+                {
+                    string name = target == null
+                        ? "null"
+                        : (target as MonoBehaviour)?.gameObject.name ?? target.GetType().Name;
+                    string cname = target == null
+                        ? "null"
+                        : (currentTarget as MonoBehaviour)?.gameObject.name ?? currentTarget.GetType().Name;
+
+                    Debug.Log($"[Interactor] Focus change -> {name} -> {cname}");
+                }
                 currentTarget = target;
 
                 if (debugInteraction)
@@ -42,10 +62,6 @@ namespace SOLITUDE.Player
             }
         }
 
-        private void OnEnable()
-        {
-            GameInput.Actions.Gameplay.Interact.performed += TryInteract;
-        }
         private void OnDisable()
         {
             // Update() stops running while disabled (e.g. during a
@@ -58,11 +74,12 @@ namespace SOLITUDE.Player
                 currentTarget = null;
                 InteractionEventBus.Publish(new InteractionFocusChangedEvent(null));
             }
-            GameInput.Actions.Gameplay.Interact.performed -= TryInteract;
+
         }
 
-        private void TryInteract(InputAction.CallbackContext ctx)
+        public void TryInteract()
         {
+            if (!inputAllowed) return;
             if (currentTarget == null)
             {
                 Debug.Log("[PlayerInteractor] No target");
@@ -139,9 +156,6 @@ namespace SOLITUDE.Player
             }
 
             nearby.Remove(interactable);
-
-            if (ReferenceEquals(currentTarget, interactable))
-                currentTarget = null;
         }
     }
 }

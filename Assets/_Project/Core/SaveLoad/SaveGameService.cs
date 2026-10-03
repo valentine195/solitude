@@ -1,138 +1,52 @@
 using System;
 using System.IO;
 using UnityEngine;
-
+using SOLITUDE.Items;
+using SOLITUDE.Application.Persistence;
 namespace SOLITUDE.SaveLoad
 {
-    /// <summary>
-    /// Scene-persistent JSON save store. Add one instance to the same bootstrap
-    /// object as GameManager. World objects only address their own records by
-    /// SaveableId; they do not own the shared save state.
-    /// </summary>
-    [DefaultExecutionOrder(-1000)]
+    /// <summary>Injected complete-file persistence and Unity lifecycle host.</summary>
     public class SaveGameService : MonoBehaviour
     {
-        private const string FileName = "solitude-save.json";
-
-        public static SaveGameService Instance { get; private set; }
-
-        [SerializeField] private int newGameWorldSeed = 12345;
-        private SaveGameData data;
-
-        public int WorldSeed => data.worldSeed;
-        private string SavePath => Path.Combine(Application.persistentDataPath, FileName);
-
-        private void Awake()
+        private ContainerSaveSession session;
+        private bool canWrite;
+        private Action newSave;
+        private SaveRecoveryStore store;
+        public SaveLoadResult LastLoad { get; private set; }
+        public bool RecoveryNoticePending => store?.NoticePending ?? false;
+        public void Configure(SaveRecoveryStore store) => this.store = store;
+        public SaveGameData Load(int seed, IItemCatalog catalog, out string error)
         {
-            if (Instance != null && Instance != this)
+            if (store == null)
             {
-                Destroy(gameObject);
-                return;
+                string directory = UnityEngine.Application.persistentDataPath;
+#if UNITY_EDITOR || SOLITUDE_VERIFICATION
+                var args = System.Environment.GetCommandLineArgs();
+                int index = System.Array.IndexOf(args, "-solitudeSaveDirectory");
+                if (index >= 0 && index + 1 < args.Length) directory = args[index + 1];
+#endif
+                store = new SaveRecoveryStore(Path.Combine(directory, "solitude-save.json"), new PhysicalSaveFiles(), new SaveJsonCodec(catalog));
             }
-
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            LoadFromDisk();
+            LastLoad = store.Load(seed); error = LastLoad.Diagnostic;
+            return LastLoad.Data;
         }
-
-        private void OnApplicationPause(bool paused)
+        public void BeginNewSave() { store?.CancelPendingRecovery(); if (store?.NoticePending == true) store.AcknowledgeNotice(); }
+        public void CompleteRecovery() => store?.CompleteRecovery();
+        public void RejectRestore(string diagnostic) => LastLoad = new SaveLoadResult(SaveLoadStatus.BlockedIncompatible, diagnostic: diagnostic);
+        public void AcknowledgeRecoveryNotice() => store?.AcknowledgeNotice();
+        public void Initialize(ContainerSaveSession session, Action newSave, bool canWrite = true)
+        { this.session = session; this.newSave = newSave; this.canWrite = canWrite; }
+        public void Flush()
         {
-            if (paused) SaveToDisk();
+            if (!canWrite || session == null || session.HasIntegrityFailure || session.IsCollecting || !session.IsDirty || store == null || store.RecoveryPending) return;
+            try { store.Write(session.Capture()); session.MarkSaved(); }
+            catch (Exception failure) { Debug.LogError("[SaveGameService] Failed to save: " + failure.Message); }
         }
-
-        private void OnApplicationQuit() => SaveToDisk();
-
-        public bool TryGetContainer(string saveableId, out ContainerSaveData state)
-        {
-            state = null;
-            if (string.IsNullOrEmpty(saveableId) || data?.containers == null) return false;
-
-            foreach (var record in data.containers)
-            {
-                if (record != null && record.saveableId == saveableId)
-                {
-                    state = record.state ?? new ContainerSaveData();
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public void SetContainer(string saveableId, ContainerSaveData state)
-        {
-            if (string.IsNullOrEmpty(saveableId))
-            {
-                Debug.LogError("[SaveGameService] Refusing to save a container with no SaveableId.");
-                return;
-            }
-
-            data ??= CreateNewData();
-            data.containers ??= new System.Collections.Generic.List<ContainerSaveRecord>();
-
-            foreach (var record in data.containers)
-            {
-                if (record != null && record.saveableId == saveableId)
-                {
-                    record.state = state ?? new ContainerSaveData();
-                    SaveToDisk();
-                    return;
-                }
-            }
-
-            data.containers.Add(new ContainerSaveRecord { saveableId = saveableId, state = state ?? new ContainerSaveData() });
-            SaveToDisk();
-        }
-
-        [ContextMenu("Start New Save")]
-        public void StartNewSave()
-        {
-            data = CreateNewData();
-            SaveToDisk();
-        }
-
-        private void LoadFromDisk()
-        {
-            if (!File.Exists(SavePath))
-            {
-                data = CreateNewData();
-                return;
-            }
-
-            try
-            {
-                data = JsonUtility.FromJson<SaveGameData>(File.ReadAllText(SavePath));
-                if (data == null || data.version != SaveGameData.CurrentVersion)
-                {
-                    Debug.LogWarning("[SaveGameService] Save file is missing or from an unsupported version; starting a new save.");
-                    data = CreateNewData();
-                }
-                else
-                {
-                    data.containers ??= new System.Collections.Generic.List<ContainerSaveRecord>();
-                }
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"[SaveGameService] Failed to load save file: {exception.Message}");
-                data = CreateNewData();
-            }
-        }
-
-        private void SaveToDisk()
-        {
-            if (data == null) return;
-
-            try
-            {
-                File.WriteAllText(SavePath, JsonUtility.ToJson(data, true));
-            }
-            catch (Exception exception)
-            {
-                Debug.LogError($"[SaveGameService] Failed to save: {exception.Message}");
-            }
-        }
-
-        private SaveGameData CreateNewData() => new() { worldSeed = newGameWorldSeed };
+        public void Release() { Flush(); session = null; newSave = null; canWrite = false; }
+        [ContextMenu("Start New Save")] public void StartNewSave() => newSave?.Invoke();
+        private void LateUpdate() => Flush();
+        private void OnApplicationPause(bool paused) { if (paused) Flush(); }
+        private void OnApplicationQuit() => Flush();
+        private void OnDestroy() => Flush();
     }
 }

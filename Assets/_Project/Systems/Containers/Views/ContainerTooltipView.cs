@@ -12,7 +12,7 @@ namespace SOLITUDE.Containers
     /// need to convert via RectTransformUtility.ScreenPointToLocalPointInRectangle
     /// against that canvas instead.
     /// </summary>
-    public class ContainerTooltipView : MonoBehaviour
+    public class ContainerTooltipView : MonoBehaviour, SOLITUDE.Application.ITooltipDisplay
     {
         [SerializeField] private RectTransform root;
         [SerializeField] private TextMeshProUGUI title;
@@ -26,7 +26,12 @@ namespace SOLITUDE.Containers
             Hide();
         }
 
-        public void Show(ItemDefinition item)
+        public void ValidateAuthoring()
+        { if (root == null) throw new System.InvalidOperationException("Tooltip root is missing."); }
+        private ItemPresentationCatalog catalog;
+        public void Initialize(ItemPresentationCatalog catalog) { this.catalog = catalog; Hide(); }
+        public void Show(string id) => Show(catalog?.Resolve(id));
+        public void Show(ItemPresentation item)
         {
             if (item == null)
             {
@@ -37,17 +42,17 @@ namespace SOLITUDE.Containers
             if (title != null) title.text = item.DisplayName;
             if (description != null) description.text = item.Description;
 
-            root.gameObject.SetActive(true);
+            if (root != null) root.gameObject.SetActive(true);
         }
 
         public void Hide()
         {
-            root.gameObject.SetActive(false);
+            if (root != null) root.gameObject.SetActive(false);
         }
 
         public void SetPosition(Vector2 screenPosition)
         {
-            root.position = screenPosition + cursorOffset;
+            if (root != null) root.position = screenPosition + cursorOffset;
         }
     }
 }

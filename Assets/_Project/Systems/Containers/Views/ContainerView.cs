@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace SOLITUDE.Containers
 {
-    public class ContainerView : MonoBehaviour
+    public class ContainerView : MonoBehaviour, SOLITUDE.Application.IContainerDisplay
     {
         [Tooltip("Prefab with a ContainerSlotView component; one is instantiated per slot. Not used when Use Existing Slot Views is enabled.")]
         [SerializeField] private ContainerSlotView slotViewPrefab;
@@ -29,150 +29,68 @@ namespace SOLITUDE.Containers
         [Tooltip("Label of the container")]
         [SerializeField] private TextMeshProUGUI label;
         private readonly List<ContainerSlotView> slotViews = new();
-        private IContainer container;
-        private int selectedIndex = -1;
-
-        // Index-based, per the architecture: the view never hands out a
-        // ContainerSlot or ContainerSlotView reference - only which index changed.
-        public event Action<int> SlotHovered;
-        public event Action<int> SlotUnhovered;
-
-        // Fires when the user clicks a slot to select it (click is selection
-        // only - moving items is a drag gesture, handled by ContainerSlotView
-        // talking directly to ContainerInteractionHub).
-        public event Action<int> SlotSelected;
-
-        public void Bind(IContainerSource containerSource)
+        private SOLITUDE.Items.ItemPresentationCatalog presentations;
+        public event Action<SOLITUDE.Application.SlotIntent> Hovered, Unhovered, Selected, BeginDrag, EndDrag, Drop;
+        public void ValidateAuthoring()
         {
-            Unbind();
-
-            this.container = containerSource.Container;
-            container.SlotChanged += OnContainerSlotChanged;
-
-            label.text = containerSource.Label;
-            if (gridLayoutGroup != null)
-            {
-                gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-                gridLayoutGroup.constraintCount = Mathf.Max(1, columns);
-            }
-
-            BuildSlots();
-        }
-
-        public void Unbind()
-        {
-            if (container != null)
-            {
-                container.SlotChanged -= OnContainerSlotChanged;
-                container = null;
-            }
-
-            selectedIndex = -1;
-            ClearSlots();
-        }
-
-        public ContainerSlot GetSlot(int index) => container?.GetSlot(index);
-
-        private void BuildSlots()
-        {
-            var containerSlots = container.GetSlots();
-
             if (useExistingSlotViews)
             {
-                if (existingSlotViews.Count != containerSlots.Count)
+                var unique = new HashSet<ContainerSlotView>();
+                if (existingSlotViews.Count == 0 || existingSlotViews.Exists(slot => slot == null || !unique.Add(slot)))
+                    throw new InvalidOperationException("Pre-placed container slots are missing or duplicated.");
+            }
+            else if (slotViewPrefab == null || slotsParent == null)
+                throw new InvalidOperationException("Container slot template/parent is missing.");
+        }
+        public void Initialize(SOLITUDE.Items.ItemPresentationCatalog catalog) => presentations = catalog;
+        public void Build(string text, int capacity, long generation)
+        {
+            Clear();
+            if (label != null) label.text = text;
+            if (gridLayoutGroup != null)
+            {
+                gridLayoutGroup.constraint = UnityEngine.UI.GridLayoutGroup.Constraint.FixedColumnCount;
+                gridLayoutGroup.constraintCount = Mathf.Max(1, columns);
+            }
+            if (useExistingSlotViews)
+                for (int i = 0; i < existingSlotViews.Count; i++) existingSlotViews[i].gameObject.SetActive(i < capacity);
+            for (int i = 0; i < capacity; i++)
+            {
+                ContainerSlotView slot;
+                if (useExistingSlotViews && i < existingSlotViews.Count) slot = existingSlotViews[i];
+                else
                 {
-                    Debug.LogError(
-                        $"{nameof(ContainerView)}: Existing Slot Views count ({existingSlotViews.Count}) " +
-                        $"does not match the bound container's capacity ({containerSlots.Count}).",
-                        this);
-                    return;
+                    var template = slotViewPrefab != null ? slotViewPrefab : useExistingSlotViews && existingSlotViews.Count > 0 ? existingSlotViews[0] : null;
+                    if (template == null || (!useExistingSlotViews && slotsParent == null)) throw new InvalidOperationException("Container slot template/parent is missing.");
+                    slot = Instantiate(template, slotsParent != null ? slotsParent : template.transform.parent);
+                    slot.gameObject.SetActive(true);
                 }
-
-                for (int i = 0; i < existingSlotViews.Count; i++)
-                {
-                    BindSlotView(existingSlotViews[i], i, containerSlots);
-                    slotViews.Add(existingSlotViews[i]);
-                }
-
-                return;
-            }
-
-            if (slotViewPrefab == null)
-            {
-                Debug.LogError($"{nameof(ContainerView)}: Slot View Prefab is not assigned (or its reference is broken).", this);
-                return;
-            }
-
-            if (slotsParent == null)
-            {
-                Debug.LogError($"{nameof(ContainerView)}: Slots Parent is not assigned.", this);
-                return;
-            }
-
-            for (int i = 0; i < containerSlots.Count; i++)
-            {
-                var slotView = Instantiate(slotViewPrefab, slotsParent);
-                BindSlotView(slotView, i, containerSlots);
-                slotViews.Add(slotView);
+                slot.Bind(i, generation, presentations);
+                slot.Hovered += Hover; slot.Unhovered += Unhover; slot.Clicked += Select;
+                slot.BeginDrag += Begin; slot.EndDrag += End; slot.Dropped += Dropped;
+                slotViews.Add(slot);
             }
         }
-
-        private void BindSlotView(ContainerSlotView slotView, int index, IReadOnlyList<ContainerSlot> containerSlots)
+        public void Render(SOLITUDE.Application.SlotPresentation slot)
+        { if (slot.Index >= 0 && slot.Index < slotViews.Count) slotViews[slot.Index].Render(slot); }
+        public void Clear()
         {
-            slotView.Bind(index, () => container.GetSlot(index));
-            slotView.Refresh(containerSlots[index]);
-
-            slotView.Hovered += OnSlotViewHovered;
-            slotView.Unhovered += OnSlotViewUnhovered;
-            slotView.Clicked += OnSlotViewClicked;
-        }
-
-        private void ClearSlots()
-        {
-            foreach (var slotView in slotViews)
+            foreach (var slot in slotViews)
             {
-                if (slotView == null) continue;
-
-                slotView.Hovered -= OnSlotViewHovered;
-                slotView.Unhovered -= OnSlotViewUnhovered;
-                slotView.Clicked -= OnSlotViewClicked;
-
-                // Pre-placed slots (hotbar) are hand-authored in the scene/
-                // prefab - Unbind() must not destroy them the way it destroys
-                // runtime-instantiated inventory/chest slots.
-                if (!useExistingSlotViews)
-                    Destroy(slotView.gameObject);
+                if (slot == null) continue;
+                slot.Hovered -= Hover; slot.Unhovered -= Unhover; slot.Clicked -= Select;
+                slot.BeginDrag -= Begin; slot.EndDrag -= End; slot.Dropped -= Dropped;
+                slot.Unbind();
+                if (!useExistingSlotViews || !existingSlotViews.Contains(slot)) Destroy(slot.gameObject);
             }
-
             slotViews.Clear();
         }
-
-        private void OnContainerSlotChanged(int index)
-        {
-            if (index < 0 || index >= slotViews.Count) return;
-            slotViews[index].Refresh(container.GetSlot(index));
-        }
-
-        private void OnSlotViewHovered(int index) => SlotHovered?.Invoke(index);
-        private void OnSlotViewUnhovered(int index) => SlotUnhovered?.Invoke(index);
-
-        private void OnSlotViewClicked(int index)
-        {
-            // Click toggles selection: clicking the already-selected slot
-            // deselects it, clicking a different slot moves the highlight.
-            SetSelected(index == selectedIndex ? -1 : index);
-            SlotSelected?.Invoke(selectedIndex);
-        }
-
-        private void SetSelected(int index)
-        {
-            if (selectedIndex >= 0 && selectedIndex < slotViews.Count)
-                slotViews[selectedIndex].SetSelected(false);
-
-            selectedIndex = index;
-
-            if (selectedIndex >= 0 && selectedIndex < slotViews.Count)
-                slotViews[selectedIndex].SetSelected(true);
-        }
+        private void Hover(SOLITUDE.Application.SlotIntent intent) => Hovered?.Invoke(intent);
+        private void Unhover(SOLITUDE.Application.SlotIntent intent) => Unhovered?.Invoke(intent);
+        private void Select(SOLITUDE.Application.SlotIntent intent) => Selected?.Invoke(intent);
+        private void Begin(SOLITUDE.Application.SlotIntent intent) => BeginDrag?.Invoke(intent);
+        private void End(SOLITUDE.Application.SlotIntent intent) => EndDrag?.Invoke(intent);
+        private void Dropped(SOLITUDE.Application.SlotIntent intent) => Drop?.Invoke(intent);
+        private void OnDestroy() => Clear();
     }
 }

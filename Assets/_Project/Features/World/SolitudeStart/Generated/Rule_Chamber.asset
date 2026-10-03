@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf386e18cc754498ea8e36dddc42f375, type: 3}
+  m_Name: Rule_Chamber
+  m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.World.SolitudeStart.SolitudeBoundaryRuleTile
+  m_DefaultSprite: {fileID: 0}
+  m_DefaultGameObject: {fileID: 0}
+  m_DefaultColliderType: 1
+  m_TilingRules: []
+  interior:
+    x: 17
+    y: 1
+    width: 8
+    height: 6
+  west: {fileID: 237255737888612096, guid: d48163183cb9247abaec778a08e0ccca, type: 3}
+  east: {fileID: -7773183333426011814, guid: d48163183cb9247abaec778a08e0ccca, type: 3}
+  south: {fileID: -480281958130896327, guid: d48163183cb9247abaec778a08e0ccca, type: 3}
+  northWest: {fileID: -1158871858569825772, guid: d48163183cb9247abaec778a08e0ccca, type: 3}
+  northEast: {fileID: 6114706908185900674, guid: d48163183cb9247abaec778a08e0ccca, type: 3}
+  southWest: {fileID: 7286500777932155457, guid: d48163183cb9247abaec778a08e0ccca, type: 3}
+  southEast: {fileID: 1608028697691039176, guid: d48163183cb9247abaec778a08e0ccca, type: 3}

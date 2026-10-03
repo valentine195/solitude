@@ -1,0 +1,195 @@
+{
+  "frame_size": [
+    64,
+    64
+  ],
+  "tile_size": 32,
+  "frame_count": 9,
+  "fps": 12.5,
+  "duration_ms": 720,
+  "fully_open_starts_ms": 640,
+  "loop": false,
+  "room_origin": [
+    128,
+    0
+  ],
+  "spritesheet": "door-opening-spritesheet.png",
+  "spritesheet_size": [
+    576,
+    64
+  ],
+  "tile_atlas_columns": 18,
+  "preview_note": "GIF loops have 600ms closed and 1000ms open holds; these are not gameplay timings. Reset from open to closed is a preview loop, not a closing animation.",
+  "mask_polygon": [
+    [
+      11,
+      21
+    ],
+    [
+      14,
+      18
+    ],
+    [
+      49,
+      18
+    ],
+    [
+      52,
+      21
+    ],
+    [
+      52,
+      57
+    ],
+    [
+      11,
+      57
+    ]
+  ],
+  "frames": [
+    {
+      "index": 0,
+      "duration_ms": 80,
+      "leaf_offset_px": 0,
+      "origin": [
+        0,
+        0
+      ],
+      "tile_ids": [
+        0,
+        1,
+        18,
+        19
+      ],
+      "visible_leaf_mask_pixels": 1668
+    },
+    {
+      "index": 1,
+      "duration_ms": 80,
+      "leaf_offset_px": 1,
+      "origin": [
+        64,
+        0
+      ],
+      "tile_ids": [
+        2,
+        3,
+        20,
+        21
+      ],
+      "visible_leaf_mask_pixels": 1588
+    },
+    {
+      "index": 2,
+      "duration_ms": 80,
+      "leaf_offset_px": 3,
+      "origin": [
+        128,
+        0
+      ],
+      "tile_ids": [
+        4,
+        5,
+        22,
+        23
+      ],
+      "visible_leaf_mask_pixels": 1428
+    },
+    {
+      "index": 3,
+      "duration_ms": 80,
+      "leaf_offset_px": 6,
+      "origin": [
+        192,
+        0
+      ],
+      "tile_ids": [
+        6,
+        7,
+        24,
+        25
+      ],
+      "visible_leaf_mask_pixels": 1188
+    },
+    {
+      "index": 4,
+      "duration_ms": 80,
+      "leaf_offset_px": 10,
+      "origin": [
+        256,
+        0
+      ],
+      "tile_ids": [
+        8,
+        9,
+        26,
+        27
+      ],
+      "visible_leaf_mask_pixels": 868
+    },
+    {
+      "index": 5,
+      "duration_ms": 80,
+      "leaf_offset_px": 14,
+      "origin": [
+        320,
+        0
+      ],
+      "tile_ids": [
+        10,
+        11,
+        28,
+        29
+      ],
+      "visible_leaf_mask_pixels": 548
+    },
+    {
+      "index": 6,
+      "duration_ms": 80,
+      "leaf_offset_px": 17,
+      "origin": [
+        384,
+        0
+      ],
+      "tile_ids": [
+        12,
+        13,
+        30,
+        31
+      ],
+      "visible_leaf_mask_pixels": 308
+    },
+    {
+      "index": 7,
+      "duration_ms": 80,
+      "leaf_offset_px": 19,
+      "origin": [
+        448,
+        0
+      ],
+      "tile_ids": [
+        14,
+        15,
+        32,
+        33
+      ],
+      "visible_leaf_mask_pixels": 150
+    },
+    {
+      "index": 8,
+      "duration_ms": 80,
+      "leaf_offset_px": 21,
+      "origin": [
+        512,
+        0
+      ],
+      "tile_ids": [
+        16,
+        17,
+        34,
+        35
+      ],
+      "visible_leaf_mask_pixels": 0
+    }
+  ]
+}

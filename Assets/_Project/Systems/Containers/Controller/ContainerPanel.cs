@@ -13,6 +13,8 @@ namespace SOLITUDE.Containers
     {
         [SerializeField] private ContainerController controller;
 
+        public ContainerController Controller => controller != null ? controller : GetComponent<ContainerController>();
+
         private void Awake()
         {
             if (controller == null) controller = GetComponent<ContainerController>();

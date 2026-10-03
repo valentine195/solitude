@@ -10,7 +10,7 @@ namespace SOLITUDE.SaveLoad
     /// change, or content edit.
     ///
     /// This does NOT protect against copy-pasting an existing instance -
-    /// OnValidate only fills in an empty id, so a paste keeps the original's
+    /// Explicit assignment only fills an empty id, so a paste keeps the original's
     /// value (Unity doesn't distinguish "duplicated" from "still the same
     /// object" at this level). Two instances silently sharing one save slot
     /// is a real, easy-to-miss failure mode - see the editor validator this
@@ -22,11 +22,24 @@ namespace SOLITUDE.SaveLoad
         [SerializeField] private string id;
         public string Value => id;
 
-#if UNITY_EDITOR
-        private void OnValidate()
+        public void AssignRuntimeIdentity(string value)
         {
-            if (string.IsNullOrEmpty(id))
-                id = System.Guid.NewGuid().ToString();
+            if (!string.IsNullOrEmpty(id) || string.IsNullOrWhiteSpace(value))
+                throw new System.InvalidOperationException("Assign a nonempty spawn identity before binding an unidentified instance.");
+            id = value;
+        }
+
+#if UNITY_EDITOR
+        [ContextMenu("Assign Missing Scene Identity")]
+        public void AssignMissingSceneIdentity()
+        {
+            if (UnityEngine.Application.isPlaying || !string.IsNullOrEmpty(id) ||
+                UnityEditor.PrefabUtility.IsPartOfPrefabAsset(this) ||
+                UnityEditor.SceneManagement.EditorSceneManager.IsPreviewScene(gameObject.scene)) return;
+            id = System.Guid.NewGuid().ToString();
+            UnityEditor.EditorUtility.SetDirty(this);
+            if (UnityEditor.PrefabUtility.IsPartOfPrefabInstance(this)) UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
         }
 #endif
     }

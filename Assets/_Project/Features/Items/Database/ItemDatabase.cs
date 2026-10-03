@@ -3,18 +3,7 @@ using UnityEngine;
 
 namespace SOLITUDE.Items
 {
-    /// <summary>
-    /// Resolves a save file's ItemId string back into the real ItemDefinition
-    /// asset. This is the one place that needs to know every item in the
-    /// game - loot tables, save/load, and anything else that only has an id
-    /// string (not a live reference) go through this rather than each
-    /// maintaining their own lookup.
-    ///
-    /// Populate Items via the inspector (drag every ItemDefinition asset in)
-    /// or via a build step that scans the project - either way, this asset
-    /// itself is Resources-loaded so runtime code can
-    /// reach it without a scene reference.
-    /// </summary>
+    /// <summary>Designer-authored catalog compiled into immutable rules and presentation data at session startup.</summary>
     [CreateAssetMenu(menuName = "SOLITUDE/Items/Item Database")]
     public class ItemDatabase : ScriptableObject
     {
@@ -60,6 +49,23 @@ namespace SOLITUDE.Items
 
                 byId.Add(item.ItemId, item);
             }
+        }
+
+        public ItemCatalog BuildRuntimeCatalog()
+        {
+            var specifications = new List<ItemSpec>();
+            foreach (var item in items)
+            {
+                if (item == null) throw new System.InvalidOperationException("Item database contains a null entry.");
+                specifications.Add(new ItemSpec(item.ItemId, item.Stackable, item.MaxStackSize));
+            }
+            return new ItemCatalog(specifications);
+        }
+
+        public ItemPresentationCatalog BuildPresentationCatalog()
+        {
+            BuildRuntimeCatalog(); // Never create a partial presentation map.
+            return new ItemPresentationCatalog(items);
         }
 
         public ItemDefinition Resolve(string itemId)
