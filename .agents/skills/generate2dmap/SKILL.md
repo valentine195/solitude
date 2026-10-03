@@ -183,7 +183,8 @@ For a fixed grid, tactical board, card-board arena, or project-native 2.5D tile 
 - Require full-bleed top-down orthographic surfaces with no gutters, labels, borders, perspective, tile thickness, actors, tall props, or UI.
 - Use `edge_policy=isolated` when visible gaps or individual tile meshes separate cells. Use `seamless` only when adjacent tiles must visually join.
 - Preserve one surface scale, lighting direction, grain density, and palette relationship across every terrain family.
-- Extract and validate the atlas with `scripts/extract_terrain_tiles.py`. The script writes portable relative paths, per-variant luminance/contrast metrics, variant-difference QC, material hints, and a Godot mesh-top runtime contract.
+- Extract and validate the atlas with `scripts/extract_terrain_tiles.py`. The script writes portable relative paths, per-variant luminance/contrast metrics, variant-difference QC, material hints, and a runtime contract.
+- For `retro_pixel` or project-native pixel art, always pass `--pixel-art`. For final production pixel art, also pass `--require-integer-scale`. Pixel-art mode forces NEAREST resampling and rejects an explicit Lanczos request.
 - Keep animated terrain states such as flame tongues, smoke, frost glints, corruption pulses, and void wisps separate from the opaque surface atlas. Generate them as transparent body/FX sheets with `$generate2dsprite`, preserve a fixed ground-contact anchor and shared silhouette envelope, and reference the generated runtime animation contract from the terrain metadata.
 - For a 2.5D `Sprite3D` status overlay on a horizontal tile mesh, record and validate `ground_lift`, `depth_policy`, `render_priority`, and `occupantPolicy`. A correct pixel-size/offset contract alone does not prove that the vertical card will survive intersection with the horizontal surface.
 - The safe default for a walkable animated status is: render above the tile surface, behind unit sprites, and apply `rear_shift_and_fade` while occupied. Do not solve tile clipping by drawing the FX over every actor.
@@ -197,6 +198,9 @@ python scripts/extract_terrain_tiles.py \
   --tile-size 512 --prompt <terrain-atlas.prompt.txt> \
   --runtime-world-size 0.94 --surface-y 0.011 \
   --strict-qc
+
+# For pixel-art output, add:
+#   --pixel-art --require-integer-scale
 ```
 
 Treat a low-contrast or near-duplicate variant failure as an art regeneration signal. Do not invent final terrain texture detail procedurally. Runtime tint, roughness, emission, highlighting, mesh depth, and destruction animation may remain engine-native layers.
@@ -249,7 +253,7 @@ For layered maps with generated props, prefer this in-world reference mockup pip
 8. Place extracted props over the original base and compose a flattened preview.
 9. Validate that base, dressed reference, and preview dimensions match.
 
-Use `scripts/extract_prop_pack.py` after generating a solid-magenta prop sheet. If the sheet has antialiased magenta fringe, run the imagegen chroma-key helper with soft matte and despill before extraction, then extract from the alpha-cleaned sheet. Use `scripts/compose_layered_preview.py` to verify placement over the base map.
+Use `scripts/extract_prop_pack.py` after generating a solid-magenta prop sheet. If the sheet has antialiased magenta fringe, run the imagegen chroma-key helper with soft matte and despill before extraction, then extract from the alpha-cleaned sheet. Use `scripts/compose_layered_preview.py` to verify placement over the base map. For pixel-art maps, pass `--pixel-art`; when placement metadata resizes production-scale pixel props, also pass `--require-integer-scale`. Do not use Lanczos for pixel-art previews or production normalization.
 
 ## Post-Reference Object Production Gate
 

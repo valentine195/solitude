@@ -1,0 +1,400 @@
+--- a/.agents/skills/generate2dmap/scripts/extract_terrain_tiles.py
++++ b/.agents/skills/generate2dmap/scripts/extract_terrain_tiles.py
+@@ -14,6 +14,7 @@
+ 
+ 
+ SCHEMA = "generate2dmap.terrain_tile_bundle.v1"
++RESAMPLING_CHOICES = ("auto", "nearest", "lanczos")
+ 
+ 
+ def slug(value: str) -> str:
+@@ -51,6 +52,58 @@
+         raise argparse.ArgumentTypeError("Mapped value must be numeric.") from exc
+ 
+ 
++def resolve_resampling(mode: str, pixel_art: bool) -> tuple[Image.Resampling, str]:
++    """Resolve the Pillow resampler while protecting pixel-art workflows."""
++    if pixel_art:
++        if mode == "lanczos":
++            raise ValueError("--pixel-art is incompatible with --resampling lanczos; use nearest or auto.")
++        return Image.Resampling.NEAREST, "nearest"
++
++    if mode == "nearest":
++        return Image.Resampling.NEAREST, "nearest"
++    if mode in ("auto", "lanczos"):
++        return Image.Resampling.LANCZOS, "lanczos"
++    raise ValueError(f"Unsupported resampling mode: {mode}")
++
++
++def validate_integer_uniform_scale(
++    source_size: tuple[int, int], target_size: tuple[int, int], *, label: str
++) -> str:
++    """Require a uniform integer up/down scale (or identity) on both axes."""
++    sw, sh = source_size
++    tw, th = target_size
++    if min(sw, sh, tw, th) <= 0:
++        raise ValueError(f"{label}: dimensions must be positive, got {source_size} -> {target_size}.")
++    if source_size == target_size:
++        return "1x"
++
++    def axis_scale(src: int, dst: int) -> tuple[str, int]:
++        if dst > src:
++            if dst % src:
++                raise ValueError(
++                    f"{label}: non-integer upscale {source_size} -> {target_size}; "
++                    "pixel-art production requires integer scaling."
++                )
++            return ("up", dst // src)
++        if src > dst:
++            if src % dst:
++                raise ValueError(
++                    f"{label}: non-integer downscale {source_size} -> {target_size}; "
++                    "pixel-art production requires an integer divisor."
++                )
++            return ("down", src // dst)
++        return ("same", 1)
++
++    x_mode, x_factor = axis_scale(sw, tw)
++    y_mode, y_factor = axis_scale(sh, th)
++    if (x_mode, x_factor) != (y_mode, y_factor):
++        raise ValueError(
++            f"{label}: non-uniform pixel-art scale {source_size} -> {target_size}; "
++            f"x={x_mode} {x_factor}x, y={y_mode} {y_factor}x."
++        )
++    return f"{x_mode}-{x_factor}x"
++
++
+ def image_metrics(image: Image.Image) -> dict[str, float]:
+     luminance = image.convert("L")
+     stat = ImageStat.Stat(luminance)
+@@ -60,15 +113,21 @@
+     }
+ 
+ 
+-def normalized_difference(left: Image.Image, right: Image.Image) -> float:
++def normalized_difference(
++    left: Image.Image, right: Image.Image, resampler: Image.Resampling
++) -> float:
++    # This resize is QC-only. In pixel-art mode it still uses NEAREST so the
++    # metric does not invent interpolated colors that do not exist in source art.
+     size = (64, 64)
+-    left_small = left.convert("RGB").resize(size, Image.Resampling.LANCZOS)
+-    right_small = right.convert("RGB").resize(size, Image.Resampling.LANCZOS)
++    left_small = left.convert("RGB").resize(size, resampler)
++    right_small = right.convert("RGB").resize(size, resampler)
+     difference = ImageChops.difference(left_small, right_small)
+     return round(statistics.fmean(ImageStat.Stat(difference).mean) / 255.0, 6)
+ 
+ 
+ def extract(args: argparse.Namespace) -> dict[str, object]:
++    resampler, resampling_name = resolve_resampling(args.resampling, args.pixel_art)
++
+     source = Image.open(args.input).convert("RGB")
+     if source.width % args.cols or source.height % args.rows:
+         raise ValueError(
+@@ -89,6 +148,9 @@
+     cell_width = source.width // args.cols
+     cell_height = source.height // args.rows
+     output_size = args.tile_size or min(cell_width, cell_height)
++    if output_size <= 0:
++        raise ValueError("--tile-size must be positive.")
++
+     args.output_dir.mkdir(parents=True, exist_ok=True)
+     manifest_path = args.manifest or args.output_dir / "terrain-bundle.json"
+     manifest_path.parent.mkdir(parents=True, exist_ok=True)
+@@ -107,8 +169,14 @@
+                 x0 = (cell.width - crop_size) // 2
+                 y0 = (cell.height - crop_size) // 2
+                 cell = cell.crop((x0, y0, x0 + crop_size, y0 + crop_size))
++
++            scale_operation = "1x"
+             if cell.size != (output_size, output_size):
+-                cell = cell.resize((output_size, output_size), Image.Resampling.LANCZOS)
++                if args.require_integer_scale:
++                    scale_operation = validate_integer_uniform_scale(
++                        cell.size, (output_size, output_size), label=f"{terrain}-{col + 1}"
++                    )
++                cell = cell.resize((output_size, output_size), resampler)
+ 
+             metrics = image_metrics(cell)
+             if metrics["contrast"] < args.min_contrast:
+@@ -123,6 +191,7 @@
+                 {
+                     "path": portable_path(output_path, manifest_path.parent),
+                     "source_cell": [row, col],
++                    "scale_operation": scale_operation,
+                     **metrics,
+                 }
+             )
+@@ -130,7 +199,9 @@
+         pair_differences: list[float] = []
+         for left_index in range(len(variant_images)):
+             for right_index in range(left_index + 1, len(variant_images)):
+-                value = normalized_difference(variant_images[left_index], variant_images[right_index])
++                value = normalized_difference(
++                    variant_images[left_index], variant_images[right_index], resampler
++                )
+                 pair_differences.append(value)
+                 if value < args.min_variant_difference:
+                     warnings.append(
+@@ -160,6 +231,11 @@
+             "source_cell_size": [cell_width, cell_height],
+             "output_tile_size": [output_size, output_size],
+         },
++        "processing": {
++            "pixel_art": args.pixel_art,
++            "resampling": resampling_name,
++            "require_integer_scale": args.require_integer_scale,
++        },
+         "runtime": {
+             "engine_target": "godot_mesh_top",
+             "world_size": args.runtime_world_size,
+@@ -195,6 +271,22 @@
+     parser.add_argument("--emission", action="append", type=parse_float_map, default=[])
+     parser.add_argument("--min-contrast", type=float, default=0.035)
+     parser.add_argument("--min-variant-difference", type=float, default=0.025)
++    parser.add_argument(
++        "--resampling",
++        choices=RESAMPLING_CHOICES,
++        default="auto",
++        help="Resize filter. auto uses NEAREST with --pixel-art, otherwise LANCZOS.",
++    )
++    parser.add_argument(
++        "--pixel-art",
++        action="store_true",
++        help="Force pixel-safe NEAREST resampling for production resize and QC normalization.",
++    )
++    parser.add_argument(
++        "--require-integer-scale",
++        action="store_true",
++        help="Reject non-uniform or non-integer resize factors instead of silently resampling them.",
++    )
+     parser.add_argument("--strict-qc", action="store_true")
+     return parser
+ 
+@@ -202,7 +294,16 @@
+ def main() -> None:
+     args = build_parser().parse_args()
+     payload = extract(args)
+-    print(json.dumps({"schema": payload["schema"], "qc": payload["qc"]}, ensure_ascii=False))
++    print(
++        json.dumps(
++            {
++                "schema": payload["schema"],
++                "processing": payload["processing"],
++                "qc": payload["qc"],
++            },
++            ensure_ascii=False,
++        )
++    )
+ 
+ 
+ if __name__ == "__main__":
+--- a/.agents/skills/generate2dmap/scripts/compose_layered_preview.py
++++ b/.agents/skills/generate2dmap/scripts/compose_layered_preview.py
+@@ -11,6 +11,9 @@
+ from PIL import Image
+ 
+ 
++RESAMPLING_CHOICES = ("auto", "nearest", "lanczos")
++
++
+ def read_json(path: Path) -> Any:
+     return json.loads(path.read_text(encoding="utf-8"))
+ 
+@@ -26,6 +29,55 @@
+     return roots[0] / path
+ 
+ 
++def resolve_resampling(mode: str, pixel_art: bool) -> tuple[Image.Resampling, str]:
++    if pixel_art:
++        if mode == "lanczos":
++            raise ValueError("--pixel-art is incompatible with --resampling lanczos; use nearest or auto.")
++        return Image.Resampling.NEAREST, "nearest"
++    if mode == "nearest":
++        return Image.Resampling.NEAREST, "nearest"
++    if mode in ("auto", "lanczos"):
++        return Image.Resampling.LANCZOS, "lanczos"
++    raise ValueError(f"Unsupported resampling mode: {mode}")
++
++
++def validate_integer_uniform_scale(
++    source_size: tuple[int, int], target_size: tuple[int, int], *, label: str
++) -> str:
++    sw, sh = source_size
++    tw, th = target_size
++    if min(sw, sh, tw, th) <= 0:
++        raise ValueError(f"{label}: dimensions must be positive, got {source_size} -> {target_size}.")
++    if source_size == target_size:
++        return "1x"
++
++    def axis_scale(src: int, dst: int) -> tuple[str, int]:
++        if dst > src:
++            if dst % src:
++                raise ValueError(
++                    f"{label}: non-integer upscale {source_size} -> {target_size}; "
++                    "pixel-art preview requires integer scaling."
++                )
++            return ("up", dst // src)
++        if src > dst:
++            if src % dst:
++                raise ValueError(
++                    f"{label}: non-integer downscale {source_size} -> {target_size}; "
++                    "pixel-art preview requires an integer divisor."
++                )
++            return ("down", src // dst)
++        return ("same", 1)
++
++    x_mode, x_factor = axis_scale(sw, tw)
++    y_mode, y_factor = axis_scale(sh, th)
++    if (x_mode, x_factor) != (y_mode, y_factor):
++        raise ValueError(
++            f"{label}: non-uniform pixel-art scale {source_size} -> {target_size}; "
++            f"x={x_mode} {x_factor}x, y={y_mode} {y_factor}x."
++        )
++    return f"{x_mode}-{x_factor}x"
++
++
+ def load_props(data: Any) -> list[dict[str, Any]]:
+     if isinstance(data, list):
+         return data
+@@ -59,7 +111,14 @@
+     return round(left), round(top)
+ 
+ 
+-def paste_prop(canvas: Image.Image, prop: dict[str, Any], roots: list[Path]) -> dict[str, Any]:
++def paste_prop(
++    canvas: Image.Image,
++    prop: dict[str, Any],
++    roots: list[Path],
++    *,
++    resampler: Image.Resampling,
++    require_integer_scale: bool,
++) -> dict[str, Any]:
+     image_key = prop.get("image") or prop.get("path")
+     if not image_key:
+         raise ValueError(f"Prop is missing image/path: {prop}")
+@@ -68,12 +127,19 @@
+         raise FileNotFoundError(f"Prop image not found: {image_path}")
+ 
+     img = Image.open(image_path).convert("RGBA")
++    source_size = img.size
+     width = int(prop.get("w", prop.get("width", img.width)))
+     height = int(prop.get("h", prop.get("height", img.height)))
+     if width <= 0 or height <= 0:
+         raise ValueError(f"Invalid prop size for {image_path}: {width}x{height}")
++
++    scale_operation = "1x"
+     if (width, height) != img.size:
+-        img = img.resize((width, height), Image.Resampling.LANCZOS)
++        if require_integer_scale:
++            scale_operation = validate_integer_uniform_scale(
++                img.size, (width, height), label=str(prop.get("id", image_path.stem))
++            )
++        img = img.resize((width, height), resampler)
+ 
+     opacity = float(prop.get("opacity", 1.0))
+     if opacity < 1:
+@@ -85,10 +151,12 @@
+     return {
+         "id": prop.get("id", image_path.stem),
+         "image": str(image_path),
++        "source_size": list(source_size),
+         "left": left,
+         "top": top,
+         "w": width,
+         "h": height,
++        "scale_operation": scale_operation,
+         "sortY": prop.get("sortY", prop.get("y", top + height)),
+         "layer": prop.get("layer", "props"),
+     }
+@@ -101,11 +169,29 @@
+     parser.add_argument("--output", required=True, type=Path)
+     parser.add_argument("--report", type=Path)
+     parser.add_argument("--project-root", type=Path, default=Path.cwd())
++    parser.add_argument(
++        "--resampling",
++        choices=RESAMPLING_CHOICES,
++        default="auto",
++        help="Resize filter. auto uses NEAREST with --pixel-art, otherwise LANCZOS.",
++    )
++    parser.add_argument(
++        "--pixel-art",
++        action="store_true",
++        help="Force pixel-safe NEAREST resampling when preview props must be resized.",
++    )
++    parser.add_argument(
++        "--require-integer-scale",
++        action="store_true",
++        help="Reject non-uniform or non-integer prop resize factors.",
++    )
+     return parser
+ 
+ 
+ def main() -> None:
+     args = build_parser().parse_args()
++    resampler, resampling_name = resolve_resampling(args.resampling, args.pixel_art)
++
+     base = Image.open(args.base).convert("RGBA")
+     data = read_json(args.placements)
+     props = load_props(data)
+@@ -118,7 +204,15 @@
+ 
+     pasted = []
+     for prop in props_layer + foreground_layer:
+-        pasted.append(paste_prop(base, prop, roots))
++        pasted.append(
++            paste_prop(
++                base,
++                prop,
++                roots,
++                resampler=resampler,
++                require_integer_scale=args.require_integer_scale,
++            )
++        )
+ 
+     args.output.parent.mkdir(parents=True, exist_ok=True)
+     base.save(args.output)
+@@ -130,6 +224,11 @@
+                     "base": str(args.base),
+                     "placements": str(args.placements),
+                     "output": str(args.output),
++                    "processing": {
++                        "pixel_art": args.pixel_art,
++                        "resampling": resampling_name,
++                        "require_integer_scale": args.require_integer_scale,
++                    },
+                     "pasted": pasted,
+                 },
+                 indent=2,
+--- a/.agents/skills/generate2dmap/SKILL.md
++++ b/.agents/skills/generate2dmap/SKILL.md
+@@ -183,7 +183,8 @@
+ - Require full-bleed top-down orthographic surfaces with no gutters, labels, borders, perspective, tile thickness, actors, tall props, or UI.
+ - Use `edge_policy=isolated` when visible gaps or individual tile meshes separate cells. Use `seamless` only when adjacent tiles must visually join.
+ - Preserve one surface scale, lighting direction, grain density, and palette relationship across every terrain family.
+-- Extract and validate the atlas with `scripts/extract_terrain_tiles.py`. The script writes portable relative paths, per-variant luminance/contrast metrics, variant-difference QC, material hints, and a Godot mesh-top runtime contract.
++- Extract and validate the atlas with `scripts/extract_terrain_tiles.py`. The script writes portable relative paths, per-variant luminance/contrast metrics, variant-difference QC, material hints, and a runtime contract.
++- For `retro_pixel` or project-native pixel art, always pass `--pixel-art`. For final production pixel art, also pass `--require-integer-scale`. Pixel-art mode forces NEAREST resampling and rejects an explicit Lanczos request.
+ - Keep animated terrain states such as flame tongues, smoke, frost glints, corruption pulses, and void wisps separate from the opaque surface atlas. Generate them as transparent body/FX sheets with `$generate2dsprite`, preserve a fixed ground-contact anchor and shared silhouette envelope, and reference the generated runtime animation contract from the terrain metadata.
+ - For a 2.5D `Sprite3D` status overlay on a horizontal tile mesh, record and validate `ground_lift`, `depth_policy`, `render_priority`, and `occupantPolicy`. A correct pixel-size/offset contract alone does not prove that the vertical card will survive intersection with the horizontal surface.
+ - The safe default for a walkable animated status is: render above the tile surface, behind unit sprites, and apply `rear_shift_and_fade` while occupied. Do not solve tile clipping by drawing the FX over every actor.
+@@ -197,6 +198,9 @@
+   --tile-size 512 --prompt <terrain-atlas.prompt.txt> \
+   --runtime-world-size 0.94 --surface-y 0.011 \
+   --strict-qc
++
++# For pixel-art output, add:
++#   --pixel-art --require-integer-scale
+ ```
+ 
+ Treat a low-contrast or near-duplicate variant failure as an art regeneration signal. Do not invent final terrain texture detail procedurally. Runtime tint, roughness, emission, highlighting, mesh depth, and destruction animation may remain engine-native layers.
+@@ -249,7 +253,7 @@
+ 8. Place extracted props over the original base and compose a flattened preview.
+ 9. Validate that base, dressed reference, and preview dimensions match.
+ 
+-Use `scripts/extract_prop_pack.py` after generating a solid-magenta prop sheet. If the sheet has antialiased magenta fringe, run the imagegen chroma-key helper with soft matte and despill before extraction, then extract from the alpha-cleaned sheet. Use `scripts/compose_layered_preview.py` to verify placement over the base map.
++Use `scripts/extract_prop_pack.py` after generating a solid-magenta prop sheet. If the sheet has antialiased magenta fringe, run the imagegen chroma-key helper with soft matte and despill before extraction, then extract from the alpha-cleaned sheet. Use `scripts/compose_layered_preview.py` to verify placement over the base map. For pixel-art maps, pass `--pixel-art`; when placement metadata resizes production-scale pixel props, also pass `--require-integer-scale`. Do not use Lanczos for pixel-art previews or production normalization.
+ 
+ ## Post-Reference Object Production Gate
+ 
