@@ -1,381 +1,165 @@
 ---
 name: solitude-art-pipeline
 description: >
-  Production art pipeline for SOLITUDE, a top-down 2D pixel-art game set aboard
-  a generation ship. Use when creating, modifying, processing, integrating, or
-  validating environment tiles, props, characters, doors, interactables,
-  environmental storytelling assets, animations, or visual-state variants.
-  This skill coordinates SOLITUDE-specific art direction, pixel-pipeline
-  constraints, reusable asset design, lower-level generation skills, and Unity
-  validation.
+  Production art pipeline for SOLITUDE, a top-down 2D pixel-art game aboard a
+  generation ship. Use when creating, modifying, processing, integrating, or
+  validating tiles, environments, characters, props, interactables, animations,
+  or visual-state variants. Coordinates SOLITUDE-specific art direction,
+  pixel-production rules, lower-level generation skills, and Unity integration.
 ---
 
 # SOLITUDE Art Pipeline
 
 Use this skill for production art work in SOLITUDE.
 
-The goal is not to maximize asset count or generate attractive standalone images.
-
-Optimize for:
-
-1. visual consistency,
-2. gameplay readability,
-3. reuse and modularity,
-4. native pixel quality,
-5. compatibility with the existing Unity project.
-
-Generated artwork is not complete until it works inside the game.
-
----
+Optimize for **consistency, gameplay readability, reuse, native pixel quality,
+and compatibility with the existing Unity project**. An image is not a finished
+asset until it works in game.
 
 ## Core Invariants
 
-These rules apply to all SOLITUDE production art unless explicitly overridden.
+- World grid: **32×32 px**
+- Player target: **~32×48 px**
+- Native pixel art; no antialiasing
+- Nearest-neighbor, integer scaling only
+- Orthogonal top-down interiors; no isometric or fake-3D room geometry
+- Prefer modular/reusable assets over baked scenes
+- **Normal first, wrong second**
+- Tone progresses gradually: **calm → unease → suspense → sparse horror**
+- Red is reserved for meaningful emergency/story states
 
-- World tile grid: **32×32 px**
-- Player target: **approximately 32×48 px**
-- Native pixel art only
-- No antialiasing
-- Nearest-neighbor and integer scaling only
-- Orthogonal top-down interiors
-- No isometric perspective or fake 3D room geometry
-- Prefer reusable modular assets over baked scenes
-- The ship should feel **normal and inhabited before it feels wrong**
-- Visual progression is gradual: **calm → unease → suspense → sparse horror**
-- Red is a rare emergency/story signal, not a default environmental color
+SOLITUDE rules override conflicting assumptions from dependency skills.
 
-Project-specific rules defined by this skill and its references override generic
-styling assumptions from lower-level generation skills.
+## Reference Loading
 
----
+Load only what the task requires.
 
-## Supporting References
+- `references/art-direction.md` — visual identity, palette, materials,
+  architecture, lighting, props, and environment design.
+- `references/pixel-pipeline.md` — dimensions, perspective, walls, scaling,
+  transparency, sprite sheets, animation alignment, and pixel QC.
+- `references/unity-pipeline.md` — import settings, pivots, Tilemaps, prefabs,
+  scene integration, and gameplay-scale validation.
 
-Load only the references relevant to the current task.
-
-### `references/art-direction.md`
-
-Read for:
-
-- visual design,
-- palette and materials,
-- environment identity,
-- generation-ship architecture,
-- tonal progression,
-- environmental storytelling,
-- human evidence,
-- damage philosophy,
-- normal / neglected / failing / critical states.
-
-Read this before any task that makes visual design decisions.
-
-### `references/pixel-pipeline.md`
-
-Read for:
-
-- sprite or tile dimensions,
-- room perspective,
-- wall construction,
-- pixel density,
-- transparency,
-- scaling,
-- sprite-sheet layout,
-- anchors,
-- animation frames,
-- deterministic cleanup,
-- pixel-art QC.
-
-Read this before generating or processing any pixel asset.
-
-### `references/unity-pipeline.md`
-
-Read for:
-
-- Unity import settings,
-- PPU and filtering,
-- sprite slicing,
-- pivots,
-- Tilemap integration,
-- asset directories,
-- prefab or scene integration,
-- ArtValidation scene usage,
-- gameplay-scale visual validation.
-
-Read this whenever the task includes importing, placing, configuring, or
-validating art inside Unity.
-
-If a task spans multiple areas, read every applicable reference.
-
-Do not load unrelated references merely because they exist.
-
----
+Read multiple references when the task spans those concerns.
 
 # Workflow
 
-Follow this workflow for every production-art task.
+## 1. Inspect First
 
-## 1. Inspect Before Creating
+Determine the asset's gameplay purpose, location, scale, required states, tiling
+or animation needs, and interaction constraints.
 
-Understand the gameplay need first.
+Search existing project art before creating anything. Classify relevant assets as
+`KEEP`, `MODIFY`, `REPLACE`, or `MISSING`.
 
-Determine:
-
-- where the asset appears,
-- what the player does with it,
-- intended gameplay scale,
-- required states,
-- required dimensions,
-- whether it tiles,
-- whether it animates,
-- whether collision or interaction behavior affects its design.
-
-Search the existing project before generating new artwork.
-
-Classify relevant assets as:
-
-- `KEEP`
-- `MODIFY`
-- `REPLACE`
-- `MISSING`
-
-Prefer extending existing approved assets over creating parallel versions.
-
-Do not replace working artwork without a reason.
-
----
+Prefer extending approved artwork over creating parallel versions.
 
 ## 2. Define the Minimum Asset Family
 
-Determine the smallest reusable set required to solve the gameplay need.
+Create the smallest reusable set that satisfies the gameplay need.
 
 Prefer:
 
-`base asset + state variants + optional overlays`
+`BASE + STATE + OPTIONAL OVERLAY`
 
-over:
+over unrelated baked variants.
 
-`many unrelated unique assets`
+Do not generate speculative asset libraries.
 
-Example:
+## 3. Route to the Smallest Appropriate Skill
 
-A powered door may require:
+### `$generate2dsprite`
 
-- frame,
-- closed state,
-- open state,
-- unpowered state,
-- indicator variation.
+Use for actual production artwork:
 
-It does not require a large decorative door library unless gameplay needs one.
-
----
-
-## 3. Choose the Appropriate Generation Tool
-
-Use lower-level skills when available.
-
-Use `$generate2dsprite` for:
-
-- props,
-- characters,
-- pickups,
-- interactables,
-- individual environment sprites,
-- animation frames,
+- characters and animations,
+- props and pickups,
+- interactables, doors, and terminals,
+- wall/floor sprites,
+- individual tiles and tile variations,
+- environmental decoration,
 - sprite sheets.
 
-Use `$generate2dmap` for:
+Use it for tile artwork even when that artwork will later be placed in a Tilemap.
 
-- tile families,
-- room layouts,
-- reusable environment kits,
-- map composition,
-- tile-based environment planning.
+### `$generate2dmap`
 
-Apply SOLITUDE's references in addition to the dependency skill.
+Use only when spatial composition is required:
 
-Do not inherit generic visual styles, palettes, dimensions, or genre assumptions
-from dependency skills when they conflict with SOLITUDE.
+- room/corridor layouts,
+- Tilemap planning,
+- reusable room chunks,
+- layered map composition,
+- arranging an existing asset vocabulary,
+- map/collision/runtime layout metadata.
 
----
+Do not invoke it for isolated assets or small tile families.
 
-## 4. Generate at Production Intent
+`$generate2dmap` consumes the asset vocabulary; it is not the default generator
+of that vocabulary.
 
-Generate assets for their actual game use.
+## 4. Generate for Game Use
 
-Prompts or generation instructions must communicate the relevant:
+Generate at production intent, specifying the relevant purpose, native scale,
+perspective, visual family, required states, palette constraints, and
+transparency requirements.
 
-- asset purpose,
-- native scale,
-- viewing perspective,
-- visual family,
-- required states,
-- palette constraints,
-- transparency/background requirements.
+Do not substitute concept illustrations for production sprites.
 
-Do not request large illustrative concept art when the desired result is a
-production sprite or tile.
-
-When a generated result contains extra decorative detail that does not survive at
-gameplay scale, simplify it.
-
----
+Simplify details that do not survive gameplay scale.
 
 ## 5. Process Deterministically
 
-After generation, only use deterministic processing for production cleanup.
+Allowed cleanup includes:
 
-Allowed operations include:
-
-- cropping,
-- alpha cleanup,
-- grid slicing,
-- sprite-sheet assembly,
+- cropping and alpha cleanup,
+- grid slicing and sheet assembly,
 - nearest-neighbor integer resizing,
 - anchor alignment,
-- palette checks,
-- transparency checks.
+- palette/transparency checks.
 
-Do not use smoothing resampling for pixel assets.
+Never use smoothing resampling or fractional scaling for production pixel art.
 
-Never use:
+Prefer native alpha; if chroma key is required, reject visible edge fringing.
 
-- Lanczos,
-- bilinear,
-- bicubic,
-- fractional scaling.
+## 6. Integrate Without Rebuilding Systems
 
-If chroma-key transparency is required, validate the final alpha edge for color
-fringing.
+When Unity integration is required, read `references/unity-pipeline.md`.
 
-Prefer native transparency when reliable.
+Follow existing project structure and gameplay architecture. Do not create
+duplicate asset hierarchies, Tilemap systems, prefabs, or interaction systems.
 
----
-
-## 6. Integrate Into the Existing Project
-
-When integration is part of the task, read `references/unity-pipeline.md`.
-
-Follow existing project organization and conventions where reasonable.
-
-Do not create:
-
-- redundant art directories,
-- duplicate Tile Palette systems,
-- parallel prefab systems,
-- arbitrary Transform scaling to compensate for bad source artwork.
-
-Fix the source asset rather than hiding inconsistencies inside Unity.
-
-Preserve existing gameplay systems unless art integration genuinely requires a
-small supporting change.
-
----
+Fix incorrect source art rather than compensating with arbitrary Transform scale.
 
 ## 7. Validate In Game
 
-A PNG is not an accepted game asset.
+Validate meaningful new assets in Unity, in the target scene or ArtValidation
+scene, beside the player and approved assets, at normal gameplay zoom.
 
-Validate meaningful new assets:
+Reject or revise work that fails:
 
-- inside Unity,
-- in the real target scene or ArtValidation scene,
-- beside the player,
-- beside approved existing assets,
-- at normal gameplay camera scale.
+- pixel integrity or grid alignment,
+- SOLITUDE perspective,
+- gameplay readability,
+- consistency with existing ship construction,
+- required state readability,
+- appropriate narrative tone.
 
-Evaluate:
+If it looks good alone but wrong in the game, it is wrong.
 
-### Pixel Integrity
-
-- crisp native pixels,
-- no smoothing,
-- correct dimensions,
-- correct grid alignment.
-
-### Perspective
-
-- correct SOLITUDE room perspective,
-- no accidental isometric or fake-3D geometry.
-
-### Readability
-
-- clear silhouette,
-- understandable gameplay function,
-- states distinguishable at normal zoom.
-
-### Visual Consistency
-
-Ask:
-
-> Does this look like it was built aboard the same generation ship as the
-> existing approved assets?
-
-### Tone
-
-Ask:
-
-> Is this asset appropriate for where the player is in the game's progression?
-
-Early-game assets should not accidentally communicate late-game horror.
-
-If an asset looks impressive in isolation but wrong in the game, revise it.
-
----
-
-# Asset Design Rules
-
-Prefer composable assets.
-
-Use:
-
-`BASE + STATE + OVERLAY`
-
-where appropriate.
-
-Examples:
-
-- clean wall + wear overlay,
-- door base + powered/unpowered indicator,
-- terminal base + active/error state,
-- room base + localized damage.
-
-Avoid baking dirt, damage, warning lights, or story-specific corruption into
-every base asset.
-
-Damage should communicate a plausible cause rather than function as random visual
-noise.
-
----
-
-# Current Production Priority
+# Current Priority
 
 Until explicitly changed, prioritize the opening vertical slice:
 
-**Cryobay → service/corridor area → locker/battery → powered door → first AI contact**
+**Cryobay → service/corridor → locker/battery → powered door → first AI contact**
 
-Prioritize assets required to make this sequence visually coherent before
-expanding broadly into unrelated ship environments.
+Finish this reusable visual vocabulary before broadly expanding into other ship
+areas.
 
-Prefer finishing one reusable visual vocabulary over partially generating many
-biomes.
+# Completion
 
----
-
-# Completion Gate
-
-An art task is complete only when all applicable conditions are satisfied:
-
-- existing assets were inspected first,
-- the minimum required reusable asset family exists,
-- the relevant reference files were followed,
-- output obeys native pixel constraints,
-- perspective and scale are correct,
-- required gameplay states are represented,
-- assets are placed in the correct project structure,
-- Unity import settings are correct when applicable,
-- the result has been reviewed at gameplay scale,
-- the new work visually belongs to SOLITUDE.
-
-If any required condition fails, revise the asset rather than marking the task
-complete.
+An art task is complete when the existing library was checked, the minimum
+reusable asset family exists, relevant references were followed, source art is
+technically valid, required gameplay states exist, Unity integration is correct
+when applicable, and the result has been reviewed successfully at gameplay scale.

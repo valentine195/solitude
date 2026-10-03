@@ -110,5 +110,10 @@ _Project.zip.meta
 .DS_Store
 
 # Verification .NET outputs
+!/Tools/Verification/PureTests.csproj
 /Tools/Verification/bin/
 /Tools/Verification/obj/
+/Tools/Verification/__pycache__/
+
+# QRSPI disposable workflow artifacts
+/.qrspi/

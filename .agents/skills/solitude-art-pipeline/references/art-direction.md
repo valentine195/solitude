@@ -2,102 +2,51 @@
 
 This document defines the core visual identity of SOLITUDE.
 
-Use it whenever making visual-design decisions for:
+Use it for visual decisions involving environments, architecture, characters, props, interactables, doors, terminals, lighting, and other shipboard assets.
 
-- environments,
-- architecture,
-- tiles,
-- characters,
-- props,
-- interactables,
-- furniture,
-- terminals,
-- doors,
-- lighting,
-- or other shipboard assets.
-
-For technical pixel-art rules, dimensions, perspective construction, scaling, transparency, and sprite-sheet requirements, use `pixel-pipeline.md`.
+For dimensions, perspective construction, scaling, transparency, sprite sheets, and technical pixel rules, use `pixel-pipeline.md`.
 
 ---
 
-# Visual References
+# Core Identity
 
-The mood boards under `references/moodboards/` are supporting visual references.
+SOLITUDE takes place aboard a generation ship built to sustain human life across an extremely long journey.
 
-Consult them when designing new asset families or when a generated result is stylistically ambiguous.
+The ship is not primarily:
 
-They communicate:
+- military,
+- horrific,
+- sterile,
+- luxurious,
+- or designed for spectacle.
 
-- overall atmosphere,
-- visual density,
-- material relationships,
-- scale,
-- lighting balance,
-- palette relationships,
-- and the intended balance between domestic and industrial spaces.
+It is a **working human habitat** shaped by generations of use, maintenance, repair, and ordinary life.
 
-The written rules in this document are authoritative.
-
-If a mood board conflicts with this document, follow this document.
-
-Do not reproduce individual images literally. Use the boards to maintain a coherent visual language across new assets.
-
----
-
-# 1. Core Visual Idea
-
-SOLITUDE takes place aboard a generation ship designed to support human life over an extremely long journey.
-
-It is not primarily:
-
-- a military spacecraft,
-- a horror ship,
-- a sterile laboratory,
-- or a futuristic luxury environment.
-
-It is a **working human habitat**.
-
-The ship should feel as though generations of people:
-
-- lived there,
-- worked there,
-- repaired it,
-- raised families there,
-- personalized it,
-- and depended on it every day.
-
-The visual identity comes from the overlap of:
+The visual identity is:
 
 **domestic familiarity + durable engineering + quiet isolation**
 
----
+## Normal First. Wrong Second.
 
-# 2. Governing Principle
+The player should understand what normal shipboard life looked like before deviations become meaningful.
 
-## Normal first. Wrong second.
-
-The player must understand what ordinary shipboard life looked like before abnormality becomes visually meaningful.
-
-Early environments should generally feel:
+Early spaces should feel:
 
 - calm,
 - functional,
-- quiet,
 - slightly aged,
 - human,
 - understandable.
 
-They may be empty without looking threatening.
+They may be empty without appearing threatening.
 
-Do not make ordinary early-game rooms look pre-corrupted, ominous, or horror-coded.
-
-The ship becomes unsettling through contrast with established normality.
+Do not pre-corrupt ordinary environments with horror lighting, excessive damage, or ominous visual language.
 
 ---
 
-# 3. Overall Aesthetic
+# Overall Aesthetic
 
-Aim for restrained industrial science fiction.
+Use restrained industrial science fiction.
 
 The ship should feel:
 
@@ -106,50 +55,46 @@ The ship should feel:
 - practical,
 - durable,
 - human-scale,
-- and somewhat old.
+- somewhat old.
 
-Prefer large readable forms over dense science-fiction detail.
+Prefer large readable forms over dense sci-fi detail.
 
-A surface should not contain vents, bolts, pipes, seams, lights, labels, and warning stripes simply because it is futuristic.
+Visual complexity should imply function.
 
-Visual complexity should usually imply function.
-
-Good recurring elements include:
+Useful recurring elements include:
 
 - replaceable wall panels,
 - structural framing,
-- access panels,
 - service hatches,
+- access panels,
 - embedded terminals,
 - standardized doors,
 - modular storage,
 - practical lighting,
 - visible maintenance interfaces.
 
+Avoid detail added only to make something look futuristic.
+
 ---
 
-# 4. Core Palette
+# Palette
 
-The base palette should remain subdued.
+The base palette is subdued.
 
-## Aged warm ivory
+## Aged Warm Ivory
 
-Primary use:
+Primary surface color for:
 
-- wall panels,
+- walls,
 - equipment shells,
 - furniture,
 - habitation surfaces.
 
-This should be warmer and more aged than pure white.
-
-The ship should not resemble a pristine white laboratory.
-
----
+Use warm aged off-white rather than pristine laboratory white.
 
 ## Graphite
 
-Primary use:
+Use for:
 
 - structural framing,
 - wall caps,
@@ -158,146 +103,70 @@ Primary use:
 - door mechanisms,
 - service infrastructure.
 
-Prefer dark neutral gray over absolute black.
+Prefer dark gray over pure black.
 
----
+## Desaturated Steel Blue
 
-## Desaturated steel blue
-
-Primary use:
+Use for:
 
 - secondary panels,
 - equipment accents,
 - utility structures,
-- selected uniforms or containers,
+- containers,
 - repeated visual identifiers.
 
-Keep it muted.
+Keep it muted and industrial.
 
-Avoid bright or saturated generic sci-fi blue.
-
----
-
-## Neutral alloy
+## Neutral Alloy
 
 Use for:
 
 - tools,
-- exposed mechanisms,
 - hardware,
-- high-wear surfaces,
-- internal machinery.
+- exposed mechanisms,
+- machinery,
+- high-wear surfaces.
 
-Bare metal should usually be secondary to painted or finished surfaces in inhabited areas.
+Bare metal should remain secondary in inhabited spaces.
 
----
+## Signal Colors
 
-# 5. Signal Colors
+Signal colors carry meaning.
 
-Signal colors communicate state and should not be used casually.
+- **Amber** — normal operation, service indicators, modest warnings, practical utility lighting.
+- **Cyan / cool blue** — selected AI, data, or specialized electronic systems.
+- **Red** — emergencies, critical failures, serious danger. Use rarely.
+- **Green** — biological systems, hydroponics, life support, verified-safe states where appropriate.
 
-## Amber
-
-Primary operational accent.
-
-Use for:
-
-- normal status lights,
-- service indicators,
-- active equipment,
-- modest warnings,
-- practical utility lighting.
-
-Amber should often feel reassuring in intact ship spaces.
+Do not use signal colors merely for decoration.
 
 ---
 
-## Cyan / cool blue
+# Materials
 
-Use selectively for:
+## Painted / Polymer Panels
 
-- AI-linked interfaces,
-- active data systems,
-- specialized electronics.
+Default inhabited interior surface.
 
-Do not make all screens and technology glow cyan.
+Use broad, matte or low-gloss modular panels with restrained seams.
 
----
+Avoid excessive fragmentation.
 
-## Red
+## Structural Metal
 
-Use rarely.
-
-Reserve for:
-
-- emergency states,
-- severe warnings,
-- critical failures,
-- story-significant danger.
-
-Red should attract immediate attention because it is uncommon.
-
----
-
-## Green
-
-Use where functionally appropriate:
-
-- biological systems,
-- hydroponics,
-- life support,
-- verified-safe states.
-
-Avoid adding it simply for palette variety.
-
----
-
-# 6. Material Language
-
-## Painted or polymer panels
-
-The default interior material.
-
-Characteristics:
-
-- matte or low-gloss,
-- modular,
-- slightly aged,
-- broad readable surfaces,
-- restrained seams.
-
-Avoid excessive panel fragmentation.
-
----
-
-## Structural metal
-
-Use where the ship's construction needs to show through.
-
-Common places:
+Use where construction or machinery is exposed:
 
 - frames,
 - thresholds,
 - heavy doors,
-- machinery,
-- maintenance spaces.
+- engineering,
+- maintenance systems.
 
----
+## Soft Materials
 
-## Soft materials
+Habitation and communal areas should include fabric, upholstery, bedding, clothing, and other softer materials.
 
-Habitation and communal spaces should introduce:
-
-- fabric,
-- upholstery,
-- bedding,
-- clothing,
-- acoustic surfaces,
-- softer furniture.
-
-These are important for making the ship feel inhabited rather than purely mechanical.
-
----
+These help distinguish a home from a machine.
 
 ## Glass
 
@@ -306,411 +175,219 @@ Use where function requires it:
 - cryopods,
 - observation windows,
 - equipment enclosures,
-- medical systems,
-- sealed compartments.
+- medical systems.
 
-Do not use glass as generic futuristic decoration.
+Do not use glass simply to imply futurism.
 
----
+## Organic / Personal Materials
 
-## Organic contrast
-
-Plants, food, paper-like materials, and other organic or personal items create useful contrast against the manufactured environment.
-
-This is especially important in habitation, dining, education, and hydroponics.
+Plants, food, paper-like objects, personal belongings, and similar materials provide important contrast to the manufactured environment.
 
 ---
 
-# 7. Ship-Wide Design Language
+# Ship-Wide Design Language
 
-Different decks should feel like parts of the same vessel.
+Every deck should visibly belong to the same vessel.
 
-Repeat recognizable construction systems across the ship:
+Reuse recognizable systems:
 
-- common wall modules,
-- shared structural framing,
-- consistent door geometry,
-- recurring terminal housings,
-- standardized status lights,
-- repeated storage systems,
-- common signage conventions.
+- wall modules,
+- structural frames,
+- door geometry,
+- terminal housings,
+- status lights,
+- storage systems,
+- signage conventions.
 
-A player should be able to encounter an unfamiliar deck and still recognize:
+Specialized areas should extend this vocabulary rather than replace it.
+
+A player entering an unfamiliar deck should still think:
 
 > This was built by the same people for the same ship.
 
-Specialized areas should extend the base vocabulary rather than replace it.
-
 ---
 
-# 8. Area Identity
+# Area Identity
+
+Different areas vary through materials, equipment, density, and lighting while preserving the shared ship vocabulary.
 
 ## Cryogenic / Medical
 
-Use:
-
-- cleaner surfaces,
-- controlled lighting,
-- pale materials,
-- glass equipment,
-- medical storage,
-- equipment-dense but organized layouts.
-
-The environment may be more sterile than habitation, but should still retain the ship's ivory, graphite, and steel-blue vocabulary.
-
----
+Cleaner, more controlled, equipment-dense spaces with pale surfaces, glass enclosures, medical storage, and cooler secondary lighting.
 
 ## Habitation
 
-This should be the ship at its most human.
-
-Use:
-
-- warmer lighting,
-- fabric,
-- personal storage,
-- furniture,
-- varied belongings,
-- modest decoration,
-- domestic clutter.
-
-Avoid making quarters feel like generic spaceship cabins.
-
----
+The ship at its most human: warmer lighting, furniture, fabric, personal storage, belongings, and modest decoration.
 
 ## Communal Spaces
 
-Examples:
-
-- dining,
-- lounges,
-- recreation,
-- education.
-
-Use:
-
-- open floor area,
-- social furniture arrangements,
-- slightly broader color variation,
-- wayfinding,
-- personal traces,
-- shared objects.
-
-These spaces are important for communicating the population the ship once supported.
-
----
+Dining, lounges, education, and recreation should emphasize open space, social furniture arrangements, wayfinding, shared objects, and traces of population.
 
 ## Hydroponics
 
-Introduce strong organic contrast:
-
-- vegetation,
-- grow beds,
-- irrigation systems,
-- humidity,
-- grow lighting,
-- horticultural tools.
-
-The supporting structure should still clearly belong to the ship.
-
----
+Introduce strong organic contrast through vegetation, cultivation beds, irrigation systems, humidity, and grow lighting. Structural components should remain recognizably ship-built.
 
 ## Maintenance
 
-Use:
-
-- more exposed infrastructure,
-- utility lighting,
-- service panels,
-- spare components,
-- tools,
-- darker structural surfaces.
-
-Maintenance areas should feel functional and less comfortable, not inherently frightening.
-
----
+Expose more infrastructure, service panels, spare components, tools, graphite structure, and utility lighting. Functional, not automatically threatening.
 
 ## Engineering
 
-Use:
-
-- larger machinery,
-- heavier structures,
-- industrial equipment,
-- functional hazard markings,
-- higher visual density.
-
-Keep forms readable and avoid uncontrolled mechanical clutter.
-
----
+Use heavier structures, large machinery, industrial equipment, and functional hazard markings. Keep forms readable despite increased density.
 
 ## AI / Systems Infrastructure
 
-Use:
-
-- more ordered geometry,
-- denser electronic systems,
-- repeated computation modules,
-- restrained cool signal lighting,
-- reduced domestic materials.
-
-These spaces may eventually support stronger unease, but should still originate from the same ship design vocabulary.
+Use ordered geometry, repeated computation modules, denser electronics, cool signal lighting, and fewer domestic materials while retaining common ship construction.
 
 ---
 
-# 9. Technology
+# Technology and AI
 
-Shipboard technology should feel maintainable.
+Technology should feel **maintainable**.
 
 Prefer:
 
 - embedded displays,
 - physical controls,
-- switches,
 - service panels,
 - status lamps,
 - modular devices,
-- understandable tools.
+- recognizable tools and mechanisms.
 
-Advanced technology is appropriate, but avoid using exotic futuristic interfaces everywhere.
+Advanced technology may exist, but it should look as though generations of technicians could understand and repair it.
 
-This ship must have survived through long-term maintenance and repair.
+The AI should feel embedded in the ship rather than represented by a ubiquitous hologram.
 
-Technology should look like people could learn how to service it.
-
----
-
-# 10. AI Presence
-
-The AI is part of the ship's infrastructure.
-
-Its presence should normally be communicated through:
+Its presence can appear through:
 
 - terminals,
-- screens,
 - speakers,
 - doors,
-- system lights,
+- status lights,
+- displays,
 - environmental responses,
-- ship behavior.
+- system behavior.
 
-Avoid relying on a ubiquitous holographic character.
-
-If different AI personalities or fragments gain distinct visual identities, distinguish them subtly through:
-
-- signal color,
-- UI patterns,
-- timing,
-- animation behavior,
-- light behavior.
-
-They should still appear to belong to a shared ship operating system.
+Different AI personalities may use subtle variations in signal color, UI patterns, timing, or animation while remaining part of one shared operating system.
 
 ---
 
-# 11. Human Scale
+# Objects and Interactables
 
-Objects and spaces should communicate their purpose immediately.
-
-The player should be able to visually recognize:
-
-- a bed,
-- locker,
-- workbench,
-- terminal,
-- battery,
-- tool,
-- food space,
-- medical device,
-
-before inspecting small detail.
-
-Design hierarchy should generally be:
+Objects should read first through:
 
 1. silhouette,
 2. major material/color blocks,
 3. functional state,
 4. secondary detail.
 
-Micro-detail should not carry essential meaning.
+Essential meaning must not depend on micro-detail.
 
----
-
-# 12. Props and Interactables
-
-Props should feel engineered for daily use.
+Props should feel designed for daily use.
 
 Prefer:
 
-- chunky readable silhouettes,
 - clear handles,
-- obvious access points,
-- visible functional components,
+- visible access points,
+- understandable mechanical parts,
 - restrained status indicators.
 
-Avoid unnecessary futuristic ornament.
+Interactive state should ideally be communicated through physical cues such as:
 
-Interactive objects should communicate state without oversized glow effects or gamey outlines wherever possible.
-
-Use physical cues such as:
-
-- indicator lamps,
+- lights,
 - screen state,
 - mechanical position,
 - open panels,
 - connected cables,
-- visible power cells.
+- visible power components.
+
+Avoid oversized glow effects or game-like outlines unless gameplay requires them.
+
+Doors should share common construction DNA while allowing functional classes such as habitation, service, pressure, or restricted access.
 
 ---
 
-# 13. Doors
+# Lighting, Signage, and Density
 
-Doors are recurring architectural anchors and should share common visual DNA.
+Lighting supports readability first.
 
-They should feel:
-
-- substantial,
-- standardized,
-- maintainable,
-- clearly interactive.
-
-Door types may include:
-
-- habitation,
-- service,
-- pressure,
-- restricted access.
-
-Different classes should vary through function and structure, not entirely unrelated designs.
-
----
-
-# 14. Lighting
-
-Lighting should support readability first and mood second.
-
-Normal areas should generally use:
+Normal spaces should generally use:
 
 - soft neutral illumination,
 - warm practical fixtures,
 - modest contrast,
-- clearly readable floors and boundaries.
+- readable floors and boundaries.
 
-Avoid making intact ship interiors excessively dark.
+Do not make intact areas excessively dark.
 
-Darkness becomes more effective later because normal environments established a brighter baseline.
+The ship should also have coherent wayfinding:
 
-Lighting-state deterioration belongs primarily to `narrative-progression.md`.
-
----
-
-# 15. Signage and Wayfinding
-
-The ship was built for a large population.
-
-Use coherent:
-
-- room numbers,
 - deck markers,
+- room identifiers,
 - directional symbols,
 - subsystem icons,
-- zone identifiers,
-- simple safety markings.
+- zone markers,
+- simple safety graphics.
 
-At gameplay scale, large graphic shapes and symbols matter more than tiny readable text.
-
-Signage should help make the ship feel operated and inhabited.
-
----
-
-# 16. Visual Density
+Favor large symbols over tiny readable text at gameplay scale.
 
 Leave room for quiet surfaces.
 
-Do not decorate every tile.
-
-A strong SOLITUDE room may contain:
-
-- broad open floor,
-- simple wall construction,
-- a handful of functional objects,
-- one or two personal details,
-- one strong focal feature.
-
-Negative space contributes to both readability and isolation.
+Do not decorate every tile. Negative space supports both readability and isolation.
 
 ---
 
-# 17. Modularity
-
-Whenever possible, create a coherent base vocabulary that can be reused throughout the ship.
+# Modularity
 
 Prefer:
 
 **shared base construction + specialized additions**
 
-rather than designing every environment independently.
-
 Examples:
 
 - common wall system + hydroponic equipment,
-- common door frame + medical door state,
-- common terminal housing + specialized UI,
-- common flooring + engineering wear overlay.
+- common door frame + medical variant,
+- common terminal housing + specialized interface,
+- common floor + localized engineering treatment.
 
-This makes the ship visually coherent and keeps asset production manageable.
+Do not independently redesign every deck.
 
 ---
 
-# 18. Avoid
+# Avoid
 
-Unless specifically justified by location or story, avoid:
+Unless specifically justified, avoid:
 
 - pristine white spaceship interiors,
 - military-first styling,
 - cyberpunk neon,
 - excessive holograms,
-- dense random greebling,
-- decorative exposed pipes everywhere,
-- unnecessary hazard stripes,
-- glowing outlines on every interactive object,
+- random greebling,
+- exposed pipes used only as decoration,
+- excessive hazard stripes,
+- glowing outlines on every interactive,
 - excessive red,
 - default horror lighting,
 - highly reflective surfaces,
-- unrelated visual styles between decks.
+- unrelated visual languages between decks.
 
 ---
 
-# 19. Art-Direction Check
+# Art-Direction Test
 
-When evaluating a proposed asset, ask:
+When evaluating an asset, ask:
 
-### Does it feel functional?
+- **Functional:** Is its purpose understandable?
+- **Human:** Does it belong in a place people lived?
+- **Maintainable:** Could someone plausibly service or replace it?
+- **Cohesive:** Does it look built for the same generation ship?
+- **Restrained:** Does each major visual detail have a reason?
+- **Appropriate:** Is its mood correct for this point in the game?
 
-Can the player understand why this object or structure exists?
+When uncertain, prefer:
 
-### Does it feel human?
+**simple, functional, human, slightly aged**
 
-Does this resemble something designed for people to live with for generations?
+over:
 
-### Does it feel maintainable?
-
-Could someone plausibly repair or replace this component?
-
-### Does it belong to the same ship?
-
-Does it share visual DNA with approved SOLITUDE assets?
-
-### Is it restrained?
-
-Does every major visual detail serve a purpose?
-
-### Does it reveal too much?
-
-If this is an early-game asset, is it accidentally communicating horror or catastrophe before the story has earned it?
-
-When uncertain, favor:
-
-**simple, functional, human, and slightly aged**
-over
-**complex, futuristic, and visually aggressive**.
+**complex, futuristic, visually aggressive**.

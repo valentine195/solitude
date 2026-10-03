@@ -1,207 +1,141 @@
 # SOLITUDE Unity Art Pipeline
 
-This document defines how production-ready SOLITUDE art assets are imported, configured, organized, integrated, and validated in Unity.
+This document defines how production-ready SOLITUDE art assets are imported, configured, integrated, and validated in Unity.
 
-Use it whenever:
+Use it for:
 
-- importing new sprites or tiles,
-- configuring texture import settings,
-- slicing sprite sheets,
-- creating Tile assets or Tile Palettes,
-- configuring pivots,
-- placing art into scenes,
-- updating art-related prefabs,
-- or validating newly generated assets in game.
+- sprite import,
+- slicing,
+- pivots,
+- Tilemaps,
+- prefabs,
+- sorting,
+- collision,
+- animation integration,
+- scene placement,
+- gameplay-scale validation.
 
-For visual design decisions, use `art-direction.md`.
+Assume source artwork already satisfies `pixel-pipeline.md`.
 
-For pixel-art generation and image processing, use `pixel-pipeline.md`.
-
-The source artwork should already be technically correct before reaching this stage.
-
-Do not use Unity Transform scaling, filtering, or import configuration to hide problems in the source asset.
+Do not use Unity settings or Transform scaling to compensate for invalid source art.
 
 ---
 
-# 1. Inspect Existing Project Conventions First
+# 1. Inspect Existing Conventions First
 
-Before changing import settings, directories, palettes, prefabs, or scenes, inspect the existing project.
+Before adding or changing art integration, inspect the project for existing:
 
-Determine:
-
-- current Pixels Per Unit,
-- existing sprite import settings,
-- existing Tilemap structure,
-- Tile Palette locations,
+- Pixels Per Unit,
+- sprite import settings,
+- Tilemap structure,
+- Tile Palettes,
 - sorting layers,
-- sprite pivots,
-- asset directories,
-- prefab conventions,
-- scene organization,
-- animation-controller conventions.
+- pivots,
+- animation conventions,
+- prefab patterns,
+- asset directories.
 
-Prefer existing project conventions when they are compatible with the requirements in this document.
+Reuse compatible project conventions.
 
-Do not create parallel systems unnecessarily.
-
-If an existing convention conflicts with SOLITUDE's required pixel-art behavior, fix the inconsistency deliberately rather than silently introducing a second convention.
+Do not create parallel art, Tilemap, prefab, or interaction systems without a clear reason.
 
 ---
 
-# 2. Source Asset Location
+# 2. World Scale
 
-Production artwork should live under the project's established art hierarchy.
-
-If no suitable structure already exists, prefer approximately:
-
-```text
-Assets/
-└── Art/
-    └── SOLITUDE/
-        ├── Characters/
-        ├── Tiles/
-        ├── Props/
-        ├── Interactables/
-        ├── Doors/
-        ├── Terminals/
-        ├── Effects/
-        └── Reference/
-```
-
-Do not create a new hierarchy if equivalent project folders already exist.
-
-Keep raw generation sources separate from production assets when practical.
-
-Only production-ready images should be imported into runtime asset directories.
-
----
-
-# 3. Pixels Per Unit
-
-Default SOLITUDE world scale:
+Default SOLITUDE scale:
 
 `32 Pixels Per Unit`
 
 Therefore:
 
-- 32 px = 1 Unity world unit,
-- 64 px = 2 Unity world units,
-- 96 px = 3 Unity world units.
+- 32 px = 1 Unity unit
+- 64 px = 2 Unity units
+- 96 px = 3 Unity units
 
-Use the same pixel density for:
+Use consistent pixel density across:
 
-- environment tiles,
+- tiles,
 - characters,
 - props,
 - interactables,
 - doors,
 - world effects.
 
-Do not change PPU on individual assets simply to make them appear larger or smaller.
+Do not vary PPU to make individual assets appear larger or smaller.
 
-Correct the source dimensions instead.
+Fix the source dimensions instead.
 
 ---
 
-# 4. Texture Import Settings
+# 3. Texture Import Settings
 
 Pixel-art textures should normally use:
 
 ```text
 Texture Type: Sprite (2D and UI)
+Pixels Per Unit: 32
 Filter Mode: Point
 Compression: None
 Generate Mip Maps: Off
-Pixels Per Unit: 32
 ```
 
-Where applicable:
+Where appropriate:
 
 ```text
 Alpha Is Transparency: On
 ```
 
-Do not use:
+Avoid:
 
 - Bilinear filtering,
 - Trilinear filtering,
-- compressed texture formats that visibly alter pixel colors,
-- mip maps for ordinary 2D pixel sprites.
+- visible texture compression,
+- mipmaps on ordinary 2D pixel sprites.
+
+For tiles and grid-aligned sprites, prefer:
+
+`Mesh Type: Full Rect`
+
+unless a demonstrated need requires otherwise.
 
 ---
 
-# 5. Sprite Mode
+# 4. Sprite Mode and Slicing
 
-Use:
+Use `Single` for standalone sprites.
 
-`Single`
-
-for standalone sprites.
-
-Use:
-
-`Multiple`
-
-for:
+Use `Multiple` for:
 
 - sprite sheets,
 - animation sheets,
 - tile atlases,
-- intentionally packed sprite families.
+- coherent sprite families.
 
-Do not combine unrelated art into large sheets solely for organizational convenience.
-
-Sheets should represent a coherent production family.
-
----
-
-# 6. Mesh Type
-
-For tiles and sprites where exact rectangular bounds matter, prefer:
-
-`Full Rect`
-
-This is especially appropriate for:
-
-- tiles,
-- wall sections,
-- floor pieces,
-- grid-aligned props.
-
-Use tighter meshes only when there is a demonstrated rendering or performance reason.
-
-Do not introduce irregular meshes that make grid placement harder to reason about.
-
----
-
-# 7. Sprite Slicing
-
-Sprite sheets should be sliced deterministically.
-
-Use explicit:
+Slice deterministic sheets using explicit:
 
 - cell width,
 - cell height,
-- grid origin,
-- padding,
-- spacing.
+- origin,
+- spacing,
+- padding.
 
-Do not rely on automatic slicing when it can produce inconsistent frame boundaries.
+Do not rely on automatic slicing when grid dimensions are known.
 
-For example, a 32×48 character sheet should use explicit:
+Example player sheet:
 
 ```text
 Cell Width: 32
 Cell Height: 48
 ```
 
-unless the asset specification explicitly defines a different frame size.
+unless the source asset defines a documented alternative.
 
 ---
 
-# 8. Pivot Conventions
+# 5. Pivots
 
-Pivots must be consistent within asset families.
+Use consistent pivots within asset families.
 
 ## Characters
 
@@ -209,87 +143,58 @@ Default conceptual pivot:
 
 `bottom center / floor contact`
 
-The visual foot position should remain stable between animation frames.
+Animation frames must preserve stable foot placement.
 
-Do not compensate for frame jitter using different pivots per animation frame.
-
-Fix the sprite alignment instead.
-
----
+Do not correct frame jitter with per-frame pivot changes.
 
 ## Floor Props
 
-Prefer a pivot that corresponds predictably to the object's footprint.
+Use a predictable footprint-based or bottom-center pivot.
 
-Usually:
+Multi-tile assets should align consistently to the world grid.
 
-`bottom center`
+## Wall Objects
 
-or an established grid-footprint convention.
-
-Objects occupying multiple tiles must align consistently to the world grid.
-
----
-
-## Wall-Mounted Assets
-
-Use a pivot corresponding to the intended attachment point.
+Use the intended wall attachment point as the pivot.
 
 Examples:
 
-- wall terminal,
+- terminal,
 - sign,
-- panel,
-- cabinet.
+- cabinet,
+- service panel.
 
-Placement should remain predictable when used on different wall segments.
+Do not solve inconsistent source alignment with arbitrary scene offsets.
 
 ---
 
-# 9. Tilemap Structure
+# 6. Tilemaps and Tile Palettes
 
-Use the existing project Tilemap architecture where available.
+Follow the existing project Tilemap structure where possible.
 
-Do not create a new Tilemap hierarchy for every asset family.
+Separate layers only when rendering or gameplay requires it.
 
-A typical SOLITUDE room may logically separate:
+Common concerns may include:
 
 - floor,
-- structural boundaries,
-- walls,
+- structural walls,
 - decoration,
 - collision,
 - foreground/occlusion.
 
-The exact implementation should follow the existing project if it already solves these concerns.
+Avoid excessive Tilemap layers.
 
-Avoid excessive Tilemap layers without a clear rendering or gameplay purpose.
+Create reusable Tile assets for stable concepts such as:
 
----
-
-# 10. Tile Assets
-
-When new reusable environment sprites are introduced, create or update the appropriate Unity Tile assets.
-
-Tiles should correspond to stable reusable concepts such as:
-
-- floor base,
-- floor variation,
-- north wall,
-- wall cap,
+- floor bases,
+- wall faces,
+- wall caps,
 - corners,
 - thresholds,
-- structural pieces.
+- structural pieces,
+- reusable variations.
 
-Do not create a unique Unity Tile asset for every visually identical room placement.
-
----
-
-# 11. Tile Palettes
-
-Prefer a small number of coherent Tile Palettes organized around actual level-building needs.
-
-For example:
+Prefer palettes organized around shared ship construction, for example:
 
 ```text
 Ship Base
@@ -298,265 +203,124 @@ Ship Variations
 Ship Damage
 ```
 
-rather than:
-
-```text
-Cryobay Tiles
-Corridor Tiles
-Room 01 Tiles
-Room 02 Tiles
-Room 03 Tiles
-```
-
-when those rooms share the same construction language.
-
-The goal is to reinforce reusable ship architecture.
+rather than room-specific palettes when those rooms share the same visual vocabulary.
 
 ---
 
-# 12. Variations and Overlays
+# 7. Reusable States and Overlays
 
-Where art was designed as:
-
-`base + overlay`
-
-preserve that architecture in Unity where practical.
+Preserve reusable source architecture where practical.
 
 Examples:
 
 - base wall + scuff overlay,
 - base floor + stain,
-- base machine + damage state,
-- base door + status indicator.
+- base door + status indicator,
+- base terminal + powered/error state.
 
-Do not bake all possible visual states into separate room-specific prefabs unless required by gameplay.
+Avoid baking every state into room-specific assets or prefabs.
 
----
-
-# 13. Interactive Objects
-
-Interactive artwork should integrate with existing gameplay systems.
-
-Before creating a new art-specific prefab or component, inspect whether the project already has:
-
-- interaction interfaces,
-- state components,
-- container logic,
-- door logic,
-- item pickups,
-- event systems.
-
-Reuse existing gameplay architecture.
-
-Art integration should not result in duplicate interaction systems.
-
-Visual states should respond to existing gameplay state whenever possible.
+Visual state should correspond to actual gameplay state when applicable.
 
 ---
 
-# 14. Door Integration
+# 8. Interactive Assets
 
-Doors should reuse the project's existing door behavior.
+Before creating new components or prefabs, inspect existing gameplay systems.
 
-Visual states may include:
+Reuse established systems for:
 
-- closed,
-- open,
-- unpowered,
-- locked,
-- damaged,
+- interaction,
+- doors,
+- containers,
+- pickups,
+- state changes,
+- events.
 
-but those visual states should be connected to actual door state rather than duplicated scene objects manually enabled by level design.
+New art should usually attach to existing behavior rather than recreate it.
 
-Do not rewrite working door behavior solely because new art was introduced.
-
----
-
-# 15. Animation Integration
-
-Animations should preserve the sprite anchor established in `pixel-pipeline.md`.
-
-When creating Animation Clips:
-
-- maintain consistent sample rate within an animation family,
-- avoid Transform scaling to compensate for sprite inconsistency,
-- verify frame order,
-- verify foot alignment,
-- inspect looping transitions.
-
-Do not assume the generated sprite-sheet frame sequence is correct without checking it.
-
----
-
-# 16. Sorting
-
-Follow existing project Sorting Layers and sorting conventions.
-
-New artwork should slot into the established system rather than adding arbitrary sorting layers.
-
-Verify:
-
-- player passes correctly behind/in front of appropriate props,
-- wall-mounted objects render correctly,
-- foreground pieces occlude when intended,
-- dropped items remain readable.
-
-Do not solve sorting issues by assigning extreme arbitrary order values.
-
----
-
-# 17. Colliders
-
-Visual asset generation and collision geometry are separate concerns.
-
-Do not derive complicated physics shapes automatically from sprite transparency unless that behavior is actually useful.
-
-Prefer simple gameplay-driven collision:
-
-- boxes,
-- capsules,
-- tile collision,
-- simple polygons where required.
-
-Collision should represent where the player can move, not perfectly trace artwork.
-
----
-
-# 18. Lighting
-
-Use the project's existing 2D lighting solution.
-
-Do not bake environmental room lighting into reusable sprites unless the asset specifically requires it.
-
-Prefer lighting systems for broad environmental state changes such as:
-
-- operational,
-- partial power,
-- emergency.
-
-Source sprites should normally remain reusable across those states.
-
-Avoid using post-processing or filtering that softens native pixel edges.
-
----
-
-# 19. Prefabs
-
-Create prefabs when the asset represents a reusable world object with:
+Stateful objects may use prefabs when they require:
 
 - interaction,
 - animation,
-- multiple visual states,
 - collision,
+- multiple visual states,
 - lighting,
 - audio,
-- or gameplay behavior.
+- gameplay logic.
 
-Examples:
-
-- door,
-- cryopod,
-- locker,
-- terminal,
-- battery pickup.
-
-Simple static decoration does not automatically need its own prefab.
-
-Avoid excessive prefab creation for trivial one-off sprites.
+Static decoration does not automatically require its own prefab.
 
 ---
 
-# 20. Art Validation Scene
+# 9. Animation Integration
 
-Maintain a lightweight scene dedicated to art validation if the project does not already have an equivalent.
+Animation assets must preserve the alignment defined in `pixel-pipeline.md`.
 
-Suggested name:
+When creating clips:
 
-`ArtValidation`
+- verify frame order,
+- preserve anchor alignment,
+- use consistent timing within the animation family,
+- inspect looping behavior,
+- avoid Transform scaling.
 
-This scene should provide a stable place to inspect art without depending on a full gameplay level.
+Check for:
 
-Include representative:
-
-- floor tiles,
-- north wall,
-- east/west/south boundaries,
-- corners,
-- door,
-- player,
-- locker/container,
-- terminal,
-- common prop,
-- lighting states.
-
-Keep this scene simple.
-
-It is a test fixture, not a showcase level.
+- foot sliding,
+- visible frame jitter,
+- scale drift,
+- incorrect transitions.
 
 ---
 
-# 21. Validation Environment
+# 10. Sorting and Occlusion
 
-New assets should be inspected under conditions representative of actual play.
+Use existing Sorting Layers and ordering conventions.
 
-Validate against:
+Verify that:
 
-- approved existing assets,
-- normal camera zoom,
-- intended lighting,
-- player scale.
+- the player passes correctly in front of or behind props,
+- wall-mounted objects render correctly,
+- foreground elements occlude intentionally,
+- pickups remain readable.
 
-Do not judge compatibility only against an empty Unity Scene view.
-
----
-
-# 22. Gameplay-Scale Review
-
-For each meaningful new asset family, enter Play Mode or otherwise view the scene through the normal game camera.
-
-Check:
-
-- apparent scale,
-- silhouette,
-- contrast,
-- state readability,
-- collision alignment,
-- sorting,
-- animation,
-- pixel integrity.
-
-A sprite can look correct in the Inspector while being visually wrong during gameplay.
-
-The gameplay camera is the final authority.
+Do not solve sorting issues with arbitrary extreme order values if the underlying sorting model is incorrect.
 
 ---
 
-# 23. Pixel-Perfect Rendering
+# 11. Collision
 
-Where the project uses Unity's Pixel Perfect Camera or equivalent configuration, maintain compatibility with it.
+Collision should represent gameplay space, not perfectly trace sprite transparency.
 
-Do not alter global pixel-perfect settings simply to accommodate one incorrectly sized asset.
+Prefer simple shapes:
 
-If a sprite exhibits:
+- boxes,
+- capsules,
+- Tilemap collision,
+- simple polygons when needed.
 
-- shimmering,
-- inconsistent pixel size,
-- blurred movement,
-- uneven scaling,
-
-investigate:
-
-- source resolution,
-- PPU,
-- camera settings,
-- transform position,
-- parent scaling.
-
-Do not immediately add filtering.
+Do not automatically generate complex colliders from sprite outlines unless gameplay genuinely requires them.
 
 ---
 
-# 24. Transform Scale
+# 12. Lighting
+
+Use the project's existing 2D lighting approach.
+
+Broad environmental states such as:
+
+- normal operation,
+- partial power,
+- emergency,
+
+should usually be handled through scene lighting or controlled overlays rather than repainted copies of every sprite.
+
+Avoid rendering or post-processing choices that blur native pixel edges.
+
+---
+
+# 13. Transform and Grid Integrity
 
 Production sprites should normally use:
 
@@ -567,205 +331,155 @@ Y = 1
 Z = 1
 ```
 
-Do not use Transform scaling to resize artwork into the correct apparent size.
+If unusual Transform scale is required to make the sprite look correct, investigate:
 
-If an asset requires:
+- source dimensions,
+- PPU,
+- pivot,
+- camera settings,
+- parent scale.
 
-```text
-0.73
-1.42
-2.15
-```
-
-to look correct, the source asset or import configuration is probably wrong.
-
-Fix the underlying issue.
-
----
-
-# 25. Grid Alignment
-
-Tile-based architecture must align exactly to the project's world grid.
+Tile-based architecture must align exactly to the world grid.
 
 Watch for:
 
 - fractional positions,
-- incorrectly sized sprites,
-- pivots that shift tile placement,
-- transform scaling,
-- inconsistent cell dimensions.
-
-Large multi-tile assets should still align predictably to grid boundaries or documented anchor points.
+- incorrect pivots,
+- inconsistent cell dimensions,
+- unintended parent scaling.
 
 ---
 
-# 26. Existing Scenes
+# 14. Art Validation Scene
 
-Do not broadly replace level artwork immediately after generating a new asset family.
+Maintain a lightweight `ArtValidation` scene if the project does not already have an equivalent.
 
-First validate it in:
+It should contain representative:
 
-1. `ArtValidation`,
-2. one representative real room,
-3. then expand its usage.
+- floor tiles,
+- north wall,
+- side/south boundaries,
+- corners,
+- door,
+- player,
+- terminal,
+- container,
+- common prop,
+- relevant lighting states.
 
-This limits the impact of a bad generation batch.
+Use it as a stable test fixture, not a showcase level.
 
 ---
 
-# 27. Generated Asset Review
+# 15. Validation Workflow
 
-When replacing temporary or prototype artwork:
+Validate meaningful new asset families in this order:
+
+1. import/configuration,
+2. `ArtValidation`,
+3. one representative real room,
+4. broader usage.
+
+Inspect assets through the normal gameplay camera.
+
+Check:
+
+## Import
+
+- PPU correct,
+- Point filtering,
+- compression off,
+- mipmaps off,
+- alpha correct.
+
+## Geometry
+
+- dimensions correct,
+- pivot correct,
+- scale = 1,
+- grid alignment correct.
+
+## Rendering
+
+- pixels remain crisp,
+- sorting is correct,
+- lighting behaves correctly,
+- no unexpected color changes.
+
+## Gameplay
+
+- collision works,
+- interaction works,
+- state transitions work,
+- animation aligns correctly.
+
+A sprite that looks correct only in the Inspector has not been validated.
+
+---
+
+# 16. Replacing Prototype Art
+
+When replacing temporary artwork:
 
 1. preserve the working gameplay object,
-2. replace or update its Sprite/Tile reference,
-3. validate behavior,
-4. validate visual placement,
-5. remove obsolete artwork only when no longer referenced.
+2. replace or update its visual reference,
+3. verify behavior,
+4. verify placement,
+5. remove obsolete art only after confirming it is unused.
 
-Do not rebuild functioning gameplay prefabs just to install new graphics.
+Do not rebuild functioning gameplay prefabs solely to install new graphics.
+
+Preserve existing `.meta` files and GUIDs when replacing established assets in place where appropriate.
 
 ---
 
-# 28. Asset Naming
+# 17. Naming and Repository Hygiene
 
-Follow established project naming conventions first.
+Follow existing project naming conventions.
 
-If none exist, prefer stable descriptive names such as:
+If none exist, use descriptive stable names such as:
 
 ```text
-floor_ship_ivory_01
 wall_north_ivory_base
-wall_cap_graphite
 door_service_closed
-door_service_open
-door_service_unpowered
 prop_battery_portable
-prop_locker_single
 terminal_ai_wall
 overlay_wall_scuff_01
 ```
 
-Avoid generation-oriented names:
+Avoid names based on generation order or revision history.
 
-```text
-image_3
-new_tile
-test_final
-door_v7_final2
-```
-
-File names should describe what the asset is, not how it was created.
+Do not place temporary generation outputs, chroma intermediates, duplicate exports, or unused concept sheets in production runtime directories.
 
 ---
 
-# 29. Meta Files
+# 18. Integration Scope
 
-Treat Unity `.meta` files as part of the asset.
+Art integration should avoid unrelated refactoring.
 
-Do not delete or regenerate `.meta` files for established assets unnecessarily.
+Small supporting changes are acceptable when required, such as:
 
-Preserving GUIDs prevents broken references in:
+- adding a visual state,
+- assigning a SpriteRenderer,
+- adding an Animation Clip,
+- creating a Tile asset,
+- wiring an existing state to new visuals.
 
-- scenes,
-- prefabs,
-- animations,
-- Tile assets,
-- ScriptableObjects.
-
-When replacing artwork in place, preserve the existing asset identity where appropriate.
+Do not redesign unrelated gameplay systems during an art task.
 
 ---
 
-# 30. Repository Hygiene
+# 19. Completion
 
-Do not commit:
-
-- temporary generation outputs,
-- duplicate intermediate PNGs,
-- large unused concept sheets,
-- debug exports,
-- temporary chroma-key images,
-
-into production runtime directories.
-
-Keep useful source/reference material in an intentional reference/source location.
-
-Delete disposable intermediates once they are no longer needed.
-
----
-
-# 31. Integration Scope
-
-Art tasks should avoid unrelated gameplay refactors.
-
-Small supporting changes are acceptable when necessary for proper asset integration.
-
-Examples:
-
-- adding a visual state to an existing door,
-- exposing a SpriteRenderer reference,
-- adding an animation clip,
-- creating a Tile asset.
-
-Do not use an art task as an excuse to redesign unrelated systems.
-
----
-
-# 32. Validation Checklist
-
-Before considering Unity integration complete, verify all applicable items.
-
-### Import
-
-- PPU is correct.
-- Filter Mode is Point.
-- Compression is disabled.
-- Mip Maps are disabled.
-- Alpha behaves correctly.
-
-### Geometry
-
-- sprite dimensions are correct,
-- pivot is correct,
-- Transform scale is 1,
-- grid alignment is correct.
-
-### Visuals
-
-- no smoothing,
-- no unexpected color changes,
-- correct sorting,
-- correct lighting behavior.
-
-### Gameplay
-
-- collision still works,
-- interaction still works,
-- state transitions still work,
-- animations align correctly.
-
-### Context
-
-- inspected beside existing approved assets,
-- inspected beside the player,
-- inspected through the gameplay camera.
-
----
-
-# 33. Completion Rule
-
-Unity integration is complete only when the asset:
+Unity integration is complete when the asset:
 
 - imports with correct pixel settings,
-- uses the correct world scale,
+- uses the expected world scale,
 - requires no corrective Transform scaling,
-- occupies the intended grid position,
+- aligns to the intended grid or anchor,
 - renders in the correct order,
 - preserves existing gameplay behavior,
-- works in required visual states,
-- and has been visually reviewed through the normal gameplay camera.
+- supports required visual states,
+- and has been reviewed successfully through the gameplay camera.
 
-Do not mark an art asset complete because it appears correctly in the Project or Inspector window.
-
-It must work in the game.
+If integration requires hiding a source-art problem, return to `pixel-pipeline.md` and fix the asset instead.
