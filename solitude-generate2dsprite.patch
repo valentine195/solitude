@@ -1,0 +1,568 @@
+diff --git a/.agents/skills/generate2dsprite/scripts/generate2dsprite.py b/.agents/skills/generate2dsprite/scripts/generate2dsprite.py
+index c897aa5..cf1d58d 100644
+--- a/.agents/skills/generate2dsprite/scripts/generate2dsprite.py
++++ b/.agents/skills/generate2dsprite/scripts/generate2dsprite.py
+@@ -16,6 +16,43 @@ import numpy as np
+ from PIL import Image
+ 
+ 
++RESAMPLING_FILTERS = {
++    "nearest": Image.Resampling.NEAREST,
++    "lanczos": Image.Resampling.LANCZOS,
++}
++PIXEL_ART_STYLES = {"pixel_art", "retro_pixel"}
++INTEGER_SCALE_TOLERANCE = 1e-6
++
++
++def resampling_filter(name: str) -> Image.Resampling:
++    try:
++        return RESAMPLING_FILTERS[name]
++    except KeyError as exc:
++        raise ValueError(f"Unknown resampling strategy '{name}'.") from exc
++
++
++def is_integer_scale(scale: float, tolerance: float = INTEGER_SCALE_TOLERANCE) -> bool:
++    """Return True for integer upscales or reciprocal-integer downscales."""
++    if scale <= 0:
++        return False
++    if math.isclose(scale, 1.0, rel_tol=tolerance, abs_tol=tolerance):
++        return True
++    if scale > 1.0:
++        return math.isclose(scale, round(scale), rel_tol=tolerance, abs_tol=tolerance)
++    inverse = 1.0 / scale
++    return math.isclose(inverse, round(inverse), rel_tol=tolerance, abs_tol=tolerance)
++
++
++def validate_integer_scale(scale: float, context: str) -> None:
++    if is_integer_scale(scale):
++        return
++    raise ValueError(
++        f"{context} requires integer pixel scaling, but computed scale is {scale:.6f}. "
++        "Use source art and output dimensions that permit an integer upscale or reciprocal-integer "
++        "downscale, adjust --fit-scale, or omit --require-integer-scale for non-production processing."
++    )
++
++
+ ART_STYLE = (
+     "Original digital monster creature. Digimon/Pokemon inspired pixel art, "
+     "strong outlines, dynamic, battle-ready. NOT cute, NOT round. "
+@@ -637,9 +674,11 @@ def build_godot_sprite3d_metadata(
+     if world_height <= 0:
+         raise ValueError("Godot Sprite3D world height must be greater than zero.")
+ 
+-    cell_size = int(metadata.get("cell_size", 0))
++    legacy_cell_size = int(metadata.get("cell_size", 0))
++    cell_width = int(metadata.get("cell_width", legacy_cell_size))
++    cell_height = int(metadata.get("cell_height", legacy_cell_size))
+     labels = list(metadata.get("frame_labels") or [])
+-    if cell_size <= 0 or not labels:
++    if cell_width <= 0 or cell_height <= 0 or not labels:
+         raise ValueError("Godot Sprite3D metadata requires processed grid frames.")
+ 
+     origin = metadata.get("output_origin") or processing_output_origin(metadata)
+@@ -660,10 +699,10 @@ def build_godot_sprite3d_metadata(
+     pixel_size = locked_pixel_size or (float(world_height) / subject_height)
+     return {
+         "schema": "generate2dsprite.godot_sprite3d.v1",
+-        "frame_size": [cell_size, cell_size],
++        "frame_size": [cell_width, cell_height],
+         "output_origin": [origin_x, origin_y],
+         # Godot's Sprite3D offset uses +Y upward from the texture center.
+-        "sprite3d_offset": [cell_size / 2 - origin_x, origin_y - cell_size / 2],
++        "sprite3d_offset": [cell_width / 2 - origin_x, origin_y - cell_height / 2],
+         "reference_subject_height_px": subject_height,
+         "world_height": float(world_height),
+         "recommended_pixel_size": pixel_size,
+@@ -786,9 +825,10 @@ def cmd_build_godot_bundle(args: argparse.Namespace) -> None:
+     print(str(args.output.resolve()))
+ 
+ 
+-SCALE_PROFILE_VERSION = 1
++SCALE_PROFILE_VERSION = 2
+ SCALE_PROFILE_PROCESSING_KEYS = (
+-    "cell_size",
++    "cell_width",
++    "cell_height",
+     "fit_scale",
+     "trim_border",
+     "edge_clean_depth",
+@@ -799,18 +839,22 @@ SCALE_PROFILE_PROCESSING_KEYS = (
+     "component_padding",
+     "min_component_area",
+     "edge_touch_margin",
++    "resampling",
++    "require_integer_scale",
+ )
+ 
+ 
+ def processing_output_origin(processing: dict[str, object]) -> list[float]:
+-    cell_size = int(processing["cell_size"])
+-    target_x = cell_size / 2
++    legacy_cell_size = int(processing.get("cell_size", 0))
++    cell_width = int(processing.get("cell_width", legacy_cell_size))
++    cell_height = int(processing.get("cell_height", legacy_cell_size))
++    target_x = cell_width / 2
+     if str(processing["align"]) in {"bottom", "feet"}:
+         fit_scale = float(processing["fit_scale"])
+-        output_pad = max(0, int(cell_size * (1 - fit_scale) * 0.5))
+-        target_y = cell_size - output_pad
++        output_pad = max(0, int(cell_height * (1 - fit_scale) * 0.5))
++        target_y = cell_height - output_pad
+     else:
+-        target_y = cell_size / 2
++        target_y = cell_height / 2
+     return [target_x, target_y]
+ 
+ 
+@@ -854,14 +898,24 @@ def build_scale_profile(
+ 
+ def load_scale_profile(path: Path) -> dict[str, object]:
+     payload = json.loads(path.read_text(encoding="utf-8"))
+-    if int(payload.get("version", 0)) != SCALE_PROFILE_VERSION:
++    version = int(payload.get("version", 0))
++    if version not in {1, SCALE_PROFILE_VERSION}:
+         raise ValueError(
+             f"Unsupported scale profile version {payload.get('version')!r}; "
+-            f"expected {SCALE_PROFILE_VERSION}."
++            f"expected 1 or {SCALE_PROFILE_VERSION}."
+         )
+     processing = payload.get("processing")
+     if not isinstance(processing, dict):
+         raise ValueError("Scale profile is missing its processing contract.")
++    if version == 1:
++        cell_size = int(processing.get("cell_size", 0))
++        if cell_size <= 0:
++            raise ValueError("Legacy scale profile is missing a valid cell_size.")
++        processing["cell_width"] = cell_size
++        processing["cell_height"] = cell_size
++        processing.setdefault("resampling", "lanczos")
++        processing.setdefault("require_integer_scale", False)
++        payload["version"] = SCALE_PROFILE_VERSION
+     missing = [key for key in SCALE_PROFILE_PROCESSING_KEYS if key not in processing]
+     if missing:
+         raise ValueError(f"Scale profile processing contract is missing: {', '.join(missing)}")
+@@ -875,6 +929,8 @@ def load_scale_profile(path: Path) -> dict[str, object]:
+ 
+ def apply_scale_profile(args: argparse.Namespace, profile: dict[str, object]) -> None:
+     processing = dict(profile["processing"])
++    if hasattr(args, "cell_size"):
++        args.cell_size = None
+     for key in SCALE_PROFILE_PROCESSING_KEYS:
+         setattr(args, key, processing[key])
+ 
+@@ -889,7 +945,14 @@ def profile_scale_drift(
+     return abs(current / reference - 1.0)
+ 
+ 
+-def center_single_sprite(img: Image.Image, size: int, threshold: int, edge_threshold: int) -> Image.Image:
++def center_single_sprite(
++    img: Image.Image,
++    size: int,
++    threshold: int,
++    edge_threshold: int,
++    resampling: str = "lanczos",
++    require_integer_scale: bool = False,
++) -> Image.Image:
+     cleaned = remove_bg_magenta(img.convert("RGBA"), threshold, edge_threshold)
+     bbox = cleaned.getbbox()
+     if bbox:
+@@ -898,9 +961,11 @@ def center_single_sprite(img: Image.Image, size: int, threshold: int, edge_thres
+     canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+     if width > 0 and height > 0:
+         scale = min(size / width, size / height) * 0.9
+-        new_width = max(1, int(width * scale))
+-        new_height = max(1, int(height * scale))
+-        cleaned = cleaned.resize((new_width, new_height), Image.Resampling.LANCZOS)
++        if require_integer_scale:
++            validate_integer_scale(scale, "Single-sprite resize")
++        new_width = max(1, int(round(width * scale)))
++        new_height = max(1, int(round(height * scale)))
++        cleaned = cleaned.resize((new_width, new_height), resampling_filter(resampling))
+         canvas.paste(cleaned, ((size - new_width) // 2, (size - new_height) // 2))
+     return canvas
+ 
+@@ -909,7 +974,8 @@ def split_grid(
+     img: Image.Image,
+     rows: int,
+     cols: int,
+-    cell_size: int,
++    output_cell_width: int,
++    output_cell_height: int,
+     threshold: int,
+     edge_threshold: int,
+     fit_scale: float = 0.85,
+@@ -922,15 +988,22 @@ def split_grid(
+     min_component_area: int = 1,
+     edge_touch_margin: int = 0,
+     scale_strategy: str = "fit",
++    resampling: str = "lanczos",
++    require_integer_scale: bool = False,
+ ) -> tuple[list[Image.Image], list[dict[str, object]]]:
+     cleaned = remove_bg_magenta(img.convert("RGBA"), threshold, edge_threshold)
+     width, height = cleaned.size
+-    cell_width, cell_height = width // cols, height // rows
++    source_cell_width, source_cell_height = width // cols, height // rows
+     cropped_frames: list[Image.Image] = []
+     frame_info: list[dict[str, object]] = []
+     for row in range(rows):
+         for col in range(cols):
+-            box = (col * cell_width, row * cell_height, (col + 1) * cell_width, (row + 1) * cell_height)
++            box = (
++                col * source_cell_width,
++                row * source_cell_height,
++                (col + 1) * source_cell_width,
++                (row + 1) * source_cell_height,
++            )
+             frame = cleaned.crop(box)
+             if trim_border_px > 0:
+                 frame = trim_border(frame, px=trim_border_px)
+@@ -987,41 +1060,51 @@ def split_grid(
+             )
+ 
+     if scale_strategy == "preserve":
+-        target_x = cell_size / 2
++        target_x = output_cell_width / 2
+         if align in {"bottom", "feet"}:
+-            output_pad = max(0, int(cell_size * (1 - fit_scale) * 0.5))
+-            target_y = cell_size - output_pad
++            output_pad = max(0, int(output_cell_height * (1 - fit_scale) * 0.5))
++            target_y = output_cell_height - output_pad
+         else:
+-            target_y = cell_size / 2
++            target_y = output_cell_height / 2
+ 
+         frames: list[Image.Image] = []
+         for index, frame in enumerate(cropped_frames):
+             info = frame_info[index]
+-            canvas = Image.new("RGBA", (cell_size, cell_size), (0, 0, 0, 0))
++            canvas = Image.new("RGBA", (output_cell_width, output_cell_height), (0, 0, 0, 0))
+             if not bool(info["is_empty"]):
+                 source_width, source_height = (int(value) for value in info["source_frame_size"])
+                 crop_x0, crop_y0, _crop_x1, _crop_y1 = (int(value) for value in info["crop_bbox"])
+                 anchor_x, anchor_y = (float(value) for value in info["anchor_source"])
+-                base_scale = min(cell_size / source_width, cell_size / source_height) * fit_scale
++                base_scale = min(
++                    output_cell_width / source_width,
++                    output_cell_height / source_height,
++                ) * fit_scale
+                 scale_adjustment = 1.0
+                 source_to_output_scale = base_scale * scale_adjustment
++                if require_integer_scale:
++                    validate_integer_scale(
++                        source_to_output_scale,
++                        f"Frame {info['grid']} preserve resize",
++                    )
+                 new_width = max(1, int(round(frame.width * source_to_output_scale)))
+                 new_height = max(1, int(round(frame.height * source_to_output_scale)))
+-                scaled = frame.resize((new_width, new_height), Image.Resampling.LANCZOS)
++                scaled = frame.resize(
++                    (new_width, new_height), resampling_filter(resampling)
++                )
+                 anchor_in_crop_x = (anchor_x - crop_x0) * source_to_output_scale
+                 anchor_in_crop_y = (anchor_y - crop_y0) * source_to_output_scale
+                 paste_x = int(round(target_x - anchor_in_crop_x))
+                 paste_y = int(round(target_y - anchor_in_crop_y))
+                 unclamped_paste = [paste_x, paste_y]
+-                paste_x = max(0, min(cell_size - new_width, paste_x))
+-                paste_y = max(0, min(cell_size - new_height, paste_y))
++                paste_x = max(0, min(output_cell_width - new_width, paste_x))
++                paste_y = max(0, min(output_cell_height - new_height, paste_y))
+                 paste_clamped = [paste_x, paste_y] != unclamped_paste
+                 canvas.paste(scaled, (paste_x, paste_y), scaled)
+                 aligned_bbox = canvas.getbbox()
+                 output_edge_touch = bbox_touches_edge(
+                     aligned_bbox,
+-                    cell_size,
+-                    cell_size,
++                    output_cell_width,
++                    output_cell_height,
+                     edge_touch_margin,
+                 )
+                 info["output_size"] = [new_width, new_height]
+@@ -1065,30 +1148,43 @@ def split_grid(
+         max_width = max((frame.size[0] for frame in valid_frames), default=0)
+         max_height = max((frame.size[1] for frame in valid_frames), default=0)
+         if max_width > 0 and max_height > 0:
+-            common_scale = min(cell_size / max_width, cell_size / max_height) * fit_scale
++            common_scale = min(
++                output_cell_width / max_width,
++                output_cell_height / max_height,
++            ) * fit_scale
++            if require_integer_scale:
++                validate_integer_scale(common_scale, "Shared frame resize")
+ 
+     frames: list[Image.Image] = []
+     for index, frame in enumerate(cropped_frames):
+         frame_width, frame_height = frame.size
+-        canvas = Image.new("RGBA", (cell_size, cell_size), (0, 0, 0, 0))
++        canvas = Image.new("RGBA", (output_cell_width, output_cell_height), (0, 0, 0, 0))
+         info = frame_info[index]
+         if not bool(info["is_empty"]):
+-            scale = common_scale or (min(cell_size / frame_width, cell_size / frame_height) * fit_scale)
+-            new_width = max(1, int(frame_width * scale))
+-            new_height = max(1, int(frame_height * scale))
+-            frame = frame.resize((new_width, new_height), Image.Resampling.LANCZOS)
+-            paste_x = (cell_size - new_width) // 2
++            scale = common_scale or (
++                min(
++                    output_cell_width / frame_width,
++                    output_cell_height / frame_height,
++                )
++                * fit_scale
++            )
++            if require_integer_scale:
++                validate_integer_scale(scale, f"Frame {info['grid']} fit resize")
++            new_width = max(1, int(round(frame_width * scale)))
++            new_height = max(1, int(round(frame_height * scale)))
++            frame = frame.resize((new_width, new_height), resampling_filter(resampling))
++            paste_x = (output_cell_width - new_width) // 2
+             if align in {"bottom", "feet"}:
+-                pad = max(0, int(cell_size * (1 - fit_scale) * 0.5))
+-                paste_y = cell_size - new_height - pad
++                pad = max(0, int(output_cell_height * (1 - fit_scale) * 0.5))
++                paste_y = output_cell_height - new_height - pad
+             else:
+-                paste_y = (cell_size - new_height) // 2
++                paste_y = (output_cell_height - new_height) // 2
+             canvas.paste(frame, (paste_x, paste_y))
+             output_bbox = canvas.getbbox()
+             output_edge_touch = bbox_touches_edge(
+                 output_bbox,
+-                cell_size,
+-                cell_size,
++                output_cell_width,
++                output_cell_height,
+                 edge_touch_margin,
+             )
+             info["output_size"] = [new_width, new_height]
+@@ -1112,14 +1208,61 @@ def split_grid(
+     return frames, frame_info
+ 
+ 
+-def compose_sheet(frames: list[Image.Image], rows: int, cols: int, cell_size: int) -> Image.Image:
+-    canvas = Image.new("RGBA", (cols * cell_size, rows * cell_size), (0, 0, 0, 0))
++def compose_sheet(
++    frames: list[Image.Image],
++    rows: int,
++    cols: int,
++    cell_width: int,
++    cell_height: int,
++) -> Image.Image:
++    canvas = Image.new(
++        "RGBA",
++        (cols * cell_width, rows * cell_height),
++        (0, 0, 0, 0),
++    )
+     for index, frame in enumerate(frames):
+         row, col = divmod(index, cols)
+-        canvas.paste(frame, (col * cell_size, row * cell_size), frame)
++        canvas.paste(frame, (col * cell_width, row * cell_height), frame)
+     return canvas
+ 
+ 
++def resolve_cell_dimensions(
++    args: argparse.Namespace,
++    rows: int,
++    cols: int,
++) -> tuple[int, int]:
++    """Resolve rectangular output cell dimensions while preserving --cell-size compatibility."""
++    if args.cell_size is not None and (args.cell_width is not None or args.cell_height is not None):
++        raise ValueError("Use either --cell-size or --cell-width/--cell-height, not both.")
++    if (args.cell_width is None) != (args.cell_height is None):
++        raise ValueError("Rectangular cells require both --cell-width and --cell-height.")
++
++    if args.cell_width is not None and args.cell_height is not None:
++        cell_width = int(args.cell_width)
++        cell_height = int(args.cell_height)
++    elif args.cell_size is not None:
++        cell_width = cell_height = int(args.cell_size)
++    else:
++        default_size = 96 if (rows, cols) == (4, 4) else 128
++        cell_width = cell_height = default_size
++
++    if cell_width <= 0 or cell_height <= 0:
++        raise ValueError("Output cell dimensions must be greater than zero.")
++    return cell_width, cell_height
++
++
++def resolve_processing_contract(args: argparse.Namespace) -> tuple[str, bool]:
++    """Resolve resampling and pixel-art safety rules for one processing run."""
++    pixel_art = bool(args.pixel_art or args.art_style in PIXEL_ART_STYLES)
++    resampling = args.resampling or ("nearest" if pixel_art else "lanczos")
++    if pixel_art and resampling != "nearest":
++        raise ValueError(
++            "Pixel-art processing requires nearest-neighbor resampling. "
++            "Remove the explicit --resampling value or use --resampling nearest."
++        )
++    return resampling, pixel_art
++
++
+ def save_transparent_gif(frames: list[Image.Image], out_path: Path, duration: int) -> None:
+     if not frames:
+         raise ValueError("No frames to encode.")
+@@ -1201,6 +1344,9 @@ def cmd_list_options() -> None:
+                     "component_mode": ["all", "largest"],
+                     "align": ["center", "bottom", "feet"],
+                     "scale_strategy": ["fit", "preserve"],
++                    "resampling": sorted(RESAMPLING_FILTERS),
++                    "rectangular_cells": True,
++                    "integer_scale_validation": True,
+                     "strict_qc": {
+                         "structural_checks": ["empty", "edge_touch", "paste_clamped"],
+                         "optional_metrics": [
+@@ -1253,6 +1399,8 @@ def cmd_process(args: argparse.Namespace) -> None:
+     if scale_profile:
+         apply_scale_profile(args, scale_profile)
+ 
++    resampling, pixel_art_processing = resolve_processing_contract(args)
++
+     raw = Image.open(args.input).convert("RGBA")
+     metadata = {
+         "target": args.target,
+@@ -1274,7 +1422,7 @@ def cmd_process(args: argparse.Namespace) -> None:
+             rows, cols = args.rows, args.cols
+         else:
+             rows, cols = GRID_SHAPES[args.mode]
+-        cell_size = args.cell_size or (96 if (rows, cols) == (4, 4) else 128)
++        cell_width, cell_height = resolve_cell_dimensions(args, rows, cols)
+         raw.save(out_dir / "raw-sheet.png")
+         cleaned = remove_bg_magenta(raw.copy(), args.threshold, args.edge_threshold)
+         cleaned.save(out_dir / "raw-sheet-clean.png")
+@@ -1283,7 +1431,8 @@ def cmd_process(args: argparse.Namespace) -> None:
+             raw,
+             rows,
+             cols,
+-            cell_size,
++            cell_width,
++            cell_height,
+             args.threshold,
+             args.edge_threshold,
+             fit_scale=args.fit_scale,
+@@ -1296,6 +1445,8 @@ def cmd_process(args: argparse.Namespace) -> None:
+             min_component_area=args.min_component_area,
+             edge_touch_margin=args.edge_touch_margin,
+             scale_strategy=args.scale_strategy,
++            resampling=resampling,
++            require_integer_scale=args.require_integer_scale,
+         )
+         if has_custom_grid:
+             prefix = args.label_prefix or args.mode
+@@ -1305,13 +1456,17 @@ def cmd_process(args: argparse.Namespace) -> None:
+         for label, frame in zip(labels, frames):
+             frame.save(out_dir / f"{label}.png")
+ 
+-        compose_sheet(frames, rows, cols, cell_size).save(out_dir / "sheet-transparent.png")
++        compose_sheet(frames, rows, cols, cell_width, cell_height).save(
++            out_dir / "sheet-transparent.png"
++        )
+ 
+         if args.mode == "player_sheet" and not has_custom_grid and (rows, cols) == (4, 4):
+             directions = ["down", "left", "right", "up"]
+             for row_index, direction in enumerate(directions):
+                 row_frames = frames[row_index * cols : (row_index + 1) * cols]
+-                compose_sheet(row_frames, 1, cols, cell_size).save(out_dir / f"{direction}-strip.png")
++                compose_sheet(row_frames, 1, cols, cell_width, cell_height).save(
++                    out_dir / f"{direction}-strip.png"
++                )
+                 save_transparent_gif(row_frames, out_dir / f"{direction}.gif", args.duration)
+             metadata["directions"] = directions
+         else:
+@@ -1319,7 +1474,10 @@ def cmd_process(args: argparse.Namespace) -> None:
+ 
+         metadata["rows"] = rows
+         metadata["cols"] = cols
+-        metadata["cell_size"] = cell_size
++        metadata["cell_width"] = cell_width
++        metadata["cell_height"] = cell_height
++        if cell_width == cell_height:
++            metadata["cell_size"] = cell_width
+         metadata["fit_scale"] = args.fit_scale
+         metadata["trim_border"] = args.trim_border
+         metadata["edge_clean_depth"] = args.edge_clean_depth
+@@ -1330,6 +1488,9 @@ def cmd_process(args: argparse.Namespace) -> None:
+         metadata["component_padding"] = args.component_padding
+         metadata["min_component_area"] = args.min_component_area
+         metadata["edge_touch_margin"] = args.edge_touch_margin
++        metadata["resampling"] = resampling
++        metadata["require_integer_scale"] = args.require_integer_scale
++        metadata["pixel_art_processing"] = pixel_art_processing
+         metadata["frame_labels"] = labels
+         metadata["frames"] = frame_qc
+         metadata["edge_touch_frames"] = [
+@@ -1386,9 +1547,19 @@ def cmd_process(args: argparse.Namespace) -> None:
+         if args.godot_world_height is not None:
+             raise ValueError("Godot Sprite3D metadata currently requires processed grid frames.")
+         raw.save(out_dir / "raw.png")
+-        centered = center_single_sprite(raw, args.single_size, args.threshold, args.edge_threshold)
++        centered = center_single_sprite(
++            raw,
++            args.single_size,
++            args.threshold,
++            args.edge_threshold,
++            resampling=resampling,
++            require_integer_scale=args.require_integer_scale,
++        )
+         centered.save(out_dir / "clean.png")
+         metadata["single_size"] = args.single_size
++        metadata["resampling"] = resampling
++        metadata["require_integer_scale"] = args.require_integer_scale
++        metadata["pixel_art_processing"] = pixel_art_processing
+ 
+     if args.prompt_file and args.prompt_file.exists():
+         prompt_text = args.prompt_file.read_text(encoding="utf-8")
+@@ -1533,10 +1704,54 @@ def build_parser() -> argparse.ArgumentParser:
+     process_parser.add_argument("--prompt-file", type=Path)
+     process_parser.add_argument("--threshold", type=int, default=100)
+     process_parser.add_argument("--edge-threshold", type=int, default=150)
+-    process_parser.add_argument("--cell-size", type=int)
++    process_parser.add_argument(
++        "--cell-size",
++        type=int,
++        help="Legacy square output cell size. Mutually exclusive with --cell-width/--cell-height.",
++    )
++    process_parser.add_argument("--cell-width", type=int)
++    process_parser.add_argument("--cell-height", type=int)
+     process_parser.add_argument("--rows", type=int)
+     process_parser.add_argument("--cols", type=int)
+     process_parser.add_argument("--label-prefix")
++    process_parser.add_argument(
++        "--art-style",
++        choices=[
++            "pixel_art",
++            "clean_hd",
++            "pixel_inspired",
++            "retro_pixel",
++            "map_style",
++            "project-native",
++        ],
++        help=(
++            "Optional art-style contract. pixel_art and retro_pixel automatically require "
++            "nearest-neighbor processing."
++        ),
++    )
++    process_parser.add_argument(
++        "--pixel-art",
++        action="store_true",
++        help=(
++            "Force pixel-safe processing for project-native pixel art (for example SOLITUDE). "
++            "Requires nearest-neighbor resampling."
++        ),
++    )
++    process_parser.add_argument(
++        "--resampling",
++        choices=sorted(RESAMPLING_FILTERS),
++        help=(
++            "Resize filter. Defaults to nearest for pixel-art processing and lanczos otherwise."
++        ),
++    )
++    process_parser.add_argument(
++        "--require-integer-scale",
++        action="store_true",
++        help=(
++            "Fail when a resize would use a non-integer upscale or non-reciprocal-integer "
++            "downscale. Recommended for final production pixel art."
++        ),
++    )
+     process_parser.add_argument("--fit-scale", type=float, default=0.85)
+     process_parser.add_argument("--trim-border", type=int, default=4)
+     process_parser.add_argument("--edge-clean-depth", type=int, default=3)
