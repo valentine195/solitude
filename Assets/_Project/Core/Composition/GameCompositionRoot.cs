@@ -7,6 +7,7 @@ using SOLITUDE.Core.Systems;
 using SOLITUDE.Features.Interactables;
 using SOLITUDE.Items;
 using SOLITUDE.SaveLoad;
+using SOLITUDE.World.Restoration;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 namespace SOLITUDE.Composition
@@ -33,11 +34,14 @@ namespace SOLITUDE.Composition
         private readonly Dictionary<Scene, SceneBindings> scopes = new();
         private IDisposable failedPause;
         private bool initialized;
+        private bool disposableSession;
+        public bool UsesDisposableSession => disposableSession;
         public RuntimeStartupState State { get; private set; }
         private void Awake()
         {
             if (active != null && active != this)
             { enabled = false; Destroy(gameObject); return; } // Only dedicated bootstrap objects carry this component.
+            var startupScene = gameObject.scene;
             active = this; DontDestroyOnLoad(gameObject);
             try
             {
@@ -49,6 +53,9 @@ namespace SOLITUDE.Composition
                 { if (table == null || loot.ContainsKey(table)) throw new InvalidOperationException("Null or duplicate configured loot table."); loot.Add(table, table.Compile(catalog)); }
                 pause = new PauseCoordinator(); policy = new InputPolicyCoordinator(pause);
                 clock.Initialize(pause); game.Initialize(pause); input.Initialize(policy);
+                var demo = DemoIn(startupScene);
+                disposableSession = demo != null;
+                if (demo != null) persistence.Configure(demo.CreateStore(catalog));
                 var data = persistence.Load(config.worldSeed, catalog, out var error);
                 if (data == null) throw new InvalidOperationException(error);
                 CreateSession(data);
@@ -89,6 +96,17 @@ namespace SOLITUDE.Composition
                 if (interactive != null && failedPause == null) { FinishStartup(); policy.SetTransition(false); } }
             catch (Exception error) { Fail(error); }
         }
+        private static RestorationDemoSession DemoIn(Scene scene)
+        {
+            RestorationDemoSession found = null;
+            foreach (var root in scene.GetRootGameObjects())
+                foreach (var marker in root.GetComponentsInChildren<RestorationDemoSession>(true))
+                {
+                    if (found != null) throw new InvalidOperationException("Duplicate disposable demo marker.");
+                    found = marker;
+                }
+            return found;
+        }
         private void BindScene(Scene scene)
         {
             if (!scene.isLoaded || scopes.ContainsKey(scene) || session == null) return;
@@ -101,6 +119,11 @@ namespace SOLITUDE.Composition
             }
             if (entry == null) return;
             if (entry.HasPlayer && interactive != null) throw new InvalidOperationException("Only one local player scene may be composed.");
+            var demo = DemoIn(scene);
+            if (entry.HasPlayer && (demo != null) != disposableSession)
+                throw new InvalidOperationException("Demo and production sessions cannot be mixed. Stop Play mode and open the scene directly.");
+            if (entry.HasPlayer && disposableSession)
+                session.Reset(config.worldSeed, releaseOwners: true);
             entry.Initialize(session, pickups, presentations, loot, gestures, policy, pause, this, input, game, () => ReleaseScene(scene));
             scopes.Add(scene, entry);
             if (entry.HasPlayer) interactive = entry;
