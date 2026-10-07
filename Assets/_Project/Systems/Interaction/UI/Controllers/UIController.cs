@@ -54,7 +54,9 @@ namespace SOLITUDE.Core.UI
                 return;
             }
             string current = focused.GetPrompt();
-            if (current == shownPrompt || interactionPrompt == null) return;
+            if (interactionPrompt == null) return;
+            interactionPrompt.SetTarget((focused as MonoBehaviour)?.transform);
+            if (current == shownPrompt) return;
             shownPrompt = current;
             interactionPrompt.Show(current);
         }
