@@ -30,7 +30,7 @@ namespace SOLITUDE.Art.Editor
             if(original.isDirty)throw new InvalidOperationException("Save current scene edits before opening review scene.");
             if(AssetDatabase.LoadAssetAtPath<SceneAsset>(ScenePath)!=null)throw new InvalidOperationException("Review scene exists; edit it without overwriting.");
             Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));AssetDatabase.Refresh();
-            if(!AssetDatabase.CopyAsset("Assets/Scenes/Wakeup.unity",ScenePath))throw new InvalidOperationException("Could not copy composed Wakeup.");
+            if(!AssetDatabase.CopyAsset("Assets/_Project/Scenes/Wakeup.unity",ScenePath))throw new InvalidOperationException("Could not copy composed Wakeup.");
             var scene=EditorSceneManager.OpenScene(ScenePath,OpenSceneMode.Single);
             foreach(string name in new[]{"Grid","Cryopod","PF_Door","Camera"}){var go=GameObject.Find(name);if(go!=null)UnityEngine.Object.DestroyImmediate(go);}
             var oxy=GameObject.Find("PF_O2Canister");if(oxy!=null)oxy.SetActive(false);
@@ -84,7 +84,7 @@ namespace SOLITUDE.Art.Editor
             var pixel=cameraGO.AddComponent<PixelPerfectCamera>();pixel.assetsPPU=32;pixel.refResolutionX=640;pixel.refResolutionY=360;pixel.gridSnapping=PixelPerfectCamera.GridSnapping.PixelSnapping;pixel.cropFrame=PixelPerfectCamera.CropFrame.Windowbox;
             cameraGO.AddComponent<SolitudeCameraFollow2D>().Configure(player.transform,new Vector2(9,20),new Vector2(5.625f,10.625f));
             foreach(var light in All<Light2D>())if(light.lightType==Light2D.LightType.Global){light.intensity=1;light.color=Color.white;}
-            var review=new GameObject("Opening Art Review Session").AddComponent<OpeningReviewSession>();review.persistence=All<SaveGameService>().Single();review.database=AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/Resources/Database.asset");
+            var review=new GameObject("Opening Art Review Session").AddComponent<OpeningReviewSession>();review.persistence=All<SaveGameService>().Single();review.database=AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/_Project/Features/Items/Resources/Database.asset");
             var feedback=All<SOLITUDE.Core.UI.InteractionFeedbackView>().Single();SetFloat(feedback,"duration",3f);
             RefineCurrent();
             All<SceneBindings>().Single().Validate();EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();

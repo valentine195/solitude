@@ -62,7 +62,7 @@ namespace SOLITUDE.Editor
             if (manifest==null) Error("BUILD_MANIFEST",WakeupBuildManifest.AssetPath,"manifest","Missing manifest.");
             else
             {
-                if (manifest.scenes==null || manifest.scenes.Length!=1 || manifest.scenes[0]!="Assets/Scenes/Wakeup.unity") Error("BUILD_SCENES",WakeupBuildManifest.AssetPath,"scenes","Wakeup must be the required entry.");
+                if (manifest.scenes==null || manifest.scenes.Length!=1 || manifest.scenes[0]!="Assets/_Project/Scenes/Wakeup.unity") Error("BUILD_SCENES",WakeupBuildManifest.AssetPath,"scenes","Wakeup must be the required entry.");
                 var selected=EditorBuildSettings.scenes.Where(s=>s.enabled).Select(s=>s.path).ToArray();
                 if (!selected.SequenceEqual(manifest.scenes??Array.Empty<string>())) Error("BUILD_SETTINGS",WakeupBuildManifest.AssetPath,"scenes","Enabled build scenes must match the manifest.");
                 if (manifest.runtimeConfig?.database==null) Error("CATALOG_CONFIG",WakeupBuildManifest.AssetPath,"runtimeConfig","Missing configured catalog.");
@@ -103,7 +103,7 @@ namespace SOLITUDE.Editor
                 if(assembly.name=="SOLITUDE.Runtime"&&assembly.assemblyReferences.Any(a=>a.name.StartsWith("SOLITUDE.")&&(a.name.Contains("Editor")||a.name.Contains("Tests"))))Error("ASSEMBLY_DIRECTION",assembly.name,"references","Runtime references editor/test code.");
             }
             foreach(var assembly in CompilationPipeline.GetAssemblies(AssembliesType.Editor).Where(a=>a.name=="Assembly-CSharp"||a.name=="Assembly-CSharp-Editor"))
-                foreach(var source in assembly.sourceFiles.Where(p=>p.Contains("Assets/_Project/")||p.Contains("Assets/Scenes/Wakeup/")))Error("ASSEMBLY_DEFAULT",source,"assembly","Project source remains in a default assembly.");
+                foreach(var source in assembly.sourceFiles.Where(p=>p.Contains("Assets/_Project/")))Error("ASSEMBLY_DEFAULT",source,"assembly","Project source remains in a default assembly.");
             findings.Sort((a,b)=>string.CompareOrdinal(a.path+"|"+a.code+"|"+a.field+"|"+a.message,b.path+"|"+b.code+"|"+b.field+"|"+b.message));report.success=findings.All(f=>f.severity!="Error");return report;
         }
         public static List<ValidationFinding> ValidateScene(Scene scene,bool directEntry)

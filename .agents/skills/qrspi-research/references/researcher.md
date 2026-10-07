@@ -28,20 +28,27 @@ Exclude **all `.qrspi/` trees** from recursive searches and file enumeration, in
 
 ## Research approach
 
-For each question in queries.md, systematically search the codebase:
+After reading the questions, read `<project-root>/CODEBASE_MAP.md` if present. It is an optional factual source-navigation guide, not feature input or evidence for behavior. Use only relevant entries; verify locations and findings in current source. If absent or stale, locate the code directly. Do not read QRSPI setup guides or workflow artifacts for navigation, and never pass the map or its contents to Query.
 
-1. **Existing patterns** — how are similar features implemented now?
-2. **Architecture** — what is the current system structure?
-3. **Dependencies** — what libraries, frameworks, or services are in use?
-4. **Data models** — what data structures and schemas exist?
-5. **API contracts** — what interfaces must be maintained?
-6. **Configuration** — what settings or environment variables are relevant?
-7. **Testing patterns** — how is similar functionality tested?
+For each question, select only the inspection categories needed to answer it:
 
-Use available source-reading and search tools:
-- `rg` or `grep` to find relevant patterns
-- `fd` or `find` to locate related files
-- file-reading tools to examine implementation details
+- **Existing patterns** for questions about comparable current behavior.
+- **Architecture** for ownership, lifecycle, and system boundaries.
+- **Dependencies** for libraries or services that affect the answer.
+- **Data models** for state, schemas, and serialization.
+- **API contracts** for interfaces, callers, and observable results.
+- **Configuration** for settings or serialized wiring that determine behavior.
+- **Testing patterns** for questions about existing verification and coverage.
+
+These are alternatives to choose from, not seven investigations per question. Follow a dependency or adjacent subsystem only when it could change the answer. Reuse source evidence already inspected in this pass across overlapping questions.
+
+Search filenames and symbols in likely owning directories first, then read relevant methods and surrounding context. Broaden searches when ownership is unclear, evidence is missing, or callers/wiring need confirmation. Read whole files only when local context is insufficient. For Unity wiring questions, inspect relevant serialized fields and GUID references before opening entire scenes or prefabs. Skip generated output and vendor internals unless the question depends on them; preserve the `.qrspi/` exclusions on every search.
+
+## Evidence-based stopping rule
+
+A question is answered when current authoritative source establishes the requested facts and you have checked any callers, configuration, or lifecycle wiring that could materially change them. Include relevant existing tests when the question asks about verification; reading a test is not evidence that it passed. Stop inspecting for that question once these conditions are met. Do not keep surveying neighboring systems for completeness.
+
+If evidence is missing or contradictory, expand only to resolve that specific gap. If authorized source cannot resolve it, state the unresolved fact and the search boundary; do not invent an answer. Use "Not found within <searched scope>" with patterns and paths for bounded absence findings, and do not claim repository-wide absence from a narrow search. Put necessary follow-up questions in `## New Questions` as questions only, without embedded findings or design suggestions. Every current question still receives an answer or an explicit unresolved finding on every pass.
 
 ## Output format
 

@@ -17,6 +17,21 @@ Always resolve the repository root before running the helper; the saved Codex pr
 
 Use `$qrspi-implement` for one approved phase, then `$qrspi-review` at its boundary. Start with interactive execution. Use `$qrspi-autoloop` only when the human chooses unattended execution for an approved spec, plan and resolved phase scope. It stops before final review. An old `qrspi/` workspace requires an explicit collision-safe migration; do not merge it with `.qrspi/` automatically.
 
+## Focused Query and Research
+
+Local Query guidance generates bounded, non-overlapping questions and includes
+only relevant categories. Research selects inspection categories per question,
+starts in likely owning source directories, and stops when current evidence
+establishes the answer and relevant callers/wiring. Missing or contradictory
+evidence is reported explicitly rather than triggering an unrelated survey.
+
+[CODEBASE_MAP.md](../../CODEBASE_MAP.md) is the one-page, feature-independent
+source-navigation guide. Research reads it after the questions and confirms
+findings in source; Query never receives it. Maintain its entries when paths or
+ownership change. Fresh-context isolation, complete answers on reruns, source
+citations, and human gates still apply. These are local skill customizations;
+`installation.json` continues to identify the installed upstream base revision.
+
 ## Helper
 
 The locally built `qrspi-x` package is installed in this machine's existing Node 22.18.0 prefix. Its executable uses that Node interpreter directly, so the older default Node does not break it. It is on this session's PATH and contains a bundled copy, independent of the original chat's checkout. Use `qrspi-x --help` to inspect commands.

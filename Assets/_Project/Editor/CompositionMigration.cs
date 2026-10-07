@@ -29,7 +29,7 @@ namespace SOLITUDE.Editor
         public static void ConfigureWakeup()
         {
             var scene = EditorSceneManager.GetActiveScene();
-            if (scene.path != "Assets/Scenes/Wakeup.unity" || EditorApplication.isPlaying) throw new InvalidOperationException("Open Wakeup in Edit Mode before migration.");
+            if (scene.path != "Assets/_Project/Scenes/Wakeup.unity" || EditorApplication.isPlaying) throw new InvalidOperationException("Open Wakeup in Edit Mode before migration.");
             var persistence = Components<SaveGameService>().Single();
             var game = Components<GameManager>().Single(); var clock = Components<TimeSystem>().Single();
             if (game.gameObject != persistence.gameObject) throw new InvalidOperationException("The dedicated game bootstrap must own GameManager and persistence.");
@@ -38,7 +38,7 @@ namespace SOLITUDE.Editor
             var configPath = "Assets/_Project/Core/Composition/GameRuntimeConfig.asset";
             var config = AssetDatabase.LoadAssetAtPath<GameRuntimeConfig>(configPath);
             if (config == null) { config = ScriptableObject.CreateInstance<GameRuntimeConfig>(); AssetDatabase.CreateAsset(config, configPath); }
-            config.database = AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/Resources/Database.asset");
+            config.database = AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/_Project/Features/Items/Resources/Database.asset");
             config.lootTables = AssetDatabase.FindAssets("t:LootTable").Select(g => AssetDatabase.LoadAssetAtPath<LootTable>(AssetDatabase.GUIDToAssetPath(g))).ToArray();
             EditorUtility.SetDirty(config);
             Set(root, "config", config); Set(root, "persistence", persistence); Set(root, "input", input); Set(root, "clock", clock); Set(root, "game", game);

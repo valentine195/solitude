@@ -24,9 +24,9 @@ namespace SOLITUDE.Editor
                 var findings=WakeupValidation.ValidateScene(scene,false);
                 if(findings.Count!=0)throw new System.InvalidOperationException("Invalid context fixture: "+findings[0].code+" "+findings[0].message);
             }
-            EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/Scenes/Wakeup.unity",true),new EditorBuildSettingsScene(Context,true),new EditorBuildSettingsScene(Unrelated,true)};
+            EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/_Project/Scenes/Wakeup.unity",true),new EditorBuildSettingsScene(Context,true),new EditorBuildSettingsScene(Unrelated,true)};
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);AssetDatabase.SaveAssets();
         }
-        public static void RestoreBuildScope()=>EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/Scenes/Wakeup.unity",true)};
+        public static void RestoreBuildScope()=>EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/_Project/Scenes/Wakeup.unity",true)};
     }
 }

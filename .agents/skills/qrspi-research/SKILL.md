@@ -34,6 +34,8 @@ Output: ./.qrspi/<feature>/research.md
 Additional source locations: <paths, or omit>
 ```
 
+The role may read the optional `<project-root>/CODEBASE_MAP.md` as current project source for navigation after reading the questions. Keep the map factual and feature-independent, outside `.qrspi/`; do not add its contents to the delegation envelope or provide it to Query. The role defines conditional inspection and evidence-based stopping; a map does not replace current source citations.
+
 Do not pass the feature brief, `request.md`, `background.md`, Query's reasoning or Questions for the User, design suggestions, implementation narrative, or parent summaries. The feature name is only a workspace locator. Do not pass any other QRSPI artifact as an additional source location.
 
 On every pass, answer **all current questions from current source evidence**. The old research artifact has been backed up for the human and is not a Research input; rereading the questions avoids stale answers and keeps the input contract limited to questions. Broad source searches must exclude every `.qrspi/` tree, even if it is tracked or appears inside an additional source location. Open only the explicit questions path within QRSPI scaffolding. Research writes a complete fresh `research.md` with cited facts and a New Questions section.

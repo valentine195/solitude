@@ -1,5 +1,12 @@
 # SOLITUDE agent guidance
 
+## Project structure
+
+Follow the ownership, placement, naming, and safe-move rules in [README.md](README.md).
+Keep first-party imported assets under `Assets/_Project`; keep review outputs and
+disposable exports outside `Assets`. Preserve existing asset GUIDs and assembly
+boundaries when moving content.
+
 ## QRSPI project root
 
 Run QRSPI with the Git repository root as its project root, even when the chat starts in `Assets/_Project`. Resolve the root with `git rev-parse --show-toplevel` in the caller. Pass this root explicitly to roles and use `--project <repository-root>` on helper commands. Keep workflow artifacts in `<repository-root>/.qrspi/`, outside `Assets/`. Skills are installed in `<repository-root>/.agents/skills/`.

@@ -15,7 +15,7 @@ namespace SOLITUDE.Editor
         {
             try
             {
-                var database = AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/Resources/Database.asset");
+                var database = AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/_Project/Features/Items/Resources/Database.asset");
                 if (database == null) throw new System.InvalidOperationException("Resources/Database.asset is missing.");
                 var catalog = database.BuildRuntimeCatalog();
                 database.BuildPresentationCatalog();

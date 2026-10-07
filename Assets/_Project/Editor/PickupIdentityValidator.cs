@@ -60,7 +60,7 @@ namespace SOLITUDE.Editor
                 errors.Add($"Invalid pickup definition at {location}.");
                 return;
             }
-            var database = AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/Resources/Database.asset");
+            var database = AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/_Project/Features/Items/Resources/Database.asset");
             if (database == null || database.Resolve(definition.Item.ItemId) != definition.Item)
                 errors.Add($"Pickup item at {location} is not registered in Resources/Database.asset.");
         }

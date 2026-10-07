@@ -21,7 +21,7 @@ Sort every question you have into one of two buckets:
 - **Questions for Research** — anything answerable by reading the code: existing patterns, current architecture, dependencies, data models, API contracts, configuration, test conventions. These go in `queries.md`.
 - **Questions for the User** — anything that's actually about intent, preference, or scope that only the requester can resolve, no matter how much of the codebase gets read. Don't guess at these and don't disguise them as research questions — the code can't answer "did you mean X or Y." These do **not** go in `queries.md` — see Reporting below.
 
-Within Questions for Research, cover:
+Within Questions for Research, use only the categories relevant to the request; these are coverage prompts, not a requirement to populate every category:
 
 1. **Requirements Clarity** — what does the existing behavior in this area actually do today, so the requested change can be stated precisely against it?
 2. **Scope Boundaries** — what existing code, callers, and features touch this area, and where do those boundaries currently sit?
@@ -33,9 +33,17 @@ Within Questions for Research, cover:
 
 For categories 1, 2, and 6, the intent half — what the requester *wants* built, what they consider in or out of scope, what they'd accept as done — belongs in Questions for the User. Only the code-answerable half (what exists today) goes in `queries.md`.
 
+## Bounded questions
+
+- Ask the smallest set of questions needed to establish the current behavior, affected boundaries, constraints, and existing verification relevant to the request. Merge overlapping questions across categories; do not repeat a dependency or integration question under several headings.
+- Name the behavior or scenario being investigated and the facts needed to answer it. Prefer "Where is inventory capacity enforced, and what happens when it is exceeded?" over "How does the inventory system work?"
+- Keep each question to one coherent investigation. Split independently answerable topics; keep tightly related trigger, outcome, and boundary checks together.
+- Avoid general architecture surveys, exhaustive inventories of similar features, and hypothetical edge cases unrelated to the request. Include a category only when its answer could affect the requested behavior or its verification. Do not impose a fixed question count that would omit necessary coverage.
+- Bound questions using only the request and allowed question inputs. Do not invent file paths, symbols, or implementation assumptions, or consult a codebase map. Apply these rules on initial, refinement, and regeneration passes.
+
 ## Output format
 
-Write `./.qrspi/<feature>/queries.md` with Questions for Research only, organized under the categories above:
+Write `./.qrspi/<feature>/queries.md` with Questions for Research only, organized under the applicable categories above. Omit unused headings and placeholder questions:
 
 ```
 ## Requirements Clarity

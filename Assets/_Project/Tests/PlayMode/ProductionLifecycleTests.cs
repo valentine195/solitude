@@ -26,9 +26,9 @@ namespace SOLITUDE.Tests
             if(Root!=null){UnityEngine.Object.Destroy(Root.gameObject);yield return null;}
             RuntimeStartupState? stateBeforeBinding=null;
             void Observe(Scene scene,LoadSceneMode mode)
-            {if(scene.path=="Assets/Scenes/Wakeup.unity")stateBeforeBinding=Root.State;}
+            {if(scene.path=="Assets/_Project/Scenes/Wakeup.unity")stateBeforeBinding=Root.State;}
             SceneManager.sceneLoaded+=Observe;
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/Wakeup.unity",LoadSceneMode.Single);
+            yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Wakeup.unity",LoadSceneMode.Single);
             SceneManager.sceneLoaded-=Observe;
             Assert.AreEqual(RuntimeStartupState.Unready,stateBeforeBinding,"Input must wait for the initial scene binding callback.");
             yield return null;Assert.AreEqual(RuntimeStartupState.Ready,Root.State);
@@ -61,7 +61,7 @@ namespace SOLITUDE.Tests
         {
             var pickup=UnityEngine.Object.FindObjectsByType<WorldPickup>(FindObjectsInactive.Include,FindObjectsSortMode.None).First(p=>p.gameObject.activeSelf);string id=pickup.PickupId;
             Assert.IsTrue(pickup.Interact(null).IsSuccess);Field<SaveGameService>(Root,"persistence").Flush();
-            var transition=Root.TransitionTo("Assets/Scenes/Wakeup.unity");Assert.IsFalse(Field<InputPolicyCoordinator>(Root,"policy").Ready);
+            var transition=Root.TransitionTo("Assets/_Project/Scenes/Wakeup.unity");Assert.IsFalse(Field<InputPolicyCoordinator>(Root,"policy").Ready);
             yield return transition;yield return null;
             var restored=UnityEngine.Object.FindObjectsByType<WorldPickup>(FindObjectsInactive.Include,FindObjectsSortMode.None).Single(p=>p.PickupId==id);
             Assert.IsFalse(restored.gameObject.activeSelf);Assert.IsTrue(Field<ContainerSaveSession>(Root,"session").IsPickupCollected(id));

@@ -18,7 +18,7 @@ namespace SOLITUDE.Editor
         public static void ConfigureWakeup()
         {
             var scene = EditorSceneManager.GetActiveScene();
-            if (scene.path != "Assets/Scenes/Wakeup.unity" || EditorApplication.isPlaying) throw new System.InvalidOperationException("Open Wakeup in Edit Mode.");
+            if (scene.path != "Assets/_Project/Scenes/Wakeup.unity" || EditorApplication.isPlaying) throw new System.InvalidOperationException("Open Wakeup in Edit Mode.");
             foreach (var id in scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<SOLITUDE.SaveLoad.SaveableId>(true)))
             {
                 id.AssignMissingSceneIdentity();

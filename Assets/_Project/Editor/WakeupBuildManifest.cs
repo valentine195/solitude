@@ -5,7 +5,7 @@ namespace SOLITUDE.Editor
     public sealed class WakeupBuildManifest : ScriptableObject
     {
         public const string AssetPath = "Assets/_Project/Editor/WakeupBuildManifest.asset";
-        public string[] scenes = { "Assets/Scenes/Wakeup.unity" };
+        public string[] scenes = { "Assets/_Project/Scenes/Wakeup.unity" };
         public GameRuntimeConfig runtimeConfig;
         public string target = "StandaloneOSX";
         public string architecture = "ARM64";

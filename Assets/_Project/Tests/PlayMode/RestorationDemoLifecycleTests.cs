@@ -76,7 +76,7 @@ namespace SOLITUDE.Tests
         }
         [UnityTest] public IEnumerator ExistingProductionSessionRejectsDemoWithoutReset()
         {
-            yield return SceneManager.LoadSceneAsync("Assets/Scenes/Wakeup.unity", LoadSceneMode.Single); yield return null;
+            yield return SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Wakeup.unity", LoadSceneMode.Single); yield return null;
             Assert.AreEqual(RuntimeStartupState.Ready, Root.State); Assert.IsFalse(Root.UsesDisposableSession);
             var session = Field<ContainerSaveSession>(Root, "session");
             var pickup = All<WorldPickup>().First(p => p.gameObject.activeSelf); string id = pickup.PickupId;

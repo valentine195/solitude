@@ -20,7 +20,7 @@ namespace SOLITUDE.Items
                     instance = Resources.Load<ItemDatabase>("Database");
 
                 if (instance == null)
-                    Debug.LogError("[ItemDatabase] Could not load Resources/Database.asset. Create an Item Database asset at Assets/Resources/Database.asset and populate it.");
+                    Debug.LogError("[ItemDatabase] Could not load Resources/Database.asset. Create an Item Database asset at Assets/_Project/Features/Items/Resources/Database.asset and populate it.");
                 return instance;
             }
         }
