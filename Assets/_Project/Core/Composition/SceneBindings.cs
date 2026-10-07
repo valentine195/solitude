@@ -31,6 +31,7 @@ namespace SOLITUDE.Composition
         private readonly List<ContainerSaveSession.ContainerBinding> bindings = new();
         private readonly List<WorldPickup> registeredPickups = new();
         private readonly List<ScrubberScreenView> scrubberScreens = new();
+        private readonly List<ScrubberEquipment> scrubberEquipment = new();
         [SerializeField] private UnityEngine.InputSystem.UI.InputSystemUIInputModule uiInput;
         private IDisposable uiLease;
         private ItemPresentationCatalog presentations;
@@ -115,6 +116,9 @@ namespace SOLITUDE.Composition
                         controller.BindDefaultSource();
                 uiLease = input.ConnectUI(uiInput);
                 input.Point += Point;
+                foreach (var root in gameObject.scene.GetRootGameObjects())
+                    foreach (var equipment in root.GetComponentsInChildren<ScrubberEquipment>(true))
+                    { equipment.Initialize(session.Commands,inventory.Container,presentations); scrubberEquipment.Add(equipment); }
                 foreach (var root in gameObject.scene.GetRootGameObjects())
                     foreach (var screen in root.GetComponentsInChildren<ScrubberScreenView>(true))
                     { screen.Initialize(policy, input); scrubberScreens.Add(screen); }
@@ -219,6 +223,8 @@ namespace SOLITUDE.Composition
             if (session == null) return;
             foreach (var screen in scrubberScreens) if (screen != null) screen.Release();
             scrubberScreens.Clear();
+            foreach (var equipment in scrubberEquipment) if(equipment!=null) equipment.ReleaseBinding();
+            scrubberEquipment.Clear();
             modal?.Dispose(); modal = null;
             if (input != null && selection != null) { input.Point -= Point; input.Bind(null, null, null, null, null, null); }
             uiLease?.Dispose(); uiLease = null;

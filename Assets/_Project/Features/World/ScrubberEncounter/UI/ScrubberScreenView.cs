@@ -18,18 +18,29 @@ namespace SOLITUDE.World.ScrubberEncounter
         private ScrubberScreenCoordinator coordinator;
         private UnityInputHost input;
         private GameObject selected;
+        private Button install, restart;
+        private TMP_Text installReason, restartLabel;
+        public string Feedback => feedback == null ? "" : feedback.text;
         public bool IsOpen => panel != null && panel.activeSelf;
         public string Telemetry => telemetry == null ? "" : telemetry.text;
         public void Configure(GameObject root, ScrubberEquipment unit, TMP_Text readings, TMP_Text task, TMP_Text result, UnityEngine.UI.Button closeButton)
         { panel = root; equipment = unit; telemetry = readings; objective = task; feedback = result; close = closeButton; }
-        private void Awake() { if (close != null) close.onClick.AddListener(Close); }
+        private void Awake()
+        {
+            if (close != null) close.onClick.AddListener(Close);
+            if(panel==null) return;
+            install=panel.transform.Find("InstallFuse")?.GetComponent<Button>(); restart=panel.transform.Find("Restart")?.GetComponent<Button>();
+            installReason=panel.transform.Find("InstallReason")?.GetComponent<TMP_Text>(); restartLabel=panel.transform.Find("Restart/RestartLabel")?.GetComponent<TMP_Text>();
+            install?.onClick.AddListener(Install); restart?.onClick.AddListener(Restart);
+        }
         public void Initialize(InputPolicyCoordinator policy, UnityInputHost host)
         {
             Release(); input = host; coordinator = new ScrubberScreenCoordinator(policy, this);
+            if(equipment!=null) equipment.Changed+=Refresh;
         }
-        public void Release() { coordinator?.Dispose(); coordinator = null; input = null; }
+        public void Release() { if(equipment!=null) equipment.Changed-=Refresh; coordinator?.Dispose(); coordinator = null; input = null; }
         private void OnDisable() => Close();
-        private void OnDestroy() { Release(); if (close != null) close.onClick.RemoveListener(Close); }
+        private void OnDestroy() { Release(); if (close != null) close.onClick.RemoveListener(Close); install?.onClick.RemoveListener(Install); restart?.onClick.RemoveListener(Restart); }
         public bool Open() => coordinator?.Open() == OpenResult.Opened;
         public bool Back()
         {
@@ -40,14 +51,25 @@ namespace SOLITUDE.World.ScrubberEncounter
         {
             if (panel == null || equipment == null || telemetry == null || objective == null || feedback == null || close == null)
                 throw new System.InvalidOperationException("Scrubber screen authoring is incomplete.");
-            var state = equipment.State;
-            telemetry.text = "OPERATING STATE   " + state.OperatingStatus + "\nFAULT   " + state.Fault +
-                "\nFUSE   " + state.FuseStatus + "\nAIRFLOW   " + state.AirflowStatus + "\nROOM CO₂   " + state.RoomCondition;
-            objective.text = "CURRENT TASK\n" + state.Objective;
+            Refresh();
             feedback.text = "";
             panel.SetActive(true);
             if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(selected != null && selected.activeInHierarchy ? selected : close.gameObject);
         }
+        private void Refresh()
+        {
+            if(equipment==null || telemetry==null || objective==null) return;
+            var state = equipment.State;
+            telemetry.text = "OPERATING STATE   " + state.OperatingStatus + "\nFAULT   " + state.Fault +
+                "\nFUSE   " + state.FuseStatus + "\nAIRFLOW   " + state.AirflowStatus + "\nROOM CO₂   " + state.RoomCondition;
+            objective.text = "CURRENT TASK\n" + state.Objective;
+            if(install!=null) install.interactable=equipment.InstallReason.Length==0;
+            if(installReason!=null) installReason.text=equipment.InstallReason;
+            if(restart!=null) restart.interactable=!state.FuseInstalled;
+            if(restartLabel!=null) restartLabel.text=state.FuseInstalled ? "RESTART — UNAVAILABLE" : "RESTART";
+        }
+        private void Install() { if(!IsOpen || coordinator?.IsOpen!=true || !isActiveAndEnabled) return; feedback.text=equipment.Install(); Refresh(); }
+        private void Restart() { if(!IsOpen || coordinator?.IsOpen!=true || !isActiveAndEnabled) return; feedback.text=equipment.State.RestartFeedback; }
         public void Hide()
         {
             var current = EventSystem.current == null ? null : EventSystem.current.currentSelectedGameObject;

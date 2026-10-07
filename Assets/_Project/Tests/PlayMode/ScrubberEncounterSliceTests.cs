@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using SOLITUDE.Composition;
+using SOLITUDE.Containers;
 using SOLITUDE.Core.Interaction;
 using SOLITUDE.Player;
 using SOLITUDE.World.ScrubberEncounter;
@@ -71,11 +72,13 @@ namespace SOLITUDE.Tests
                 var inventoryView = (SOLITUDE.Containers.ContainerModalView)typeof(SceneBindings).GetField("inventoryModal", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(All<SceneBindings>().Single());
                 Assert.IsFalse(inventoryView.IsOpen);
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState()); InputSystem.Update();
+                selected=EventSystem.current.currentSelectedGameObject;
                 Press(keyboard, Key.Escape, Key.E); Assert.IsFalse(screen.IsOpen); yield return null; Assert.IsFalse(screen.IsOpen);
                 body.position = position + Vector2.down * 2; Physics2D.SyncTransforms(); yield return new WaitForFixedUpdate(); yield return null;
                 body.position = position; Physics2D.SyncTransforms(); yield return new WaitForFixedUpdate(); yield return null; yield return null;
                 Press(keyboard, Key.E); yield return null; Assert.IsTrue(screen.IsOpen);
                 Assert.AreSame(selected, EventSystem.current.currentSelectedGameObject); Assert.That(screen.Telemetry, Does.Contain("BLOWN"));
+                EventSystem.current.SetSelectedGameObject(screen.GetComponentsInChildren<UnityEngine.UI.Button>(true).Single(button=>button.name=="Close").gameObject);
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.Enter)); yield return null; yield return null;
                 Assert.IsFalse(screen.IsOpen, "The EventSystem submit action activates Close.");
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState()); InputSystem.Update(); yield return null;
@@ -122,6 +125,30 @@ namespace SOLITUDE.Tests
             {
                 InputSystem.RemoveDevice(keyboard);InputSystem.settings.backgroundBehavior=previousBackground;InputSystem.settings.editorInputBehaviorInPlayMode=previousEditor;
             }
+        }
+        [UnityTest] public IEnumerator RepairScreenRechecksInventoryAndKeepsRepairedScrubberOffline()
+        {
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single));yield return null;
+            var screen=All<ScrubberScreenView>().Single();var equipment=All<ScrubberEquipment>().Single();
+            var root=All<GameCompositionRoot>().Single();var session=(SOLITUDE.SaveLoad.ContainerSaveSession)typeof(GameCompositionRoot).GetField("session",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(root);
+            var inventory=All<PlayerInventory>().Single().Container;var buttons=screen.GetComponentsInChildren<UnityEngine.UI.Button>(true);
+            var install=buttons.Single(b=>b.name=="InstallFuse");var restart=buttons.Single(b=>b.name=="Restart");
+            Assert.IsTrue(screen.Open());Assert.IsFalse(install.interactable);Assert.IsTrue(restart.interactable);
+            restart.onClick.Invoke();Assert.AreEqual("Restart failed: blown fuse. Replace fuse first.",screen.Feedback);Assert.IsFalse(equipment.State.FuseInstalled);
+            session.Commands.Grant(inventory.Handle,ScrubberEquipment.FuseItemId,1);Assert.IsTrue(install.interactable);
+            var fuse=inventory.GetSlots().Single(slot=>!slot.IsEmpty && slot.Stack.ItemId==ScrubberEquipment.FuseItemId);session.Commands.Remove(fuse.Address,1);
+            install.onClick.Invoke();Assert.IsFalse(equipment.State.FuseInstalled);Assert.AreEqual("Requires 1 replacement fuse in inventory.",screen.Feedback);
+            session.Commands.Grant(inventory.Handle,ScrubberEquipment.FuseItemId,2);Assert.IsTrue(install.interactable);
+            bool observerSawRepair=false;inventory.SlotChanged+=_=>observerSawRepair=equipment.State.FuseInstalled;
+            install.onClick.Invoke();Assert.IsTrue(observerSawRepair);Assert.AreEqual("Fuse replaced. Restart scrubber.",screen.Feedback);
+            Assert.IsTrue(equipment.State.FuseInstalled);Assert.IsFalse(install.interactable);Assert.IsFalse(restart.interactable);
+            Assert.AreEqual(1,inventory.GetSlots().Where(slot=>!slot.IsEmpty && slot.Stack.ItemId==ScrubberEquipment.FuseItemId).Sum(slot=>slot.Stack.Quantity));
+            Assert.That(screen.Telemetry,Does.Contain("INTACT").And.Contain("OFFLINE").And.Contain("STOPPED").And.Contain("ELEVATED"));
+            install.onClick.Invoke();Assert.AreEqual("Fuse already installed.",screen.Feedback);screen.Close();
+            var hiddenFeedback=screen.Feedback;install.onClick.Invoke();restart.onClick.Invoke();Assert.AreEqual(hiddenFeedback,screen.Feedback);
+            Assert.IsTrue(screen.Open());Assert.That(screen.Telemetry,Does.Contain("INTACT"));Assert.IsFalse(install.interactable);Assert.IsFalse(restart.interactable);
+            Assert.AreEqual(1,inventory.GetSlots().Where(slot=>!slot.IsEmpty && slot.Stack.ItemId==ScrubberEquipment.FuseItemId).Sum(slot=>slot.Stack.Quantity));
+            Assert.AreEqual("SCRUBBER-SAVE-ISOLATION-SENTINEL",File.ReadAllText(path));
         }
         [UnityTest] public IEnumerator FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave()
         {
