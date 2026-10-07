@@ -6,15 +6,38 @@ namespace SOLITUDE.Restoration
     public sealed class ScrubberEncounterState
     {
         private readonly RestorableSystemState repair = new RestorableSystemState();
+        private double recoverySeconds;
         public bool FuseInstalled => repair.IsRestored;
-        public event Action Changed { add => repair.Changed += value; remove => repair.Changed -= value; }
-        public string OperatingStatus => "OFFLINE";
+        public bool Running { get; private set; }
+        public bool Operational => Running && recoverySeconds >= 5;
+        public double RecoverySeconds => recoverySeconds;
+        public event Action Changed;
+        public ScrubberEncounterState() { repair.Changed += Publish; }
+        public string OperatingStatus => Running ? "RUNNING" : "OFFLINE";
         public string FuseStatus => FuseInstalled ? "INTACT" : "BLOWN";
-        public string AirflowStatus => "STOPPED";
-        public string RoomCondition => "ELEVATED";
-        public string Objective => FuseInstalled ? "Restart the scrubber" : "Replace the scrubber fuse";
+        public string AirflowStatus => Running ? "ACTIVE" : "STOPPED";
+        public string RoomCondition => Operational ? "NORMAL" : Running ? "RECOVERING" : "ELEVATED";
+        public string Objective => Operational ? "Room atmosphere restored — complete" : Running ? "Wait for room air to recover" : FuseInstalled ? "Restart the scrubber" : "Replace the scrubber fuse";
         public string Fault => FuseInstalled ? "None" : "Blown fuse";
-        public string RestartFeedback => FuseInstalled ? "Restart unavailable until recovery is connected." : "Restart failed: blown fuse. Replace fuse first.";
+        public string RestartFeedback => Running ? "Scrubber already running." : "Restart failed: blown fuse. Replace fuse first.";
         public RestorationOutcome Install(ContainerCommandService commands, IContainerReader inventory, string itemId) => repair.TryRestore(commands,inventory,itemId);
+        public bool TryRestart()
+        {
+            if(!FuseInstalled || Running) return false;
+            Running=true; Publish(); return true;
+        }
+        public void Advance(float activeSeconds)
+        {
+            if(float.IsNaN(activeSeconds) || float.IsInfinity(activeSeconds) || activeSeconds<0) throw new ArgumentOutOfRangeException(nameof(activeSeconds));
+            if(!Running || Operational) return;
+            recoverySeconds=Math.Min(5,recoverySeconds+activeSeconds);
+            if(Operational) Publish();
+        }
+        private void Publish()
+        {
+            if(Changed==null) return;
+            foreach(Action observer in Changed.GetInvocationList())
+                try { observer(); } catch { /* Observers cannot undo committed state or prevent other consumers. */ }
+        }
     }
 }

@@ -19,7 +19,7 @@ namespace SOLITUDE.World.ScrubberEncounter
         private UnityInputHost input;
         private GameObject selected;
         private Button install, restart;
-        private TMP_Text installReason, restartLabel;
+        private TMP_Text installReason, restartLabel, intake, distribution, flow, indication;
         public string Feedback => feedback == null ? "" : feedback.text;
         public bool IsOpen => panel != null && panel.activeSelf;
         public string Telemetry => telemetry == null ? "" : telemetry.text;
@@ -31,6 +31,8 @@ namespace SOLITUDE.World.ScrubberEncounter
             if(panel==null) return;
             install=panel.transform.Find("InstallFuse")?.GetComponent<Button>(); restart=panel.transform.Find("Restart")?.GetComponent<Button>();
             installReason=panel.transform.Find("InstallReason")?.GetComponent<TMP_Text>(); restartLabel=panel.transform.Find("Restart/RestartLabel")?.GetComponent<TMP_Text>();
+            intake=panel.transform.Find("Intake")?.GetComponent<TMP_Text>(); distribution=panel.transform.Find("Distribution")?.GetComponent<TMP_Text>();
+            flow=panel.transform.Find("Flow")?.GetComponent<TMP_Text>(); indication=panel.transform.Find("Scrubber")?.GetComponent<TMP_Text>();
             install?.onClick.AddListener(Install); restart?.onClick.AddListener(Restart);
         }
         public void Initialize(InputPolicyCoordinator policy, UnityInputHost host)
@@ -65,11 +67,15 @@ namespace SOLITUDE.World.ScrubberEncounter
             objective.text = "CURRENT TASK\n" + state.Objective;
             if(install!=null) install.interactable=equipment.InstallReason.Length==0;
             if(installReason!=null) installReason.text=equipment.InstallReason;
-            if(restart!=null) restart.interactable=!state.FuseInstalled;
-            if(restartLabel!=null) restartLabel.text=state.FuseInstalled ? "RESTART — UNAVAILABLE" : "RESTART";
+            if(intake!=null) intake.text="INTAKE\nFLOW "+state.AirflowStatus;
+            if(distribution!=null) distribution.text="DISTRIBUTION\nFLOW "+state.AirflowStatus;
+            if(flow!=null) flow.text=state.Running ? "→ ACTIVE →" : "→ INTERRUPTED →";
+            if(indication!=null) { indication.text="SCRUBBER\n● "+state.OperatingStatus; indication.color=state.Running ? new Color(.3f,.85f,.42f) : new Color(.9f,.26f,.24f); }
+            if(restart!=null) restart.interactable=!state.Running;
+            if(restartLabel!=null) restartLabel.text=state.Running ? "ALREADY RUNNING" : "RESTART";
         }
         private void Install() { if(!IsOpen || coordinator?.IsOpen!=true || !isActiveAndEnabled) return; feedback.text=equipment.Install(); Refresh(); }
-        private void Restart() { if(!IsOpen || coordinator?.IsOpen!=true || !isActiveAndEnabled) return; feedback.text=equipment.State.RestartFeedback; }
+        private void Restart() { if(!IsOpen || coordinator?.IsOpen!=true || !isActiveAndEnabled) return; feedback.text=equipment.Restart(); Refresh(); }
         public void Hide()
         {
             var current = EventSystem.current == null ? null : EventSystem.current.currentSelectedGameObject;

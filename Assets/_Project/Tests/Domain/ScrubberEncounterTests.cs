@@ -52,5 +52,15 @@ namespace SOLITUDE.Tests
             state.Changed+=()=>throw new InvalidOperationException();state.Changed+=()=>delivered++;
             Assert.AreEqual(RestorationOutcome.Restored,state.Install(commands,inventory,"fuse"));Assert.IsTrue(state.FuseInstalled);Assert.IsTrue(inventory.GetSlot(0).IsEmpty);Assert.AreEqual(1,delivered);
         }
+        [Test] public void RestartAndFiveSecondRecoveryAreConfirmedOnce()
+        {
+            var state=new ScrubberEncounterState();Assert.IsFalse(state.TryRestart());state.Advance(5);Assert.AreEqual(0,state.RecoverySeconds);
+            var commands=Commands();var inventory=commands.Register(ContainerSaveSession.PlayerInventoryId,1);commands.Grant(inventory.Handle,"fuse",1);state.Install(commands,inventory,"fuse");
+            int events=0;state.Changed+=()=>events++;Assert.IsTrue(state.TryRestart());Assert.AreEqual("RUNNING",state.OperatingStatus);Assert.AreEqual("ACTIVE",state.AirflowStatus);Assert.AreEqual("RECOVERING",state.RoomCondition);
+            state.Advance(4);Assert.IsFalse(state.TryRestart());state.Advance(.5f);Assert.IsFalse(state.Operational);Assert.AreEqual(4.5,state.RecoverySeconds);
+            state.Advance(0);Assert.AreEqual(4.5,state.RecoverySeconds);state.Advance(.5f);Assert.IsTrue(state.Operational);Assert.AreEqual("NORMAL",state.RoomCondition);Assert.That(state.Objective,Does.Contain("complete"));
+            state.Advance(50);Assert.IsFalse(state.TryRestart());Assert.AreEqual(5,state.RecoverySeconds);Assert.AreEqual(2,events);
+            Assert.AreEqual(RestorationOutcome.AlreadyRestored,state.Install(commands,inventory,"fuse"));Assert.IsTrue(inventory.GetSlot(0).IsEmpty);
+        }
     }
 }

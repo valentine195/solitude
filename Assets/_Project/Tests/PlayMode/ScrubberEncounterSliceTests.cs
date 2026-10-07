@@ -141,14 +141,34 @@ namespace SOLITUDE.Tests
             session.Commands.Grant(inventory.Handle,ScrubberEquipment.FuseItemId,2);Assert.IsTrue(install.interactable);
             bool observerSawRepair=false;inventory.SlotChanged+=_=>observerSawRepair=equipment.State.FuseInstalled;
             install.onClick.Invoke();Assert.IsTrue(observerSawRepair);Assert.AreEqual("Fuse replaced. Restart scrubber.",screen.Feedback);
-            Assert.IsTrue(equipment.State.FuseInstalled);Assert.IsFalse(install.interactable);Assert.IsFalse(restart.interactable);
+            Assert.IsTrue(equipment.State.FuseInstalled);Assert.IsFalse(install.interactable);Assert.IsTrue(restart.interactable);
             Assert.AreEqual(1,inventory.GetSlots().Where(slot=>!slot.IsEmpty && slot.Stack.ItemId==ScrubberEquipment.FuseItemId).Sum(slot=>slot.Stack.Quantity));
             Assert.That(screen.Telemetry,Does.Contain("INTACT").And.Contain("OFFLINE").And.Contain("STOPPED").And.Contain("ELEVATED"));
             install.onClick.Invoke();Assert.AreEqual("Fuse already installed.",screen.Feedback);screen.Close();
             var hiddenFeedback=screen.Feedback;install.onClick.Invoke();restart.onClick.Invoke();Assert.AreEqual(hiddenFeedback,screen.Feedback);
-            Assert.IsTrue(screen.Open());Assert.That(screen.Telemetry,Does.Contain("INTACT"));Assert.IsFalse(install.interactable);Assert.IsFalse(restart.interactable);
+            Assert.IsTrue(screen.Open());Assert.That(screen.Telemetry,Does.Contain("INTACT"));Assert.IsFalse(install.interactable);Assert.IsTrue(restart.interactable);
             Assert.AreEqual(1,inventory.GetSlots().Where(slot=>!slot.IsEmpty && slot.Stack.ItemId==ScrubberEquipment.FuseItemId).Sum(slot=>slot.Stack.Quantity));
             Assert.AreEqual("SCRUBBER-SAVE-ISOLATION-SENTINEL",File.ReadAllText(path));
+        }
+        [UnityTest] public IEnumerator RecoveryContinuesWithScreenOpenAndAwayButActualPauseSuspendsIt()
+        {
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single));yield return null;
+            var screen=All<ScrubberScreenView>().Single();var equipment=All<ScrubberEquipment>().Single();var room=All<ScrubberRoomFeedback>().Single();var player=All<PlayerInteractor>().Single();
+            var vitals=player.GetComponent<PlayerVitalsController>();float health=vitals.Vitals.Health.Current,oxygen=vitals.Vitals.Oxygen.Current;
+            var root=All<GameCompositionRoot>().Single();var session=(SOLITUDE.SaveLoad.ContainerSaveSession)typeof(GameCompositionRoot).GetField("session",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(root);
+            session.Commands.Grant(All<PlayerInventory>().Single().Container.Handle,ScrubberEquipment.FuseItemId,1);Assert.IsTrue(screen.Open());
+            var buttons=screen.GetComponentsInChildren<UnityEngine.UI.Button>(true);buttons.Single(b=>b.name=="InstallFuse").onClick.Invoke();buttons.Single(b=>b.name=="Restart").onClick.Invoke();
+            Assert.IsTrue(equipment.State.Running);Assert.That(screen.Feedback,Does.Contain("restarted"));Assert.IsTrue(room.RunningSound.isPlaying);Assert.IsTrue(room.IsWarningVisible);
+            Assert.That(screen.Telemetry,Does.Contain("RUNNING").And.Contain("ACTIVE").And.Contain("RECOVERING"));Assert.IsFalse(buttons.Single(b=>b.name=="Restart").interactable);
+            yield return new WaitForSeconds(1);Assert.Greater(equipment.State.RecoverySeconds,.8);Assert.IsFalse(equipment.State.Operational);
+            var elapsed=equipment.State.RecoverySeconds;equipment.Restart();Assert.AreEqual(elapsed,equipment.State.RecoverySeconds);
+            var pause=(SOLITUDE.Application.PauseCoordinator)typeof(GameCompositionRoot).GetField("pause",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(root);
+            using(pause.Acquire()) { yield return new WaitForSecondsRealtime(.2f);Assert.AreEqual(elapsed,equipment.State.RecoverySeconds); }
+            screen.Close();player.GetComponent<Rigidbody2D>().position=new Vector2(20,2);Physics2D.SyncTransforms();
+            yield return new WaitForSeconds(4.2f);Assert.IsTrue(equipment.State.Operational);Assert.IsFalse(room.IsWarningVisible);Assert.IsFalse(room.Alert.isPlaying);Assert.IsTrue(room.RunningSound.isPlaying);
+            Assert.IsTrue(screen.Open());Assert.That(screen.Telemetry,Does.Contain("RUNNING").And.Contain("NORMAL"));
+            var labels=screen.GetComponentsInChildren<TMPro.TMP_Text>(true);Assert.That(labels.Single(label=>label.name=="Intake").text,Does.Contain("ACTIVE"));Assert.That(labels.Single(label=>label.name=="Scrubber").text,Does.Contain("RUNNING"));
+            Assert.AreEqual(health,vitals.Vitals.Health.Current);Assert.AreEqual(oxygen,vitals.Vitals.Oxygen.Current);Assert.AreEqual("SCRUBBER-SAVE-ISOLATION-SENTINEL",File.ReadAllText(path));
         }
         [UnityTest] public IEnumerator FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave()
         {

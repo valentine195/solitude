@@ -142,6 +142,21 @@ namespace SOLITUDE.Editor
             }
             finally { EditorSceneManager.CloseScene(scene,true); if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }
+        [MenuItem("SOLITUDE/Demos/Add Scrubber Running Audio")]
+        public static void AddRunningAudio()
+        {
+            if(EditorApplication.isPlaying) throw new InvalidOperationException("Exit Play mode before authoring.");
+            var previous=SceneManager.GetActiveScene();var scene=EditorSceneManager.OpenScene(ScenePath,OpenSceneMode.Additive);
+            try
+            {
+                var equipment=All<ScrubberEquipment>(scene).Single();var feedback=equipment.GetComponent<ScrubberRoomFeedback>();var data=new SerializedObject(feedback);
+                var source=data.FindProperty("runningSound").objectReferenceValue as AudioSource;
+                if(source==null) { source=equipment.gameObject.AddComponent<AudioSource>();source.loop=true;source.playOnAwake=false;source.volume=.15f;source.spatialBlend=0;data.FindProperty("runningSound").objectReferenceValue=source; }
+                source.clip=AssetDatabase.LoadAssetAtPath<AudioClip>(Feature+"/Audio/scrubber_running.wav");if(source.clip==null) throw new InvalidOperationException("Running clip missing.");
+                data.ApplyModifiedPropertiesWithoutUndo();EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+            }
+            finally { EditorSceneManager.CloseScene(scene,true);if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
+        }
         private static void MakeRoom(Scene scene)
         {
             var maps = All<Tilemap>(scene);

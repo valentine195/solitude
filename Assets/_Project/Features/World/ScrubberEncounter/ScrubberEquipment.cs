@@ -39,6 +39,12 @@ namespace SOLITUDE.World.ScrubberEncounter
                 default: return "Installation unavailable; no item installed.";
             }
         }
+        public string Restart()
+        {
+            if(!Available || !isActiveAndEnabled) return "Restart unavailable.";
+            return state.TryRestart() ? "Scrubber restarted. Room air recovering." : state.RestartFeedback;
+        }
+        private void Update() { if(Available) state.Advance(Time.deltaTime); }
         public void ReleaseBinding()
         {
             if(inventory!=null) { inventory.SlotChanged-=SlotChanged; inventory.CapacityChanged-=Publish; }
