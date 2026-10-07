@@ -79,6 +79,69 @@ namespace SOLITUDE.Editor
             }
             finally { EditorSceneManager.CloseScene(scene,true); if (previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }
+        public const string FuseFolder = "Assets/_Project/Features/Items/Definitions/ReplacementFuse";
+        [MenuItem("SOLITUDE/Demos/Add Replacement Fuse To Scrubber Encounter")]
+        public static void AddFuse()
+        {
+            if (EditorApplication.isPlaying) throw new InvalidOperationException("Exit Play mode before authoring.");
+            Directory.CreateDirectory(FuseFolder); AssetDatabase.Refresh();
+            var sceneGuid = AssetDatabase.AssetPathToGUID(ScenePath);
+            var previous = SceneManager.GetActiveScene();
+            var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+            try
+            {
+                SceneManager.SetActiveScene(scene);
+                if (All<WorldPickup>(scene).Length != 0) throw new InvalidOperationException("Encounter pickup already exists; refusing to overwrite.");
+                var item = AssetDatabase.LoadAssetAtPath<ItemDefinition>(FuseFolder + "/ReplacementFuse.asset");
+                if (item == null)
+                {
+                    item = ScriptableObject.CreateInstance<ItemDefinition>();
+                    item.DisplayName = "Replacement fuse"; item.Description = "Replacement fuse for the atmospheric scrubber.";
+                    item.Stackable = true; item.MaxStackSize = 99;
+                    item.Icon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/SOLITUDE/Props/solitude_battery_normal_v01.png");
+                    if (item.Icon == null) throw new InvalidOperationException("Existing electrical component icon missing.");
+                    AssetDatabase.CreateAsset(item, FuseFolder + "/ReplacementFuse.asset");
+                    var data = new SerializedObject(item); data.FindProperty("itemId").stringValue = AssetDatabase.AssetPathToGUID(FuseFolder + "/ReplacementFuse.asset"); data.ApplyModifiedPropertiesWithoutUndo();
+                }
+                var definition = AssetDatabase.LoadAssetAtPath<PickupDefinition>(FuseFolder + "/ReplacementFusePickup.asset");
+                if (definition == null)
+                {
+                    definition = ScriptableObject.CreateInstance<PickupDefinition>();
+                    AssetDatabase.CreateAsset(definition, FuseFolder + "/ReplacementFusePickup.asset");
+                    var data = new SerializedObject(definition); data.FindProperty("item").objectReferenceValue = item;
+                    data.FindProperty("quantity").intValue = 1; data.FindProperty("successText").stringValue = "Picked up replacement fuse"; data.ApplyModifiedPropertiesWithoutUndo();
+                }
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(FuseFolder + "/PF_ReplacementFuse.prefab");
+                if (prefab == null)
+                {
+                    var go = new GameObject("PF_ReplacementFuse", typeof(SpriteRenderer), typeof(WorldPickup));
+                    try
+                    {
+                        var renderer = go.GetComponent<SpriteRenderer>(); renderer.sprite = item.Icon;
+                        renderer.sharedMaterial = All<ScrubberEquipment>(scene).Single().GetComponent<SpriteRenderer>().sharedMaterial;
+                        renderer.sortingOrder = 20;
+                        var data = new SerializedObject(go.GetComponent<WorldPickup>()); data.FindProperty("definition").objectReferenceValue = definition;
+                        data.FindProperty("prompt").stringValue = "Collect replacement fuse"; data.ApplyModifiedPropertiesWithoutUndo();
+                        var sensor = new GameObject("InteractionRange", typeof(BoxCollider2D), typeof(InteractableProximitySensor));
+                        sensor.transform.SetParent(go.transform, false); sensor.GetComponent<BoxCollider2D>().isTrigger = true; sensor.GetComponent<BoxCollider2D>().size = Vector2.one;
+                        prefab = PrefabUtility.SaveAsPrefabAsset(go, FuseFolder + "/PF_ReplacementFuse.prefab");
+                    }
+                    finally { UnityEngine.Object.DestroyImmediate(go); }
+                }
+                item.PickupPrefab = prefab; EditorUtility.SetDirty(item);
+                var database = AssetDatabase.LoadAssetAtPath<ItemDatabase>(Feature + "/Demo/ScrubberItemDatabase.asset");
+                var catalog = new SerializedObject(database); var list = catalog.FindProperty("items");
+                if (!Enumerable.Range(0,list.arraySize).Any(i => list.GetArrayElementAtIndex(i).objectReferenceValue == item))
+                { int index = list.arraySize; list.arraySize++; list.GetArrayElementAtIndex(index).objectReferenceValue = item; catalog.ApplyModifiedPropertiesWithoutUndo(); }
+                var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab,scene); instance.name = "Replacement fuse"; instance.transform.position = new Vector3(21,4);
+                instance.GetComponent<SOLITUDE.SaveLoad.SaveableId>().AssignMissingSceneIdentity();
+                var binding = new SerializedObject(All<SceneBindings>(scene).Single()); var pickups = binding.FindProperty("worldPickups");
+                pickups.arraySize = 1; pickups.GetArrayElementAtIndex(0).objectReferenceValue = instance.GetComponent<WorldPickup>(); binding.ApplyModifiedPropertiesWithoutUndo();
+                EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+                if (AssetDatabase.AssetPathToGUID(ScenePath) != sceneGuid) throw new InvalidOperationException("Scene GUID changed.");
+            }
+            finally { EditorSceneManager.CloseScene(scene,true); if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
+        }
         private static void MakeRoom(Scene scene)
         {
             var maps = All<Tilemap>(scene);

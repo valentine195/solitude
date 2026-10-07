@@ -1992,10 +1992,10 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0.057812504
-    y: 0.6296296
-    width: 0.33333334
-    height: 0.3333333
+    x: 0
+    y: 0.125
+    width: 1
+    height: 0.75000006
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -4567,7 +4567,8 @@ MonoBehaviour:
   tooltips:
   - {fileID: 1306456123}
   lockers: []
-  worldPickups: []
+  worldPickups:
+  - {fileID: 1065739465}
   restorationJunctions: []
   uiInput: {fileID: 1001239075}
 --- !u!4 &770409761
@@ -5492,6 +5493,78 @@ RectTransform:
   m_AnchoredPosition: {x: 960, y: 540}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1001 &1065739464
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1916895254183655585, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_Name
+      value: Replacement fuse
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 21
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5413527586884044776, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+      propertyPath: id
+      value: 7d618078-552b-42e6-b1ec-ca146336ecd2
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+--- !u!114 &1065739465 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 778504808531962589, guid: 41d4abe5868dd459689f2ec2b8ebb998, type: 3}
+  m_PrefabInstance: {fileID: 1065739464}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c923170122b90492098dfe6859f871fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Items.WorldPickup
 --- !u!1 &1071381351
 GameObject:
   m_ObjectHideFlags: 0
@@ -13475,3 +13548,4 @@ SceneRoots:
   - {fileID: 1870826384}
   - {fileID: 1601142661}
   - {fileID: 369883438}
+  - {fileID: 1065739464}

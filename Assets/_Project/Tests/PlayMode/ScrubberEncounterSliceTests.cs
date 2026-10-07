@@ -87,6 +87,42 @@ namespace SOLITUDE.Tests
                 InputSystem.settings.editorInputBehaviorInPlayMode = previousEditor;
             }
         }
+        [UnityTest] public IEnumerator FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput()
+        {
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
+            var pickup = All<SOLITUDE.Items.WorldPickup>().Single(); var player=All<PlayerInteractor>().Single();
+            var body=player.GetComponent<Rigidbody2D>();
+            var from=body.position; var to=(Vector2)pickup.transform.position;
+            Assert.IsFalse(Physics2D.RaycastAll(from,(to-from).normalized,Vector2.Distance(from,to)).Any(hit=>!hit.collider.isTrigger && hit.rigidbody != body),"Fuse has an unobstructed same-room path from spawn.");
+            var root=All<GameCompositionRoot>().Single();
+            var session=(SOLITUDE.SaveLoad.ContainerSaveSession)typeof(GameCompositionRoot).GetField("session",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(root);
+            var inventory=All<PlayerInventory>().Single().Container;
+            var database=UnityEditor.AssetDatabase.LoadAssetAtPath<SOLITUDE.Items.ItemDatabase>("Assets/_Project/Features/World/ScrubberEncounter/Demo/ScrubberItemDatabase.asset");
+            var filler=database.BuildRuntimeCatalog().Items.First(item=>item.ItemId!=pickup.Definition.Item.ItemId);
+            session.Commands.Grant(inventory.Handle,filler.ItemId,inventory.Capacity*filler.MaxStackSize);
+            Assert.IsTrue(Enumerable.Range(0,inventory.Capacity).All(i=>!inventory.GetSlot(i).IsEmpty));
+            var previousBackground=InputSystem.settings.backgroundBehavior;var previousEditor=InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;InputSystem.settings.editorInputBehaviorInPlayMode=InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            var keyboard=InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                body.position=to+Vector2.down*.3f;Physics2D.SyncTransforms();yield return new WaitForFixedUpdate();yield return null;yield return null;
+                Assert.AreSame(pickup,typeof(PlayerInteractor).GetField("currentTarget",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(player));
+                Press(keyboard,Key.E);yield return null;Assert.IsTrue(pickup.gameObject.activeSelf);
+                var feedback=All<SOLITUDE.Core.UI.InteractionFeedbackView>().Select(view=>(TMPro.TMP_Text)typeof(SOLITUDE.Core.UI.InteractionFeedbackView).GetField("label",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(view));
+                Assert.IsTrue(feedback.Any(label=>label!=null && label.text=="Inventory full" && label.gameObject.activeInHierarchy));
+                session.Commands.Remove(inventory.GetSlot(0).Address,inventory.GetSlot(0).Stack.Quantity);
+                Press(keyboard,Key.E);yield return null;Assert.IsFalse(pickup.gameObject.activeSelf);
+                Assert.AreEqual(1,Enumerable.Range(0,inventory.Capacity).Select(i=>inventory.GetSlot(i)).Where(slot=>!slot.IsEmpty && slot.Stack.ItemId==pickup.Definition.Item.ItemId).Sum(slot=>slot.Stack.Quantity));
+                pickup.Interact(player);Press(keyboard,Key.E);yield return null;
+                Assert.AreEqual(1,Enumerable.Range(0,inventory.Capacity).Select(i=>inventory.GetSlot(i)).Where(slot=>!slot.IsEmpty && slot.Stack.ItemId==pickup.Definition.Item.ItemId).Sum(slot=>slot.Stack.Quantity));
+                Assert.AreEqual("SCRUBBER-SAVE-ISOLATION-SENTINEL",File.ReadAllText(path));
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard);InputSystem.settings.backgroundBehavior=previousBackground;InputSystem.settings.editorInputBehaviorInPlayMode=previousEditor;
+            }
+        }
         [UnityTest] public IEnumerator FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave()
         {
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single));yield return null;
