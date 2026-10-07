@@ -18,12 +18,20 @@ namespace SOLITUDE.Core.Input
         private Action fallbackBack;
         private InputControl lastBackControl;
         private double lastBackTime = -1;
+        private int consumedFrame = -1;
+        public void ConsumeUIActivation() => consumedFrame = Time.frameCount;
+        private bool GameplayAllowed => policy.Gameplay && consumedFrame != Time.frameCount;
         public event Action<float, float> Point;
         public IDisposable ConnectUI(UnityEngine.InputSystem.UI.InputSystemUIInputModule module)
         {
             if (actions.asset.FindActionMap("UI", false) == null) throw new InvalidOperationException("The composed input asset requires a UI map.");
             module.enabled = false;
             module.actionsAsset = actions.asset;
+            InputActionReference UI(string name) => InputActionReference.Create(actions.asset.FindAction("UI/" + name, true));
+            module.point = UI("Point"); module.move = UI("Navigate");
+            module.leftClick = UI("Click"); module.rightClick = UI("RightClick"); module.middleClick = UI("MiddleClick");
+            module.scrollWheel = UI("ScrollWheel"); module.submit = UI("Submit"); module.cancel = UI("Cancel");
+            module.trackedDevicePosition = UI("TrackedDevicePosition"); module.trackedDeviceOrientation = UI("TrackedDeviceOrientation");
             var references = new[] { module.point, module.move, module.leftClick, module.rightClick, module.middleClick, module.scrollWheel,
                 module.submit, module.cancel, module.trackedDevicePosition, module.trackedDeviceOrientation };
             var boundPolicy = policy;
@@ -68,12 +76,12 @@ namespace SOLITUDE.Core.Input
             Enable(actions.Container.Point, policy.Pointer);
             // Click delivery belongs exclusively to the EventSystem.
         }
-        private void Move(InputAction.CallbackContext context) { if (policy.Gameplay && movement != null) movement.SetInput(context.ReadValue<Vector2>()); }
+        private void Move(InputAction.CallbackContext context) { if (GameplayAllowed && movement != null) movement.SetInput(context.ReadValue<Vector2>()); }
         private void Stop(InputAction.CallbackContext _) { if (movement != null) movement.SetInput(Vector2.zero); }
-        private void Interact(InputAction.CallbackContext _) { if (policy.Gameplay && interactor != null) interactor.TryInteract(); }
+        private void Interact(InputAction.CallbackContext _) { if (GameplayAllowed && interactor != null) interactor.TryInteract(); }
         private void Inventory(InputAction.CallbackContext _) { if (policy.Inventory) inventory?.Invoke(); }
         private void Hotbar(InputAction.CallbackContext context)
-        { if (policy.Gameplay && int.TryParse(context.action.name.Substring(6), out int index)) selection?.Select(index - 1); }
+        { if (GameplayAllowed && int.TryParse(context.action.name.Substring(6), out int index)) selection?.Select(index - 1); }
         private void Pointer(InputAction.CallbackContext context)
         { if (!policy.Pointer) return; var point = context.ReadValue<Vector2>(); Point?.Invoke(point.x, point.y); }
         private void Back(InputAction.CallbackContext context)
@@ -91,6 +99,7 @@ namespace SOLITUDE.Core.Input
             if (policy != null) policy.Changed -= Apply; policy = null;
             if (actions != null) { actions.Disable(); actions.Dispose(); actions = null; }
             lastBackTime = -1; lastBackControl = null;
+            consumedFrame = -1;
         }
         private void OnDestroy() => Release();
     }

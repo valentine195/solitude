@@ -31,15 +31,24 @@ namespace SOLITUDE.Application
     {
         private readonly PauseCoordinator pause;
         private bool ready, transition, modal;
+        private bool primaryScreen;
+        public bool PrimaryScreenActive => primaryScreen;
         public bool Ready => ready && !transition;
-        public bool Gameplay => Ready && !modal && !pause.IsPaused;
-        public bool Pointer => Ready && (modal || !pause.IsPaused);
-        public bool Inventory => Ready && (modal || !pause.IsPaused);
+        public bool Gameplay => Ready && !modal && !primaryScreen && !pause.IsPaused;
+        public bool Pointer => Ready && (modal || primaryScreen || !pause.IsPaused);
+        public bool Inventory => Ready && !primaryScreen && (modal || !pause.IsPaused);
         public event Action Changed;
         public InputPolicyCoordinator(PauseCoordinator pause) { this.pause = pause; pause.Changed += Publish; }
         public void SetReady(bool value) { ready = value; Publish(); }
         public void SetTransition(bool value) { transition = value; Publish(); }
         internal void SetModal(bool value) { modal = value; Publish(); }
+        public IDisposable AcquirePrimaryScreen()
+        {
+            if (!Ready || modal || primaryScreen || pause.IsPaused) return null;
+            primaryScreen = true;
+            Publish();
+            return new Lease(() => { primaryScreen = false; Publish(); });
+        }
         private void Publish() => Changed?.Invoke();
         public void Dispose() => pause.Changed -= Publish;
     }
@@ -78,7 +87,7 @@ namespace SOLITUDE.Application
         }
         private OpenResult Open(ContainerModalKind kind, IContainerReader reader)
         {
-            if (!policy.Ready || inventory == null || !inventory.IsAvailable || (kind == ContainerModalKind.Transfer && (reader == null || !reader.IsAvailable)))
+            if (!policy.Ready || policy.PrimaryScreenActive || inventory == null || !inventory.IsAvailable || (kind == ContainerModalKind.Transfer && (reader == null || !reader.IsAvailable)))
                 return OpenResult.Unavailable;
             IModalBinding next;
             try { next = display.Prepare(kind, inventory, reader); }

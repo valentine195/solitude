@@ -20,6 +20,7 @@ namespace SOLITUDE.Tests
     {
         private sealed class Display : IContainerModalDisplay
         { public IModalBinding Prepare(ContainerModalKind kind, IContainerReader inventory, IContainerReader target) => new Binding(); }
+        private sealed class ScreenDisplay : IScrubberScreenDisplay { public void Show() { } public void Hide() { } }
         private sealed class Binding : IModalBinding { public void Activate() { } public void Dispose() { } }
         private static void Press(Keyboard keyboard, Key key)
         {
@@ -63,7 +64,24 @@ namespace SOLITUDE.Tests
                 Assert.IsFalse(gestures.Interaction.IsHolding); Assert.AreEqual(ContainerModalKind.Inventory, modal.Kind); Assert.AreEqual(0, fallbacks);
                 Press(keyboard, Key.Escape); Assert.AreEqual(ContainerModalKind.Closed, modal.Kind); Assert.AreEqual(0, fallbacks);
                 Press(keyboard, Key.Escape); Assert.AreEqual(1, fallbacks);
-                using (pause.Acquire()) { Assert.IsFalse(module.enabled); Press(keyboard, Key.Digit2); Assert.AreEqual(1, changes); }
+                using (var screen = new ScrubberScreenCoordinator(policy, new ScreenDisplay()))
+                {
+                    input.Bind(null, null, selection, () => modal.ToggleInventory(), () =>
+                    { if (!screen.IsOpen) return modal.Back(); input.ConsumeUIActivation(); return screen.Back(); }, () => fallbacks++);
+                    Assert.AreEqual(OpenResult.Opened, screen.Open()); Assert.AreEqual(1, pause.Scale); Assert.IsTrue(module.enabled);
+                    yield return null;
+                    Assert.IsTrue(actions.asset.FindAction("UI/Navigate").enabled, "UI navigation must use the composed asset."); Assert.IsTrue(actions.asset.FindAction("UI/Submit").enabled);
+                    Press(keyboard, Key.Tab); Assert.AreEqual(ContainerModalKind.Closed, modal.Kind);
+                    Assert.AreEqual(OpenResult.Unavailable, modal.ToggleInventory());
+                    Press(keyboard, Key.Digit2); Assert.AreEqual(1, changes);
+                    Press(keyboard, Key.Escape); Assert.IsFalse(screen.IsOpen); Assert.AreEqual(1, fallbacks);
+                    Press(keyboard, Key.Digit2); Assert.AreEqual(1, changes, "Close activation is consumed for this frame.");
+                    yield return null;
+                    Press(keyboard, Key.Digit2); Assert.AreEqual(2, changes);
+                    Assert.AreEqual(OpenResult.Opened, modal.ToggleInventory());
+                    Assert.AreEqual(OpenResult.Unavailable, screen.Open()); modal.Close();
+                }
+                using (pause.Acquire()) { Assert.IsFalse(module.enabled); Press(keyboard, Key.Digit1); Assert.AreEqual(2, changes); }
                 policy.SetTransition(true); Press(keyboard, Key.Tab); Assert.AreEqual(ContainerModalKind.Closed, modal.Kind);
                 input.Release(); Assert.DoesNotThrow(() => uiLease.Dispose());
             }

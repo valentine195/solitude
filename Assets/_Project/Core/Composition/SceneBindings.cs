@@ -9,6 +9,7 @@ using SOLITUDE.Items;
 using SOLITUDE.Player;
 using SOLITUDE.SaveLoad;
 using SOLITUDE.World.Restoration;
+using SOLITUDE.World.ScrubberEncounter;
 using UnityEngine;
 namespace SOLITUDE.Composition
 {
@@ -29,6 +30,7 @@ namespace SOLITUDE.Composition
         [SerializeField] private RestorationJunction[] restorationJunctions = new RestorationJunction[0];
         private readonly List<ContainerSaveSession.ContainerBinding> bindings = new();
         private readonly List<WorldPickup> registeredPickups = new();
+        private readonly List<ScrubberScreenView> scrubberScreens = new();
         [SerializeField] private UnityEngine.InputSystem.UI.InputSystemUIInputModule uiInput;
         private IDisposable uiLease;
         private ItemPresentationCatalog presentations;
@@ -113,7 +115,10 @@ namespace SOLITUDE.Composition
                         controller.BindDefaultSource();
                 uiLease = input.ConnectUI(uiInput);
                 input.Point += Point;
-                input.Bind(movement, interactor, selection, () => modal.ToggleInventory(), () => modal.Back(), game.TogglePause);
+                foreach (var root in gameObject.scene.GetRootGameObjects())
+                    foreach (var screen in root.GetComponentsInChildren<ScrubberScreenView>(true))
+                    { screen.Initialize(policy, input); scrubberScreens.Add(screen); }
+                input.Bind(movement, interactor, selection, () => modal.ToggleInventory(), Back, game.TogglePause);
             }
             catch { Release(); throw; }
         }
@@ -133,7 +138,16 @@ namespace SOLITUDE.Composition
             var candidates = !saved && source.Loot != null ? loot[source.Loot].Roll(new System.Random(SeedUtility.DeriveSeed(session.WorldSeed, source.PersistentId))) : null;
             var binding = session.Register(source.PersistentId, source.Capacity, initialLoot: candidates); bindings.Add(binding); return binding.Container;
         }
-        public void CloseForTransition() => modal?.Close();
+        private bool Back()
+        {
+            foreach (var screen in scrubberScreens) if (screen != null && screen.Back()) return true;
+            return modal?.Back() ?? false;
+        }
+        public void CloseForTransition()
+        {
+            foreach (var screen in scrubberScreens) if (screen != null) screen.Close();
+            modal?.Close();
+        }
         public void ShowRecoveryNotice(Action acknowledged) => recoveryNotice.Show(acknowledged);
         public bool Open(LockerContainer source)
         {
@@ -203,6 +217,8 @@ namespace SOLITUDE.Composition
         public void Release()
         {
             if (session == null) return;
+            foreach (var screen in scrubberScreens) if (screen != null) screen.Release();
+            scrubberScreens.Clear();
             modal?.Dispose(); modal = null;
             if (input != null && selection != null) { input.Point -= Point; input.Bind(null, null, null, null, null, null); }
             uiLease?.Dispose(); uiLease = null;
