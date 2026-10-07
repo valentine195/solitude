@@ -41,6 +41,7 @@ namespace SOLITUDE.World.ScrubberEncounter
             if(equipment!=null) equipment.Changed+=Refresh;
         }
         public void Release() { if(equipment!=null) equipment.Changed-=Refresh; coordinator?.Dispose(); coordinator = null; input = null; }
+        private void OnEnable() => Refresh();
         private void OnDisable() => Close();
         private void OnDestroy() { Release(); if (close != null) close.onClick.RemoveListener(Close); install?.onClick.RemoveListener(Install); restart?.onClick.RemoveListener(Restart); }
         public bool Open() => coordinator?.Open() == OpenResult.Opened;

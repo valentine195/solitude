@@ -170,6 +170,21 @@ namespace SOLITUDE.Tests
             var labels=screen.GetComponentsInChildren<TMPro.TMP_Text>(true);Assert.That(labels.Single(label=>label.name=="Intake").text,Does.Contain("ACTIVE"));Assert.That(labels.Single(label=>label.name=="Scrubber").text,Does.Contain("RUNNING"));
             Assert.AreEqual(health,vitals.Vitals.Health.Current);Assert.AreEqual(oxygen,vitals.Vitals.Oxygen.Current);Assert.AreEqual("SCRUBBER-SAVE-ISOLATION-SENTINEL",File.ReadAllText(path));
         }
+        [UnityTest] public IEnumerator CompletionNotificationDefersExpiresAndNeverReplays()
+        {
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single));yield return null;
+            var equipment=All<ScrubberEquipment>().Single();var screen=All<ScrubberScreenView>().Single();var notification=All<ScrubberTaskNotificationView>().Single();var room=All<ScrubberRoomFeedback>().Single();
+            var root=All<GameCompositionRoot>().Single();var session=(SOLITUDE.SaveLoad.ContainerSaveSession)typeof(GameCompositionRoot).GetField("session",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(root);
+            session.Commands.Grant(All<PlayerInventory>().Single().Container.Handle,ScrubberEquipment.FuseItemId,1);equipment.Install();Assert.IsTrue(screen.Open());equipment.Restart();
+            var selected=EventSystem.current.currentSelectedGameObject;equipment.State.Advance(5);yield return null;
+            Assert.IsTrue(equipment.State.Operational);Assert.IsFalse(room.IsWarningVisible);Assert.IsFalse(room.Alert.isPlaying);Assert.IsFalse(notification.IsVisible);Assert.AreEqual(0,notification.PresentationCount);Assert.AreSame(selected,EventSystem.current.currentSelectedGameObject);
+            Assert.That(screen.GetComponentsInChildren<TMPro.TMP_Text>(true).Single(label=>label.name=="Objective").text,Does.Contain("complete"));
+            screen.Close();yield return null;yield return null;Assert.IsTrue(notification.IsVisible);Assert.AreEqual(1,notification.PresentationCount);Assert.IsNull(EventSystem.current.currentSelectedGameObject);
+            yield return new WaitForSecondsRealtime(4.1f);Assert.IsFalse(notification.IsVisible);Assert.AreEqual(1,notification.PresentationCount);
+            Assert.IsTrue(screen.Open());Assert.That(screen.Telemetry,Does.Contain("RUNNING").And.Contain("NORMAL"));Assert.That(screen.GetComponentsInChildren<TMPro.TMP_Text>(true).Single(label=>label.name=="Objective").text,Does.Contain("complete"));
+            notification.enabled=false;notification.enabled=true;screen.Close();room.enabled=false;room.enabled=true;yield return null;
+            Assert.IsFalse(notification.IsVisible);Assert.AreEqual(1,notification.PresentationCount);Assert.IsFalse(room.IsWarningVisible);Assert.IsFalse(room.Alert.isPlaying);
+        }
         [UnityTest] public IEnumerator FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave()
         {
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single));yield return null;

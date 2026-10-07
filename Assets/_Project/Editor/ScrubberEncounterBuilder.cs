@@ -157,6 +157,37 @@ namespace SOLITUDE.Editor
             }
             finally { EditorSceneManager.CloseScene(scene,true);if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }
+        [MenuItem("SOLITUDE/Demos/Add Scrubber Completion Notification")]
+        public static void AddCompletionNotification()
+        {
+            if(EditorApplication.isPlaying) throw new InvalidOperationException("Exit Play mode before authoring.");
+            string path=Feature+"/UI/ScrubberScreen.prefab";
+            var contents=PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                if(contents.GetComponent<ScrubberTaskNotificationView>()==null)
+                {
+                    font=AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/UI/Fonts/pixel_operator/FontAssets/PixelOperator SDF.asset");
+                    var rect=Rect("TaskCompletion",contents.transform,Vector2.zero,new Vector2(300,72));
+                    rect.anchorMin=rect.anchorMax=Vector2.one;rect.pivot=Vector2.one;rect.anchoredPosition=new Vector2(-18,-18);
+                    var image=rect.gameObject.AddComponent<UnityEngine.UI.Image>();image.color=new Color(.035f,.05f,.055f,.98f);image.raycastTarget=false;
+                    var text=Text("TaskCompletionText",rect,"TASK COMPLETE\nRoom atmosphere restored",new Vector2(-150,-36),new Vector2(276,60),22,new Color(.3f,.85f,.42f));
+                    text.rectTransform.anchorMin=text.rectTransform.anchorMax=Vector2.one; text.rectTransform.pivot=new Vector2(.5f,.5f);
+                    var view=contents.AddComponent<ScrubberTaskNotificationView>();var data=new SerializedObject(view);
+                    data.FindProperty("notice").objectReferenceValue=rect.gameObject;data.FindProperty("screen").objectReferenceValue=contents.GetComponent<ScrubberScreenView>();data.ApplyModifiedPropertiesWithoutUndo();
+                    rect.gameObject.SetActive(false);PrefabUtility.SaveAsPrefabAsset(contents,path);
+                }
+            }
+            finally { PrefabUtility.UnloadPrefabContents(contents); }
+            var previous=SceneManager.GetActiveScene();var scene=EditorSceneManager.OpenScene(ScenePath,OpenSceneMode.Additive);
+            try
+            {
+                var notification=All<ScrubberTaskNotificationView>(scene).Single();var data=new SerializedObject(notification);
+                data.FindProperty("equipment").objectReferenceValue=All<ScrubberEquipment>(scene).Single();data.ApplyModifiedPropertiesWithoutUndo();
+                EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+            }
+            finally { EditorSceneManager.CloseScene(scene,true);if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
+        }
         private static void MakeRoom(Scene scene)
         {
             var maps = All<Tilemap>(scene);
