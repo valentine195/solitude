@@ -221,6 +221,26 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""Journal"",
+                    ""type"": ""Button"",
+                    ""id"": ""39a00929-6755-42ff-8372-2be6a4e55608"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""JournalPin"",
+                    ""type"": ""Button"",
+                    ""id"": ""63ba8314-b22f-4753-9a30-8d3f57e6ef5f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -454,6 +474,28 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                     ""action"": ""Hotbar9"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e76eb062-bb04-4319-87c7-c2103952d1ef"",
+                    ""path"": ""<Keyboard>/j"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Journal"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""099527d5-2813-4a9d-8a37-2acf44874b9c"",
+                    ""path"": ""<Keyboard>/p"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""JournalPin"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -669,7 +711,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             ""bindings"": [
                 {
                     ""name"": ""Gamepad"",
-                    ""id"": ""788bc320-eb06-4678-9f7a-3744cebfee4e"",
+                    ""id"": """",
                     ""path"": ""2DVector"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -680,7 +722,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""up"",
-                    ""id"": ""2c77f059-b258-4d83-bb1e-08675387b1d0"",
+                    ""id"": """",
                     ""path"": ""<Gamepad>/leftStick/up"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -691,7 +733,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""up"",
-                    ""id"": ""e052ed98-d751-4e5f-97e0-5533fa63e9d6"",
+                    ""id"": """",
                     ""path"": ""<Gamepad>/rightStick/up"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -702,7 +744,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""down"",
-                    ""id"": ""83ee0e89-fffa-463a-85bf-7a5eb4460550"",
+                    ""id"": """",
                     ""path"": ""<Gamepad>/leftStick/down"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -713,7 +755,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""down"",
-                    ""id"": ""34ce89ef-e001-466f-a60b-450af30a381d"",
+                    ""id"": """",
                     ""path"": ""<Gamepad>/rightStick/down"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -724,7 +766,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""left"",
-                    ""id"": ""3e6c6c14-507a-489f-9379-d1aa6ad89d65"",
+                    ""id"": """",
                     ""path"": ""<Gamepad>/leftStick/left"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -735,7 +777,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""left"",
-                    ""id"": ""00b0d498-514f-45f6-a460-7771b9cdbe71"",
+                    ""id"": """",
                     ""path"": ""<Gamepad>/rightStick/left"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -746,7 +788,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""right"",
-                    ""id"": ""8d207eb9-c9cf-426c-8e35-b220b91f4293"",
+                    ""id"": """",
                     ""path"": ""<Gamepad>/leftStick/right"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -757,7 +799,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""right"",
-                    ""id"": ""4c4ab8d3-e540-4987-84a8-d10c6be19465"",
+                    ""id"": """",
                     ""path"": ""<Gamepad>/rightStick/right"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -768,7 +810,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""074fb075-d8ce-455a-949d-e02f34bb6d60"",
+                    ""id"": """",
                     ""path"": ""<Gamepad>/dpad"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -779,7 +821,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""Joystick"",
-                    ""id"": ""701e510c-fb9e-4b39-ac06-e97b7b31c398"",
+                    ""id"": """",
                     ""path"": ""2DVector"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -790,7 +832,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""up"",
-                    ""id"": ""9a49b030-9818-45d0-8af5-7d653c6c41e8"",
+                    ""id"": """",
                     ""path"": ""<Joystick>/stick/up"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -801,7 +843,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""down"",
-                    ""id"": ""9a01928c-68ad-48f1-b0e5-20b80df1bcf4"",
+                    ""id"": """",
                     ""path"": ""<Joystick>/stick/down"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -812,7 +854,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""left"",
-                    ""id"": ""04c17c0f-7185-4507-86d3-024157ded6c7"",
+                    ""id"": """",
                     ""path"": ""<Joystick>/stick/left"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -823,7 +865,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""right"",
-                    ""id"": ""e7e60363-8339-4987-9525-244df9973f7f"",
+                    ""id"": """",
                     ""path"": ""<Joystick>/stick/right"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -834,7 +876,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""Keyboard"",
-                    ""id"": ""2db5eb21-d826-422a-a5dc-ff12ba24e6ef"",
+                    ""id"": """",
                     ""path"": ""2DVector"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -845,7 +887,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""up"",
-                    ""id"": ""0abed797-25fa-43f9-b500-a8ad5a158186"",
+                    ""id"": """",
                     ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -856,7 +898,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""up"",
-                    ""id"": ""5aa71f74-55c9-4b46-bcbb-cb6b934bbec5"",
+                    ""id"": """",
                     ""path"": ""<Keyboard>/upArrow"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -867,7 +909,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""down"",
-                    ""id"": ""255b7c4f-9765-45ae-b5ea-7222d7d3aafb"",
+                    ""id"": """",
                     ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -878,7 +920,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""down"",
-                    ""id"": ""dd1b679b-d660-41aa-a5a8-130dadca6337"",
+                    ""id"": """",
                     ""path"": ""<Keyboard>/downArrow"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -889,7 +931,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""left"",
-                    ""id"": ""5c282ac3-abbe-4528-bf94-f7a4fd289625"",
+                    ""id"": """",
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -900,7 +942,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""left"",
-                    ""id"": ""ac1f7fbd-b0c5-4dc3-9fe7-0e7e24fafd51"",
+                    ""id"": """",
                     ""path"": ""<Keyboard>/leftArrow"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -911,7 +953,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""right"",
-                    ""id"": ""137693be-5f8f-4268-b867-e0694a28f381"",
+                    ""id"": """",
                     ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -922,7 +964,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": ""right"",
-                    ""id"": ""d8984dbc-162f-492e-8ab2-ff53961a0877"",
+                    ""id"": """",
                     ""path"": ""<Keyboard>/rightArrow"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -933,7 +975,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""0272d451-da0c-4d27-9a3d-9db0e7b1e667"",
+                    ""id"": """",
                     ""path"": ""*/{Submit}"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -944,7 +986,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""0a559cd3-1074-439d-9f32-e58f01c3fd40"",
+                    ""id"": """",
                     ""path"": ""*/{Cancel}"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -955,7 +997,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""a1a66833-7525-4688-b2e5-bb9726e9bf9a"",
+                    ""id"": """",
                     ""path"": ""<Mouse>/position"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -966,7 +1008,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""533267c6-b85d-495a-a2a9-341a3a8bf6c0"",
+                    ""id"": """",
                     ""path"": ""<Pen>/position"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -977,7 +1019,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""52939c43-2565-46c9-9ecb-3c7321ff8663"",
+                    ""id"": """",
                     ""path"": ""<Touchscreen>/touch*/position"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -988,7 +1030,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""080eb5de-e86c-4f3d-bd65-b75888bf1d64"",
+                    ""id"": """",
                     ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -999,7 +1041,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""0f76c5d5-576c-48da-920e-0d2312df0f4b"",
+                    ""id"": """",
                     ""path"": ""<Pen>/tip"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -1010,7 +1052,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""714a6c00-c0ee-472e-9471-9bc00ad18e21"",
+                    ""id"": """",
                     ""path"": ""<Touchscreen>/touch*/press"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -1021,7 +1063,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""b393a886-623e-481c-878f-344d79b20423"",
+                    ""id"": """",
                     ""path"": ""<XRController>/trigger"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -1032,7 +1074,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""cb2df436-1395-49cc-9b7e-8e02effe1ec0"",
+                    ""id"": """",
                     ""path"": ""<Mouse>/scroll"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -1043,7 +1085,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""ace00ce0-8629-4e87-b4d2-0f4a656b5c98"",
+                    ""id"": """",
                     ""path"": ""<Mouse>/middleButton"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -1054,7 +1096,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""3612c07b-1d58-4a82-8a76-2a3b36e33622"",
+                    ""id"": """",
                     ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -1065,7 +1107,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""a989be0e-7fdd-4524-a789-fb8b6c4316a9"",
+                    ""id"": """",
                     ""path"": ""<XRController>/devicePosition"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -1076,7 +1118,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                 },
                 {
                     ""name"": """",
-                    ""id"": ""070fa9d0-9f34-4946-9801-0cb5545c1873"",
+                    ""id"": """",
                     ""path"": ""<XRController>/deviceRotation"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -1117,6 +1159,8 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         m_Gameplay_Hotbar7 = m_Gameplay.FindAction("Hotbar7", throwIfNotFound: true);
         m_Gameplay_Hotbar8 = m_Gameplay.FindAction("Hotbar8", throwIfNotFound: true);
         m_Gameplay_Hotbar9 = m_Gameplay.FindAction("Hotbar9", throwIfNotFound: true);
+        m_Gameplay_Journal = m_Gameplay.FindAction("Journal", throwIfNotFound: true);
+        m_Gameplay_JournalPin = m_Gameplay.FindAction("JournalPin", throwIfNotFound: true);
         // Container
         m_Container = asset.FindActionMap("Container", throwIfNotFound: true);
         m_Container_Point = m_Container.FindAction("Point", throwIfNotFound: true);
@@ -1229,6 +1273,8 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
     private readonly InputAction m_Gameplay_Hotbar7;
     private readonly InputAction m_Gameplay_Hotbar8;
     private readonly InputAction m_Gameplay_Hotbar9;
+    private readonly InputAction m_Gameplay_Journal;
+    private readonly InputAction m_Gameplay_JournalPin;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -1292,6 +1338,14 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         /// Provides access to the underlying input action "Gameplay/Hotbar9".
         /// </summary>
         public InputAction @Hotbar9 => m_Wrapper.m_Gameplay_Hotbar9;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Journal".
+        /// </summary>
+        public InputAction @Journal => m_Wrapper.m_Gameplay_Journal;
+        /// <summary>
+        /// Provides access to the underlying input action "Gameplay/JournalPin".
+        /// </summary>
+        public InputAction @JournalPin => m_Wrapper.m_Gameplay_JournalPin;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1357,6 +1411,12 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             @Hotbar9.started += instance.OnHotbar9;
             @Hotbar9.performed += instance.OnHotbar9;
             @Hotbar9.canceled += instance.OnHotbar9;
+            @Journal.started += instance.OnJournal;
+            @Journal.performed += instance.OnJournal;
+            @Journal.canceled += instance.OnJournal;
+            @JournalPin.started += instance.OnJournalPin;
+            @JournalPin.performed += instance.OnJournalPin;
+            @JournalPin.canceled += instance.OnJournalPin;
         }
 
         /// <summary>
@@ -1407,6 +1467,12 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             @Hotbar9.started -= instance.OnHotbar9;
             @Hotbar9.performed -= instance.OnHotbar9;
             @Hotbar9.canceled -= instance.OnHotbar9;
+            @Journal.started -= instance.OnJournal;
+            @Journal.performed -= instance.OnJournal;
+            @Journal.canceled -= instance.OnJournal;
+            @JournalPin.started -= instance.OnJournalPin;
+            @JournalPin.performed -= instance.OnJournalPin;
+            @JournalPin.canceled -= instance.OnJournalPin;
         }
 
         /// <summary>
@@ -1864,6 +1930,20 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnHotbar9(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Journal" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnJournal(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "JournalPin" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnJournalPin(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Container" which allows adding and removing callbacks.

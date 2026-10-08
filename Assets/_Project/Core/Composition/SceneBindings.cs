@@ -32,6 +32,8 @@ namespace SOLITUDE.Composition
         [SerializeField] private ScrubberTaskSource[] taskSources = new ScrubberTaskSource[0];
         private TaskJournal tasks;
         private string taskScope;
+        private TaskJournalScreenCoordinator journalScreen;
+        private TaskJournalPresenter journalPresenter;
         private readonly List<ContainerSaveSession.ContainerBinding> bindings = new();
         private readonly List<WorldPickup> registeredPickups = new();
         private readonly List<ScrubberScreenView> scrubberScreens = new();
@@ -131,7 +133,7 @@ namespace SOLITUDE.Composition
                     if (source != null)
                         source.Initialize(tasks, taskScope, policy, interactor, scrubberEquipment.Contains(source.Equipment) &&
                             presentations.Resolve(ScrubberEquipment.FuseItemId) != null && inventory.Container.IsAvailable);
-                input.Bind(movement, interactor, selection, () => modal.ToggleInventory(), Back, game.TogglePause);
+                input.Bind(movement, interactor, selection, () => modal.ToggleInventory(), Back, game.TogglePause, journalScreen, journalPresenter);
             }
             catch { Release(); throw; }
         }
@@ -153,11 +155,13 @@ namespace SOLITUDE.Composition
         }
         private bool Back()
         {
+            if (journalScreen?.IsOpen == true) { input?.ConsumeUIActivation(); return journalScreen.Back(); }
             foreach (var screen in scrubberScreens) if (screen != null && screen.Back()) return true;
             return modal?.Back() ?? false;
         }
         public void CloseForTransition()
         {
+            journalScreen?.Close();
             foreach (var screen in scrubberScreens) if (screen != null) screen.Close();
             modal?.Close();
         }
@@ -230,6 +234,7 @@ namespace SOLITUDE.Composition
         public void Release()
         {
             if (session == null) return;
+            journalScreen?.Dispose(); journalScreen = null; journalPresenter?.Dispose(); journalPresenter = null;
             foreach (var source in taskSources) if (source != null) source.ReleaseBinding();
             if (taskScope != null) tasks?.ReleaseScope(taskScope);
             tasks = null; taskScope = null;
