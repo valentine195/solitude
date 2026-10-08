@@ -23,6 +23,15 @@ namespace SOLITUDE.World.ScrubberEncounter
         private static readonly Color Amber = new Color(.95f,.66f,.23f);
         private static readonly Color ActionBackground = new Color(.16f,.18f,.18f);
         private static readonly Color ActionText = new Color(.9f,.91f,.87f);
+        public ScrubberEquipment Equipment => equipment;
+        public void ValidateAuthoring()
+        {
+            if (panel == null || equipment == null || telemetry == null || objective == null || feedback == null || close == null)
+                throw new System.InvalidOperationException("Scrubber screen authoring is incomplete.");
+            foreach (var endpoint in new Component[] { panel.transform, equipment, telemetry, objective, feedback, close })
+                if (endpoint.gameObject.scene != gameObject.scene)
+                    throw new System.InvalidOperationException("Wrong-scene scrubber screen endpoint.");
+        }
         public string Feedback => feedback == null ? "" : feedback.text;
         public bool IsOpen => panel != null && panel.activeSelf;
         public string Telemetry => telemetry == null ? "" : telemetry.text;

@@ -19,12 +19,21 @@ namespace SOLITUDE.Player
 
         private IInteractable currentTarget;
 
+        private SceneInteractionEvents events;
+        private InteractionFeedbackService feedback;
         private bool inputAllowed;
+        public void Bind(SceneInteractionEvents source, InteractionFeedbackService service)
+        { Release(); events = source; feedback = service; }
+        public void Release()
+        {
+            SetInputAllowed(false);
+            events = null; feedback = null;
+        }
+        private void OnDestroy() => Release();
         public void SetInputAllowed(bool allowed)
         {
             inputAllowed = allowed;
-            if (!allowed && currentTarget != null)
-            { currentTarget = null; InteractionEventBus.Publish(new InteractionFocusChangedEvent(null)); }
+            if (!allowed) ClearFocus();
         }
         void Update()
         {
@@ -56,26 +65,18 @@ namespace SOLITUDE.Player
                     Debug.Log($"[Interactor] Focus -> {name}");
                 }
 
-                InteractionEventBus.Publish(
+                events?.Publish(
                     new InteractionFocusChangedEvent(target)
                 );
             }
         }
 
-        private void OnDisable()
+        public void ClearFocus()
         {
-            // Update() stops running while disabled (e.g. during a
-            // cutscene), so without this the last-focused prompt would
-            // stay on screen with no further FocusChanged event to hide
-            // it. Explicitly clear focus so the UI hides the prompt, and
-            // let OnEnable's next Update() naturally recompute it.
-            if (currentTarget != null)
-            {
-                currentTarget = null;
-                InteractionEventBus.Publish(new InteractionFocusChangedEvent(null));
-            }
-
+            if (currentTarget == null) return;
+            currentTarget = null; events?.Publish(new InteractionFocusChangedEvent(null));
         }
+        private void OnDisable() => ClearFocus();
 
         public void TryInteract()
         {
@@ -93,20 +94,20 @@ namespace SOLITUDE.Player
             // up to return false.
             if (!currentTarget.CanInteract(this))
             {
-                InteractionFeedback.Handle(InteractionResult.Blocked());
+                feedback?.Handle(InteractionResult.Blocked());
                 return;
             }
 
             var result = currentTarget.Interact(this);
 
-            InteractionFeedback.Handle(result);
+            feedback?.Handle(result);
 
             // "Triggered" means an interact attempt actually reached a
             // target that allowed it - a blocked attempt above never
             // publishes this, so listeners (achievements, quest tracking,
             // etc.) can treat Triggered as "something really happened"
             // rather than "the button was pressed".
-            InteractionEventBus.Publish(
+            events?.Publish(
                 new InteractionTriggeredEvent(currentTarget, this)
             );
         }

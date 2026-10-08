@@ -1,0 +1,4970 @@
+{
+  "validate_loop": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "tag": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "loops": {
+        "type": "boolean"
+      },
+      "jitter_tolerance": {
+        "default": 1.0,
+        "type": "number",
+        "description": "Default: 1.0."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "offset_cels": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frames": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "dx": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "dy": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "ease": {
+        "default": "linear",
+        "type": "string",
+        "description": "Default: \"linear\"."
+      },
+      "arc_height": {
+        "default": 0.0,
+        "type": "number",
+        "description": "Default: 0.0."
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "frames"
+    ],
+    "type": "object"
+  },
+  "apply_timing_curve": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "curve": {
+        "default": "hold_extremes",
+        "type": "string",
+        "description": "Default: \"hold_extremes\"."
+      },
+      "frames": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "tag": {
+        "type": "string"
+      },
+      "base_ms": {
+        "default": 100,
+        "type": "integer",
+        "description": "Default: 100."
+      },
+      "hold_frames": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "snap_frames": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "tween_cels": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frames": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "scale_from": {
+        "default": 1.0,
+        "type": "number",
+        "description": "Default: 1.0."
+      },
+      "scale_to": {
+        "default": 1.0,
+        "type": "number",
+        "description": "Default: 1.0."
+      },
+      "scale_y_from": {
+        "type": "number"
+      },
+      "scale_y_to": {
+        "type": "number"
+      },
+      "rotate_from": {
+        "default": 0.0,
+        "type": "number",
+        "description": "Default: 0.0."
+      },
+      "rotate_to": {
+        "default": 0.0,
+        "type": "number",
+        "description": "Default: 0.0."
+      },
+      "opacity_from": {
+        "default": 255,
+        "type": "integer",
+        "description": "Default: 255."
+      },
+      "opacity_to": {
+        "default": 255,
+        "type": "integer",
+        "description": "Default: 255."
+      },
+      "ease": {
+        "default": "linear",
+        "type": "string",
+        "description": "Default: \"linear\"."
+      },
+      "anchor": {
+        "default": "center",
+        "type": "string",
+        "description": "Default: \"center\"."
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "frames"
+    ],
+    "type": "object"
+  },
+  "smear_frame": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      },
+      "from_frame": {
+        "type": "integer"
+      },
+      "mode": {
+        "default": "stretch",
+        "type": "string",
+        "description": "Default: \"stretch\"."
+      },
+      "strength": {
+        "default": 0.6,
+        "type": "number",
+        "description": "Default: 0.6."
+      },
+      "steps": {
+        "type": "integer"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "frame"
+    ],
+    "type": "object"
+  },
+  "apply_operations": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "operations": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "dry_run": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "operations"
+    ],
+    "type": "object"
+  },
+  "stamp_file": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "source": {
+        "type": "string"
+      },
+      "x": {
+        "type": "integer"
+      },
+      "y": {
+        "type": "integer"
+      },
+      "source_frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "opacity": {
+        "default": 255,
+        "type": "integer",
+        "description": "Default: 255."
+      },
+      "blend_mode": {
+        "default": "normal",
+        "type": "string",
+        "description": "Default: \"normal\"."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "source",
+      "x",
+      "y"
+    ],
+    "type": "object"
+  },
+  "draw_image_base64": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "image_base64": {
+        "type": "string"
+      },
+      "x": {
+        "type": "integer"
+      },
+      "y": {
+        "type": "integer"
+      },
+      "opacity": {
+        "default": 255,
+        "type": "integer",
+        "description": "Default: 255."
+      },
+      "blend_mode": {
+        "default": "normal",
+        "type": "string",
+        "description": "Default: \"normal\"."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "image_base64",
+      "x",
+      "y"
+    ],
+    "type": "object"
+  },
+  "import_spritesheet": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "source": {
+        "type": "string"
+      },
+      "frame_width": {
+        "type": "integer"
+      },
+      "frame_height": {
+        "type": "integer"
+      },
+      "layout": {
+        "default": "horizontal",
+        "type": "string",
+        "description": "Default: \"horizontal\"."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "source",
+      "frame_width",
+      "frame_height"
+    ],
+    "type": "object"
+  },
+  "export_png": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "output": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "output"
+    ],
+    "type": "object"
+  },
+  "export_gif": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "output": {
+        "type": "string"
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "loop": {
+        "default": true,
+        "type": "boolean",
+        "description": "Default: true."
+      }
+    },
+    "required": [
+      "filename",
+      "output"
+    ],
+    "type": "object"
+  },
+  "export_tag_gif": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "tag": {
+        "type": "string"
+      },
+      "output": {
+        "type": "string"
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "tag",
+      "output"
+    ],
+    "type": "object"
+  },
+  "export_spritesheet": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "output": {
+        "type": "string"
+      },
+      "sheet_type": {
+        "default": "packed",
+        "type": "string",
+        "description": "Default: \"packed\"."
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "data_output": {
+        "type": "string"
+      },
+      "padding": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "ignore_layer": {
+        "type": "string"
+      },
+      "split_layers": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "split_tags": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "output"
+    ],
+    "type": "object"
+  },
+  "export_spritesheet_packed": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "output": {
+        "type": "string"
+      },
+      "sheet_type": {
+        "default": "packed",
+        "type": "string",
+        "description": "Default: \"packed\"."
+      },
+      "trim": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "extrude": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "merge_duplicates": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "padding": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "data_output": {
+        "type": "string"
+      },
+      "data_format": {
+        "type": "string"
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "output"
+    ],
+    "type": "object"
+  },
+  "export_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "output": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "output"
+    ],
+    "type": "object"
+  },
+  "export_layers": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "output_pattern": {
+        "type": "string"
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "include_hidden": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "output_pattern"
+    ],
+    "type": "object"
+  },
+  "export_tags": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "output_pattern": {
+        "type": "string"
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "output_pattern"
+    ],
+    "type": "object"
+  },
+  "export_onion_skin": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      },
+      "output": {
+        "type": "string"
+      },
+      "previous": {
+        "default": 2,
+        "type": "integer",
+        "description": "Default: 2."
+      },
+      "next": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "ghost_opacity": {
+        "default": 80,
+        "type": "integer",
+        "description": "Default: 80."
+      },
+      "scale": {
+        "default": 4,
+        "type": "integer",
+        "description": "Default: 4."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "frame",
+      "output"
+    ],
+    "type": "object"
+  },
+  "export_motion_trail": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "output": {
+        "type": "string"
+      },
+      "tag": {
+        "type": "string"
+      },
+      "frames": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "scale": {
+        "default": 6,
+        "type": "integer",
+        "description": "Default: 6."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "output"
+    ],
+    "type": "object"
+  },
+  "export_frames": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "output_pattern": {
+        "type": "string"
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "output_pattern"
+    ],
+    "type": "object"
+  },
+  "import_image": {
+    "properties": {
+      "input_image": {
+        "type": "string"
+      },
+      "output": {
+        "type": "string"
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "input_image",
+      "output"
+    ],
+    "type": "object"
+  },
+  "get_sprite_info": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "render_preview": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "scale": {
+        "default": 8,
+        "type": "integer",
+        "description": "Default: 8."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "get_pixels": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "format": {
+        "default": "rows",
+        "type": "string",
+        "description": "Default: \"rows\"."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "list_sprites": {
+    "properties": {},
+    "type": "object"
+  },
+  "assess_sprite": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "check_tiling": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "standing": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "check_cvd": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "diff_sprites": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "other": {
+        "type": "string"
+      },
+      "other_frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "other_layer": {
+        "type": "string"
+      },
+      "expect": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "export_godot_spriteframes": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "output": {
+        "type": "string"
+      },
+      "sheet_output": {
+        "type": "string"
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "texture_res_path": {
+        "type": "string"
+      },
+      "default_loop": {
+        "default": true,
+        "type": "boolean",
+        "description": "Default: true."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "output"
+    ],
+    "type": "object"
+  },
+  "export_slice_metadata": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "output": {
+        "type": "string"
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "write_pack_mcmeta": {
+    "properties": {
+      "pack_root": {
+        "type": "string"
+      },
+      "mc_version": {
+        "type": "string"
+      },
+      "pack_format": {
+        "type": "integer"
+      },
+      "description": {
+        "default": "Generated by aseprite-mcp",
+        "type": "string",
+        "description": "Default: \"Generated by aseprite-mcp\"."
+      },
+      "supported_min": {
+        "type": "integer"
+      },
+      "supported_max": {
+        "type": "integer"
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "pack_root"
+    ],
+    "type": "object"
+  },
+  "write_texture_mcmeta": {
+    "properties": {
+      "texture_path": {
+        "type": "string"
+      },
+      "frametime": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "interpolate": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "frame_order": {
+        "items": {},
+        "type": "array"
+      },
+      "frame_width": {
+        "type": "integer"
+      },
+      "frame_height": {
+        "type": "integer"
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "texture_path"
+    ],
+    "type": "object"
+  },
+  "export_minecraft_texture": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "pack_root": {
+        "type": "string"
+      },
+      "namespace": {
+        "default": "minecraft",
+        "type": "string",
+        "description": "Default: \"minecraft\"."
+      },
+      "category": {
+        "default": "block",
+        "type": "string",
+        "description": "Default: \"block\"."
+      },
+      "texture_name": {
+        "type": "string"
+      },
+      "frametime": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "interpolate": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "frame_order": {
+        "items": {},
+        "type": "array"
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "pack_root"
+    ],
+    "type": "object"
+  },
+  "validate_minecraft_texture": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "category": {
+        "type": "string"
+      },
+      "texture_size": {
+        "type": "integer"
+      },
+      "tiling": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "expected_frames": {
+        "type": "integer"
+      },
+      "max_palette_size": {
+        "type": "integer"
+      },
+      "pack_root": {
+        "type": "string"
+      },
+      "namespace": {
+        "default": "minecraft",
+        "type": "string",
+        "description": "Default: \"minecraft\"."
+      },
+      "texture_name": {
+        "type": "string"
+      },
+      "warn_ratio": {
+        "default": 2.0,
+        "type": "number",
+        "description": "Default: 2.0."
+      },
+      "error_ratio": {
+        "default": 4.0,
+        "type": "number",
+        "description": "Default: 4.0."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "get_palette": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "set_palette": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "colors": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "filename",
+      "colors"
+    ],
+    "type": "object"
+  },
+  "set_palette_color": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "index": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "index",
+      "color"
+    ],
+    "type": "object"
+  },
+  "add_palette_color": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "color": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "color"
+    ],
+    "type": "object"
+  },
+  "resize_palette": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "size": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "size"
+    ],
+    "type": "object"
+  },
+  "load_palette": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "palette_file": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "palette_file"
+    ],
+    "type": "object"
+  },
+  "extract_palette": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "from_image": {
+        "type": "string"
+      },
+      "set_as_palette": {
+        "default": true,
+        "type": "boolean",
+        "description": "Default: true."
+      },
+      "include_alpha": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "max_colors": {
+        "default": 256,
+        "type": "integer",
+        "description": "Default: 256."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "quantize_palette": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "max_colors": {
+        "default": 256,
+        "type": "integer",
+        "description": "Default: 256."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "sort_palette": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "by": {
+        "default": "luminance",
+        "type": "string",
+        "description": "Default: \"luminance\"."
+      },
+      "reverse": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "generate_ramp": {
+    "properties": {
+      "base_color": {
+        "type": "string"
+      },
+      "steps": {
+        "default": 5,
+        "type": "integer",
+        "description": "Default: 5."
+      },
+      "hue_shift": {
+        "default": 0.0,
+        "type": "number",
+        "description": "Default: 0.0."
+      },
+      "saturation_shift": {
+        "default": 0.0,
+        "type": "number",
+        "description": "Default: 0.0."
+      },
+      "light_range": {
+        "default": 0.6,
+        "type": "number",
+        "description": "Default: 0.6."
+      },
+      "filename": {
+        "type": "string"
+      },
+      "apply": {
+        "default": "none",
+        "type": "string",
+        "description": "Default: \"none\"."
+      },
+      "shadow_hue": {
+        "type": "string"
+      },
+      "light_hue": {
+        "type": "string"
+      },
+      "sat_curve": {
+        "default": "linear",
+        "type": "string",
+        "description": "Default: \"linear\"."
+      },
+      "easing": {
+        "default": "linear",
+        "type": "string",
+        "description": "Default: \"linear\"."
+      },
+      "chroma": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "base_color"
+    ],
+    "type": "object"
+  },
+  "set_transparent_color": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "index": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "index"
+    ],
+    "type": "object"
+  },
+  "ramp_between": {
+    "properties": {
+      "shadow_color": {
+        "type": "string"
+      },
+      "light_color": {
+        "type": "string"
+      },
+      "steps": {
+        "default": 5,
+        "type": "integer",
+        "description": "Default: 5."
+      },
+      "easing": {
+        "default": "perceptual",
+        "type": "string",
+        "description": "Default: \"perceptual\"."
+      },
+      "filename": {
+        "type": "string"
+      },
+      "apply": {
+        "default": "none",
+        "type": "string",
+        "description": "Default: \"none\"."
+      }
+    },
+    "required": [
+      "shadow_color",
+      "light_color"
+    ],
+    "type": "object"
+  },
+  "ramp_from_art": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "steps": {
+        "default": 5,
+        "type": "integer",
+        "description": "Default: 5."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "list_palette_usage": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      },
+      "layer": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "cycle_palette": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "indices": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "frame_count": {
+        "type": "integer"
+      },
+      "step": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "layer": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "indices"
+    ],
+    "type": "object"
+  },
+  "add_slice": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "x": {
+        "type": "integer"
+      },
+      "y": {
+        "type": "integer"
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "center_x": {
+        "type": "integer"
+      },
+      "center_y": {
+        "type": "integer"
+      },
+      "center_width": {
+        "type": "integer"
+      },
+      "center_height": {
+        "type": "integer"
+      },
+      "pivot_x": {
+        "type": "integer"
+      },
+      "pivot_y": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string"
+      },
+      "data": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "name",
+      "x",
+      "y",
+      "width",
+      "height"
+    ],
+    "type": "object"
+  },
+  "set_slice": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "x": {
+        "type": "integer"
+      },
+      "y": {
+        "type": "integer"
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "new_name": {
+        "type": "string"
+      },
+      "color": {
+        "type": "string"
+      },
+      "data": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "name"
+    ],
+    "type": "object"
+  },
+  "remove_slice": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "name"
+    ],
+    "type": "object"
+  },
+  "list_slices": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "create_sprite": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "color_mode": {
+        "default": "rgb",
+        "type": "string",
+        "description": "Default: \"rgb\"."
+      },
+      "background": {
+        "type": "string"
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "width",
+      "height"
+    ],
+    "type": "object"
+  },
+  "save_sprite_as": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "new_filename": {
+        "type": "string"
+      },
+      "flatten": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "new_filename"
+    ],
+    "type": "object"
+  },
+  "set_color_mode": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "color_mode": {
+        "type": "string"
+      },
+      "dithering": {
+        "default": "none",
+        "type": "string",
+        "description": "Default: \"none\"."
+      },
+      "palette_source": {
+        "default": "from_art",
+        "type": "string",
+        "description": "Default: \"from_art\"."
+      }
+    },
+    "required": [
+      "filename",
+      "color_mode"
+    ],
+    "type": "object"
+  },
+  "resize_canvas": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "anchor": {
+        "default": "top_left",
+        "type": "string",
+        "description": "Default: \"top_left\"."
+      }
+    },
+    "required": [
+      "filename",
+      "width",
+      "height"
+    ],
+    "type": "object"
+  },
+  "crop_sprite": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "x": {
+        "type": "integer"
+      },
+      "y": {
+        "type": "integer"
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "x",
+      "y",
+      "width",
+      "height"
+    ],
+    "type": "object"
+  },
+  "scale_sprite": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "factor": {
+        "type": "number"
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "method": {
+        "default": "nearest",
+        "type": "string",
+        "description": "Default: \"nearest\"."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "flatten_sprite": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "trim_sprite": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "convert_layer_to_background": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "layer"
+    ],
+    "type": "object"
+  },
+  "convert_background_to_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "get_cel": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer"
+    ],
+    "type": "object"
+  },
+  "set_cel_position": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      },
+      "x": {
+        "type": "integer"
+      },
+      "y": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "frame",
+      "x",
+      "y"
+    ],
+    "type": "object"
+  },
+  "set_cel_opacity": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      },
+      "opacity": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "frame",
+      "opacity"
+    ],
+    "type": "object"
+  },
+  "copy_cel": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "from_frame": {
+        "type": "integer"
+      },
+      "to_frame": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "from_frame",
+      "to_frame"
+    ],
+    "type": "object"
+  },
+  "delete_cel": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "frame"
+    ],
+    "type": "object"
+  },
+  "link_cels": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frames": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "frames"
+    ],
+    "type": "object"
+  },
+  "unlink_cels": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frames": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "frames"
+    ],
+    "type": "object"
+  },
+  "set_cel_z_index": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      },
+      "z": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "frame",
+      "z"
+    ],
+    "type": "object"
+  },
+  "set_properties": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "target": {
+        "type": "string"
+      },
+      "key": {
+        "type": "string"
+      },
+      "value": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "tile": {
+        "type": "integer"
+      },
+      "namespace": {
+        "type": "string"
+      },
+      "as_json": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "delete": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename",
+      "target",
+      "key"
+    ],
+    "type": "object"
+  },
+  "get_properties": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "target": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "string"
+      },
+      "tile": {
+        "type": "integer"
+      },
+      "namespace": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "target"
+    ],
+    "type": "object"
+  },
+  "draw_pixels": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "pixels": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "color": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "pixels"
+    ],
+    "type": "object"
+  },
+  "draw_pixel_map": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "rows": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "legend": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "rows",
+      "legend"
+    ],
+    "type": "object"
+  },
+  "draw_line": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "x1": {
+        "type": "integer"
+      },
+      "y1": {
+        "type": "integer"
+      },
+      "x2": {
+        "type": "integer"
+      },
+      "y2": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string"
+      },
+      "pixel_perfect": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "antialias": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "x1",
+      "y1",
+      "x2",
+      "y2",
+      "color"
+    ],
+    "type": "object"
+  },
+  "draw_polyline": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "points": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "color": {
+        "type": "string"
+      },
+      "closed": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "pixel_perfect": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "points",
+      "color"
+    ],
+    "type": "object"
+  },
+  "draw_curve": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "x0": {
+        "type": "integer"
+      },
+      "y0": {
+        "type": "integer"
+      },
+      "control_x": {
+        "type": "integer"
+      },
+      "control_y": {
+        "type": "integer"
+      },
+      "x1": {
+        "type": "integer"
+      },
+      "y1": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string"
+      },
+      "steps": {
+        "default": 32,
+        "type": "integer",
+        "description": "Default: 32."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "x0",
+      "y0",
+      "control_x",
+      "control_y",
+      "x1",
+      "y1",
+      "color"
+    ],
+    "type": "object"
+  },
+  "draw_rectangle": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "x": {
+        "type": "integer"
+      },
+      "y": {
+        "type": "integer"
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string"
+      },
+      "filled": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "x",
+      "y",
+      "width",
+      "height",
+      "color"
+    ],
+    "type": "object"
+  },
+  "draw_ellipse": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "center_x": {
+        "type": "integer"
+      },
+      "center_y": {
+        "type": "integer"
+      },
+      "radius_x": {
+        "type": "integer"
+      },
+      "radius_y": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string"
+      },
+      "filled": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "antialias": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "center_x",
+      "center_y",
+      "radius_x",
+      "radius_y",
+      "color"
+    ],
+    "type": "object"
+  },
+  "draw_ellipse_in_box": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "x": {
+        "type": "integer"
+      },
+      "y": {
+        "type": "integer"
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string"
+      },
+      "filled": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "antialias": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "x",
+      "y",
+      "width",
+      "height",
+      "color"
+    ],
+    "type": "object"
+  },
+  "fill_area": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "x": {
+        "type": "integer"
+      },
+      "y": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "x",
+      "y",
+      "color"
+    ],
+    "type": "object"
+  },
+  "fill_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "color": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "color"
+    ],
+    "type": "object"
+  },
+  "clear_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "shift_along_ramp": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "steps": {
+        "type": "integer"
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "tolerance": {
+        "default": 48.0,
+        "type": "number",
+        "description": "Default: 48.0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "ramp",
+      "steps"
+    ],
+    "type": "object"
+  },
+  "shade_region_by_light": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "base_color": {
+        "type": "string"
+      },
+      "light_angle": {
+        "default": 135.0,
+        "type": "number",
+        "description": "Default: 135.0."
+      },
+      "light_z": {
+        "default": 0.45,
+        "type": "number",
+        "description": "Default: 0.45."
+      },
+      "bulge": {
+        "default": 1.0,
+        "type": "number",
+        "description": "Default: 1.0."
+      },
+      "ambient": {
+        "default": 0.35,
+        "type": "number",
+        "description": "Default: 0.35."
+      },
+      "rim": {
+        "default": 0.0,
+        "type": "number",
+        "description": "Default: 0.0."
+      },
+      "bias": {
+        "default": 0.0,
+        "type": "number",
+        "description": "Default: 0.0."
+      },
+      "fill_angle": {
+        "type": "number"
+      },
+      "fill_strength": {
+        "default": 0.35,
+        "type": "number",
+        "description": "Default: 0.35."
+      },
+      "tolerance": {
+        "default": 24.0,
+        "type": "number",
+        "description": "Default: 24.0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "ramp"
+    ],
+    "type": "object"
+  },
+  "specular_highlight": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "light_angle": {
+        "default": 135.0,
+        "type": "number",
+        "description": "Default: 135.0."
+      },
+      "light_z": {
+        "default": 0.45,
+        "type": "number",
+        "description": "Default: 0.45."
+      },
+      "size": {
+        "default": 2,
+        "type": "integer",
+        "description": "Default: 2."
+      },
+      "tightness": {
+        "default": 0.7,
+        "type": "number",
+        "description": "Default: 0.7."
+      },
+      "bulge": {
+        "default": 1.0,
+        "type": "number",
+        "description": "Default: 1.0."
+      },
+      "highlight_color": {
+        "type": "string"
+      },
+      "base_color": {
+        "type": "string"
+      },
+      "tolerance": {
+        "default": 24.0,
+        "type": "number",
+        "description": "Default: 24.0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "ramp"
+    ],
+    "type": "object"
+  },
+  "contact_shadow": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "occluder_color": {
+        "type": "string"
+      },
+      "radius": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "depth": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "direction": {
+        "type": "number"
+      },
+      "tolerance": {
+        "default": 24.0,
+        "type": "number",
+        "description": "Default: 24.0."
+      },
+      "occluder_tolerance": {
+        "type": "number"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "ramp",
+      "occluder_color"
+    ],
+    "type": "object"
+  },
+  "seam_occlusion": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "rows": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "legend": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "radius": {
+        "default": 2,
+        "type": "integer",
+        "description": "Default: 2."
+      },
+      "depth": {
+        "default": 2,
+        "type": "integer",
+        "description": "Default: 2."
+      },
+      "tolerance": {
+        "default": 24.0,
+        "type": "number",
+        "description": "Default: 24.0."
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "rows",
+      "legend",
+      "ramp"
+    ],
+    "type": "object"
+  },
+  "surface_emission": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "source_color": {
+        "type": "string"
+      },
+      "radius": {
+        "default": 4,
+        "type": "integer",
+        "description": "Default: 4."
+      },
+      "depth": {
+        "default": 3,
+        "type": "integer",
+        "description": "Default: 3."
+      },
+      "falloff": {
+        "default": "quadratic",
+        "type": "string",
+        "description": "Default: \"quadratic\"."
+      },
+      "tolerance": {
+        "default": 24.0,
+        "type": "number",
+        "description": "Default: 24.0."
+      },
+      "source_tolerance": {
+        "type": "number"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "ramp",
+      "source_color"
+    ],
+    "type": "object"
+  },
+  "outline_smart": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "mode": {
+        "default": "colormatched",
+        "type": "string",
+        "description": "Default: \"colormatched\"."
+      },
+      "darken_steps": {
+        "default": 2,
+        "type": "integer",
+        "description": "Default: 2."
+      },
+      "light_angle": {
+        "type": "number"
+      },
+      "tolerance": {
+        "default": 32.0,
+        "type": "number",
+        "description": "Default: 32.0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "ramp"
+    ],
+    "type": "object"
+  },
+  "dither_band": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "from_step": {
+        "type": "integer"
+      },
+      "to_step": {
+        "type": "integer"
+      },
+      "pattern": {
+        "default": "bayer4",
+        "type": "string",
+        "description": "Default: \"bayer4\"."
+      },
+      "width": {
+        "default": 2,
+        "type": "integer",
+        "description": "Default: 2."
+      },
+      "tolerance": {
+        "default": 24.0,
+        "type": "number",
+        "description": "Default: 24.0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "ramp",
+      "from_step",
+      "to_step"
+    ],
+    "type": "object"
+  },
+  "gradient_map": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "contrast": {
+        "default": 1.0,
+        "type": "number",
+        "description": "Default: 1.0."
+      },
+      "bias": {
+        "default": 0.0,
+        "type": "number",
+        "description": "Default: 0.0."
+      },
+      "dither": {
+        "type": "string"
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "ramp"
+    ],
+    "type": "object"
+  },
+  "shade_facets": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "rows": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "legend": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "light_angle": {
+        "default": 135.0,
+        "type": "number",
+        "description": "Default: 135.0."
+      },
+      "light_z": {
+        "default": 0.5,
+        "type": "number",
+        "description": "Default: 0.5."
+      },
+      "fill_strength": {
+        "default": 0.35,
+        "type": "number",
+        "description": "Default: 0.35."
+      },
+      "ambient": {
+        "default": 0.16,
+        "type": "number",
+        "description": "Default: 0.16."
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "rows",
+      "legend",
+      "ramp"
+    ],
+    "type": "object"
+  },
+  "fill_gradient": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "colors": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "gradient_type": {
+        "default": "linear",
+        "type": "string",
+        "description": "Default: \"linear\"."
+      },
+      "angle": {
+        "default": 0.0,
+        "type": "number",
+        "description": "Default: 0.0."
+      },
+      "dither": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "respect_alpha": {
+        "default": true,
+        "type": "boolean",
+        "description": "Default: true."
+      }
+    },
+    "required": [
+      "filename",
+      "colors"
+    ],
+    "type": "object"
+  },
+  "add_outline": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "color": {
+        "type": "string"
+      },
+      "thickness": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "connectivity": {
+        "default": 8,
+        "type": "integer",
+        "description": "Default: 8."
+      },
+      "where": {
+        "default": "outside",
+        "type": "string",
+        "description": "Default: \"outside\"."
+      },
+      "light_angle": {
+        "type": "number"
+      },
+      "lit_thickness": {
+        "type": "integer"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "color"
+    ],
+    "type": "object"
+  },
+  "add_drop_shadow": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "offset_x": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "offset_y": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "color": {
+        "default": "#00000080",
+        "type": "string",
+        "description": "Default: \"#00000080\"."
+      },
+      "opacity": {
+        "default": 255,
+        "type": "integer",
+        "description": "Default: 255."
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer"
+    ],
+    "type": "object"
+  },
+  "cast_shadow": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "light_angle": {
+        "default": 135.0,
+        "type": "number",
+        "description": "Default: 135.0."
+      },
+      "light_height": {
+        "default": 0.6,
+        "type": "number",
+        "description": "Default: 0.6."
+      },
+      "ground_y": {
+        "type": "integer"
+      },
+      "ground_layer": {
+        "type": "string"
+      },
+      "softness": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "opacity": {
+        "default": 255,
+        "type": "integer",
+        "description": "Default: 255."
+      },
+      "new_layer": {
+        "default": "shadow",
+        "type": "string",
+        "description": "Default: \"shadow\"."
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "ramp"
+    ],
+    "type": "object"
+  },
+  "glow": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "ramp": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "radius": {
+        "default": 3,
+        "type": "integer",
+        "description": "Default: 3."
+      },
+      "falloff": {
+        "default": "linear",
+        "type": "string",
+        "description": "Default: \"linear\"."
+      },
+      "dither_edge": {
+        "default": true,
+        "type": "boolean",
+        "description": "Default: true."
+      },
+      "base_color": {
+        "type": "string"
+      },
+      "tolerance": {
+        "default": 24.0,
+        "type": "number",
+        "description": "Default: 24.0."
+      },
+      "new_layer": {
+        "default": "glow",
+        "type": "string",
+        "description": "Default: \"glow\"."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "ramp"
+    ],
+    "type": "object"
+  },
+  "replace_color": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "from_color": {
+        "type": "string"
+      },
+      "to_color": {
+        "type": "string"
+      },
+      "tolerance": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "from_color",
+      "to_color"
+    ],
+    "type": "object"
+  },
+  "invert_colors": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "adjust_brightness_contrast": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "brightness": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "contrast": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "adjust_hue_saturation": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "hue": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "saturation": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "lightness": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "desaturate": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "amount": {
+        "default": 100,
+        "type": "integer",
+        "description": "Default: 100."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "fill_checkerboard": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "color1": {
+        "type": "string"
+      },
+      "color2": {
+        "type": "string"
+      },
+      "size": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "color1",
+      "color2"
+    ],
+    "type": "object"
+  },
+  "remove_stray_pixels": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "protect": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "erase_isolated": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "min_cluster": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "normalize_edge_runs": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "min_span": {
+        "default": 3,
+        "type": "integer",
+        "description": "Default: 3."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "add_frame": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "duration_ms": {
+        "default": 100,
+        "type": "integer",
+        "description": "Default: 100."
+      },
+      "copy_from": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "duplicate_frame": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "frame"
+    ],
+    "type": "object"
+  },
+  "remove_frame": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "frame"
+    ],
+    "type": "object"
+  },
+  "set_frame_duration": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      },
+      "duration_ms": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "frame",
+      "duration_ms"
+    ],
+    "type": "object"
+  },
+  "set_all_frame_durations": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "duration_ms": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "duration_ms"
+    ],
+    "type": "object"
+  },
+  "reverse_frames": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "tag": {
+        "type": "string"
+      },
+      "frames": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "move_frame": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "frame": {
+        "type": "integer"
+      },
+      "to": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "frame",
+      "to"
+    ],
+    "type": "object"
+  },
+  "add_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "group": {
+        "type": "string"
+      },
+      "opacity": {
+        "default": 255,
+        "type": "integer",
+        "description": "Default: 255."
+      },
+      "blend_mode": {
+        "default": "normal",
+        "type": "string",
+        "description": "Default: \"normal\"."
+      },
+      "visible": {
+        "default": true,
+        "type": "boolean",
+        "description": "Default: true."
+      }
+    },
+    "required": [
+      "filename",
+      "name"
+    ],
+    "type": "object"
+  },
+  "add_group_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "name"
+    ],
+    "type": "object"
+  },
+  "remove_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "layer"
+    ],
+    "type": "object"
+  },
+  "rename_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "new_name": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "new_name"
+    ],
+    "type": "object"
+  },
+  "set_layer_properties": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "opacity": {
+        "type": "integer"
+      },
+      "blend_mode": {
+        "type": "string"
+      },
+      "visible": {
+        "type": "boolean"
+      },
+      "editable": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "layer"
+    ],
+    "type": "object"
+  },
+  "move_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "to_index": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "to_index"
+    ],
+    "type": "object"
+  },
+  "duplicate_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "layer"
+    ],
+    "type": "object"
+  },
+  "merge_layer_down": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "layer"
+    ],
+    "type": "object"
+  },
+  "add_tag": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "from_frame": {
+        "type": "integer"
+      },
+      "to_frame": {
+        "type": "integer"
+      },
+      "direction": {
+        "default": "forward",
+        "type": "string",
+        "description": "Default: \"forward\"."
+      },
+      "color": {
+        "type": "string"
+      },
+      "repeats": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      }
+    },
+    "required": [
+      "filename",
+      "name",
+      "from_frame",
+      "to_frame"
+    ],
+    "type": "object"
+  },
+  "remove_tag": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "name"
+    ],
+    "type": "object"
+  },
+  "set_tag": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "from_frame": {
+        "type": "integer"
+      },
+      "to_frame": {
+        "type": "integer"
+      },
+      "new_name": {
+        "type": "string"
+      },
+      "direction": {
+        "type": "string"
+      },
+      "color": {
+        "type": "string"
+      },
+      "repeats": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "name"
+    ],
+    "type": "object"
+  },
+  "create_tilemap_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "tile_width": {
+        "default": 16,
+        "type": "integer",
+        "description": "Default: 16."
+      },
+      "tile_height": {
+        "default": 16,
+        "type": "integer",
+        "description": "Default: 16."
+      },
+      "columns": {
+        "type": "integer"
+      },
+      "rows": {
+        "type": "integer"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "name"
+    ],
+    "type": "object"
+  },
+  "add_tile": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "color": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer"
+    ],
+    "type": "object"
+  },
+  "fill_tile": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "tile_index": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "tile_index",
+      "color"
+    ],
+    "type": "object"
+  },
+  "paint_tile_pixels": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "tile_index": {
+        "type": "integer"
+      },
+      "pixels": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "color": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "tile_index",
+      "pixels"
+    ],
+    "type": "object"
+  },
+  "set_tile": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "column": {
+        "type": "integer"
+      },
+      "row": {
+        "type": "integer"
+      },
+      "tile_index": {
+        "type": "integer"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "column",
+      "row",
+      "tile_index"
+    ],
+    "type": "object"
+  },
+  "set_tiles": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "tiles": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "tiles"
+    ],
+    "type": "object"
+  },
+  "fill_tilemap": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "tile_index": {
+        "type": "integer"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer",
+      "tile_index"
+    ],
+    "type": "object"
+  },
+  "get_tilemap": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer"
+    ],
+    "type": "object"
+  },
+  "create_character_sprite": {
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "width": {
+        "default": 32,
+        "type": "integer",
+        "description": "Default: 32."
+      },
+      "height": {
+        "default": 32,
+        "type": "integer",
+        "description": "Default: 32."
+      },
+      "base_color": {
+        "default": "#3878c8",
+        "type": "string",
+        "description": "Default: \"#3878c8\"."
+      },
+      "with_placeholder": {
+        "default": true,
+        "type": "boolean",
+        "description": "Default: true."
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "type": "object"
+  },
+  "make_4_frame_idle_animation": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "default": "body",
+        "type": "string",
+        "description": "Default: \"body\"."
+      },
+      "frame_duration_ms": {
+        "default": 150,
+        "type": "integer",
+        "description": "Default: 150."
+      },
+      "bob_pixels": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "tag_name": {
+        "default": "idle",
+        "type": "string",
+        "description": "Default: \"idle\"."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "create_tileset_project": {
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "tile_size": {
+        "default": 16,
+        "type": "integer",
+        "description": "Default: 16."
+      },
+      "columns": {
+        "default": 4,
+        "type": "integer",
+        "description": "Default: 4."
+      },
+      "rows": {
+        "default": 4,
+        "type": "integer",
+        "description": "Default: 4."
+      },
+      "tiles": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "type": "object"
+  },
+  "export_game_asset_bundle": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "bundle_name": {
+        "type": "string"
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "validate_sprite_for_game_export": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "expected_width": {
+        "type": "integer"
+      },
+      "expected_height": {
+        "type": "integer"
+      },
+      "tile_multiple": {
+        "type": "integer"
+      },
+      "allowed_color_modes": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "min_frames": {
+        "type": "integer"
+      },
+      "max_frames": {
+        "type": "integer"
+      },
+      "required_tags": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "require_transparent_background": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "max_palette_size": {
+        "type": "integer"
+      },
+      "expected_exports": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "spritesheet_data": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "create_icon_set": {
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "icon_size": {
+        "default": 16,
+        "type": "integer",
+        "description": "Default: 16."
+      },
+      "count": {
+        "default": 4,
+        "type": "integer",
+        "description": "Default: 4."
+      },
+      "columns": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "type": "object"
+  },
+  "create_rpg_item_sheet": {
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "item_size": {
+        "default": 16,
+        "type": "integer",
+        "description": "Default: 16."
+      },
+      "items": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "columns": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "name"
+    ],
+    "type": "object"
+  },
+  "make_8_direction_walk_template": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "frames_per_direction": {
+        "default": 8,
+        "type": "integer",
+        "description": "Default: 8."
+      },
+      "frame_duration_ms": {
+        "default": 120,
+        "type": "integer",
+        "description": "Default: 120."
+      },
+      "directions": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "scaffold_cycle": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "kind": {
+        "type": "string"
+      },
+      "frames": {
+        "type": "integer"
+      },
+      "base_ms": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "kind"
+    ],
+    "type": "object"
+  },
+  "validate_asset_spec": {
+    "properties": {
+      "spec": {
+        "additionalProperties": true,
+        "type": "object"
+      }
+    },
+    "required": [
+      "spec"
+    ],
+    "type": "object"
+  },
+  "plan_asset_spec": {
+    "properties": {
+      "spec": {
+        "additionalProperties": true,
+        "type": "object"
+      }
+    },
+    "required": [
+      "spec"
+    ],
+    "type": "object"
+  },
+  "build_asset_from_spec": {
+    "properties": {
+      "spec": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "overwrite": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      }
+    },
+    "required": [
+      "spec"
+    ],
+    "type": "object"
+  },
+  "validate_asset_against_spec": {
+    "properties": {
+      "spec": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "spec"
+    ],
+    "type": "object"
+  },
+  "draw_brush": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "brush": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "points": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "color": {
+        "type": "string"
+      },
+      "anchor": {
+        "default": "center",
+        "type": "string",
+        "description": "Default: \"center\"."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "brush",
+      "points",
+      "color"
+    ],
+    "type": "object"
+  },
+  "stamp_pattern": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "source": {
+        "type": "string"
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "spacing_x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "spacing_y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "opacity": {
+        "default": 255,
+        "type": "integer",
+        "description": "Default: 255."
+      },
+      "blend_mode": {
+        "default": "normal",
+        "type": "string",
+        "description": "Default: \"normal\"."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "source"
+    ],
+    "type": "object"
+  },
+  "mirror_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "direction": {
+        "default": "horizontal",
+        "type": "string",
+        "description": "Default: \"horizontal\"."
+      },
+      "source_side": {
+        "default": "first",
+        "type": "string",
+        "description": "Default: \"first\"."
+      },
+      "axis": {
+        "type": "integer"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "layer"
+    ],
+    "type": "object"
+  },
+  "draw_symmetric_pixels": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "pixels": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "color": {
+        "type": "string"
+      },
+      "mode": {
+        "default": "horizontal",
+        "type": "string",
+        "description": "Default: \"horizontal\"."
+      },
+      "axis_x": {
+        "type": "integer"
+      },
+      "axis_y": {
+        "type": "integer"
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "pixels",
+      "color"
+    ],
+    "type": "object"
+  },
+  "gui_available": {
+    "properties": {},
+    "type": "object"
+  },
+  "open_in_editor": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "health_check": {
+    "properties": {},
+    "type": "object"
+  },
+  "add_reference_layer": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "image_file": {
+        "type": "string"
+      },
+      "layer_name": {
+        "default": "reference",
+        "type": "string",
+        "description": "Default: \"reference\"."
+      },
+      "opacity": {
+        "default": 128,
+        "type": "integer",
+        "description": "Default: 128."
+      },
+      "scale_to_fit": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "image_file"
+    ],
+    "type": "object"
+  },
+  "import_reference_sequence": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "images": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "layer_name": {
+        "default": "rotoscope",
+        "type": "string",
+        "description": "Default: \"rotoscope\"."
+      },
+      "opacity": {
+        "default": 128,
+        "type": "integer",
+        "description": "Default: 128."
+      },
+      "scale_to_fit": {
+        "default": false,
+        "type": "boolean",
+        "description": "Default: false."
+      },
+      "start_frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "images"
+    ],
+    "type": "object"
+  },
+  "select_region": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "shape": {
+        "default": "rect",
+        "type": "string",
+        "description": "Default: \"rect\"."
+      },
+      "x": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "y": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "width": {
+        "type": "integer"
+      },
+      "height": {
+        "type": "integer"
+      },
+      "points": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "mode": {
+        "default": "replace",
+        "type": "string",
+        "description": "Default: \"replace\"."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "select_by_color": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "color": {
+        "type": "string"
+      },
+      "tolerance": {
+        "default": 0,
+        "type": "integer",
+        "description": "Default: 0."
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "layer": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename",
+      "color"
+    ],
+    "type": "object"
+  },
+  "modify_selection": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "op": {
+        "type": "string"
+      },
+      "quantity": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "op"
+    ],
+    "type": "object"
+  },
+  "invert_selection": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "deselect": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "get_selection": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "draw_text": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "text": {
+        "type": "string"
+      },
+      "x": {
+        "type": "integer"
+      },
+      "y": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string"
+      },
+      "scale": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "font_path": {
+        "type": "string"
+      },
+      "font_size": {
+        "default": 16,
+        "type": "integer",
+        "description": "Default: 16."
+      },
+      "spacing": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      },
+      "threshold": {
+        "default": 128,
+        "type": "integer",
+        "description": "Default: 128."
+      },
+      "layer": {
+        "type": "string"
+      },
+      "frame": {
+        "default": 1,
+        "type": "integer",
+        "description": "Default: 1."
+      }
+    },
+    "required": [
+      "filename",
+      "text",
+      "x",
+      "y",
+      "color"
+    ],
+    "type": "object"
+  },
+  "flip_sprite": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "direction": {
+        "default": "horizontal",
+        "type": "string",
+        "description": "Default: \"horizontal\"."
+      }
+    },
+    "required": [
+      "filename"
+    ],
+    "type": "object"
+  },
+  "rotate_sprite": {
+    "properties": {
+      "filename": {
+        "type": "string"
+      },
+      "angle": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "filename",
+      "angle"
+    ],
+    "type": "object"
+  }
+}

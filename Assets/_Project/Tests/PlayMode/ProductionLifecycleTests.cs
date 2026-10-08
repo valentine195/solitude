@@ -4,6 +4,9 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using SOLITUDE.Application;
+using SOLITUDE.Core.Interaction;
+using SOLITUDE.Core.Events;
+using SOLITUDE.Core.UI;
 using SOLITUDE.Composition;
 using SOLITUDE.Containers;
 using SOLITUDE.Features.Interactables;
@@ -36,6 +39,27 @@ namespace SOLITUDE.Tests
         }
         [UnityTearDown] public IEnumerator Release()
         {if(Root!=null)UnityEngine.Object.Destroy(Root.gameObject);yield return null;Time.timeScale=1;}
+        [UnityTest] public IEnumerator RepeatedSceneTransitionsDisposeInteractionViewsAndEventSubscriptions()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                var interaction = Field<SceneInteractionScope>(PlayerScope, "interactions");
+                var events = interaction.Events; var feedback = interaction.Feedback;
+                feedback.Handle(InteractionResult.Success("Before transition"));
+                int oldDeliveries = 0; events.FocusChanged += _ => oldDeliveries++;
+                var transition = Root.TransitionTo("Assets/_Project/Scenes/Wakeup.unity");
+                yield return transition; yield return null;
+                Assert.AreEqual(RuntimeStartupState.Ready, Root.State);
+                Assert.IsNull(Field<InteractionFeedbackView>(feedback, "view")); Assert.IsNull(events.CurrentFocus);
+                int releasedCount = oldDeliveries; events.Publish(new InteractionFocusChangedEvent(null));
+                Assert.AreEqual(releasedCount, oldDeliveries, "Disposed scene events do not dispatch.");
+                var replacement = Field<SceneInteractionScope>(PlayerScope, "interactions");
+                Assert.AreNotSame(events, replacement.Events); Assert.AreNotSame(feedback, replacement.Feedback);
+                int newDeliveries = 0; replacement.Events.FocusChanged += _ => newDeliveries++;
+                events.Publish(new InteractionFocusChangedEvent(null)); Assert.AreEqual(0, newDeliveries);
+                replacement.Events.Publish(new InteractionFocusChangedEvent(null)); Assert.AreEqual(1, newDeliveries);
+            }
+        }
         [UnityTest] public IEnumerator StartupAndInactiveBindingsStaySingleAcrossEnableCycles()
         {
             var scope=PlayerScope;var input=Field<SOLITUDE.Core.Input.UnityInputHost>(Root,"input");var modal=Field<ContainerModalCoordinator>(scope,"modal");

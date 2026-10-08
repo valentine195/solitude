@@ -1,0 +1,73 @@
+{
+  "ok": true,
+  "schema_version": "workflow_manifest.v1",
+  "kind": "validation",
+  "created_files": [],
+  "suggested_next_actions": [
+    "Fix: width 64 != expected 32",
+    "Fix: height 96 != expected 48"
+  ],
+  "warnings": [],
+  "sprite": {
+    "path": "/Users/jeremyvalentine/SOLITUDE/work/Reviews/PlayerSpriteAsepriteAudit20261008/player_audit_clone.aseprite",
+    "width": 64,
+    "height": 96,
+    "color_mode": "rgb",
+    "frames": 8,
+    "layers": [
+      "Reference Layer 1",
+      "Body"
+    ],
+    "tags": [
+      {
+        "name": "Idle_Down",
+        "from": 1,
+        "to": 1,
+        "aniDir": "forward",
+        "repeats": 0
+      },
+      {
+        "name": "Walk_Down",
+        "from": 2,
+        "to": 8,
+        "aniDir": "forward",
+        "repeats": 0
+      }
+    ],
+    "slices": []
+  },
+  "validation": {
+    "passed": false,
+    "checks": [
+      {
+        "name": "width",
+        "ok": false,
+        "level": "error",
+        "detail": "width 64 != expected 32"
+      },
+      {
+        "name": "height",
+        "ok": false,
+        "level": "error",
+        "detail": "height 96 != expected 48"
+      },
+      {
+        "name": "required_tags",
+        "ok": true,
+        "level": "error",
+        "detail": ""
+      },
+      {
+        "name": "transparent_background",
+        "ok": true,
+        "level": "error",
+        "detail": ""
+      }
+    ],
+    "errors": [
+      "width 64 != expected 32",
+      "height 96 != expected 48"
+    ],
+    "warnings": []
+  }
+}

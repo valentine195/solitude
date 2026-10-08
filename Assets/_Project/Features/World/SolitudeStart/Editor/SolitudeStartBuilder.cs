@@ -209,6 +209,7 @@ namespace SOLITUDE.World.SolitudeStart.Editor
             SetReference(feedbackView.GetComponent<InteractionFeedbackView>(), "root", feedbackLabel.gameObject);
             SetReference(feedbackView.GetComponent<InteractionFeedbackView>(), "label", feedbackLabel);
             feedbackLabel.gameObject.SetActive(false);
+            canvasGO.AddComponent<SOLITUDE.Core.Interaction.SceneInteractionBindings>();
             var controller = canvasGO.AddComponent<UIController>();
             SetReference(controller, "interactionPrompt", promptView.GetComponent<InteractionPromptView>());
             SetReference(controller, "feedbackView", feedbackView.GetComponent<InteractionFeedbackView>());

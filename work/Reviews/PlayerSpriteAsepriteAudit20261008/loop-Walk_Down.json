@@ -1,0 +1,256 @@
+{
+  "ok": true,
+  "schema_version": "workflow_manifest.v1",
+  "kind": "validation",
+  "created_files": [],
+  "suggested_next_actions": [
+    "set_frame_duration on the extreme poses (two to four times the passing frames) so the cycle has a shape in time.",
+    "Compare contact_rows in the animation section: for a grounded cycle every frame should share one bottom row."
+  ],
+  "warnings": [
+    "every frame lasts 100ms; real cycles hold their extremes two to four times as long as the passing frames",
+    "the bottom row of the drawn content moves by 1px across these frames: a character sliding or sinking in a grounded cycle, and expected while airborne"
+  ],
+  "animation": {
+    "tag": "Walk_Down",
+    "loops": true,
+    "frame_count": 7,
+    "total_duration_ms": 700,
+    "frames": [
+      {
+        "frame": 2,
+        "hash": "2706b3f2dd6c27db",
+        "duration_ms": 100,
+        "bounds": {
+          "height": 79,
+          "y": 8,
+          "x": 19,
+          "width": 26
+        },
+        "centroid": {
+          "x": 31.5,
+          "y": 47.0
+        },
+        "bottom": 86
+      },
+      {
+        "frame": 3,
+        "hash": "d8b66c1e960b52d5",
+        "duration_ms": 100,
+        "bounds": {
+          "height": 79,
+          "y": 9,
+          "x": 20,
+          "width": 25
+        },
+        "centroid": {
+          "x": 32.0,
+          "y": 48.0
+        },
+        "bottom": 87
+      },
+      {
+        "frame": 4,
+        "hash": "a3147a47cdf2a826",
+        "duration_ms": 100,
+        "bounds": {
+          "height": 80,
+          "y": 8,
+          "x": 19,
+          "width": 26
+        },
+        "centroid": {
+          "x": 31.5,
+          "y": 47.5
+        },
+        "bottom": 87
+      },
+      {
+        "frame": 5,
+        "hash": "8d2b6fff7616cc93",
+        "duration_ms": 100,
+        "bounds": {
+          "height": 79,
+          "y": 8,
+          "x": 18,
+          "width": 28
+        },
+        "centroid": {
+          "x": 31.5,
+          "y": 47.0
+        },
+        "bottom": 86
+      },
+      {
+        "frame": 6,
+        "hash": "9d145984a5f3580e",
+        "duration_ms": 100,
+        "bounds": {
+          "height": 79,
+          "y": 8,
+          "x": 19,
+          "width": 26
+        },
+        "centroid": {
+          "x": 31.5,
+          "y": 47.0
+        },
+        "bottom": 86
+      },
+      {
+        "frame": 7,
+        "hash": "a5b67a4bb4a7aaf8",
+        "duration_ms": 100,
+        "bounds": {
+          "height": 79,
+          "y": 9,
+          "x": 19,
+          "width": 25
+        },
+        "centroid": {
+          "x": 31.0,
+          "y": 48.0
+        },
+        "bottom": 87
+      },
+      {
+        "frame": 8,
+        "hash": "3253aae5a8f88184",
+        "duration_ms": 100,
+        "bounds": {
+          "height": 79,
+          "y": 8,
+          "x": 18,
+          "width": 28
+        },
+        "centroid": {
+          "x": 31.5,
+          "y": 47.0
+        },
+        "bottom": 86
+      }
+    ],
+    "durations_ms": [
+      100,
+      100,
+      100,
+      100,
+      100,
+      100,
+      100
+    ],
+    "spacing": [
+      {
+        "from": 2,
+        "to": 3,
+        "dx": 0.5,
+        "dy": 1.0,
+        "distance": 1.12
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "dx": -0.5,
+        "dy": -0.5,
+        "distance": 0.71
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "dx": 0.0,
+        "dy": -0.5,
+        "distance": 0.5
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "dx": 0.0,
+        "dy": 0.0,
+        "distance": 0.0
+      },
+      {
+        "from": 6,
+        "to": 7,
+        "dx": -0.5,
+        "dy": 1.0,
+        "distance": 1.12
+      },
+      {
+        "from": 7,
+        "to": 8,
+        "dx": 0.5,
+        "dy": -1.0,
+        "distance": 1.12
+      }
+    ],
+    "spacing_direction_changes": 1,
+    "duplicate_pairs": [],
+    "seam_duplicate": false,
+    "uniform_timing": true,
+    "empty_frames": [],
+    "contact_rows": [
+      86,
+      87,
+      87,
+      86,
+      86,
+      87,
+      86
+    ],
+    "contact_drift_px": 1,
+    "layer": null,
+    "sprite_frame_count": 8
+  },
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "comparable_frames",
+        "ok": true,
+        "level": "warning",
+        "detail": ""
+      },
+      {
+        "name": "no_seam_duplicate",
+        "ok": true,
+        "level": "error",
+        "detail": ""
+      },
+      {
+        "name": "no_duplicate_adjacent_frames",
+        "ok": true,
+        "level": "error",
+        "detail": ""
+      },
+      {
+        "name": "timing_varies",
+        "ok": false,
+        "level": "warning",
+        "detail": "every frame lasts 100ms; real cycles hold their extremes two to four times as long as the passing frames"
+      },
+      {
+        "name": "spacing_steady",
+        "ok": true,
+        "level": "warning",
+        "detail": ""
+      },
+      {
+        "name": "contact_edge_stable",
+        "ok": false,
+        "level": "warning",
+        "detail": "the bottom row of the drawn content moves by 1px across these frames: a character sliding or sinking in a grounded cycle, and expected while airborne"
+      },
+      {
+        "name": "no_empty_frames",
+        "ok": true,
+        "level": "warning",
+        "detail": ""
+      }
+    ],
+    "errors": [],
+    "warnings": [
+      "every frame lasts 100ms; real cycles hold their extremes two to four times as long as the passing frames",
+      "the bottom row of the drawn content moves by 1px across these frames: a character sliding or sinking in a grounded cycle, and expected while airborne"
+    ]
+  }
+}

@@ -28,6 +28,11 @@ namespace SOLITUDE.Core.UI
             root.transform.position = screenPoint + (Vector3)screenOffset;
         }
 
+        public void ValidateAuthoring()
+        {
+            if (root == null || promptText == null || root.scene != gameObject.scene || promptText.gameObject.scene != gameObject.scene)
+                throw new System.InvalidOperationException("Interaction prompt authoring is incomplete or wrong-scene.");
+        }
         public void SetTarget(Transform value) => target = value;
 
         public void Show(string text)
@@ -40,7 +45,7 @@ namespace SOLITUDE.Core.UI
         public void Hide()
         {
             target = null;
-            root.SetActive(false);
+            if (root != null) root.SetActive(false);
         }
     }
 }

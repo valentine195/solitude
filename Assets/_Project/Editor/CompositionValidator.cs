@@ -27,11 +27,24 @@ namespace SOLITUDE.Editor
             var roots = scene.GetRootGameObjects();
             var scopes = roots.SelectMany(r => r.GetComponentsInChildren<SceneBindings>(true)).ToArray();
             var bootstraps = roots.SelectMany(r => r.GetComponentsInChildren<GameCompositionRoot>(true)).ToArray();
-            if (scopes.Length == 0 && bootstraps.Length == 0) return; // Unmigrated scenes are outside this composition graph.
+            if (scopes.Length == 0 && bootstraps.Length == 0)
+            {
+                var owners = roots.SelectMany(r => r.GetComponentsInChildren<SOLITUDE.Core.Interaction.SceneInteractionBindings>(true)).ToArray();
+                bool hasInteractionUI = roots.Any(r => r.GetComponentsInChildren<SOLITUDE.Core.UI.UIController>(true).Length != 0);
+                if (hasInteractionUI && owners.Length != 1) throw new BuildFailedException(scene.path + ": Expected one standalone interaction owner.");
+                foreach (var owner in owners) owner.Validate();
+                return;
+            }
             try
             {
                 if (scopes.Length != 1 || bootstraps.Length > 1) throw new InvalidOperationException("Expected one scene scope and at most one bootstrap.");
                 scopes[0].Validate();
+                var scrubbers = roots.SelectMany(r => r.GetComponentsInChildren<SOLITUDE.World.ScrubberEncounter.ScrubberEquipment>(true)).ToArray();
+                var scrubberScreens = roots.SelectMany(r => r.GetComponentsInChildren<SOLITUDE.World.ScrubberEncounter.ScrubberScreenView>(true)).ToArray();
+                var scrubberSources = roots.SelectMany(r => r.GetComponentsInChildren<SOLITUDE.World.ScrubberEncounter.ScrubberTaskSource>(true)).ToArray();
+                var scrubberFeatures = roots.SelectMany(r => r.GetComponentsInChildren<SOLITUDE.World.ScrubberEncounter.ScrubberComposition>(true)).ToArray();
+                if ((scrubbers.Length != 0 || scrubberScreens.Length != 0 || scrubberSources.Length != 0) && scrubberFeatures.Length != 1)
+                    throw new InvalidOperationException("Authored scrubber endpoints require exactly one scrubber composition.");
                 foreach (var root in bootstraps)
                 {
                     var authoring = new SerializedObject(root);

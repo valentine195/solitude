@@ -1,0 +1,121 @@
+{
+  "ok": true,
+  "identical": false,
+  "change": "silhouette",
+  "width": 64,
+  "height": 96,
+  "a": {
+    "path": "/Users/jeremyvalentine/SOLITUDE/work/Reviews/PlayerSpriteAsepriteAudit20261008/player_audit_clone.aseprite",
+    "layer": null,
+    "color_mode": "rgb",
+    "content": {
+      "y": 8,
+      "width": 28,
+      "height": 79,
+      "x": 18
+    },
+    "frame": 8,
+    "frames": 8,
+    "drawn_pixels": 1504
+  },
+  "b": {
+    "path": "/Users/jeremyvalentine/SOLITUDE/work/Reviews/PlayerSpriteAsepriteAudit20261008/player_audit_clone.aseprite",
+    "layer": null,
+    "color_mode": "rgb",
+    "content": {
+      "y": 8,
+      "width": 26,
+      "height": 79,
+      "x": 19
+    },
+    "frame": 2,
+    "frames": 8,
+    "drawn_pixels": 1471
+  },
+  "metrics": {
+    "changed_pixels": 226,
+    "silhouette_added": 21,
+    "silhouette_removed": 54,
+    "interior_changed": 151,
+    "coverage_changed": 0,
+    "changed_share": 0.148,
+    "change_density": 0.124,
+    "change_box": {
+      "y": 22,
+      "width": 28,
+      "height": 65,
+      "x": 18
+    },
+    "drawn_union": 1525,
+    "colors_before": [
+      {
+        "color": "#000000ff",
+        "pixels": 74
+      },
+      {
+        "color": "#2c2e30ff",
+        "pixels": 53
+      },
+      {
+        "color": "#dbc9afff",
+        "pixels": 46
+      },
+      {
+        "color": "#f0ad71ff",
+        "pixels": 16
+      },
+      {
+        "color": "#e9e9e9ff",
+        "pixels": 7
+      },
+      {
+        "color": "#8e4b21ff",
+        "pixels": 4
+      },
+      {
+        "color": "#da540bff",
+        "pixels": 3
+      },
+      {
+        "color": "#252526ff",
+        "pixels": 2
+      }
+    ],
+    "colors_after": [
+      {
+        "color": "#000000ff",
+        "pixels": 70
+      },
+      {
+        "color": "#2c2e30ff",
+        "pixels": 48
+      },
+      {
+        "color": "#dbc9afff",
+        "pixels": 31
+      },
+      {
+        "color": "#f0ad71ff",
+        "pixels": 12
+      },
+      {
+        "color": "#e3e3e3ff",
+        "pixels": 7
+      },
+      {
+        "color": "#8e4b21ff",
+        "pixels": 4
+      }
+    ],
+    "colors_introduced": [
+      {
+        "color": "#e3e3e3ff",
+        "pixels": 7
+      }
+    ]
+  },
+  "readings": [
+    "The silhouette changed: 21 pixels entered it and 54 left it. That is the shape itself, so everything measured against it moves too, including collision boxes, outlines and the trimmed export box. The shading tools are built to leave a silhouette alone, so if this came from one of them it is the bug rather than the result.",
+    "151 pixels were repainted inside the silhouette, 10% of the drawn art."
+  ]
+}

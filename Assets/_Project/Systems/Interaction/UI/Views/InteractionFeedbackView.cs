@@ -13,12 +13,26 @@ namespace SOLITUDE.Core.UI
 
         private Coroutine routine;
 
+        public void ValidateAuthoring()
+        {
+            if (root == null || label == null || root.scene != gameObject.scene || label.gameObject.scene != gameObject.scene)
+                throw new System.InvalidOperationException("Interaction feedback authoring is incomplete or wrong-scene.");
+        }
+        public void Hide()
+        {
+            if (routine != null) StopCoroutine(routine);
+            routine = null;
+            if (label != null) label.gameObject.SetActive(false);
+            if (root != null) root.SetActive(false);
+        }
+        private void OnDisable() => Hide();
         public void Show(string message, Color color)
         {
-            if (root == null || label == null) return;
+            if (root == null || label == null || !enabled) return;
             if (routine != null)
                 StopCoroutine(routine);
             root.SetActive(true);
+            if (!isActiveAndEnabled) return;
             routine = StartCoroutine(ShowRoutine(message, color));
         }
 
@@ -32,6 +46,7 @@ namespace SOLITUDE.Core.UI
 
             label.gameObject.SetActive(false);
             root.SetActive(false);
+            routine = null;
         }
     }
 }

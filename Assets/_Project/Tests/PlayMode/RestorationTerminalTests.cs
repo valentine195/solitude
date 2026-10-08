@@ -17,6 +17,7 @@ namespace SOLITUDE.Tests
     public class RestorationTerminalTests
     {
         private GameObject host, systemHost, otherHost, ui;
+        private InteractionFeedbackService feedback;
         private RestorationTerminal terminal;
         private RestorableSystem system;
         private SpriteRenderer screen;
@@ -34,6 +35,7 @@ namespace SOLITUDE.Tests
         private void Restore() => Assert.AreEqual(RestorationOutcome.Restored, system.State.TryRestore(commands, inventory, "cell"));
         [TearDown] public void TearDown()
         {
+            feedback?.Dispose();
             Object.DestroyImmediate(ui); Object.DestroyImmediate(host); Object.DestroyImmediate(otherHost); Object.DestroyImmediate(systemHost);
         }
         [UnityTest] public IEnumerator PowerChangesScreenAndDisplaysRepeatableConfiguredContent()
@@ -48,7 +50,7 @@ namespace SOLITUDE.Tests
             var flags = BindingFlags.Instance | BindingFlags.NonPublic;
             typeof(InteractionFeedbackView).GetField("root", flags).SetValue(view, text);
             typeof(InteractionFeedbackView).GetField("label", flags).SetValue(view, label);
-            InteractionFeedback.Initialize(view); InteractionFeedback.Handle(terminal.Interact(null));
+            feedback = new InteractionFeedbackService(view); feedback.Handle(terminal.Interact(null));
             yield return null;
             Assert.AreEqual("Placeholder transmission.", label.text); Assert.IsTrue(text.activeSelf);
             Assert.AreEqual(1, inventory.GetSlot(0).Stack.Quantity);

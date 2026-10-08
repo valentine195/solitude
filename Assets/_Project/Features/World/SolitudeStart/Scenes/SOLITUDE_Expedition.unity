@@ -721,7 +721,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Core.UI.InteractionPromptView
   root: {fileID: 1547546891}
+  inputText: {fileID: 0}
   promptText: {fileID: 1547546892}
+  inputLabel: E
+  screenOffset: {x: 28, y: 24}
 --- !u!224 &760515120
 RectTransform:
   m_ObjectHideFlags: 0
@@ -774,6 +777,7 @@ MonoBehaviour:
   root: {fileID: 872222022}
   label: {fileID: 872222023}
   duration: 1.5
+  defaultColor: {r: 0.8627451, g: 0.92156863, b: 0.93333334, a: 1}
 --- !u!224 &852972094
 RectTransform:
   m_ObjectHideFlags: 0
@@ -807,6 +811,7 @@ GameObject:
   - component: {fileID: 853043229}
   - component: {fileID: 853043228}
   - component: {fileID: 853043227}
+  - component: {fileID: 853043232}
   m_Layer: 0
   m_Name: SOLITUDE Interaction UI
   m_TagString: Untagged
@@ -913,6 +918,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &853043232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 853043226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c64a9db2b7084404a286182c08e32fa5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Core.Interaction.SceneInteractionBindings
 --- !u!1 &872222022
 GameObject:
   m_ObjectHideFlags: 0
@@ -2105,6 +2122,7 @@ MonoBehaviour:
   - {fileID: 9009905872124096306, guid: 42d02e3869bf54f95b1b54348734f297, type: 3}
   blocker: {fileID: 1657839595}
   frameSeconds: 0.08
+  accessGate: {fileID: 0}
 --- !u!212 &1657839597
 SpriteRenderer:
   serializedVersion: 3
@@ -2729,6 +2747,7 @@ MonoBehaviour:
   - {fileID: 9009905872124096306, guid: 42d02e3869bf54f95b1b54348734f297, type: 3}
   blocker: {fileID: 1910376543}
   frameSeconds: 0.08
+  accessGate: {fileID: 0}
 --- !u!61 &1910376543
 BoxCollider2D:
   m_ObjectHideFlags: 0

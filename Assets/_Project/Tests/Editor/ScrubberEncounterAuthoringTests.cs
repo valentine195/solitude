@@ -1,4 +1,8 @@
+using System;
+using System.Reflection;
 using System.Linq;
+using SOLITUDE.Editor;
+using UnityEngine.SceneManagement;
 using NUnit.Framework;
 using SOLITUDE.Items;
 using SOLITUDE.Composition;
@@ -31,10 +35,92 @@ namespace SOLITUDE.Tests
                 Assert.AreEqual("scrubber-room-01",source.SourceId); Assert.IsNotNull(source.Equipment); Assert.IsNotNull(source.Access);
                 var data = new SerializedObject(roots.SelectMany(g=>g.GetComponentsInChildren<SceneBindings>(true)).Single());
                 Assert.AreSame(view,data.FindProperty("journalView").objectReferenceValue);
-                Assert.AreEqual(1,data.FindProperty("taskSources").arraySize); Assert.AreSame(source,data.FindProperty("taskSources").GetArrayElementAtIndex(0).objectReferenceValue);
+                var feature = roots.SelectMany(g => g.GetComponentsInChildren<ScrubberComposition>(true)).Single();
+                feature.Validate();
+                Assert.AreEqual(1, data.FindProperty("features").arraySize);
+                Assert.AreSame(feature, data.FindProperty("features").GetArrayElementAtIndex(0).objectReferenceValue);
+                var featureData = new SerializedObject(feature);
+                Assert.AreEqual(1, featureData.FindProperty("taskSources").arraySize);
+                Assert.AreSame(source, featureData.FindProperty("taskSources").GetArrayElementAtIndex(0).objectReferenceValue);
+                Assert.IsNull(data.FindProperty("taskSources"), "Task source ownership moved to the feature.");
                 Assert.AreEqual(1,roots.SelectMany(g=>g.GetComponentsInChildren<UnityEngine.EventSystems.EventSystem>(true)).Count());
             }
             finally { EditorSceneManager.CloseScene(scene,true); }
+        }
+        [TestCase("missing-feature")]
+        [TestCase("null-feature")]
+        [TestCase("duplicate-feature")]
+        [TestCase("wrong-scene-feature")]
+        [TestCase("duplicate-composition")]
+        [TestCase("missing-equipment")]
+        [TestCase("duplicate-equipment")]
+        [TestCase("wrong-scene-equipment")]
+        [TestCase("missing-screen")]
+        [TestCase("missing-source")]
+        [TestCase("incomplete-screen")]
+        [TestCase("wrong-source-access")]
+        public void ValidationRejectsIncompleteOrAmbiguousFeatureAuthoring(string defect)
+        {
+            var scene = EditorSceneManager.OpenScene(ScrubberEncounterBuilder.ScenePath, OpenSceneMode.Additive);
+            var other = EditorSceneManager.NewPreviewScene();
+            try
+            {
+                var roots = scene.GetRootGameObjects();
+                var scope = roots.SelectMany(g => g.GetComponentsInChildren<SceneBindings>(true)).Single();
+                var feature = roots.SelectMany(g => g.GetComponentsInChildren<ScrubberComposition>(true)).Single();
+                var equipment = roots.SelectMany(g => g.GetComponentsInChildren<ScrubberEquipment>(true)).Single();
+                var screen = roots.SelectMany(g => g.GetComponentsInChildren<ScrubberScreenView>(true)).Single();
+                var source = roots.SelectMany(g => g.GetComponentsInChildren<ScrubberTaskSource>(true)).Single();
+                scope.Validate();
+                var data = new SerializedObject(scope); var list = data.FindProperty("features");
+                if (defect == "missing-feature") { UnityEngine.Object.DestroyImmediate(feature); list.arraySize = 0; }
+                if (defect == "null-feature") list.GetArrayElementAtIndex(0).objectReferenceValue = null;
+                if (defect == "duplicate-feature") { list.arraySize = 2; list.GetArrayElementAtIndex(1).objectReferenceValue = feature; }
+                if (defect == "wrong-scene-feature")
+                {
+                    var foreign = new GameObject("Foreign feature"); SceneManager.MoveGameObjectToScene(foreign, other);
+                    list.GetArrayElementAtIndex(0).objectReferenceValue = foreign.AddComponent<ScrubberComposition>();
+                }
+                data.ApplyModifiedPropertiesWithoutUndo();
+                if (defect == "duplicate-composition") feature.gameObject.AddComponent<ScrubberComposition>();
+                if (defect == "missing-equipment") feature.Configure(new ScrubberEquipment[0], new[] { screen }, new[] { source });
+                if (defect == "duplicate-equipment") feature.Configure(new[] { equipment, equipment }, new[] { screen }, new[] { source });
+                if (defect == "wrong-scene-equipment")
+                {
+                    var foreign = new GameObject("Foreign equipment"); SceneManager.MoveGameObjectToScene(foreign, other);
+                    feature.Configure(new[] { foreign.AddComponent<ScrubberEquipment>() }, new[] { screen }, new[] { source });
+                }
+                if (defect == "missing-screen") feature.Configure(new[] { equipment }, new ScrubberScreenView[0], new[] { source });
+                if (defect == "missing-source") feature.Configure(new[] { equipment }, new[] { screen }, new ScrubberTaskSource[0]);
+                if (defect == "incomplete-screen")
+                {
+                    var view = new SerializedObject(screen); view.FindProperty("close").objectReferenceValue = null; view.ApplyModifiedPropertiesWithoutUndo();
+                }
+                if (defect == "wrong-source-access") source.Configure(source.SourceId, "room", equipment, null);
+                var validate = typeof(CompositionValidator).GetMethod("ValidateScene", BindingFlags.Static | BindingFlags.NonPublic);
+                var error = Assert.Throws<TargetInvocationException>(() => validate.Invoke(null, new object[] { scene }));
+                Assert.That(error.InnerException, Is.TypeOf<UnityEditor.Build.BuildFailedException>());
+                Assert.That(error.InnerException.Message.ToLowerInvariant(), Does.Contain("scrubber").Or.Contain("feature"));
+            }
+            finally { EditorSceneManager.CloseScene(scene, true); EditorSceneManager.ClosePreviewScene(other); }
+        }
+        [Test] public void MigrationIsIdempotentAndKeepsExistingSceneEndpointIdentities()
+        {
+            ScrubberEncounterBuilder.MigrateComposition();
+            var scene = EditorSceneManager.OpenScene(ScrubberEncounterBuilder.ScenePath, OpenSceneMode.Additive);
+            try
+            {
+                var scope = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<SceneBindings>(true)).Single();
+                var feature = scope.GetComponent<ScrubberComposition>();
+                var journal = new SerializedObject(scope).FindProperty("journalView").objectReferenceValue;
+                Assert.IsFalse(scene.isDirty);
+                ScrubberEncounterBuilder.MigrateComposition();
+                Assert.AreSame(scope, scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<SceneBindings>(true)).Single());
+                Assert.AreSame(feature, scope.GetComponent<ScrubberComposition>());
+                Assert.AreSame(journal, new SerializedObject(scope).FindProperty("journalView").objectReferenceValue);
+                scope.Validate();
+            }
+            finally { EditorSceneManager.CloseScene(scene, true); }
         }
         private const string Folder = "Assets/_Project/Features/Items/Definitions/ReplacementFuse";
         [Test] public void FuseCatalogAndSceneInstanceHaveDistinctStableIdentities()

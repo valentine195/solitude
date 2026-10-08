@@ -42,8 +42,43 @@ namespace SOLITUDE.Editor
             source.Configure("scrubber-room-01", "DECK 01 / SCRUBBER ROOM", equipment, equipment.GetComponent<ScrubberAccess>());
             var data = new SerializedObject(All<SceneBindings>(scene).Single());
             data.FindProperty("journalView").objectReferenceValue = view;
-            var sources = data.FindProperty("taskSources"); sources.arraySize = 1; sources.GetArrayElementAtIndex(0).objectReferenceValue = source;
-            data.ApplyModifiedPropertiesWithoutUndo(); view.ValidateAuthoring();
+            data.ApplyModifiedPropertiesWithoutUndo(); EnsureComposition(scene); view.ValidateAuthoring();
+        }
+        // Deliberately migrate the existing scene; do not rebuild its authored content.
+        [MenuItem("SOLITUDE/Migrations/Compose Scrubber Feature")]
+        public static void MigrateComposition()
+        {
+            if (EditorApplication.isPlaying) throw new InvalidOperationException("Exit Play mode before migration.");
+            var previous = SceneManager.GetActiveScene();
+            var scene = SceneManager.GetSceneByPath(ScenePath);
+            bool opened = !scene.IsValid() || !scene.isLoaded;
+            if (opened) scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+            try
+            {
+                if (scene.isDirty) throw new InvalidOperationException("Save the scrubber scene before migration.");
+                EnsureComposition(scene);
+                CompositionValidator.ValidateScene(scene);
+                EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
+            }
+            finally
+            {
+                if (opened) EditorSceneManager.CloseScene(scene, true);
+                if (previous.IsValid()) SceneManager.SetActiveScene(previous);
+            }
+        }
+        private static void EnsureComposition(Scene scene)
+        {
+            var scope = All<SceneBindings>(scene).Single();
+            var feature = All<ScrubberComposition>(scene).SingleOrDefault();
+            if (feature == null) feature = scope.gameObject.AddComponent<ScrubberComposition>();
+            feature.Configure(All<ScrubberEquipment>(scene), All<ScrubberScreenView>(scene), All<ScrubberTaskSource>(scene));
+            EditorUtility.SetDirty(feature);
+            var data = new SerializedObject(scope);
+            var features = data.FindProperty("features");
+            bool present = Enumerable.Range(0, features.arraySize).Any(i => features.GetArrayElementAtIndex(i).objectReferenceValue == feature);
+            if (!present) { int index = features.arraySize++; features.GetArrayElementAtIndex(index).objectReferenceValue = feature; }
+            data.ApplyModifiedPropertiesWithoutUndo();
+            feature.Validate();
         }
         private static RectTransform JRect(string name, Transform parent, Vector2 min, Vector2 max, Vector2 low, Vector2 high)
         {
@@ -234,7 +269,7 @@ namespace SOLITUDE.Editor
                 var player = All<PlayerInteractor>(scene).Single(); player.transform.position = new Vector3(23,4.5f);
                 var camera = All<Camera>(scene).Single(); camera.transform.position = new Vector3(23,4.5f,-10);
                 camera.GetComponent<SolitudeCameraFollow2D>().Configure(player.transform,new Vector2(23,23),new Vector2(4.5f,4.5f));
-                scope.Validate(); EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+                EnsureJournal(scene); scope.Validate(); EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
             }
             finally { EditorSceneManager.CloseScene(scene,true); if (previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }

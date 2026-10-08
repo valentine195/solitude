@@ -5,7 +5,6 @@ using SOLITUDE.Containers;
 using SOLITUDE.Items;
 using SOLITUDE.SaveLoad;
 using SOLITUDE.Tasks;
-using SOLITUDE.World.ScrubberEncounter;
 using UnityEngine;
 
 namespace SOLITUDE.Tests
@@ -20,7 +19,7 @@ namespace SOLITUDE.Tests
 
             void Set(string field, object value) => typeof(SceneBindings).GetField(field, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(scope, value);
             Set("session", new ContainerSaveSession(new SaveGameData(), new ItemCatalog(new[] { new ItemSpec("item", true, 10) })));
-            Set("tasks", journal); Set("taskScope", "first"); Set("taskSources", new ScrubberTaskSource[0]);
+            Set("tasks", journal); Set("taskScope", "first");
             try
             {
                 scope.Release(); scope.Release(); Assert.AreEqual(1, journal.ReadSnapshot().Active.Count);

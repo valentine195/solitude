@@ -1,6 +1,11 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using SOLITUDE.Core.Input;
+using SOLITUDE.Core.Systems;
+using SOLITUDE.Features.Interactables;
+using SOLITUDE.Tasks;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -19,6 +24,22 @@ using UnityEngine.TestTools;
 using Object=UnityEngine.Object;
 namespace SOLITUDE.Tests
 {
+    public sealed class FailingSceneFeature : SceneFeatureComposition
+    {
+        public ScrubberScreenView Screen;
+        public bool ShouldThrow = true;
+        public int Releases, BackCalls;
+        public override void Validate() { }
+        public override void Initialize(SceneFeatureContext context)
+        {
+            if (!ShouldThrow) return;
+            if (!Screen.Open()) throw new InvalidOperationException("Fixture screen failed to open.");
+            throw new InvalidOperationException("Injected later feature failure.");
+        }
+        public override bool TryBack() { BackCalls++; return false; }
+        public override void CloseForTransition() { }
+        public override void Release() { Releases++; }
+    }
     public class ScrubberEncounterLifecycleTests
     {
         private const string Demo="Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity";
@@ -36,6 +57,57 @@ namespace SOLITUDE.Tests
         {
             foreach(var root in All<GameCompositionRoot>()) Object.Destroy(root.gameObject);yield return null;Time.timeScale=1;
             if(original==null) { if(File.Exists(savePath)) File.Delete(savePath); } else File.WriteAllBytes(savePath,original);
+        }
+        [UnityTest] public IEnumerator LaterFeatureFailureUnwindsAllBoundFeaturesAndSceneLeases()
+        {
+            yield return Load(Demo); yield return null;
+            var root = All<GameCompositionRoot>().Single(); var scope = All<SceneBindings>().Single();
+            var feature = All<ScrubberComposition>().Single(); var screen = All<ScrubberScreenView>().Single();
+            var policy = Field<InputPolicyCoordinator>(root, "policy"); var input = Field<UnityInputHost>(root, "input");
+            scope.Release();
+            var failure = scope.gameObject.AddComponent<FailingSceneFeature>(); failure.Screen = screen;
+            typeof(SceneBindings).GetField("features", BindingFlags.NonPublic | BindingFlags.Instance)
+                .SetValue(scope, new SceneFeatureComposition[] { feature, failure });
+            Assert.Throws<InvalidOperationException>(() => scope.Initialize(
+                Field<ContainerSaveSession>(root, "session"), Field<PickupCollectionService>(root, "pickups"),
+                Field<ItemPresentationCatalog>(root, "presentations"), Field<Dictionary<LootTable, RuntimeLootTable>>(root, "loot"),
+                Field<ContainerGestureCoordinator>(root, "gestures"), policy, Field<PauseCoordinator>(root, "pause"),
+                root, input, Field<GameManager>(root, "game"), null, (TaskJournal)root.Tasks));
+            Assert.AreEqual(1, failure.Releases); Assert.IsFalse(screen.IsOpen); Assert.IsFalse(screen.Open());
+            Assert.IsFalse(policy.PrimaryScreenActive); Assert.IsFalse(Field<PauseCoordinator>(root, "pause").IsPaused);
+            Assert.IsFalse(All<ScrubberTaskSource>().Single().IsRegistered);
+            Assert.IsNull(All<PlayerInventory>().Single().Container);
+            scope.Release(); Assert.AreEqual(1, failure.Releases);
+            Object.Destroy(failure); yield return null;
+            yield return Load(Demo); yield return null;
+            Assert.AreEqual(RuntimeStartupState.Ready, root.State); Assert.IsTrue(All<ScrubberScreenView>().Single().Open());
+        }
+        [UnityTest] public IEnumerator BackRoutesJournalThenFeatureThenContainerAndActivationKeepsSingleBindings()
+        {
+            yield return Load(Demo); yield return null;
+            var root = All<GameCompositionRoot>().Single(); var scope = All<SceneBindings>().Single();
+            var feature = All<ScrubberComposition>().Single(); var screen = All<ScrubberScreenView>().Single();
+            var source = All<ScrubberTaskSource>().Single(); var journal = All<SOLITUDE.Tasks.UI.TaskJournalView>().Single();
+            var modal = Field<ContainerModalCoordinator>(scope, "modal");
+            var policy = Field<InputPolicyCoordinator>(root, "policy");
+            var probe = scope.gameObject.AddComponent<FailingSceneFeature>(); probe.ShouldThrow = false;
+            Field<List<SceneFeatureComposition>>(scope, "boundFeatures").Add(probe);
+            bool Back() => (bool)typeof(SceneBindings).GetMethod("Back", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(scope, null);
+            Assert.AreEqual(OpenResult.Opened, journal.Screen.Open()); Assert.IsTrue(Back()); Assert.AreEqual(0, probe.BackCalls);
+            Assert.IsFalse(journal.IsOpen);
+            for (int i = 0; i < 3; i++)
+            {
+                feature.enabled = false; feature.enabled = true;
+                source.enabled = false; source.enabled = true;
+                screen.enabled = false; screen.enabled = true;
+                Assert.IsTrue(source.IsRegistered); Assert.IsTrue(screen.Open()); Assert.IsTrue(Back());
+                Assert.IsFalse(screen.IsOpen); Assert.AreEqual(0, probe.BackCalls, "The open feature screen wins before later features.");
+            }
+            Assert.AreEqual(OpenResult.Opened, modal.ToggleInventory()); Assert.IsTrue(Back());
+            Assert.AreEqual(1, probe.BackCalls, "Features run before modal Back."); Assert.IsTrue(policy.Gameplay);
+            Assert.IsFalse(Back()); Assert.AreEqual(2, probe.BackCalls);
+            scope.Release(); scope.Release(); Assert.AreEqual(1, probe.Releases); Assert.IsFalse(source.IsRegistered);
+            Assert.IsFalse(screen.Open()); Assert.IsFalse(policy.PrimaryScreenActive); Assert.IsFalse(Field<PauseCoordinator>(root, "pause").IsPaused);
         }
         [UnityTest] public IEnumerator ReloadResetsEveryStateTogetherAndReleasesOldEndpoints()
         {

@@ -1,0 +1,153 @@
+{
+  "ok": true,
+  "schema_version": "workflow_manifest.v1",
+  "kind": "validation",
+  "created_files": [],
+  "suggested_next_actions": [
+    "set_frame_duration on the extreme poses (two to four times the passing frames) so the cycle has a shape in time."
+  ],
+  "warnings": [
+    "every frame lasts 100ms; real cycles hold their extremes two to four times as long as the passing frames"
+  ],
+  "animation": {
+    "tag": "west_poses",
+    "loops": false,
+    "frame_count": 3,
+    "total_duration_ms": 300,
+    "frames": [
+      {
+        "frame": 7,
+        "hash": "49084488d66dc215",
+        "duration_ms": 100,
+        "bounds": {
+          "height": 46,
+          "width": 16,
+          "x": 8,
+          "y": 2
+        },
+        "centroid": {
+          "x": 15.5,
+          "y": 24.5
+        },
+        "bottom": 47
+      },
+      {
+        "frame": 8,
+        "hash": "1dd7ee609244d525",
+        "duration_ms": 100,
+        "bounds": {
+          "height": 46,
+          "width": 18,
+          "x": 7,
+          "y": 2
+        },
+        "centroid": {
+          "x": 15.5,
+          "y": 24.5
+        },
+        "bottom": 47
+      },
+      {
+        "frame": 9,
+        "hash": "3d30459b8c60cb4c",
+        "duration_ms": 100,
+        "bounds": {
+          "height": 46,
+          "width": 18,
+          "x": 7,
+          "y": 2
+        },
+        "centroid": {
+          "x": 15.5,
+          "y": 24.5
+        },
+        "bottom": 47
+      }
+    ],
+    "durations_ms": [
+      100,
+      100,
+      100
+    ],
+    "spacing": [
+      {
+        "from": 7,
+        "to": 8,
+        "dx": 0.0,
+        "dy": 0.0,
+        "distance": 0.0
+      },
+      {
+        "from": 8,
+        "to": 9,
+        "dx": 0.0,
+        "dy": 0.0,
+        "distance": 0.0
+      }
+    ],
+    "spacing_direction_changes": 0,
+    "duplicate_pairs": [],
+    "seam_duplicate": false,
+    "uniform_timing": true,
+    "empty_frames": [],
+    "contact_rows": [
+      47,
+      47,
+      47
+    ],
+    "contact_drift_px": 0,
+    "layer": null,
+    "sprite_frame_count": 12
+  },
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "comparable_frames",
+        "ok": true,
+        "level": "warning",
+        "detail": ""
+      },
+      {
+        "name": "no_seam_duplicate",
+        "ok": true,
+        "level": "warning",
+        "detail": ""
+      },
+      {
+        "name": "no_duplicate_adjacent_frames",
+        "ok": true,
+        "level": "error",
+        "detail": ""
+      },
+      {
+        "name": "timing_varies",
+        "ok": false,
+        "level": "warning",
+        "detail": "every frame lasts 100ms; real cycles hold their extremes two to four times as long as the passing frames"
+      },
+      {
+        "name": "spacing_steady",
+        "ok": true,
+        "level": "warning",
+        "detail": ""
+      },
+      {
+        "name": "contact_edge_stable",
+        "ok": true,
+        "level": "warning",
+        "detail": ""
+      },
+      {
+        "name": "no_empty_frames",
+        "ok": true,
+        "level": "warning",
+        "detail": ""
+      }
+    ],
+    "errors": [],
+    "warnings": [
+      "every frame lasts 100ms; real cycles hold their extremes two to four times as long as the passing frames"
+    ]
+  }
+}

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SOLITUDE.Application;
+using SOLITUDE.Core.Interaction;
 using SOLITUDE.Containers;
 using SOLITUDE.Core.Input;
 using SOLITUDE.Core.Systems;
@@ -9,7 +11,6 @@ using SOLITUDE.Items;
 using SOLITUDE.Player;
 using SOLITUDE.SaveLoad;
 using SOLITUDE.World.Restoration;
-using SOLITUDE.World.ScrubberEncounter;
 using SOLITUDE.Tasks;
 using UnityEngine;
 namespace SOLITUDE.Composition
@@ -29,7 +30,7 @@ namespace SOLITUDE.Composition
         [SerializeField] private LockerContainer[] lockers = new LockerContainer[0];
         [SerializeField] private WorldPickup[] worldPickups = new WorldPickup[0];
         [SerializeField] private RestorationJunction[] restorationJunctions = new RestorationJunction[0];
-        [SerializeField] private ScrubberTaskSource[] taskSources = new ScrubberTaskSource[0];
+        [SerializeField] private SceneFeatureComposition[] features = new SceneFeatureComposition[0];
         [SerializeField] private SOLITUDE.Tasks.UI.TaskJournalView journalView;
         private TaskJournal tasks;
         private string taskScope;
@@ -37,8 +38,7 @@ namespace SOLITUDE.Composition
         private TaskJournalPresenter journalPresenter;
         private readonly List<ContainerSaveSession.ContainerBinding> bindings = new();
         private readonly List<WorldPickup> registeredPickups = new();
-        private readonly List<ScrubberScreenView> scrubberScreens = new();
-        private readonly List<ScrubberEquipment> scrubberEquipment = new();
+        private readonly List<SceneFeatureComposition> boundFeatures = new();
         [SerializeField] private UnityEngine.InputSystem.UI.InputSystemUIInputModule uiInput;
         private IDisposable uiLease;
         private ItemPresentationCatalog presentations;
@@ -50,6 +50,7 @@ namespace SOLITUDE.Composition
         private ContainerModalCoordinator modal;
         private HotbarSelectionState selection;
         private HeldItemPresenter held;
+        private SceneInteractionScope interactions;
         private Action released;
         private Guid inventoryToken, transferToken;
         public bool HasPlayer => inventory != null;
@@ -61,7 +62,12 @@ namespace SOLITUDE.Composition
             var pickupIds = new HashSet<string>(StringComparer.Ordinal);
             foreach (var pickup in worldPickups)
                 if (pickup == null || string.IsNullOrWhiteSpace(pickup.PickupId) || !pickupIds.Add(pickup.PickupId)) throw new InvalidOperationException("Invalid/duplicate scene pickup reference.");
+            ValidateFeatures();
+            if (!HasPlayer && features.Length != 0) throw new InvalidOperationException("Scene features require a composed player scene.");
             if (!HasPlayer) return;
+            if (gameObject.scene.GetRootGameObjects().Any(root => root.GetComponentsInChildren<SceneInteractionBindings>(true).Length != 0))
+                throw new InvalidOperationException("Standalone interaction owner cannot coexist with SceneBindings.");
+            SceneInteractionScope.Validate(gameObject.scene, interactor);
             if (recoveryNotice == null) throw new InvalidOperationException("Recovery notice is missing.");
             recoveryNotice.ValidateAuthoring();
             if (hotbar == null || movement == null || interactor == null || inventoryModal == null || transferModal == null || heldView == null || uiInput == null)
@@ -85,6 +91,20 @@ namespace SOLITUDE.Composition
             if (!unique.Contains(inventoryModal.Controller) || !unique.Contains(transferModal.InventoryController) || !unique.Contains(transferModal.TargetController))
                 throw new InvalidOperationException("Every modal panel must be a configured presenter endpoint.");
         }
+        private void ValidateFeatures()
+        {
+            if (features == null) throw new InvalidOperationException("Scene feature references are missing.");
+            var unique = new HashSet<SceneFeatureComposition>();
+            foreach (var feature in features)
+            {
+                if (feature == null || feature.gameObject.scene != gameObject.scene || !unique.Add(feature))
+                    throw new InvalidOperationException("Null, duplicate or wrong-scene feature composition reference.");
+                feature.Validate();
+            }
+            foreach (var root in gameObject.scene.GetRootGameObjects())
+                foreach (var feature in root.GetComponentsInChildren<SceneFeatureComposition>(true))
+                    if (!unique.Contains(feature)) throw new InvalidOperationException("Unbound authored feature composition: " + feature.name);
+        }
         public void Initialize(ContainerSaveSession session, PickupCollectionService pickups, ItemPresentationCatalog presentations,
             Dictionary<LootTable, RuntimeLootTable> loot, ContainerGestureCoordinator gestures, InputPolicyCoordinator policy,
             PauseCoordinator pause, IContainerScreenRequests screens, UnityInputHost input, GameManager game, Action released, TaskJournal tasks = null)
@@ -107,6 +127,7 @@ namespace SOLITUDE.Composition
                 if (!HasPlayer) return;
                 recoveryNotice.Initialize();
                 var inventoryBinding = session.Register(ContainerSaveSession.PlayerInventoryId, inventory.Capacity); bindings.Add(inventoryBinding); inventory.Initialize(inventoryBinding.Container);
+                interactions = new SceneInteractionScope(); interactions.Initialize(gameObject.scene, interactor);
                 foreach (var junction in restorationJunctions)
                     if (junction != null) junction.Initialize(session.Commands, inventory.Container);
                 var hotbarBinding = session.Register(ContainerSaveSession.PlayerHotbarId, hotbar.Capacity); bindings.Add(hotbarBinding);
@@ -124,16 +145,13 @@ namespace SOLITUDE.Composition
                         controller.BindDefaultSource();
                 uiLease = input.ConnectUI(uiInput);
                 input.Point += Point;
-                foreach (var root in gameObject.scene.GetRootGameObjects())
-                    foreach (var equipment in root.GetComponentsInChildren<ScrubberEquipment>(true))
-                    { equipment.Initialize(session.Commands,inventory.Container,presentations); scrubberEquipment.Add(equipment); }
-                foreach (var root in gameObject.scene.GetRootGameObjects())
-                    foreach (var screen in root.GetComponentsInChildren<ScrubberScreenView>(true))
-                    { screen.Initialize(policy, input); scrubberScreens.Add(screen); }
-                foreach (var source in taskSources)
-                    if (source != null)
-                        source.Initialize(tasks, taskScope, policy, interactor, scrubberEquipment.Contains(source.Equipment) &&
-                            presentations.Resolve(ScrubberEquipment.FuseItemId) != null && inventory.Container.IsAvailable);
+                var featureContext = new SceneFeatureContext(session.Commands, inventory.Container, presentations,
+                    policy, input, tasks, taskScope, interactor, interactions.Events);
+                foreach (var feature in features)
+                {
+                    // Record before binding so a throwing initializer is also unwound.
+                    boundFeatures.Add(feature); feature.Initialize(featureContext);
+                }
                 if (journalView != null && tasks != null)
                 {
                     try
@@ -166,13 +184,15 @@ namespace SOLITUDE.Composition
         private bool Back()
         {
             if (journalScreen?.IsOpen == true) { input?.ConsumeUIActivation(); return journalScreen.Back(); }
-            foreach (var screen in scrubberScreens) if (screen != null && screen.Back()) return true;
+            foreach (var feature in boundFeatures) if (feature != null && feature.TryBack()) return true;
             return modal?.Back() ?? false;
         }
         public void CloseForTransition()
         {
+            interactor?.ClearFocus();
+            interactions?.Feedback.Clear();
             journalScreen?.Close();
-            foreach (var screen in scrubberScreens) if (screen != null) screen.Close();
+            foreach (var feature in boundFeatures) if (feature != null) feature.CloseForTransition();
             modal?.Close();
         }
         public void ShowRecoveryNotice(Action acknowledged) => recoveryNotice.Show(acknowledged);
@@ -246,13 +266,12 @@ namespace SOLITUDE.Composition
             if (session == null) return;
             journalScreen?.Dispose(); journalScreen = null; journalPresenter?.Dispose(); journalPresenter = null;
             if (journalView != null) journalView.Release();
-            foreach (var source in taskSources) if (source != null) source.ReleaseBinding();
+            for (int i = boundFeatures.Count - 1; i >= 0; i--)
+                if (boundFeatures[i] != null) boundFeatures[i].Release();
+            boundFeatures.Clear();
+            interactions?.Dispose(); interactions = null;
             if (taskScope != null) tasks?.ReleaseScope(taskScope);
             tasks = null; taskScope = null;
-            foreach (var screen in scrubberScreens) if (screen != null) screen.Release();
-            scrubberScreens.Clear();
-            foreach (var equipment in scrubberEquipment) if(equipment!=null) equipment.ReleaseBinding();
-            scrubberEquipment.Clear();
             modal?.Dispose(); modal = null;
             if (input != null && selection != null) { input.Point -= Point; input.Bind(null, null, null, null, null, null); }
             uiLease?.Dispose(); uiLease = null;

@@ -56,12 +56,15 @@ namespace SOLITUDE.Tests
             typeof(SOLITUDE.Core.UI.InteractionPromptView).GetField("root", flags).SetValue(view, textObject);
             typeof(SOLITUDE.Core.UI.InteractionPromptView).GetField("promptText", flags).SetValue(view, label);
             typeof(SOLITUDE.Core.UI.UIController).GetField("interactionPrompt", flags).SetValue(controller, view);
+            var events = new SOLITUDE.Core.Events.SceneInteractionEvents();
+            var feedback = new SOLITUDE.Core.UI.InteractionFeedbackService(ui.AddComponent<SOLITUDE.Core.UI.InteractionFeedbackView>());
+            controller.Bind(events, feedback);
             try
             {
                 ui.SetActive(true);
                 // EditMode does not dispatch the runtime MonoBehaviour lifecycle.
                 typeof(SOLITUDE.Core.UI.UIController).GetMethod("OnEnable", flags).Invoke(controller, null);
-                SOLITUDE.Core.Events.InteractionEventBus.Publish(new SOLITUDE.Core.Events.InteractionFocusChangedEvent { interactable = junction });
+                events.Publish(new SOLITUDE.Core.Events.InteractionFocusChangedEvent { interactable = junction });
                 StringAssert.Contains("Power cell", label.text);
                 commands.Grant(inventory.Handle, "cell", 1); junction.Interact(null);
                 typeof(SOLITUDE.Core.UI.UIController).GetMethod("LateUpdate", flags).Invoke(controller, null);
@@ -72,6 +75,7 @@ namespace SOLITUDE.Tests
             finally
             {
                 typeof(SOLITUDE.Core.UI.UIController).GetMethod("OnDisable", flags).Invoke(controller, null);
+                controller.Release(); feedback.Dispose(); events.Dispose();
                 Object.DestroyImmediate(ui);
             }
         }

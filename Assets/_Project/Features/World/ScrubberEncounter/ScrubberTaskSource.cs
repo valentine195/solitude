@@ -18,6 +18,7 @@ namespace SOLITUDE.World.ScrubberEncounter
         private string scopeId;
         private InputPolicyCoordinator policy;
         private PlayerInteractor player;
+        private SceneInteractionEvents events;
         private ITaskPublisher publisher;
         private bool boundEquipment, watching;
         public string SourceId => sourceId;
@@ -27,17 +28,17 @@ namespace SOLITUDE.World.ScrubberEncounter
         public bool IsRegistered => publisher != null;
         public void Configure(string identity, string room, ScrubberEquipment unit, ScrubberAccess target)
         { sourceId = identity; location = room; equipment = unit; access = target; }
-        public void Initialize(TaskJournal tasks, string scope, InputPolicyCoordinator inputPolicy, PlayerInteractor interactor, bool equipmentBound)
+        public void Initialize(TaskJournal tasks, string scope, InputPolicyCoordinator inputPolicy, PlayerInteractor interactor, SceneInteractionEvents interactionEvents, bool equipmentBound)
         {
-            ReleaseBinding(); journal = tasks; scopeId = scope; policy = inputPolicy; player = interactor; boundEquipment = equipmentBound;
+            ReleaseBinding(); journal = tasks; scopeId = scope; policy = inputPolicy; player = interactor; events = interactionEvents; boundEquipment = equipmentBound;
             Attach();
         }
         private void Attach()
         {
-            if (watching || journal == null || !boundEquipment || equipment == null || access == null || !isActiveAndEnabled) return;
+            if (watching || journal == null || events == null || !boundEquipment || equipment == null || access == null || !isActiveAndEnabled) return;
             var result = journal.RegisterSource(sourceId, scopeId, out publisher);
             if (result != TaskWriteResult.Applied) { Debug.LogWarning("[ScrubberTaskSource] Registration unavailable: " + result, this); return; }
-            equipment.Changed += Reconcile; access.AccessSucceeded += SuccessfulAccess; InteractionEventBus.OnFocusChanged += Focus;
+            equipment.Changed += Reconcile; access.AccessSucceeded += SuccessfulAccess; events.FocusChanged += Focus;
             watching = true; Reconcile();
         }
         private bool Eligible => publisher != null && equipment != null && equipment.isActiveAndEnabled && access != null && access.isActiveAndEnabled && boundEquipment;
@@ -78,12 +79,12 @@ namespace SOLITUDE.World.ScrubberEncounter
             {
                 if (equipment != null) equipment.Changed -= Reconcile;
                 if (access != null) access.AccessSucceeded -= SuccessfulAccess;
-                InteractionEventBus.OnFocusChanged -= Focus; watching = false;
+                events.FocusChanged -= Focus; watching = false;
             }
             publisher?.Release(); publisher = null;
         }
         public void ReleaseBinding()
-        { Detach(); journal = null; scopeId = null; policy = null; player = null; boundEquipment = false; }
+        { Detach(); journal = null; scopeId = null; policy = null; player = null; events = null; boundEquipment = false; }
         private void OnEnable() => Attach();
         private void OnDisable() => Detach();
         private void OnDestroy() => ReleaseBinding();

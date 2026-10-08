@@ -1,0 +1,215 @@
+{
+  "ok": true,
+  "frame": 6,
+  "layer": null,
+  "width": 32,
+  "height": 48,
+  "metrics": {
+    "colors": 18,
+    "drawn_pixels": 643,
+    "ramps": 2,
+    "isolated_pixels": 47,
+    "jaggy_corners": 40,
+    "canvas_usage": 0.629,
+    "centred": false,
+    "silhouette_asymmetry": 118,
+    "bbox": [
+      5,
+      2,
+      25,
+      47
+    ],
+    "row_structure": {
+      "rows_drawn": 46,
+      "rows_with_air": 1,
+      "welded_rows": 25,
+      "widest_run": 21,
+      "waists": 2,
+      "gutters": 0
+    },
+    "edge_contact": 5,
+    "tone_shares": {
+      "top_color": "#182b35",
+      "top_share": 0.524,
+      "tones": 18
+    },
+    "separator": {
+      "separator": "#182b35",
+      "share": 0.524,
+      "luminance": 0.022,
+      "contrast": 1.33
+    },
+    "form": {
+      "centerline_peak": 2.0,
+      "centerline_normalized": 0.095,
+      "centerline_rows_measured": 41,
+      "components": 1,
+      "holes": 0,
+      "thin_parts": 0,
+      "support": {
+        "centroid_x": 15.25,
+        "base": [
+          15,
+          20
+        ],
+        "margin": 0.25,
+        "contact_runs": 3
+      }
+    },
+    "notan": {
+      "median": 0.0218,
+      "dark": {
+        "pixels": 337,
+        "components": 19,
+        "largest_share": 0.623,
+        "components_for_90pct": 4
+      },
+      "light": {
+        "pixels": 306,
+        "components": 13,
+        "largest_share": 0.853,
+        "components_for_90pct": 3
+      },
+      "drawn_pixels": 643
+    },
+    "craft": {
+      "clusters": {
+        "regions": 97,
+        "drawn": 643,
+        "median": 2,
+        "largest": 210,
+        "singleton_share": 0.485,
+        "share_in_8plus": 0.759
+      },
+      "edge_runs": {
+        "distinct": 7,
+        "runs": [
+          1,
+          1,
+          1,
+          3,
+          3,
+          2,
+          3,
+          1,
+          2,
+          1,
+          1,
+          1,
+          4,
+          6,
+          1,
+          1,
+          2,
+          5,
+          1,
+          6,
+          1,
+          1,
+          2,
+          2,
+          3,
+          2,
+          3,
+          1,
+          2,
+          1,
+          1,
+          2,
+          3,
+          7,
+          1,
+          1,
+          5,
+          1,
+          4,
+          2,
+          1
+        ],
+        "longest_repeat": 3
+      },
+      "value_split": {
+        "dark": 0.635,
+        "mid": 0.104,
+        "light": 0.261,
+        "median": 0.0218,
+        "bimodal": true
+      },
+      "keyline": {
+        "darkest": "#182b35ff",
+        "share": 0.524,
+        "bounds": false,
+        "matches": null
+      }
+    },
+    "cvd": {
+      "touching_pairs": 56,
+      "normal": {
+        "notan": {
+          "median": 0.0218,
+          "dark": {
+            "pixels": 337,
+            "components": 19,
+            "largest_share": 0.623,
+            "components_for_90pct": 4
+          },
+          "light": {
+            "pixels": 306,
+            "components": 13,
+            "largest_share": 0.853,
+            "components_for_90pct": 3
+          },
+          "drawn_pixels": 643
+        }
+      },
+      "deuteranopia": {
+        "collapsed_pairs": 0,
+        "worst": [],
+        "notan": {
+          "median": 0.0206,
+          "dark": {
+            "pixels": 337,
+            "components": 19,
+            "largest_share": 0.623,
+            "components_for_90pct": 4
+          },
+          "light": {
+            "pixels": 306,
+            "components": 13,
+            "largest_share": 0.853,
+            "components_for_90pct": 3
+          },
+          "drawn_pixels": 643
+        }
+      },
+      "protanopia": {
+        "collapsed_pairs": 0,
+        "worst": [],
+        "notan": {
+          "median": 0.0231,
+          "dark": {
+            "pixels": 337,
+            "components": 19,
+            "largest_share": 0.623,
+            "components_for_90pct": 4
+          },
+          "light": {
+            "pixels": 306,
+            "components": 13,
+            "largest_share": 0.853,
+            "components_for_90pct": 3
+          },
+          "drawn_pixels": 643
+        }
+      }
+    }
+  },
+  "readings": [
+    "The drawn content is off-centre, which shows up when the sprite is scaled or flipped.",
+    "25 of 46 drawn rows are a single unbroken run across most of the width, the widest spanning 21px, and only 1 have background between two parts of the silhouette. The masses have fused, so the shape reads as one object however well it is shaded: separate the limbs by two or three pixels of background before shading anything.",
+    "5 drawn pixel(s) sit on the canvas border, so the silhouette is cut off there and cannot take an outline. resize_canvas, or move the art inward.",
+    "The darkest colour #182b35 is 52% of the drawing, well past the 24% that work in this style spends on separating its masses. An outline that heavy is doing the drawing: the interior has no values left to describe form with. Thin it to one pixel with add_outline, or spend the difference on mid tones.",
+    "47 pixels have no neighbour of their own colour, which reads as noise rather than as texture.",
+    "18 colours across about 2 ramps, which is more than a pixel-art palette usually carries."
+  ]
+}

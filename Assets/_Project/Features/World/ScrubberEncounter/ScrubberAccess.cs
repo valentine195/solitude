@@ -8,6 +8,7 @@ namespace SOLITUDE.World.ScrubberEncounter
     public sealed class ScrubberAccess : InteractableBase
     {
         [SerializeField] private ScrubberScreenView screen;
+        public ScrubberScreenView Screen => screen;
         public event Action<PlayerInteractor> AccessSucceeded;
         public void Configure(ScrubberScreenView view) => screen = view;
         public override string GetPrompt() => "Access scrubber";
