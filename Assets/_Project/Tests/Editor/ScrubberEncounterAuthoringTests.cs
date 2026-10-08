@@ -11,6 +11,31 @@ namespace SOLITUDE.Tests
 {
     public class ScrubberEncounterAuthoringTests
     {
+        [Test] public void JournalPrefabAndBuilderKeepAuthoredControlsAndSourceBindings()
+        {
+            var path = SOLITUDE.Editor.ScrubberEncounterBuilder.ScenePath;
+            var guid = AssetDatabase.AssetPathToGUID(path);
+            SOLITUDE.Editor.ScrubberEncounterBuilder.AddTaskJournal();
+            SOLITUDE.Editor.ScrubberEncounterBuilder.AddTaskJournal();
+            Assert.AreEqual(guid,AssetDatabase.AssetPathToGUID(path));
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(SOLITUDE.Editor.ScrubberEncounterBuilder.JournalFolder+"/TaskJournal.prefab");
+            prefab.GetComponent<SOLITUDE.Tasks.UI.TaskJournalView>().ValidateAuthoring();
+            Assert.AreEqual(2,prefab.GetComponentsInChildren<UnityEngine.UI.ScrollRect>(true).Length);
+            Assert.IsTrue(prefab.GetComponentsInChildren<TMPro.TMP_Text>(true).All(label=>!label.richText));
+            var scene = EditorSceneManager.OpenScene(path,OpenSceneMode.Additive);
+            try
+            {
+                var roots = scene.GetRootGameObjects();
+                var view = roots.SelectMany(g=>g.GetComponentsInChildren<SOLITUDE.Tasks.UI.TaskJournalView>(true)).Single(); view.ValidateAuthoring();
+                var source = roots.SelectMany(g=>g.GetComponentsInChildren<ScrubberTaskSource>(true)).Single();
+                Assert.AreEqual("scrubber-room-01",source.SourceId); Assert.IsNotNull(source.Equipment); Assert.IsNotNull(source.Access);
+                var data = new SerializedObject(roots.SelectMany(g=>g.GetComponentsInChildren<SceneBindings>(true)).Single());
+                Assert.AreSame(view,data.FindProperty("journalView").objectReferenceValue);
+                Assert.AreEqual(1,data.FindProperty("taskSources").arraySize); Assert.AreSame(source,data.FindProperty("taskSources").GetArrayElementAtIndex(0).objectReferenceValue);
+                Assert.AreEqual(1,roots.SelectMany(g=>g.GetComponentsInChildren<UnityEngine.EventSystems.EventSystem>(true)).Count());
+            }
+            finally { EditorSceneManager.CloseScene(scene,true); }
+        }
         private const string Folder = "Assets/_Project/Features/Items/Definitions/ReplacementFuse";
         [Test] public void FuseCatalogAndSceneInstanceHaveDistinctStableIdentities()
         {

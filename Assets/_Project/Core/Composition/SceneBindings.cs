@@ -30,6 +30,7 @@ namespace SOLITUDE.Composition
         [SerializeField] private WorldPickup[] worldPickups = new WorldPickup[0];
         [SerializeField] private RestorationJunction[] restorationJunctions = new RestorationJunction[0];
         [SerializeField] private ScrubberTaskSource[] taskSources = new ScrubberTaskSource[0];
+        [SerializeField] private SOLITUDE.Tasks.UI.TaskJournalView journalView;
         private TaskJournal tasks;
         private string taskScope;
         private TaskJournalScreenCoordinator journalScreen;
@@ -133,6 +134,15 @@ namespace SOLITUDE.Composition
                     if (source != null)
                         source.Initialize(tasks, taskScope, policy, interactor, scrubberEquipment.Contains(source.Equipment) &&
                             presentations.Resolve(ScrubberEquipment.FuseItemId) != null && inventory.Container.IsAvailable);
+                if (journalView != null && tasks != null)
+                {
+                    try
+                    {
+                        journalView.Initialize(tasks, policy, pause, input);
+                        journalScreen = journalView.Screen; journalPresenter = journalView.Presenter;
+                    }
+                    catch (Exception error) { journalView.Release(); Debug.LogWarning("Optional task journal UI unavailable: " + error.Message); }
+                }
                 input.Bind(movement, interactor, selection, () => modal.ToggleInventory(), Back, game.TogglePause, journalScreen, journalPresenter);
             }
             catch { Release(); throw; }
@@ -235,6 +245,7 @@ namespace SOLITUDE.Composition
         {
             if (session == null) return;
             journalScreen?.Dispose(); journalScreen = null; journalPresenter?.Dispose(); journalPresenter = null;
+            if (journalView != null) journalView.Release();
             foreach (var source in taskSources) if (source != null) source.ReleaseBinding();
             if (taskScope != null) tasks?.ReleaseScope(taskScope);
             tasks = null; taskScope = null;

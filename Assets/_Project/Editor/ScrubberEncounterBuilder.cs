@@ -19,6 +19,174 @@ namespace SOLITUDE.Editor
 {
     public static class ScrubberEncounterBuilder
     {
+        public const string JournalFolder = "Assets/_Project/Systems/Tasks/UI";
+        [MenuItem("SOLITUDE/Demos/Add Task Journal To Scrubber Encounter")]
+        public static void AddTaskJournal()
+        {
+            if (EditorApplication.isPlaying) throw new InvalidOperationException("Exit Play mode before authoring.");
+            AuthorJournalPrefabs();
+            var previous = SceneManager.GetActiveScene();
+            var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
+            try { EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets(); }
+            finally { EditorSceneManager.CloseScene(scene,true); if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
+        }
+        private static void EnsureJournal(Scene scene)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(JournalFolder + "/TaskJournal.prefab");
+            if (prefab == null) { AuthorJournalPrefabs(); prefab = AssetDatabase.LoadAssetAtPath<GameObject>(JournalFolder + "/TaskJournal.prefab"); }
+            var view = All<SOLITUDE.Tasks.UI.TaskJournalView>(scene).SingleOrDefault();
+            if (view == null) view = ((GameObject)PrefabUtility.InstantiatePrefab(prefab,scene)).GetComponent<SOLITUDE.Tasks.UI.TaskJournalView>();
+            var equipment = All<ScrubberEquipment>(scene).Single();
+            var source = equipment.GetComponent<ScrubberTaskSource>();
+            if (source == null) source = equipment.gameObject.AddComponent<ScrubberTaskSource>();
+            source.Configure("scrubber-room-01", "DECK 01 / SCRUBBER ROOM", equipment, equipment.GetComponent<ScrubberAccess>());
+            var data = new SerializedObject(All<SceneBindings>(scene).Single());
+            data.FindProperty("journalView").objectReferenceValue = view;
+            var sources = data.FindProperty("taskSources"); sources.arraySize = 1; sources.GetArrayElementAtIndex(0).objectReferenceValue = source;
+            data.ApplyModifiedPropertiesWithoutUndo(); view.ValidateAuthoring();
+        }
+        private static RectTransform JRect(string name, Transform parent, Vector2 min, Vector2 max, Vector2 low, Vector2 high)
+        {
+            var go = new GameObject(name,typeof(RectTransform)); go.transform.SetParent(parent,false);
+            var rect = go.GetComponent<RectTransform>(); rect.anchorMin = min; rect.anchorMax = max; rect.offsetMin = low; rect.offsetMax = high; return rect;
+        }
+        private static void JSet(UnityEngine.Object target, string field, UnityEngine.Object value)
+        { var data = new SerializedObject(target); data.FindProperty(field).objectReferenceValue = value; data.ApplyModifiedPropertiesWithoutUndo(); }
+        private static TextMeshProUGUI JText(string name, Transform parent, string value, float size, Color color)
+        {
+            var rect = JRect(name,parent,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero);
+            var label = rect.gameObject.AddComponent<TextMeshProUGUI>(); label.font = font; label.fontSize = size; label.color = color;
+            label.text = value; label.richText = false; label.raycastTarget = false; label.textWrappingMode = TextWrappingModes.Normal;
+            return label;
+        }
+        private static UnityEngine.UI.Image JImage(RectTransform rect, Color color, bool hit = false)
+        { var image = rect.gameObject.AddComponent<UnityEngine.UI.Image>(); image.color = color; image.raycastTarget = hit; return image; }
+        private static UnityEngine.UI.Button JButton(RectTransform rect, string value, float size = 24)
+        {
+            var image = JImage(rect,new Color(.08f,.10f,.10f),true); var button = rect.gameObject.AddComponent<UnityEngine.UI.Button>();
+            button.targetGraphic = image; button.transition = UnityEngine.UI.Selectable.Transition.None;
+            var label = JText("Label",rect,value,size,White); label.alignment = TextAlignmentOptions.Center;
+            return button;
+        }
+        private static UnityEngine.UI.ScrollRect JScroll(RectTransform root)
+        {
+            var scroll = root.gameObject.AddComponent<UnityEngine.UI.ScrollRect>(); scroll.horizontal = false; scroll.vertical = true; scroll.scrollSensitivity = 36;
+            scroll.movementType = UnityEngine.UI.ScrollRect.MovementType.Clamped;
+            var viewport = JRect("Viewport",root,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero);
+            JImage(viewport,Color.white,true); viewport.gameObject.AddComponent<UnityEngine.UI.Mask>().showMaskGraphic = false;
+            var content = JRect("Content",viewport,new Vector2(0,1),Vector2.one,Vector2.zero,Vector2.zero); content.pivot = new Vector2(.5f,1);
+            var layout = content.gameObject.AddComponent<UnityEngine.UI.VerticalLayoutGroup>(); layout.spacing = 16; layout.childControlWidth = true; layout.childControlHeight = true;
+            layout.childForceExpandWidth = true; layout.childForceExpandHeight = false;
+            content.gameObject.AddComponent<UnityEngine.UI.ContentSizeFitter>().verticalFit = UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
+            scroll.viewport = viewport; scroll.content = content; return scroll;
+        }
+        private static TMP_Text JDetail(UnityEngine.Object view, string field, Transform parent, string initial, float size, Color color)
+        {
+            var label = JText(field,parent,initial,size,color); label.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().minHeight = size + 8;
+            JSet(view,field,label); return label;
+        }
+        private static void JRule(Transform parent)
+        {
+            var rect = JRect("Divider",parent,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero);
+            JImage(rect,new Color(.25f,.32f,.33f)); rect.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 1;
+        }
+        private static void JKey(UnityEngine.Object view, string field, Transform parent, string name, float x)
+        {
+            var rect = JRect(name,parent,new Vector2(0,.5f),new Vector2(0,.5f),new Vector2(x,-17),new Vector2(x+(name == "BackKey" ? 92 : 44),17));
+            JImage(rect,Amber); var label = JText("Key",rect,"?",22,Color.black); label.alignment = TextAlignmentOptions.Center;
+            label.textWrappingMode = TextWrappingModes.NoWrap; label.enableAutoSizing = true; label.fontSizeMin = 14; label.fontSizeMax = 22; JSet(view,field,label);
+        }
+        private static void JRowSymbols(SOLITUDE.Tasks.UI.TaskJournalRowView view)
+        {
+            var marker = JRect("PinIcon",view.transform,new Vector2(0,1),new Vector2(0,1),new Vector2(18,-124),new Vector2(34,-104));
+            marker.localRotation = Quaternion.Euler(0,0,-30);
+            JImage(JRect("Head",marker,new Vector2(.5f,.5f),new Vector2(.5f,.5f),new Vector2(-6,0),new Vector2(6,5)),Amber);
+            JImage(JRect("Stem",marker,new Vector2(.5f,.5f),new Vector2(.5f,.5f),new Vector2(-1,-9),new Vector2(1,1)),Amber);
+            JSet(view,"pinIcon",marker.gameObject); marker.gameObject.SetActive(false);
+            var pin = view.transform.Find("pin").GetComponent<TMP_Text>(); pin.margin = new Vector4(22,0,0,0);
+            var outcome = view.transform.Find("outcome").GetComponent<TMP_Text>(); outcome.margin = new Vector4(18,0,0,0);
+            JSet(view,"outcomeIcon",JOutcomeIcon(outcome.transform));
+            var layout = view.gameObject.GetComponent<UnityEngine.UI.VerticalLayoutGroup>();
+            if (layout == null) layout = view.gameObject.AddComponent<UnityEngine.UI.VerticalLayoutGroup>();
+            layout.padding = new RectOffset(18,18,12,12); layout.spacing = 4; layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = true; layout.childForceExpandHeight = false;
+            var sizing = view.GetComponent<UnityEngine.UI.LayoutElement>(); sizing.preferredHeight = -1; sizing.minHeight = 140;
+            var selection = view.transform.Find("Selection").gameObject.AddComponent<UnityEngine.UI.LayoutElement>(); selection.ignoreLayout = true;
+            marker.SetParent(pin.transform,false); marker.anchorMin = marker.anchorMax = new Vector2(0,.5f); marker.sizeDelta = new Vector2(16,20); marker.anchoredPosition = new Vector2(8,0); marker.localRotation = Quaternion.Euler(0,0,-30);
+        }
+        private static UnityEngine.UI.Image JOutcomeIcon(Transform parent)
+        {
+            var icon = JImage(JRect("OutcomeIcon",parent,new Vector2(0,.5f),new Vector2(0,.5f),new Vector2(0,-5),new Vector2(10,5)),SOLITUDE.Tasks.UI.TaskJournalView.Operational);
+            icon.enabled = false; return icon;
+        }
+        private static void AuthorJournalPrefabs()
+        {
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(JournalFolder + "/TaskJournal.prefab") != null) return;
+            Directory.CreateDirectory(JournalFolder); AssetDatabase.Refresh();
+            font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/UI/Fonts/pixel_operator/FontAssets/PixelOperator SDF.asset");
+            if (font == null) throw new InvalidOperationException("Existing journal font is missing.");
+            var row = new GameObject("TaskJournalRow",typeof(RectTransform));
+            GameObject rowPrefab;
+            try
+            {
+                row.GetComponent<RectTransform>().sizeDelta = new Vector2(460,170);
+                row.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 170;
+                var button = JButton(row.GetComponent<RectTransform>(),"",22); UnityEngine.Object.DestroyImmediate(button.GetComponentInChildren<TMP_Text>().gameObject);
+                var view = row.AddComponent<SOLITUDE.Tasks.UI.TaskJournalRowView>(); JSet(view,"select",button);
+                var selection = JImage(JRect("Selection",row.transform,Vector2.zero,new Vector2(0,1),Vector2.zero,new Vector2(4,0)),Amber); selection.enabled = false; JSet(view,"selection",selection);
+                string[] fields = { "title", "location", "condition", "pin", "outcome", "availability" };
+                for (int i = 0; i < fields.Length; i++)
+                {
+                    var label = JText(fields[i],row.transform,"",i == 0 ? 25 : 20,i == 3 ? Amber : i == 1 ? new Color(.6f,.67f,.68f) : White);
+                    var r = label.rectTransform; r.anchorMin = new Vector2(0,1); r.anchorMax = Vector2.one; r.pivot = new Vector2(.5f,1);
+                    r.anchoredPosition = new Vector2(0,-12-i*24); r.sizeDelta = new Vector2(-36,i == 0 ? 50 : 24);
+                    if (i > 0) r.anchoredPosition = new Vector2(0,-64-(i-1)*20);
+                    JSet(view,fields[i],label);
+                }
+                JRowSymbols(view); view.ValidateAuthoring(); rowPrefab = PrefabUtility.SaveAsPrefabAsset(row,JournalFolder+"/TaskJournalRow.prefab");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(row); }
+            var canvasGO = new GameObject("TaskJournal",typeof(RectTransform),typeof(Canvas),typeof(UnityEngine.UI.CanvasScaler),typeof(UnityEngine.UI.GraphicRaycaster));
+            try
+            {
+                canvasGO.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay; canvasGO.GetComponent<Canvas>().sortingOrder = 180;
+                var scaler = canvasGO.GetComponent<UnityEngine.UI.CanvasScaler>(); scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1280,720); scaler.matchWidthOrHeight = .5f;
+                var view = canvasGO.AddComponent<SOLITUDE.Tasks.UI.TaskJournalView>();
+                var panel = JRect("Panel",canvasGO.transform,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero); JImage(panel,new Color(.035f,.05f,.055f,1),true); JSet(view,"panel",panel.gameObject);
+                var header = JRect("Header",panel,new Vector2(0,1),Vector2.one,new Vector2(32,-76),new Vector2(-32,-20));
+                var heading = JText("Heading",header,"TASK JOURNAL",38,White);
+                var brand = JText("Brand",header,"SOLITUDE",22,new Color(.6f,.67f,.68f)); brand.alignment = TextAlignmentOptions.TopRight;
+                var tabs = JRect("Tabs",panel,new Vector2(0,1),Vector2.one,new Vector2(32,-126),new Vector2(-32,-78));
+                var a = JButton(JRect("Active",tabs,Vector2.zero,new Vector2(0,1),Vector2.zero,new Vector2(170,0)),"ACTIVE  0"); JSet(view,"activeTab",a); JSet(view,"activeCount",a.GetComponentInChildren<TMP_Text>());
+                var c = JButton(JRect("Completed",tabs,Vector2.zero,new Vector2(0,1),new Vector2(180,0),new Vector2(390,0)),"COMPLETED  0"); JSet(view,"completedTab",c); JSet(view,"completedCount",c.GetComponentInChildren<TMP_Text>());
+                JSet(view,"activeUnderline",JImage(JRect("ActiveUnderline",tabs,Vector2.zero,Vector2.zero,new Vector2(0,-1),new Vector2(170,3)),Amber));
+                JSet(view,"completedUnderline",JImage(JRect("CompletedUnderline",tabs,Vector2.zero,Vector2.zero,new Vector2(180,-1),new Vector2(390,3)),Amber));
+                var body = JRect("Body",panel,Vector2.zero,Vector2.one,new Vector2(32,80),new Vector2(-32,-146));
+                var list = JScroll(JRect("TaskList",body,Vector2.zero,new Vector2(.42f,1),Vector2.zero,new Vector2(-18,0))); JSet(view,"listScroll",list);
+                var empty = JText("Empty",list.viewport,"NO ACTIVE TASKS",24,new Color(.6f,.67f,.68f)); JSet(view,"empty",empty);
+                JImage(JRect("ColumnRule",body,new Vector2(.42f,0),new Vector2(.42f,1),Vector2.zero,new Vector2(1,0)),new Color(.25f,.32f,.33f));
+                var detail = JScroll(JRect("Details",body,new Vector2(.42f,0),Vector2.one,new Vector2(32,0),Vector2.zero)); JSet(view,"detailScroll",detail);
+                detail.content.GetComponent<UnityEngine.UI.VerticalLayoutGroup>().spacing = 10;
+                var gray = new Color(.6f,.67f,.68f);
+                JDetail(view,"title",detail.content,"NO TASK SELECTED",34,White); JDetail(view,"location",detail.content,"",22,gray); JRule(detail.content);
+                var outcome = JDetail(view,"outcome",detail.content,"",22,White); outcome.margin = new Vector4(18,0,0,0); JSet(view,"outcomeIcon",JOutcomeIcon(outcome.transform));
+                var confirmed = JText("Confirmed",detail.content,"CONFIRMED CONDITION",20,gray); confirmed.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 28;
+                JSet(view,"confirmed",confirmed);
+                JDetail(view,"condition",detail.content,"",28,SOLITUDE.Tasks.UI.TaskJournalView.Fault); JDetail(view,"availability",detail.content,"",20,gray); JRule(detail.content);
+                JDetail(view,"stepLabel",detail.content,"NEXT STEP",20,gray); JDetail(view,"stepText",detail.content,"",30,White); JDetail(view,"blocker",detail.content,"",22,gray);
+                var pin = JButton(JRect("Pin",detail.content,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero),"PIN TASK"); pin.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 48;
+                JSet(view,"pinButton",pin); JSet(view,"pinLabel",pin.GetComponentInChildren<TMP_Text>());
+                var footer = JRect("Footer",panel,Vector2.zero,new Vector2(1,0),new Vector2(32,20),new Vector2(-32,64));
+                JKey(view,"pinKey",footer,"PinKey",0); var hint = JText("PinHint",footer,"PIN TASK",22,White); hint.rectTransform.offsetMin = new Vector2(58,0); hint.rectTransform.offsetMax = new Vector2(-420,0); JSet(view,"pinHint",hint);
+                var close = JRect("CloseControls",footer,new Vector2(1,0),Vector2.one,new Vector2(-360,0),Vector2.zero);
+                JKey(view,"journalKey",close,"JournalKey",0); var closeText = JText("CloseLabel",close,"CLOSE",22,White); closeText.rectTransform.offsetMin = new Vector2(54,0); closeText.rectTransform.offsetMax = new Vector2(-200,0);
+                JKey(view,"backKey",close,"BackKey",180); var back = JText("BackLabel",close,"BACK",22,White); back.rectTransform.offsetMin = new Vector2(284,0);
+                JSet(view,"rowPrefab",rowPrefab.GetComponent<SOLITUDE.Tasks.UI.TaskJournalRowView>()); view.ValidateAuthoring(); panel.gameObject.SetActive(false);
+                PrefabUtility.SaveAsPrefabAsset(canvasGO,JournalFolder+"/TaskJournal.prefab");
+            }
+            finally { UnityEngine.Object.DestroyImmediate(canvasGO); }
+        }
         public const string ScenePath = "Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity";
         private const string Source = "Assets/_Project/Art/SOLITUDE/ReferenceScenes/SOLITUDE_OpeningSlice.unity";
         private const string Feature = "Assets/_Project/Features/World/ScrubberEncounter";
@@ -76,7 +244,7 @@ namespace SOLITUDE.Editor
                 var player = All<PlayerInteractor>(scene).Single(); player.transform.position = new Vector3(23,4.5f);
                 var camera = All<Camera>(scene).Single(); camera.transform.position = new Vector3(23,4.5f,-10);
                 camera.GetComponent<SolitudeCameraFollow2D>().Configure(player.transform,new Vector2(23,23),new Vector2(4.5f,4.5f));
-                scope.Validate(); EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+                scope.Validate(); EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
             }
             finally { EditorSceneManager.CloseScene(scene,true); if (previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }
@@ -138,7 +306,7 @@ namespace SOLITUDE.Editor
                 instance.GetComponent<SOLITUDE.SaveLoad.SaveableId>().AssignMissingSceneIdentity();
                 var binding = new SerializedObject(All<SceneBindings>(scene).Single()); var pickups = binding.FindProperty("worldPickups");
                 pickups.arraySize = 1; pickups.GetArrayElementAtIndex(0).objectReferenceValue = instance.GetComponent<WorldPickup>(); binding.ApplyModifiedPropertiesWithoutUndo();
-                EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+                EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
                 if (AssetDatabase.AssetPathToGUID(ScenePath) != sceneGuid) throw new InvalidOperationException("Scene GUID changed.");
             }
             finally { EditorSceneManager.CloseScene(scene,true); if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
@@ -171,7 +339,7 @@ namespace SOLITUDE.Editor
             // Pixel Perfect can adjust the Edit-mode viewport to the current dock size.
             // Retain the encounter's authored viewport when saving presentation changes.
             All<Camera>(scene).Single().rect=new Rect(0,.125f,1,.75000006f);
-            EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+            EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
         }
         private static void StyleAction(UnityEngine.UI.Button button)
         {
@@ -190,7 +358,7 @@ namespace SOLITUDE.Editor
                 var source=data.FindProperty("runningSound").objectReferenceValue as AudioSource;
                 if(source==null) { source=equipment.gameObject.AddComponent<AudioSource>();source.loop=true;source.playOnAwake=false;source.volume=.15f;source.spatialBlend=0;data.FindProperty("runningSound").objectReferenceValue=source; }
                 source.clip=AssetDatabase.LoadAssetAtPath<AudioClip>(Feature+"/Audio/scrubber_running.wav");if(source.clip==null) throw new InvalidOperationException("Running clip missing.");
-                data.ApplyModifiedPropertiesWithoutUndo();EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+                data.ApplyModifiedPropertiesWithoutUndo();EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
             }
             finally { EditorSceneManager.CloseScene(scene,true);if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }
@@ -221,7 +389,7 @@ namespace SOLITUDE.Editor
             {
                 var notification=All<ScrubberTaskNotificationView>(scene).Single();var data=new SerializedObject(notification);
                 data.FindProperty("equipment").objectReferenceValue=All<ScrubberEquipment>(scene).Single();data.ApplyModifiedPropertiesWithoutUndo();
-                EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+                EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
             }
             finally { EditorSceneManager.CloseScene(scene,true);if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }
