@@ -11,17 +11,18 @@ namespace SOLITUDE.Tasks.UI
     public sealed class TaskJournalView : MonoBehaviour, ITaskJournalDisplay, ITaskJournalScreenDisplay
     {
         [SerializeField] private GameObject panel;
-        [SerializeField] private UnityEngine.UI.Button activeTab, completedTab, pinButton;
+        [SerializeField] private UnityEngine.UI.Button activeTab, completedTab;
         [SerializeField] private UnityEngine.UI.Image activeUnderline, completedUnderline;
         [SerializeField] private UnityEngine.UI.Image outcomeIcon;
-        [SerializeField] private TMP_Text activeCount, completedCount, title, location, condition, confirmed, outcome, availability, stepLabel, stepText, blocker, empty, pinLabel;
-        [SerializeField] private TMP_Text pinKey, journalKey, backKey, pinHint;
+        [SerializeField] private TMP_Text activeCount, completedCount, title, location, condition, confirmed, outcome, availability, stepLabel, stepText, blocker, empty;
+        [SerializeField] private TMP_Text journalKey, backKey;
         [SerializeField] private UnityEngine.UI.ScrollRect listScroll, detailScroll;
         [SerializeField] private TaskJournalRowView rowPrefab;
         private readonly Dictionary<TaskKey, TaskJournalRowView> rows = new();
         private TaskJournalPresenter presenter;
         private TaskJournalScreenCoordinator screen;
         private UnityInputHost input;
+        private GameObject lastFocused;
         public bool IsOpen => screen?.IsOpen == true;
         public TaskJournalPresenter Presenter => presenter;
         public TaskJournalScreenCoordinator Screen => screen;
@@ -33,9 +34,9 @@ namespace SOLITUDE.Tasks.UI
         public static Color ConditionColor(TaskCondition value) => value == TaskCondition.Fault ? Fault : value == TaskCondition.Normal ? Operational : value == TaskCondition.Unknown ? Gray : Amber;
         public void ValidateAuthoring()
         {
-            if (panel == null || activeTab == null || completedTab == null || pinButton == null || activeUnderline == null || completedUnderline == null || outcomeIcon == null ||
+            if (panel == null || activeTab == null || completedTab == null || activeUnderline == null || completedUnderline == null || outcomeIcon == null ||
                 activeCount == null || completedCount == null || title == null || location == null || condition == null || confirmed == null || outcome == null || availability == null ||
-                stepLabel == null || stepText == null || blocker == null || empty == null || pinLabel == null || pinKey == null || journalKey == null || backKey == null || pinHint == null ||
+                stepLabel == null || stepText == null || blocker == null || empty == null || journalKey == null || backKey == null ||
                 listScroll?.content == null || listScroll.viewport == null || detailScroll?.content == null || detailScroll.viewport == null || rowPrefab == null)
                 throw new InvalidOperationException("Task journal authored endpoints are incomplete.");
             rowPrefab.ValidateAuthoring();
@@ -44,19 +45,18 @@ namespace SOLITUDE.Tasks.UI
         public void Initialize(TaskJournal journal, InputPolicyCoordinator policy, PauseCoordinator pause, UnityInputHost host)
         {
             Release(); ValidateAuthoring(); input = host;
-            presenter = new TaskJournalPresenter(journal, journal, this); presenter.PresentationError += Debug.LogException;
+            presenter = new TaskJournalPresenter(journal, this); presenter.PresentationError += PresentationFailed;
             screen = new TaskJournalScreenCoordinator(policy, pause, this); screen.PresentationError += Debug.LogException;
-            activeTab.onClick.AddListener(Active); completedTab.onClick.AddListener(Completed); pinButton.onClick.AddListener(Pin);
+            activeTab.onClick.AddListener(Active); completedTab.onClick.AddListener(Completed);
             panel.SetActive(false);
         }
         private void Active() { Remember(); presenter?.SelectTab(TaskJournalTab.Active); }
         private void Completed() { Remember(); presenter?.SelectTab(TaskJournalTab.Completed); }
-        private void Pin() { Remember(); presenter?.TogglePin(); }
         private void Select(TaskKey key) { Remember(); presenter?.Select(key); }
         public void Show()
         {
             if (!isActiveAndEnabled || presenter == null) throw new InvalidOperationException("Journal view is unavailable.");
-            panel.SetActive(true); presenter.SetVisible(true); RestoreFocus(presenter.Presentation.FocusToken);
+            panel.SetActive(true); presenter.SetVisible(true, requireRender: true); RestoreFocus(presenter.Presentation.FocusToken);
         }
         public void Hide()
         {
@@ -72,15 +72,13 @@ namespace SOLITUDE.Tasks.UI
             var selected = EventSystem.current?.currentSelectedGameObject; string token = null;
             if (selected == activeTab.gameObject) token = "active";
             else if (selected == completedTab.gameObject) token = "completed";
-            else if (selected == pinButton.gameObject) token = "pin";
             else foreach (var row in rows.Values) if (selected == row.Button.gameObject) { token = Token(row.Key); break; }
             presenter.RememberPosition(token, listScroll.verticalNormalizedPosition, detailScroll.verticalNormalizedPosition);
         }
         private void RestoreFocus(string token)
         {
             GameObject target = null;
-            if (token == "pin" && pinButton.interactable) target = pinButton.gameObject;
-            else if (token == "completed") target = completedTab.gameObject;
+            if (token == "completed") target = completedTab.gameObject;
             else if (token == "active") target = activeTab.gameObject;
             else foreach (var row in rows.Values) if (Token(row.Key) == token) { target = row.Button.gameObject; break; }
             if (target == null && presenter.Presentation.SelectedKey.HasValue && rows.TryGetValue(presenter.Presentation.SelectedKey.Value,out var current)) target = current.Button.gameObject;
@@ -109,28 +107,54 @@ namespace SOLITUDE.Tasks.UI
             outcomeIcon.color = state.Outcome == "FAILED" ? Fault : Operational;
             stepLabel.text = state.StepLabel; stepText.text = state.StepText; blocker.text = state.Blocker; empty.text = state.EmptyText;
             foreach (var label in new[] { location, condition, outcome, availability, stepLabel, stepText, blocker }) label.gameObject.SetActive(!string.IsNullOrEmpty(label.text));
-            pinButton.gameObject.SetActive(state.CanPin); pinButton.interactable = state.CanPin; pinLabel.text = state.PinLabel;
-            pinHint.text = state.CanPin ? state.PinLabel : "PIN UNAVAILABLE";
-            pinKey.text = input.BindingLabel("Gameplay/JournalPin"); journalKey.text = input.BindingLabel("Gameplay/Journal"); backKey.text = input.BindingLabel("Container/Cancel");
+            journalKey.text = input.BindingLabel("Gameplay/Journal"); backKey.text = input.BindingLabel("Container/Cancel");
             Canvas.ForceUpdateCanvases(); listScroll.verticalNormalizedPosition = state.ListScroll; detailScroll.verticalNormalizedPosition = state.DetailScroll;
             if (focused == null || !focused.activeInHierarchy) RestoreFocus(state.FocusToken);
+            RevealFocus();
         }
         private void LateUpdate()
         {
             if (!IsOpen) return;
-            Remember();
             var selected = EventSystem.current?.currentSelectedGameObject;
-            foreach (var button in new[] { activeTab, completedTab, pinButton })
+            if (selected != lastFocused) RevealFocus();
+            Remember();
+            foreach (var button in new[] { activeTab, completedTab })
             {
                 bool focus = selected == button.gameObject;
                 button.image.color = focus ? Amber : new Color(.08f,.10f,.10f);
                 button.GetComponentInChildren<TMP_Text>(true).color = focus ? Color.black : White;
             }
         }
+        private void PresentationFailed(Exception error)
+        {
+            Debug.LogException(error);
+            screen?.Close();
+        }
+        private void RevealFocus()
+        {
+            var target = EventSystem.current?.currentSelectedGameObject;
+            lastFocused = target;
+            if (target == null) return;
+            Reveal(listScroll, target.transform as RectTransform);
+            Reveal(detailScroll, target.transform as RectTransform);
+            Remember();
+        }
+        private static void Reveal(UnityEngine.UI.ScrollRect scroll, RectTransform target)
+        {
+            if (target == null || !target.IsChildOf(scroll.content)) return;
+            var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(scroll.viewport, target);
+            var viewport = scroll.viewport.rect;
+            float delta = bounds.size.y > viewport.height || bounds.max.y > viewport.yMax
+                ? viewport.yMax - bounds.max.y
+                : bounds.min.y < viewport.yMin ? viewport.yMin - bounds.min.y : 0;
+            if (Mathf.Abs(delta) < .01f) return;
+            scroll.StopMovement();
+            scroll.content.position += scroll.viewport.TransformVector(new Vector3(0, delta, 0));
+        }
         public void Release()
         {
             screen?.Dispose(); screen = null; presenter?.Dispose(); presenter = null;
-            activeTab?.onClick.RemoveListener(Active); completedTab?.onClick.RemoveListener(Completed); pinButton?.onClick.RemoveListener(Pin); input = null;
+            activeTab?.onClick.RemoveListener(Active); completedTab?.onClick.RemoveListener(Completed); input = null;
             if (panel != null) panel.SetActive(false);
         }
         private void OnDisable() => Release();

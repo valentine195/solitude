@@ -143,7 +143,7 @@ namespace SOLITUDE.Composition
                     }
                     catch (Exception error) { journalView.Release(); Debug.LogWarning("Optional task journal UI unavailable: " + error.Message); }
                 }
-                input.Bind(movement, interactor, selection, () => modal.ToggleInventory(), Back, game.TogglePause, journalScreen, journalPresenter);
+                input.Bind(movement, interactor, selection, () => modal.ToggleInventory(), Back, game.TogglePause, journalScreen);
             }
             catch { Release(); throw; }
         }

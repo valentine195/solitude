@@ -13,11 +13,10 @@ namespace SOLITUDE.Application
         public string Outcome { get; }
         public string Availability { get; }
         public bool Selected { get; }
-        public bool Pinned { get; }
         public TaskCondition Condition { get; }
         internal TaskRowPresentation(TaskRecord record, bool selected)
         { Key = record.Key; Title = record.State.Title; Location = Copy(record.State.Location); Outcome = record.State.Outcome.ToString().ToUpperInvariant();
-            Availability = record.SourceAvailable ? "" : "SOURCE UNAVAILABLE"; Selected = selected; Pinned = record.Pinned; Condition = record.State.Condition; }
+            Availability = record.SourceAvailable ? "" : "SOURCE UNAVAILABLE"; Selected = selected; Condition = record.State.Condition; }
         internal static string Copy(string text) => string.IsNullOrWhiteSpace(text) ? "UNKNOWN" : text;
     }
     public sealed class TaskJournalPresentation
@@ -37,8 +36,6 @@ namespace SOLITUDE.Application
         public string StepText { get; }
         public string Blocker { get; }
         public string EmptyText { get; }
-        public bool CanPin { get; }
-        public string PinLabel { get; }
         public string FocusToken { get; }
         public float ListScroll { get; }
         public float DetailScroll { get; }
@@ -60,15 +57,12 @@ namespace SOLITUDE.Application
             StepText = record == null ? "" : record.State.Outcome == TaskOutcome.Active ? record.State.NextStep : record.State.Result;
             Blocker = record?.State.Blocker ?? "";
             EmptyText = records.Count == 0 ? tab == TaskJournalTab.Active ? "NO ACTIVE TASKS" : "NO COMPLETED TASKS" : "";
-            CanPin = record != null && record.State.Outcome == TaskOutcome.Active;
-            PinLabel = CanPin ? record.Pinned ? "UNPIN TASK" : "PIN TASK" : "";
             FocusToken = focusToken; ListScroll = listScroll; DetailScroll = detailScroll;
         }
     }
     public interface ITaskJournalDisplay { void Render(TaskJournalPresentation presentation); }
     public sealed class TaskJournalPresenter : IDisposable
     {
-        private readonly ITaskPinCommands commands;
         private readonly ITaskJournalDisplay display;
         private readonly IDisposable observation;
         private TaskJournalSnapshot snapshot;
@@ -80,9 +74,9 @@ namespace SOLITUDE.Application
         public event Action<Exception> PresentationError;
         public TaskJournalPresentation Presentation => new TaskJournalPresentation(snapshot, tab, selected, focusToken, listScroll, detailScroll);
         public bool IsVisible => visible;
-        public TaskJournalPresenter(ITaskJournalReader reader, ITaskPinCommands commands, ITaskJournalDisplay display)
+        public TaskJournalPresenter(ITaskJournalReader reader, ITaskJournalDisplay display)
         {
-            this.commands = commands; this.display = display;
+            this.display = display;
             observation = reader.ObserveWithSnapshot(Changed, out snapshot);
             Reconcile(null);
         }
@@ -104,8 +98,15 @@ namespace SOLITUDE.Application
             selected = rows.Count == 0 ? (TaskKey?)null : rows[Math.Min(oldIndex, rows.Count - 1)].Key;
             if (focusToken != null && focusToken.StartsWith("row:", StringComparison.Ordinal)) focusToken = null;
         }
-        public void SetVisible(bool value)
-        { if (disposed) return; visible = value; if (value) Render(); }
+        public void SetVisible(bool value, bool requireRender = false)
+        {
+            if (disposed) return;
+            visible = value;
+            if (!value) return;
+            if (!requireRender) { Render(); return; }
+            try { display?.Render(Presentation); }
+            catch { visible = false; throw; }
+        }
         public void SelectTab(TaskJournalTab value)
         {
             if (!visible || disposed || !Enum.IsDefined(typeof(TaskJournalTab), value) || tab == value) return;
@@ -115,13 +116,6 @@ namespace SOLITUDE.Application
         {
             if (!visible || disposed) return;
             foreach (var row in Rows(snapshot)) if (row.Key == key) { selected = key; Render(); return; }
-        }
-        public TaskWriteResult TogglePin()
-        {
-            if (!visible || disposed || !selected.HasValue) return TaskWriteResult.Unavailable;
-            var record = snapshot.Find(selected.Value);
-            if (record == null || record.State.Outcome != TaskOutcome.Active) return TaskWriteResult.Invalid;
-            return commands.SetPinned(record.Pinned ? (TaskKey?)null : record.Key);
         }
         public void RememberPosition(string focus, float list, float detail)
         {

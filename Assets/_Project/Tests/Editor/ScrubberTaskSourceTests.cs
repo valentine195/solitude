@@ -78,10 +78,10 @@ namespace SOLITUDE.Tests
             commands.Grant(inventory.Handle, ScrubberEquipment.FuseItemId, 1);
             equipment.Install(); Assert.IsNull(Record);
             Assert.IsTrue(access.Interact(player).IsSuccess); Assert.AreEqual("restart", Record.State.StageKey); screen.Close();
-            journal.SetPinned(source.Key); equipment.Restart(); Assert.AreEqual("recover-air", Record.State.StageKey);
+            equipment.Restart(); Assert.AreEqual("recover-air", Record.State.StageKey);
             equipment.State.Advance(4.9f); Assert.AreEqual(TaskOutcome.Active, Record.State.Outcome);
             equipment.State.Advance(.2f); Assert.AreEqual(TaskOutcome.Completed, Record.State.Outcome);
-            Assert.IsNull(journal.ReadSnapshot().PinnedKey); Assert.AreEqual("Room atmosphere restored.", Record.State.Result);
+            Assert.AreEqual("Room atmosphere restored.", Record.State.Result);
             equipment.Restart(); equipment.Install(); Focus(); Assert.AreEqual(1, journal.ReadSnapshot().Completed.Count);
         }
         [Test] public void OperationalFocusStaysHiddenUntilSuccessfulAccess()
@@ -91,13 +91,13 @@ namespace SOLITUDE.Tests
             Assert.IsTrue(access.Interact(player).IsSuccess); Assert.AreEqual(TaskOutcome.Completed, Record.State.Outcome);
             Assert.AreEqual(0, journal.ReadSnapshot().Active.Count); Assert.AreEqual(1, journal.ReadSnapshot().Completed.Count);
         }
-        [Test] public void DisableRetainsUnavailablePinAndReattachmentReconcilesCurrentStage()
+        [Test] public void DisableRetainsUnavailableTaskAndReattachmentReconcilesCurrentStage()
         {
-            Focus(); journal.SetPinned(source.Key); Invoke(source, "OnDisable"); source.enabled = false;
-            Assert.IsFalse(Record.SourceAvailable); Assert.IsTrue(Record.Pinned);
+            Focus(); Invoke(source, "OnDisable"); source.enabled = false;
+            Assert.IsFalse(Record.SourceAvailable);
             commands.Grant(inventory.Handle, ScrubberEquipment.FuseItemId, 1); equipment.Install();
             Assert.AreEqual("replace-fuse", Record.State.StageKey);
-            source.enabled = true; Invoke(source, "OnEnable"); Assert.IsTrue(Record.SourceAvailable); Assert.IsTrue(Record.Pinned);
+            source.enabled = true; Invoke(source, "OnEnable"); Assert.IsTrue(Record.SourceAvailable);
             Assert.AreEqual("restart", Record.State.StageKey);
             source.ReleaseBinding(); journal.ReleaseScope("fixture-scope"); Assert.IsNull(Record);
             source.Initialize(journal, "fixture-scope-new", policy, player, true); Assert.IsNull(Record); Focus(); Assert.AreEqual("restart", Record.State.StageKey);

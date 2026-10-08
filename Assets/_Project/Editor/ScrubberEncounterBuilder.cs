@@ -98,12 +98,6 @@ namespace SOLITUDE.Editor
         }
         private static void JRowSymbols(SOLITUDE.Tasks.UI.TaskJournalRowView view)
         {
-            var marker = JRect("PinIcon",view.transform,new Vector2(0,1),new Vector2(0,1),new Vector2(18,-124),new Vector2(34,-104));
-            marker.localRotation = Quaternion.Euler(0,0,-30);
-            JImage(JRect("Head",marker,new Vector2(.5f,.5f),new Vector2(.5f,.5f),new Vector2(-6,0),new Vector2(6,5)),Amber);
-            JImage(JRect("Stem",marker,new Vector2(.5f,.5f),new Vector2(.5f,.5f),new Vector2(-1,-9),new Vector2(1,1)),Amber);
-            JSet(view,"pinIcon",marker.gameObject); marker.gameObject.SetActive(false);
-            var pin = view.transform.Find("pin").GetComponent<TMP_Text>(); pin.margin = new Vector4(22,0,0,0);
             var outcome = view.transform.Find("outcome").GetComponent<TMP_Text>(); outcome.margin = new Vector4(18,0,0,0);
             JSet(view,"outcomeIcon",JOutcomeIcon(outcome.transform));
             var layout = view.gameObject.GetComponent<UnityEngine.UI.VerticalLayoutGroup>();
@@ -112,7 +106,6 @@ namespace SOLITUDE.Editor
             layout.childForceExpandWidth = true; layout.childForceExpandHeight = false;
             var sizing = view.GetComponent<UnityEngine.UI.LayoutElement>(); sizing.preferredHeight = -1; sizing.minHeight = 140;
             var selection = view.transform.Find("Selection").gameObject.AddComponent<UnityEngine.UI.LayoutElement>(); selection.ignoreLayout = true;
-            marker.SetParent(pin.transform,false); marker.anchorMin = marker.anchorMax = new Vector2(0,.5f); marker.sizeDelta = new Vector2(16,20); marker.anchoredPosition = new Vector2(8,0); marker.localRotation = Quaternion.Euler(0,0,-30);
         }
         private static UnityEngine.UI.Image JOutcomeIcon(Transform parent)
         {
@@ -134,10 +127,10 @@ namespace SOLITUDE.Editor
                 var button = JButton(row.GetComponent<RectTransform>(),"",22); UnityEngine.Object.DestroyImmediate(button.GetComponentInChildren<TMP_Text>().gameObject);
                 var view = row.AddComponent<SOLITUDE.Tasks.UI.TaskJournalRowView>(); JSet(view,"select",button);
                 var selection = JImage(JRect("Selection",row.transform,Vector2.zero,new Vector2(0,1),Vector2.zero,new Vector2(4,0)),Amber); selection.enabled = false; JSet(view,"selection",selection);
-                string[] fields = { "title", "location", "condition", "pin", "outcome", "availability" };
+                string[] fields = { "title", "location", "condition", "outcome", "availability" };
                 for (int i = 0; i < fields.Length; i++)
                 {
-                    var label = JText(fields[i],row.transform,"",i == 0 ? 25 : 20,i == 3 ? Amber : i == 1 ? new Color(.6f,.67f,.68f) : White);
+                    var label = JText(fields[i],row.transform,"",i == 0 ? 25 : 20,i == 1 ? new Color(.6f,.67f,.68f) : White);
                     var r = label.rectTransform; r.anchorMin = new Vector2(0,1); r.anchorMax = Vector2.one; r.pivot = new Vector2(.5f,1);
                     r.anchoredPosition = new Vector2(0,-12-i*24); r.sizeDelta = new Vector2(-36,i == 0 ? 50 : 24);
                     if (i > 0) r.anchoredPosition = new Vector2(0,-64-(i-1)*20);
@@ -175,10 +168,7 @@ namespace SOLITUDE.Editor
                 JSet(view,"confirmed",confirmed);
                 JDetail(view,"condition",detail.content,"",28,SOLITUDE.Tasks.UI.TaskJournalView.Fault); JDetail(view,"availability",detail.content,"",20,gray); JRule(detail.content);
                 JDetail(view,"stepLabel",detail.content,"NEXT STEP",20,gray); JDetail(view,"stepText",detail.content,"",30,White); JDetail(view,"blocker",detail.content,"",22,gray);
-                var pin = JButton(JRect("Pin",detail.content,Vector2.zero,Vector2.one,Vector2.zero,Vector2.zero),"PIN TASK"); pin.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight = 48;
-                JSet(view,"pinButton",pin); JSet(view,"pinLabel",pin.GetComponentInChildren<TMP_Text>());
                 var footer = JRect("Footer",panel,Vector2.zero,new Vector2(1,0),new Vector2(32,20),new Vector2(-32,64));
-                JKey(view,"pinKey",footer,"PinKey",0); var hint = JText("PinHint",footer,"PIN TASK",22,White); hint.rectTransform.offsetMin = new Vector2(58,0); hint.rectTransform.offsetMax = new Vector2(-420,0); JSet(view,"pinHint",hint);
                 var close = JRect("CloseControls",footer,new Vector2(1,0),Vector2.one,new Vector2(-360,0),Vector2.zero);
                 JKey(view,"journalKey",close,"JournalKey",0); var closeText = JText("CloseLabel",close,"CLOSE",22,White); closeText.rectTransform.offsetMin = new Vector2(54,0); closeText.rectTransform.offsetMax = new Vector2(-200,0);
                 JKey(view,"backKey",close,"BackKey",180); var back = JText("BackLabel",close,"BACK",22,White); back.rectTransform.offsetMin = new Vector2(284,0);

@@ -29,7 +29,7 @@ namespace SOLITUDE.Tests
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(key)); InputSystem.Update();
             InputSystem.QueueStateEvent(keyboard, new KeyboardState()); InputSystem.Update();
         }
-        [UnityTest] public IEnumerator SharedKeyboardRoutesJournalPinBackAndPreservesOtherOwners()
+        [UnityTest] public IEnumerator SharedKeyboardRoutesJournalBackAndPreservesOtherOwners()
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             yield return new EnterPlayMode(); yield return Verify(); yield return new ExitPlayMode();
@@ -41,13 +41,13 @@ namespace SOLITUDE.Tests
             journal.RegisterSource("a", "scope", out var writer);
             var key = new TaskKey("a", "task");
             writer.Publish("task", new TaskSnapshot(true, TaskOutcome.Active, "Task", "stage", nextStep: "Instruction"));
-            var display = new Display(); var presenter = new TaskJournalPresenter(journal, journal, display); display.Presenter = presenter;
+            var display = new Display(); var presenter = new TaskJournalPresenter(journal, display); display.Presenter = presenter;
             var screen = new TaskJournalScreenCoordinator(policy, pause, display);
             var inputObject = new GameObject("Journal Input"); var input = inputObject.AddComponent<UnityInputHost>(); input.Initialize(policy);
             var uiObject = new GameObject("Journal EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
             var module = uiObject.GetComponent<InputSystemUIInputModule>(); var uiLease = input.ConnectUI(module);
             int inventories = 0, fallbacks = 0;
-            input.Bind(null, null, null, () => inventories++, () => false, () => fallbacks++, screen, presenter);
+            input.Bind(null, null, null, () => inventories++, () => false, () => fallbacks++, screen);
             var background = InputSystem.settings.backgroundBehavior; var editor = InputSystem.settings.editorInputBehaviorInPlayMode;
             InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
@@ -55,26 +55,24 @@ namespace SOLITUDE.Tests
             try
             {
                 Press(keyboard, Key.J); Assert.IsFalse(screen.IsOpen); policy.SetReady(true);
-                Press(keyboard, Key.P); Assert.IsNull(journal.ReadSnapshot().PinnedKey);
+
                 Press(keyboard, Key.J); Assert.IsTrue(screen.IsOpen); Assert.AreEqual(0, pause.Scale); Assert.IsTrue(module.enabled);
-                // Opening must allow an explicit pin action even in the opening frame.
-                Press(keyboard, Key.P); Assert.AreEqual(key, journal.ReadSnapshot().PinnedKey);
-                Press(keyboard, Key.P); Assert.IsNull(journal.ReadSnapshot().PinnedKey);
+
                 yield return null;
                 var actions = (SOLITUDE_InputActions)typeof(UnityInputHost).GetField("actions", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(input);
+                Assert.IsNull(actions.asset.FindAction("Gameplay/JournalPin", false));
                 Assert.IsFalse(actions.Gameplay.Move.enabled); Assert.IsFalse(actions.Gameplay.Interact.enabled); Assert.IsFalse(actions.Gameplay.Hotbar1.enabled);
                 Assert.IsTrue(actions.asset.FindAction("UI/Navigate").enabled); Assert.IsTrue(actions.asset.FindAction("UI/Submit").enabled);
-                Assert.AreEqual("J", input.BindingLabel("Gameplay/Journal")); Assert.AreEqual("P", input.BindingLabel("Gameplay/JournalPin"));
+                Assert.AreEqual("J", input.BindingLabel("Gameplay/Journal"));
                 Press(keyboard, Key.Tab); Assert.AreEqual(0, inventories);
-                Press(keyboard, Key.P); Assert.AreEqual(key, journal.ReadSnapshot().PinnedKey);
-                Press(keyboard, Key.P); Assert.IsNull(journal.ReadSnapshot().PinnedKey);
-                presenter.Select(key); Assert.IsNull(journal.ReadSnapshot().PinnedKey, "Selection alone must not pin.");
+
+                presenter.Select(key);
                 Press(keyboard, Key.J); Assert.IsFalse(screen.IsOpen); Assert.AreEqual(.5f, pause.Scale);
                 Press(keyboard, Key.J); Assert.IsFalse(screen.IsOpen, "Closing activation is consumed for the frame.");
                 yield return null;
                 Press(keyboard, Key.J); Assert.IsTrue(screen.IsOpen); yield return null;
                 Press(keyboard, Key.Escape); Assert.IsFalse(screen.IsOpen); Assert.AreEqual(0, fallbacks);
-                Assert.IsFalse(actions.Gameplay.JournalPin.enabled);
+
                 Press(keyboard, Key.E); Press(keyboard, Key.Tab); Assert.AreEqual(0, inventories, "Inventory remains unavailable in close frame.");
                 yield return null;
                 using (var other = policy.AcquirePrimaryScreen()) { Press(keyboard, Key.J); Assert.IsFalse(screen.IsOpen); Assert.IsTrue(policy.PrimaryScreenActive); }
@@ -83,7 +81,7 @@ namespace SOLITUDE.Tests
                 display.Fail = true; Press(keyboard, Key.J); Assert.IsFalse(screen.IsOpen); Assert.AreEqual(.5f, pause.Scale); Assert.IsFalse(policy.PrimaryScreenActive);
                 display.Fail = false; Press(keyboard, Key.J); Assert.IsTrue(screen.IsOpen);
                 writer.Publish("task", new TaskSnapshot(true, TaskOutcome.Completed, "Task", result: "Done"));
-                yield return null; Press(keyboard, Key.P); Assert.IsNull(journal.ReadSnapshot().PinnedKey);
+                yield return null;
                 input.Bind(null, null, null, null, null, null); Assert.IsFalse(screen.IsOpen); Assert.AreEqual(.5f, pause.Scale);
                 Assert.DoesNotThrow(() => { screen.Dispose(); input.Release(); uiLease.Dispose(); });
             }

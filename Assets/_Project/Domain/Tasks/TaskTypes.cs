@@ -5,7 +5,7 @@ namespace SOLITUDE.Tasks
 {
     public enum TaskOutcome { Active, Completed, Failed, Abandoned }
     public enum TaskWriteResult { Applied, Unchanged, Invalid, Conflict, Unavailable, Busy }
-    public enum TaskChangeCause { Discovered, Updated, Completed, Failed, Removed, AvailabilityChanged, PinChanged }
+    public enum TaskChangeCause { Discovered, Updated, Completed, Failed, Removed, AvailabilityChanged }
     public enum TaskCondition { Unknown, Fault, Elevated, Recovering, Normal }
 
     public readonly struct TaskKey : IEquatable<TaskKey>
@@ -54,24 +54,22 @@ namespace SOLITUDE.Tasks
         public string ScopeId { get; }
         public TaskSnapshot State { get; }
         public bool SourceAvailable { get; }
-        public bool Pinned { get; }
         public long DiscoveryOrder { get; }
         public long TerminalOrder { get; }
         public long Revision { get; }
-        internal TaskRecord(TaskKey key, string scopeId, TaskSnapshot state, bool available, bool pinned,
+        internal TaskRecord(TaskKey key, string scopeId, TaskSnapshot state, bool available,
             long discoveryOrder, long terminalOrder, long revision)
-        { Key = key; ScopeId = scopeId; State = state; SourceAvailable = available; Pinned = pinned;
+        { Key = key; ScopeId = scopeId; State = state; SourceAvailable = available;
             DiscoveryOrder = discoveryOrder; TerminalOrder = terminalOrder; Revision = revision; }
     }
 
     public sealed class TaskJournalSnapshot
     {
         public long Revision { get; }
-        public TaskKey? PinnedKey { get; }
         public IReadOnlyList<TaskRecord> Active { get; }
         public IReadOnlyList<TaskRecord> Completed { get; }
-        internal TaskJournalSnapshot(long revision, TaskKey? pinned, TaskRecord[] active, TaskRecord[] completed)
-        { Revision = revision; PinnedKey = pinned; Active = Array.AsReadOnly(active); Completed = Array.AsReadOnly(completed); }
+        internal TaskJournalSnapshot(long revision, TaskRecord[] active, TaskRecord[] completed)
+        { Revision = revision; Active = Array.AsReadOnly(active); Completed = Array.AsReadOnly(completed); }
         public TaskRecord Find(TaskKey key)
         {
             foreach (var row in Active) if (row.Key == key) return row;
@@ -90,7 +88,7 @@ namespace SOLITUDE.Tasks
         { Key = key; Before = before; After = after; Cause = cause; }
     }
 
-    // One notification per accepted visible revision, including atomic multi-record pin/scope changes.
+    // One notification per accepted visible revision, including atomic multi-record scope changes.
     public sealed class TaskJournalChange
     {
         public long Revision => After.Revision;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SOLITUDE.Tasks
 {
-    public sealed class TaskJournal : ITaskJournalReader, ITaskPinCommands, IDisposable
+    public sealed class TaskJournal : ITaskJournalReader, IDisposable
     {
         private sealed class Source
         {
@@ -38,7 +38,6 @@ namespace SOLITUDE.Tasks
         private readonly List<Subscription> observers = new List<Subscription>();
         private long revision, order;
         private bool delivering, disposed;
-        private TaskKey? pinned;
         public event Action<Exception> ObserverError;
 
         private TaskWriteResult? Guard => delivering ? TaskWriteResult.Busy : disposed ? TaskWriteResult.Unavailable : (TaskWriteResult?)null;
@@ -76,7 +75,6 @@ namespace SOLITUDE.Tasks
             entry.State = state;
             if (state.Discovered && entry.Discovery == 0) entry.Discovery = ++order;
             if ((state.Outcome == TaskOutcome.Completed || state.Outcome == TaskOutcome.Failed) && entry.Terminal == 0) entry.Terminal = ++order;
-            if (state.Outcome != TaskOutcome.Active && pinned == key) pinned = null;
             var cause = old == null || !old.Discovered ? TaskChangeCause.Discovered :
                 state.Outcome == TaskOutcome.Abandoned ? TaskChangeCause.Removed :
                 old.Outcome == TaskOutcome.Active && state.Outcome == TaskOutcome.Completed ? TaskChangeCause.Completed :
@@ -111,28 +109,20 @@ namespace SOLITUDE.Tasks
             foreach (var id in ids) { sources[id].Writer = null; sources.Remove(id); }
             var keys = new List<TaskKey>();
             foreach (var pair in entries) if (pair.Value.Source.Scope == scopeId) keys.Add(pair.Key);
-            foreach (var key in keys) { entries.Remove(key); if (pinned == key) pinned = null; }
+            foreach (var key in keys) entries.Remove(key);
             Notify(before, TaskChangeCause.Removed); return TaskWriteResult.Applied;
-        }
-        public TaskWriteResult SetPinned(TaskKey? key)
-        {
-            if (Guard.HasValue) return Guard.Value;
-            if (key.HasValue && (!entries.TryGetValue(key.Value, out var entry) || !Visible(entry) || entry.State.Outcome != TaskOutcome.Active)) return TaskWriteResult.Invalid;
-            if (pinned == key) return TaskWriteResult.Unchanged;
-            var before = ReadSnapshot(); pinned = key;
-            Notify(before, TaskChangeCause.PinChanged); return TaskWriteResult.Applied;
         }
         private static bool Visible(Entry entry) => entry.State.Discovered && entry.State.Outcome != TaskOutcome.Abandoned;
         private TaskRecord Record(Entry entry) => new TaskRecord(entry.Key, entry.Source.Scope, entry.State,
-            entry.Source.Writer != null, pinned == entry.Key, entry.Discovery, entry.Terminal, entry.Revision);
+            entry.Source.Writer != null, entry.Discovery, entry.Terminal, entry.Revision);
         public TaskJournalSnapshot ReadSnapshot()
         {
             var active = new List<TaskRecord>(); var completed = new List<TaskRecord>();
             foreach (var entry in entries.Values)
                 if (Visible(entry)) (entry.State.Outcome == TaskOutcome.Active ? active : completed).Add(Record(entry));
-            active.Sort((a, b) => a.Pinned != b.Pinned ? a.Pinned ? -1 : 1 : a.DiscoveryOrder.CompareTo(b.DiscoveryOrder));
+            active.Sort((a, b) => a.DiscoveryOrder.CompareTo(b.DiscoveryOrder));
             completed.Sort((a, b) => b.TerminalOrder.CompareTo(a.TerminalOrder));
-            return new TaskJournalSnapshot(revision, pinned, active.ToArray(), completed.ToArray());
+            return new TaskJournalSnapshot(revision, active.ToArray(), completed.ToArray());
         }
         public IDisposable ObserveWithSnapshot(Action<TaskJournalChange> observer, out TaskJournalSnapshot snapshot)
         {
@@ -142,7 +132,7 @@ namespace SOLITUDE.Tasks
             snapshot = ReadSnapshot(); return subscription;
         }
         private static bool Same(TaskRecord a, TaskRecord b) => a != null && b != null && a.State.Equals(b.State) &&
-            a.SourceAvailable == b.SourceAvailable && a.Pinned == b.Pinned;
+            a.SourceAvailable == b.SourceAvailable;
         private void Notify(TaskJournalSnapshot before, TaskChangeCause cause)
         {
             var candidate = ReadSnapshot();
@@ -177,7 +167,7 @@ namespace SOLITUDE.Tasks
             if (disposed || delivering) return;
             var before = ReadSnapshot();
             foreach (var source in sources.Values) source.Writer = null;
-            sources.Clear(); entries.Clear(); pinned = null; disposed = true;
+            sources.Clear(); entries.Clear(); disposed = true;
             Notify(before, TaskChangeCause.Removed);
             foreach (var observer in observers.ToArray()) observer.Dispose();
         }

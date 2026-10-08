@@ -17,7 +17,6 @@ namespace SOLITUDE.Core.Input
         private Action inventory;
         private Action fallbackBack;
         private TaskJournalScreenCoordinator journal;
-        private TaskJournalPresenter journalPresenter;
         private InputControl lastBackControl;
         private double lastBackTime = -1;
         private int consumedFrame = -1;
@@ -54,19 +53,19 @@ namespace SOLITUDE.Core.Input
             actions.Gameplay.Move.performed += Move; actions.Gameplay.Move.canceled += Stop;
             actions.Gameplay.Interact.performed += Interact; actions.Gameplay.Inventory.performed += Inventory;
             actions.Gameplay.Pause.performed += Back; actions.Container.Cancel.performed += Back;
-            actions.Gameplay.Journal.performed += ToggleJournal; actions.Gameplay.JournalPin.performed += PinJournal;
+            actions.Gameplay.Journal.performed += ToggleJournal;
             actions.Container.Point.performed += Pointer;
             for (int i = 0; i < 9; i++) actions.asset.FindAction("Gameplay/Hotbar" + (i + 1)).performed += Hotbar;
             policy.Changed += Apply; Apply();
         }
         public void Bind(PlayerMovement movement, PlayerInteractor interactor, HotbarSelectionState selection,
-            Action inventory, Func<bool> back, Action fallbackBack, TaskJournalScreenCoordinator journal = null, TaskJournalPresenter journalPresenter = null)
+            Action inventory, Func<bool> back, Action fallbackBack, TaskJournalScreenCoordinator journal = null)
         {
             if (!ReferenceEquals(this.journal, journal)) this.journal?.Close();
             if (this.movement != null) this.movement.SetInput(Vector2.zero); if (this.interactor != null) this.interactor.SetInputAllowed(false);
             this.movement = movement; this.interactor = interactor; this.selection = selection;
             this.inventory = inventory; this.back = back; this.fallbackBack = fallbackBack;
-            this.journal = journal; this.journalPresenter = journalPresenter; Apply();
+            this.journal = journal; Apply();
         }
         private static void Enable(InputAction action, bool enabled) { if (enabled) action.Enable(); else action.Disable(); }
         private void Apply()
@@ -79,7 +78,6 @@ namespace SOLITUDE.Core.Input
             Enable(actions.Gameplay.Inventory, policy.Inventory);
             Enable(actions.Gameplay.Pause, policy.Ready); Enable(actions.Container.Cancel, policy.Ready);
             Enable(actions.Gameplay.Journal, policy.Ready && journal != null);
-            Enable(actions.Gameplay.JournalPin, policy.Ready && journal?.IsOpen == true);
             Enable(actions.Container.Point, policy.Pointer);
             // Click delivery belongs exclusively to the EventSystem.
         }
@@ -98,8 +96,6 @@ namespace SOLITUDE.Core.Input
             if (result == OpenResult.Closed) ConsumeUIActivation();
             Apply();
         }
-        private void PinJournal(InputAction.CallbackContext _)
-        { if (policy.Ready && journal?.IsOpen == true && consumedFrame != Time.frameCount) journalPresenter?.TogglePin(); }
         public string BindingLabel(string actionPath)
         {
             var action = actions?.asset.FindAction(actionPath, false);
@@ -118,7 +114,7 @@ namespace SOLITUDE.Core.Input
         }
         public void Release()
         {
-            journal?.Close(); journal = null; journalPresenter = null;
+            journal?.Close(); journal = null;
             foreach (var lease in uiLeases) lease.Dispose();
             uiLeases.Clear();
             if (movement != null) movement.SetInput(Vector2.zero); if (interactor != null) interactor.SetInputAllowed(false);

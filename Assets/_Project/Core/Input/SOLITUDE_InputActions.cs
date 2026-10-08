@@ -231,16 +231,6 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
-                },
-                {
-                    ""name"": ""JournalPin"",
-                    ""type"": ""Button"",
-                    ""id"": ""63ba8314-b22f-4753-9a30-8d3f57e6ef5f"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false,
-                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -483,17 +473,6 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Journal"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""099527d5-2813-4a9d-8a37-2acf44874b9c"",
-                    ""path"": ""<Keyboard>/p"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""JournalPin"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1160,7 +1139,6 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         m_Gameplay_Hotbar8 = m_Gameplay.FindAction("Hotbar8", throwIfNotFound: true);
         m_Gameplay_Hotbar9 = m_Gameplay.FindAction("Hotbar9", throwIfNotFound: true);
         m_Gameplay_Journal = m_Gameplay.FindAction("Journal", throwIfNotFound: true);
-        m_Gameplay_JournalPin = m_Gameplay.FindAction("JournalPin", throwIfNotFound: true);
         // Container
         m_Container = asset.FindActionMap("Container", throwIfNotFound: true);
         m_Container_Point = m_Container.FindAction("Point", throwIfNotFound: true);
@@ -1274,7 +1252,6 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
     private readonly InputAction m_Gameplay_Hotbar8;
     private readonly InputAction m_Gameplay_Hotbar9;
     private readonly InputAction m_Gameplay_Journal;
-    private readonly InputAction m_Gameplay_JournalPin;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -1343,10 +1320,6 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         /// </summary>
         public InputAction @Journal => m_Wrapper.m_Gameplay_Journal;
         /// <summary>
-        /// Provides access to the underlying input action "Gameplay/JournalPin".
-        /// </summary>
-        public InputAction @JournalPin => m_Wrapper.m_Gameplay_JournalPin;
-        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
@@ -1414,9 +1387,6 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             @Journal.started += instance.OnJournal;
             @Journal.performed += instance.OnJournal;
             @Journal.canceled += instance.OnJournal;
-            @JournalPin.started += instance.OnJournalPin;
-            @JournalPin.performed += instance.OnJournalPin;
-            @JournalPin.canceled += instance.OnJournalPin;
         }
 
         /// <summary>
@@ -1470,9 +1440,6 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             @Journal.started -= instance.OnJournal;
             @Journal.performed -= instance.OnJournal;
             @Journal.canceled -= instance.OnJournal;
-            @JournalPin.started -= instance.OnJournalPin;
-            @JournalPin.performed -= instance.OnJournalPin;
-            @JournalPin.canceled -= instance.OnJournalPin;
         }
 
         /// <summary>
@@ -1937,13 +1904,6 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnJournal(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "JournalPin" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnJournalPin(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Container" which allows adding and removing callbacks.
