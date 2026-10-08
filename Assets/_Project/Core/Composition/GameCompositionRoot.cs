@@ -8,6 +8,7 @@ using SOLITUDE.Features.Interactables;
 using SOLITUDE.Items;
 using SOLITUDE.SaveLoad;
 using SOLITUDE.World.Restoration;
+using SOLITUDE.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 namespace SOLITUDE.Composition
@@ -23,6 +24,8 @@ namespace SOLITUDE.Composition
         [SerializeField] private TimeSystem clock;
         [SerializeField] private GameManager game;
         private ContainerSaveSession session;
+        private TaskJournal tasks;
+        public ITaskJournalReader Tasks => tasks;
         private PickupCollectionService pickups;
         private ItemCatalog catalog;
         private ItemPresentationCatalog presentations;
@@ -75,6 +78,7 @@ namespace SOLITUDE.Composition
         }
         private void CreateSession(SaveGameData data)
         {
+            tasks?.Dispose(); tasks = new TaskJournal(); tasks.ObserverError += Debug.LogException;
             session = new ContainerSaveSession(data, catalog); session.Commands.ObserverError += Debug.LogException;
             pickups = new PickupCollectionService(session);
             gestures = new ContainerGestureCoordinator(new ContainerInteractionController(session.Commands), policy);
@@ -123,8 +127,11 @@ namespace SOLITUDE.Composition
             if (entry.HasPlayer && (demo != null) != disposableSession)
                 throw new InvalidOperationException("Demo and production sessions cannot be mixed. Stop Play mode and open the scene directly.");
             if (entry.HasPlayer && disposableSession)
+            {
                 session.Reset(config.worldSeed, releaseOwners: true);
-            entry.Initialize(session, pickups, presentations, loot, gestures, policy, pause, this, input, game, () => ReleaseScene(scene));
+                tasks?.Dispose(); tasks = new TaskJournal(); tasks.ObserverError += Debug.LogException;
+            }
+            entry.Initialize(session, pickups, presentations, loot, gestures, policy, pause, this, input, game, () => ReleaseScene(scene), tasks);
             scopes.Add(scene, entry);
             if (entry.HasPlayer) interactive = entry;
         }
@@ -153,6 +160,7 @@ namespace SOLITUDE.Composition
             policy.SetTransition(true); failedPause?.Dispose(); failedPause = null;
             foreach (var scope in new List<SceneBindings>(scopes.Values)) scope.Release();
             scopes.Clear(); interactive = null; input.Bind(null, null, null, null, null, null); game.ResumeGame();
+            tasks?.Dispose(); tasks = new TaskJournal(); tasks.ObserverError += Debug.LogException;
             if (session == null) CreateSession(new SaveGameData { worldSeed = config.worldSeed });
             persistence.BeginNewSave();
             session.Reset(config.worldSeed, releaseOwners: true); persistence.Initialize(session, StartNewSave); persistence.Flush();
@@ -166,6 +174,7 @@ namespace SOLITUDE.Composition
             policy?.SetTransition(true); persistence?.Flush();
             foreach (var scope in new List<SceneBindings>(scopes.Values)) scope.Release(); scopes.Clear();
             input?.Release(); persistence?.Release(); game?.Release(); failedPause?.Dispose(); policy?.Dispose(); clock?.Release();
+            tasks?.Dispose(); tasks = null;
             SceneManager.sceneLoaded -= Loaded; SceneManager.sceneUnloaded -= Unloaded; active = null;
         }
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)] private static void ResetStatics() => active = null;

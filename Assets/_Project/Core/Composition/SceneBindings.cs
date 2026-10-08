@@ -10,6 +10,7 @@ using SOLITUDE.Player;
 using SOLITUDE.SaveLoad;
 using SOLITUDE.World.Restoration;
 using SOLITUDE.World.ScrubberEncounter;
+using SOLITUDE.Tasks;
 using UnityEngine;
 namespace SOLITUDE.Composition
 {
@@ -28,6 +29,9 @@ namespace SOLITUDE.Composition
         [SerializeField] private LockerContainer[] lockers = new LockerContainer[0];
         [SerializeField] private WorldPickup[] worldPickups = new WorldPickup[0];
         [SerializeField] private RestorationJunction[] restorationJunctions = new RestorationJunction[0];
+        [SerializeField] private ScrubberTaskSource[] taskSources = new ScrubberTaskSource[0];
+        private TaskJournal tasks;
+        private string taskScope;
         private readonly List<ContainerSaveSession.ContainerBinding> bindings = new();
         private readonly List<WorldPickup> registeredPickups = new();
         private readonly List<ScrubberScreenView> scrubberScreens = new();
@@ -80,9 +84,10 @@ namespace SOLITUDE.Composition
         }
         public void Initialize(ContainerSaveSession session, PickupCollectionService pickups, ItemPresentationCatalog presentations,
             Dictionary<LootTable, RuntimeLootTable> loot, ContainerGestureCoordinator gestures, InputPolicyCoordinator policy,
-            PauseCoordinator pause, IContainerScreenRequests screens, UnityInputHost input, GameManager game, Action released)
+            PauseCoordinator pause, IContainerScreenRequests screens, UnityInputHost input, GameManager game, Action released, TaskJournal tasks = null)
         {
             Validate(); this.presentations = presentations; this.session = session; this.pickups = pickups; this.loot = loot; this.policy = policy; this.input = input; this.released = released;
+            this.tasks = tasks; taskScope = Guid.NewGuid().ToString("N");
             try
             {
                 foreach (var source in lockers)
@@ -122,6 +127,10 @@ namespace SOLITUDE.Composition
                 foreach (var root in gameObject.scene.GetRootGameObjects())
                     foreach (var screen in root.GetComponentsInChildren<ScrubberScreenView>(true))
                     { screen.Initialize(policy, input); scrubberScreens.Add(screen); }
+                foreach (var source in taskSources)
+                    if (source != null)
+                        source.Initialize(tasks, taskScope, policy, interactor, scrubberEquipment.Contains(source.Equipment) &&
+                            presentations.Resolve(ScrubberEquipment.FuseItemId) != null && inventory.Container.IsAvailable);
                 input.Bind(movement, interactor, selection, () => modal.ToggleInventory(), Back, game.TogglePause);
             }
             catch { Release(); throw; }
@@ -221,6 +230,9 @@ namespace SOLITUDE.Composition
         public void Release()
         {
             if (session == null) return;
+            foreach (var source in taskSources) if (source != null) source.ReleaseBinding();
+            if (taskScope != null) tasks?.ReleaseScope(taskScope);
+            tasks = null; taskScope = null;
             foreach (var screen in scrubberScreens) if (screen != null) screen.Release();
             scrubberScreens.Clear();
             foreach (var equipment in scrubberEquipment) if(equipment!=null) equipment.ReleaseBinding();
