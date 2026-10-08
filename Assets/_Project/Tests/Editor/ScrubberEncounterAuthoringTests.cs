@@ -3,6 +3,7 @@ using NUnit.Framework;
 using SOLITUDE.Items;
 using SOLITUDE.Composition;
 using SOLITUDE.SaveLoad;
+using SOLITUDE.World.ScrubberEncounter;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace SOLITUDE.Tests
         {
             var item = AssetDatabase.LoadAssetAtPath<ItemDefinition>(Folder + "/ReplacementFuse.asset");
             Assert.IsNotNull(item); Assert.AreEqual(AssetDatabase.AssetPathToGUID(Folder + "/ReplacementFuse.asset"),item.ItemId);
+            Assert.AreEqual(ScrubberEquipment.FuseItemId,item.ItemId);
             Assert.AreEqual("Replacement fuse",item.DisplayName); Assert.IsNotNull(item.Icon); Assert.IsNotNull(item.PickupPrefab);
             Assert.AreEqual(Vector3.one,item.PickupPrefab.transform.localScale); Assert.IsTrue(string.IsNullOrEmpty(item.PickupPrefab.GetComponent<SaveableId>().Value));
             var database = AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/_Project/Features/World/ScrubberEncounter/Demo/ScrubberItemDatabase.asset");
@@ -32,6 +34,12 @@ namespace SOLITUDE.Tests
                 var binding=new SerializedObject(roots.SelectMany(g=>g.GetComponentsInChildren<SceneBindings>(true)).Single());
                 var registered=binding.FindProperty("worldPickups"); Assert.AreEqual(1,registered.arraySize); Assert.AreSame(pickup,registered.GetArrayElementAtIndex(0).objectReferenceValue);
                 Assert.That(pickup.GetPrompt(),Does.Contain("replacement fuse"));
+                var room=roots.SelectMany(g=>g.GetComponentsInChildren<ScrubberRoomFeedback>(true)).Single();Assert.IsNotNull(room.Alert.clip);Assert.IsNotNull(room.RunningSound.clip);Assert.IsTrue(room.RunningSound.loop);
+                var warning=roots.SelectMany(g=>g.GetComponentsInChildren<TMPro.TextMeshPro>(true)).Single();
+                Assert.Greater(warning.renderer.sortingOrder,roots.SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.TilemapRenderer>(true)).Max(r=>r.sortingOrder),"Room warning must render above wall tiles.");
+                var screen=roots.SelectMany(g=>g.GetComponentsInChildren<ScrubberScreenView>(true)).Single();var notice=roots.SelectMany(g=>g.GetComponentsInChildren<ScrubberTaskNotificationView>(true)).Single();Assert.AreSame(screen.gameObject,notice.gameObject);
+                var rect=screen.transform.Find("TaskCompletion").GetComponent<RectTransform>();Assert.AreEqual(Vector2.one,rect.anchorMax);Assert.IsFalse(rect.gameObject.GetComponent<UnityEngine.UI.Image>().raycastTarget);
+                Assert.AreEqual(0,screen.GetComponentsInChildren<UnityEngine.UI.Button>(true).Count(button=>button.transform.IsChildOf(rect)));
             }
             finally { EditorSceneManager.CloseScene(scene,true); }
         }

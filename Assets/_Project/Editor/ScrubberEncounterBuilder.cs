@@ -66,8 +66,9 @@ namespace SOLITUDE.Editor
                 var equipment = equipmentGO.GetComponent<ScrubberEquipment>();
                 var screen = Screen(equipment);
                 equipmentGO.GetComponent<ScrubberAccess>().Configure(screen);
-                var warning = new GameObject("RoomAtmosphereWarning", typeof(TextMeshPro)); warning.transform.position = new Vector3(23,7.4f); warning.transform.localScale = Vector3.one;
-                var label = warning.GetComponent<TextMeshPro>(); label.font = font; label.fontSize = 3; label.color = Amber; label.alignment = TextAlignmentOptions.Center; label.text = "CO₂ ELEVATED"; label.rectTransform.sizeDelta = new Vector2(5,.6f);
+                var warning = new GameObject("RoomAtmosphereWarning", typeof(TextMeshPro)); warning.transform.position = new Vector3(23,7.7f); warning.transform.localScale = Vector3.one;
+                var label = warning.GetComponent<TextMeshPro>(); label.font = font; label.fontSize = 4.5f; label.color = Amber; label.alignment = TextAlignmentOptions.Center; label.text = "CO2 ELEVATED"; label.rectTransform.sizeDelta = new Vector2(5,.6f);
+                label.renderer.sortingOrder = 2500;
                 var audio = equipmentGO.AddComponent<AudioSource>(); audio.clip = AssetDatabase.LoadAssetAtPath<AudioClip>(Feature + "/Audio/co2_alert.wav");
                 audio.loop = true; audio.playOnAwake = false; audio.volume = .12f; audio.spatialBlend = 0;
                 if (audio.clip == null) throw new InvalidOperationException("Alert clip is missing.");
@@ -239,10 +240,10 @@ namespace SOLITUDE.Editor
             Text("Title",panel,"ATMOSPHERIC SCRUBBER",new Vector2(-225,260),new Vector2(600,50),34,White);
             Text("Location",panel,"SERVICE ROOM",new Vector2(320,260),new Vector2(360,50),24,White);
             Text("Intake",panel,"INTAKE\nFLOW STOPPED",new Vector2(-330,115),new Vector2(240,80),26,White);
-            Text("Scrubber",panel,"SCRUBBER\n● OFFLINE",new Vector2(0,115),new Vector2(220,80),28,new Color(.9f,.26f,.24f));
+            Text("Scrubber",panel,"SCRUBBER\nOFFLINE",new Vector2(0,115),new Vector2(220,80),28,new Color(.9f,.26f,.24f));
             Text("Distribution",panel,"DISTRIBUTION\nFLOW STOPPED",new Vector2(330,115),new Vector2(260,80),26,White);
             Text("Selection",panel,"[ SELECTED UNIT ]",new Vector2(0,175),new Vector2(260,35),22,Amber);
-            Text("Flow",panel,"→ INTERRUPTED →",new Vector2(0,15),new Vector2(340,40),24,White);
+            Text("Flow",panel,"-> INTERRUPTED ->",new Vector2(0,15),new Vector2(340,40),24,White);
             var telemetry=Text("Telemetry",panel,"",new Vector2(-245,-110),new Vector2(500,180),25,White);
             var objective=Text("Objective",panel,"",new Vector2(285,-25),new Vector2(360,70),24,Amber);
             Button("InstallFuse",panel,"INSTALL FUSE",new Vector2(285,-105),false);

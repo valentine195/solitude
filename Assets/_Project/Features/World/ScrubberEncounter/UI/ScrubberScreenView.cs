@@ -64,14 +64,14 @@ namespace SOLITUDE.World.ScrubberEncounter
             if(equipment==null || telemetry==null || objective==null) return;
             var state = equipment.State;
             telemetry.text = "OPERATING STATE   " + state.OperatingStatus + "\nFAULT   " + state.Fault +
-                "\nFUSE   " + state.FuseStatus + "\nAIRFLOW   " + state.AirflowStatus + "\nROOM CO₂   " + state.RoomCondition;
-            objective.text = "CURRENT TASK\n" + state.Objective;
+                "\nFUSE   " + state.FuseStatus + "\nAIRFLOW   " + state.AirflowStatus + "\nROOM CO2   " + state.RoomCondition;
+            objective.text = "CURRENT TASK\n" + state.Objective.Replace("—", "-");
             if(install!=null) install.interactable=equipment.InstallReason.Length==0;
             if(installReason!=null) installReason.text=equipment.InstallReason;
             if(intake!=null) intake.text="INTAKE\nFLOW "+state.AirflowStatus;
             if(distribution!=null) distribution.text="DISTRIBUTION\nFLOW "+state.AirflowStatus;
-            if(flow!=null) flow.text=state.Running ? "→ ACTIVE →" : "→ INTERRUPTED →";
-            if(indication!=null) { indication.text="SCRUBBER\n● "+state.OperatingStatus; indication.color=state.Running ? new Color(.3f,.85f,.42f) : new Color(.9f,.26f,.24f); }
+            if(flow!=null) flow.text=state.Running ? "-> ACTIVE ->" : "-> INTERRUPTED ->";
+            if(indication!=null) { indication.text="SCRUBBER\n"+state.OperatingStatus; indication.color=state.Running ? new Color(.3f,.85f,.42f) : new Color(.9f,.26f,.24f); }
             if(restart!=null) restart.interactable=!state.Running;
             if(restartLabel!=null) restartLabel.text=state.Running ? "ALREADY RUNNING" : "RESTART";
         }

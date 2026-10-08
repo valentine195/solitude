@@ -21,7 +21,7 @@ namespace SOLITUDE.World.ScrubberEncounter
         private void Reconcile()
         {
             var state=equipment?.State;
-            if(warning!=null) { warning.text="CO₂ "+(state?.RoomCondition ?? "ELEVATED"); warning.gameObject.SetActive(state?.Operational!=true); }
+            if(warning!=null) { warning.text="CO2 "+(state?.RoomCondition ?? "ELEVATED"); warning.gameObject.SetActive(state?.Operational!=true); }
             if(alert!=null && alert.clip!=null) { if(state?.Operational==true) alert.Stop(); else if(!alert.isPlaying) alert.Play(); }
             if(runningSound!=null && runningSound.clip!=null) { if(state?.Running==true) { if(!runningSound.isPlaying) runningSound.Play(); } else runningSound.Stop(); }
             var indicator=GetComponent<SpriteRenderer>();
