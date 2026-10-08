@@ -72,7 +72,7 @@ namespace SOLITUDE.Editor
                 var audio = equipmentGO.AddComponent<AudioSource>(); audio.clip = AssetDatabase.LoadAssetAtPath<AudioClip>(Feature + "/Audio/co2_alert.wav");
                 audio.loop = true; audio.playOnAwake = false; audio.volume = .12f; audio.spatialBlend = 0;
                 if (audio.clip == null) throw new InvalidOperationException("Alert clip is missing.");
-                equipmentGO.AddComponent<ScrubberRoomFeedback>().Configure(audio,label);
+                equipmentGO.AddComponent<ScrubberRoomFeedback>().Configure(audio,label,EquipmentStatus(equipment));
                 var player = All<PlayerInteractor>(scene).Single(); player.transform.position = new Vector3(23,4.5f);
                 var camera = All<Camera>(scene).Single(); camera.transform.position = new Vector3(23,4.5f,-10);
                 camera.GetComponent<SolitudeCameraFollow2D>().Configure(player.transform,new Vector2(23,23),new Vector2(4.5f,4.5f));
@@ -142,6 +142,42 @@ namespace SOLITUDE.Editor
                 if (AssetDatabase.AssetPathToGUID(ScenePath) != sceneGuid) throw new InvalidOperationException("Scene GUID changed.");
             }
             finally { EditorSceneManager.CloseScene(scene,true); if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
+        }
+        private static TMP_Text EquipmentStatus(ScrubberEquipment equipment)
+        {
+            var existing=equipment.transform.Find("EquipmentStatus");
+            if(existing!=null) return existing.GetComponent<TMP_Text>();
+            var go=new GameObject("EquipmentStatus",typeof(TextMeshPro));go.transform.SetParent(equipment.transform,false);
+            var label=go.GetComponent<TextMeshPro>();label.rectTransform.anchoredPosition=new Vector2(0,.6f);label.rectTransform.sizeDelta=new Vector2(4,.6f);
+            label.font=font;label.fontSize=4.5f;label.alignment=TextAlignmentOptions.Center;label.text="SCRUBBER OFFLINE";label.color=new Color(.9f,.26f,.24f);label.raycastTarget=false;
+            label.renderer.sortingOrder=2500;return label;
+        }
+        [MenuItem("SOLITUDE/Demos/Repair Scrubber Review Presentation")]
+        public static void RepairReviewPresentation()
+        {
+            if(EditorApplication.isPlaying || SceneManager.GetActiveScene().isDirty) throw new InvalidOperationException("Author presentation only in a clean Edit-mode scene.");
+            var path=Feature+"/UI/ScrubberScreen.prefab";var contents=PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                foreach(var button in contents.GetComponentsInChildren<UnityEngine.UI.Button>(true)) StyleAction(button);
+                PrefabUtility.SaveAsPrefabAsset(contents,path);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(contents); }
+            var scene=EditorSceneManager.OpenScene(ScenePath,OpenSceneMode.Single);
+            font=AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/UI/Fonts/pixel_operator/FontAssets/PixelOperator SDF.asset");
+            if(font==null) throw new InvalidOperationException("Existing UI font is missing.");
+            var equipment=All<ScrubberEquipment>(scene).Single();var data=new SerializedObject(equipment.GetComponent<ScrubberRoomFeedback>());
+            data.FindProperty("equipmentStatus").objectReferenceValue=EquipmentStatus(equipment);data.ApplyModifiedPropertiesWithoutUndo();
+            // Pixel Perfect can adjust the Edit-mode viewport to the current dock size.
+            // Retain the encounter's authored viewport when saving presentation changes.
+            All<Camera>(scene).Single().rect=new Rect(0,.125f,1,.75000006f);
+            EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+        }
+        private static void StyleAction(UnityEngine.UI.Button button)
+        {
+            button.transition=UnityEngine.UI.Selectable.Transition.None;
+            if(button.image!=null) button.image.color=new Color(.16f,.18f,.18f);
+            var label=button.GetComponentInChildren<TMP_Text>();if(label!=null) label.color=White;
         }
         [MenuItem("SOLITUDE/Demos/Add Scrubber Running Audio")]
         public static void AddRunningAudio()
@@ -228,7 +264,7 @@ namespace SOLITUDE.Editor
         {
             var rect=Rect(name,parent,pos,new Vector2(320,48));var image=rect.gameObject.AddComponent<UnityEngine.UI.Image>();image.color=enabled?Amber:new Color(.16f,.18f,.18f);
             var button=rect.gameObject.AddComponent<UnityEngine.UI.Button>();button.targetGraphic=image;button.interactable=enabled;
-            var label=Text(name+"Label",rect,text,Vector2.zero,new Vector2(300,40),24,enabled?Color.black:White);label.alignment=TextAlignmentOptions.Center;return button;
+            var label=Text(name+"Label",rect,text,Vector2.zero,new Vector2(300,40),24,White);label.alignment=TextAlignmentOptions.Center;StyleAction(button);return button;
         }
         private static ScrubberScreenView Screen(ScrubberEquipment equipment)
         {

@@ -35,11 +35,14 @@ namespace SOLITUDE.Tests
                 var registered=binding.FindProperty("worldPickups"); Assert.AreEqual(1,registered.arraySize); Assert.AreSame(pickup,registered.GetArrayElementAtIndex(0).objectReferenceValue);
                 Assert.That(pickup.GetPrompt(),Does.Contain("replacement fuse"));
                 var room=roots.SelectMany(g=>g.GetComponentsInChildren<ScrubberRoomFeedback>(true)).Single();Assert.IsNotNull(room.Alert.clip);Assert.IsNotNull(room.RunningSound.clip);Assert.IsTrue(room.RunningSound.loop);
-                var warning=roots.SelectMany(g=>g.GetComponentsInChildren<TMPro.TextMeshPro>(true)).Single();
+                var warning=roots.SelectMany(g=>g.GetComponentsInChildren<TMPro.TextMeshPro>(true)).Single(label=>label.name=="RoomAtmosphereWarning");
                 Assert.Greater(warning.renderer.sortingOrder,roots.SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.TilemapRenderer>(true)).Max(r=>r.sortingOrder),"Room warning must render above wall tiles.");
+                var status=room.GetComponentInChildren<TMPro.TextMeshPro>(true);Assert.IsNotNull(status);Assert.That(status.text,Does.Contain("OFFLINE"));Assert.Greater(status.renderer.sortingOrder,2000);
+                Assert.AreSame(status,new SerializedObject(room).FindProperty("equipmentStatus").objectReferenceValue);
                 var screen=roots.SelectMany(g=>g.GetComponentsInChildren<ScrubberScreenView>(true)).Single();var notice=roots.SelectMany(g=>g.GetComponentsInChildren<ScrubberTaskNotificationView>(true)).Single();Assert.AreSame(screen.gameObject,notice.gameObject);
                 var rect=screen.transform.Find("TaskCompletion").GetComponent<RectTransform>();Assert.AreEqual(Vector2.one,rect.anchorMax);Assert.IsFalse(rect.gameObject.GetComponent<UnityEngine.UI.Image>().raycastTarget);
                 Assert.AreEqual(0,screen.GetComponentsInChildren<UnityEngine.UI.Button>(true).Count(button=>button.transform.IsChildOf(rect)));
+                Assert.IsTrue(screen.GetComponentsInChildren<UnityEngine.UI.Button>(true).All(button=>button.transition==UnityEngine.UI.Selectable.Transition.None),"Default tint must not mask focus styling.");
             }
             finally { EditorSceneManager.CloseScene(scene,true); }
         }

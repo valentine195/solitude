@@ -90,6 +90,31 @@ namespace SOLITUDE.Tests
                 InputSystem.settings.editorInputBehaviorInPlayMode = previousEditor;
             }
         }
+        [UnityTest] public IEnumerator ActionNavigationUsesAmberWithoutActivatingOrRecoloringFault()
+        {
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single));yield return null;
+            var screen=All<ScrubberScreenView>().Single();var equipment=All<ScrubberEquipment>().Single();
+            var root=All<GameCompositionRoot>().Single();var session=(SOLITUDE.SaveLoad.ContainerSaveSession)typeof(GameCompositionRoot).GetField("session",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(root);
+            session.Commands.Grant(All<PlayerInventory>().Single().Container.Handle,ScrubberEquipment.FuseItemId,1);Assert.IsTrue(screen.Open());
+            var buttons=screen.GetComponentsInChildren<UnityEngine.UI.Button>(true);var close=buttons.Single(b=>b.name=="Close");var restart=buttons.Single(b=>b.name=="Restart");var install=buttons.Single(b=>b.name=="InstallFuse");
+            var fault=screen.GetComponentsInChildren<TMPro.TMP_Text>(true).Single(label=>label.name=="Scrubber");var faultColor=fault.color;
+            var oldBackground=InputSystem.settings.backgroundBehavior;var oldEditor=InputSystem.settings.editorInputBehaviorInPlayMode;
+            InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;InputSystem.settings.editorInputBehaviorInPlayMode=InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+            var keyboard=InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                yield return null;yield return null;Assert.AreEqual(new Color(.95f,.66f,.23f),close.image.color);
+                InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.UpArrow));yield return null;yield return null;
+                Assert.AreSame(restart.gameObject,EventSystem.current.currentSelectedGameObject);Assert.AreEqual(new Color(.95f,.66f,.23f),restart.image.color);
+                Assert.AreEqual(Color.black,restart.GetComponentInChildren<TMPro.TMP_Text>().color);Assert.AreEqual(new Color(.16f,.18f,.18f),close.image.color);
+                InputSystem.QueueStateEvent(keyboard,new KeyboardState());yield return null;
+                InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.UpArrow));yield return null;yield return null;
+                Assert.AreSame(install.gameObject,EventSystem.current.currentSelectedGameObject);Assert.AreEqual(new Color(.95f,.66f,.23f),install.image.color);
+                Assert.AreEqual(Color.black,install.GetComponentInChildren<TMPro.TMP_Text>().color);Assert.AreEqual(new Color(.16f,.18f,.18f),restart.image.color);
+                Assert.IsFalse(equipment.State.FuseInstalled);Assert.IsFalse(equipment.State.Running);Assert.AreEqual(faultColor,fault.color);Assert.That(fault.text,Does.Contain("OFFLINE"));
+            }
+            finally { InputSystem.RemoveDevice(keyboard);InputSystem.settings.backgroundBehavior=oldBackground;InputSystem.settings.editorInputBehaviorInPlayMode=oldEditor; }
+        }
         [UnityTest] public IEnumerator FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput()
         {
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
@@ -159,6 +184,7 @@ namespace SOLITUDE.Tests
             session.Commands.Grant(All<PlayerInventory>().Single().Container.Handle,ScrubberEquipment.FuseItemId,1);Assert.IsTrue(screen.Open());
             var buttons=screen.GetComponentsInChildren<UnityEngine.UI.Button>(true);buttons.Single(b=>b.name=="InstallFuse").onClick.Invoke();buttons.Single(b=>b.name=="Restart").onClick.Invoke();
             Assert.IsTrue(equipment.State.Running);Assert.That(screen.Feedback,Does.Contain("restarted"));Assert.IsTrue(room.RunningSound.isPlaying);Assert.IsTrue(room.IsWarningVisible);
+            var status=room.GetComponentInChildren<TMPro.TextMeshPro>();Assert.That(status.text,Does.Contain("RUNNING"));Assert.IsTrue(status.gameObject.activeInHierarchy);
             Assert.That(screen.Telemetry,Does.Contain("RUNNING").And.Contain("ACTIVE").And.Contain("RECOVERING"));Assert.IsFalse(buttons.Single(b=>b.name=="Restart").interactable);
             yield return new WaitForSeconds(1);Assert.Greater(equipment.State.RecoverySeconds,.8);Assert.IsFalse(equipment.State.Operational);
             var elapsed=equipment.State.RecoverySeconds;equipment.Restart();Assert.AreEqual(elapsed,equipment.State.RecoverySeconds);
@@ -166,6 +192,7 @@ namespace SOLITUDE.Tests
             using(pause.Acquire()) { yield return new WaitForSecondsRealtime(.2f);Assert.AreEqual(elapsed,equipment.State.RecoverySeconds); }
             screen.Close();player.GetComponent<Rigidbody2D>().position=new Vector2(20,2);Physics2D.SyncTransforms();
             yield return new WaitForSeconds(4.2f);Assert.IsTrue(equipment.State.Operational);Assert.IsFalse(room.IsWarningVisible);Assert.IsFalse(room.Alert.isPlaying);Assert.IsTrue(room.RunningSound.isPlaying);
+            Assert.That(status.text,Does.Contain("RUNNING"));Assert.IsTrue(status.gameObject.activeInHierarchy);Assert.AreEqual(equipment.GetComponent<SpriteRenderer>().color,status.color);
             Assert.IsTrue(screen.Open());Assert.That(screen.Telemetry,Does.Contain("RUNNING").And.Contain("NORMAL"));
             var labels=screen.GetComponentsInChildren<TMPro.TMP_Text>(true);Assert.That(labels.Single(label=>label.name=="Intake").text,Does.Contain("ACTIVE"));Assert.That(labels.Single(label=>label.name=="Scrubber").text,Does.Contain("RUNNING"));
             Assert.AreEqual(health,vitals.Vitals.Health.Current);Assert.AreEqual(oxygen,vitals.Vitals.Oxygen.Current);Assert.AreEqual("SCRUBBER-SAVE-ISOLATION-SENTINEL",File.ReadAllText(path));
@@ -191,6 +218,7 @@ namespace SOLITUDE.Tests
             var root=All<GameCompositionRoot>().Single();Assert.AreEqual(RuntimeStartupState.Ready,root.State);Assert.IsTrue(root.UsesDisposableSession);
             var equipment=All<ScrubberEquipment>().Single();var access=All<ScrubberAccess>().Single();var screen=All<ScrubberScreenView>().Single();
             var room=All<ScrubberRoomFeedback>().Single();Assert.IsTrue(room.IsWarningVisible);Assert.IsNotNull(room.Alert.clip);Assert.IsTrue(room.Alert.isPlaying);
+            var status=room.GetComponentInChildren<TMPro.TextMeshPro>();Assert.That(status.text,Does.Contain("OFFLINE"));Assert.IsTrue(status.gameObject.activeInHierarchy);Assert.AreEqual(equipment.GetComponent<SpriteRenderer>().color,status.color);
             var player=All<PlayerInteractor>().Single();var vitals=player.GetComponent<PlayerVitalsController>();
             var health=vitals.Vitals.Health.Current;var oxygen=vitals.Vitals.Oxygen.Current;
             player.GetComponent<Rigidbody2D>().position=(Vector2)access.transform.position+Vector2.down*.6f;Physics2D.SyncTransforms();

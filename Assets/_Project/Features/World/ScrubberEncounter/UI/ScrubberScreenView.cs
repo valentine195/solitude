@@ -20,6 +20,9 @@ namespace SOLITUDE.World.ScrubberEncounter
         private GameObject selected;
         private Button install, restart;
         private TMP_Text installReason, restartLabel, intake, distribution, flow, indication;
+        private static readonly Color Amber = new Color(.95f,.66f,.23f);
+        private static readonly Color ActionBackground = new Color(.16f,.18f,.18f);
+        private static readonly Color ActionText = new Color(.9f,.91f,.87f);
         public string Feedback => feedback == null ? "" : feedback.text;
         public bool IsOpen => panel != null && panel.activeSelf;
         public string Telemetry => telemetry == null ? "" : telemetry.text;
@@ -42,6 +45,20 @@ namespace SOLITUDE.World.ScrubberEncounter
         }
         public void Release() { if(equipment!=null) equipment.Changed-=Refresh; coordinator?.Dispose(); coordinator = null; input = null; }
         private void OnEnable() => Refresh();
+        private void LateUpdate()
+        {
+            if(!IsOpen) return;
+            var focus=EventSystem.current==null ? null : EventSystem.current.currentSelectedGameObject;
+            ApplyFocus(install,focus); ApplyFocus(restart,focus); ApplyFocus(close,focus);
+        }
+        private static void ApplyFocus(Button action, GameObject focus)
+        {
+            if(action==null) return;
+            bool focused=action.IsInteractable() && action.gameObject==focus;
+            if(action.image!=null) action.image.color=focused ? Amber : ActionBackground;
+            var label=action.GetComponentInChildren<TMP_Text>();
+            if(label!=null) label.color=focused ? Color.black : ActionText;
+        }
         private void OnDisable() => Close();
         private void OnDestroy() { Release(); if (close != null) close.onClick.RemoveListener(Close); install?.onClick.RemoveListener(Install); restart?.onClick.RemoveListener(Restart); }
         public bool Open() => coordinator?.Open() == OpenResult.Opened;
