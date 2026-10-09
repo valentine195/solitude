@@ -15,6 +15,7 @@ namespace SOLITUDE.Containers
     {
         private readonly ItemCatalog catalog;
         private readonly Dictionary<string, ContainerState> owners = new Dictionary<string, ContainerState>(StringComparer.Ordinal);
+        private readonly Dictionary<Guid, ContainerHandoffReceipt> handoffs = new Dictionary<Guid, ContainerHandoffReceipt>();
         private bool executing, publishing;
         public bool IsBusy => executing || publishing;
         public event Action<ContainerChangeSet> Completed;
@@ -71,6 +72,56 @@ namespace SOLITUDE.Containers
         }
         private bool Resolve(ContainerHandle handle, out ContainerState state)
         { state = null; return handle.Id != null && owners.TryGetValue(handle.Id, out state) && state.Handle.Equals(handle) && state.Available; }
+        public ContainerHandoffReceipt FindHandoffReceipt(Guid transitionId) =>
+            handoffs.TryGetValue(transitionId, out var receipt) ? receipt : null;
+        public CommandStatus PrepareHandoff(Guid transitionId, ContainerHandle firstSource,
+            ContainerHandle secondSource, ContainerHandle destination, out ContainerHandoffPlan plan)
+        {
+            plan = null;
+            if (IsBusy) return CommandStatus.Busy;
+            if (transitionId == Guid.Empty) return CommandStatus.Invalid;
+            if (handoffs.ContainsKey(transitionId)) return CommandStatus.NoOp;
+            if (!Resolve(firstSource, out var first) || !Resolve(secondSource, out var second) ||
+                !Resolve(destination, out var target)) return CommandStatus.Unavailable;
+            if (first == second || first == target || second == target) return CommandStatus.Invalid;
+            foreach (var stack in target.Slots) if (stack != null) return CommandStatus.Rejected;
+            // Reserve both full capacities. Preserve individual stacks without merging assumptions.
+            if ((long)first.Slots.Length + second.Slots.Length > target.Slots.Length)
+                return CommandStatus.InsufficientSpace;
+            var targetPlan = new ItemStack[target.Slots.Length];
+            Array.Copy(first.Slots, targetPlan, first.Slots.Length);
+            Array.Copy(second.Slots, 0, targetPlan, first.Slots.Length, second.Slots.Length);
+            foreach (var stack in targetPlan)
+                if (stack != null && !target.Accepts(stack.Definition)) return CommandStatus.Rejected;
+            plan = new ContainerHandoffPlan(this, transitionId, new[] { first, second, target },
+                new[] { new ItemStack[first.Slots.Length], new ItemStack[second.Slots.Length], targetPlan });
+            return CommandStatus.Applied;
+        }
+        public ContainerHandoffResult CommitHandoff(ContainerHandoffPlan plan)
+        {
+            if (IsBusy) return new ContainerHandoffResult(CommandStatus.Busy);
+            if (plan == null || plan.Service != this) return new ContainerHandoffResult(CommandStatus.Invalid);
+            if (handoffs.TryGetValue(plan.TransitionId, out var prior))
+                return new ContainerHandoffResult(CommandStatus.NoOp, prior);
+            executing = true;
+            try
+            {
+                var plans = new Dictionary<ContainerState, ItemStack[]>();
+                for (int i = 0; i < plan.States.Length; i++)
+                {
+                    var expected = plan.States[i];
+                    if (!Resolve(expected.Handle, out var state)) return new ContainerHandoffResult(CommandStatus.Unavailable);
+                    // Clock covers every slot revision, including changes later restored to the same values.
+                    if (state.Clock != plan.Clocks[i] || state.Slots.Length != plan.Capacities[i])
+                        return new ContainerHandoffResult(CommandStatus.Stale);
+                    plans.Add(state, plan.Slots[i]);
+                }
+                var receipt = new ContainerHandoffReceipt(plan);
+                Commit(plans, handoffReceipt: receipt);
+                return new ContainerHandoffResult(CommandStatus.Applied, receipt);
+            }
+            finally { executing = false; }
+        }
         private CommandStatus Address(SlotAddress address, out ContainerState state)
         {
             if (!Resolve(address.Container, out state)) return CommandStatus.Unavailable;
@@ -226,7 +277,8 @@ namespace SOLITUDE.Containers
             internal long Clock; internal bool Resized; internal List<int> Changed;
         }
         private IReadOnlyList<SlotAddress> lastChanges = Array.AsReadOnly(new SlotAddress[0]);
-        private void Commit(Dictionary<ContainerState, ItemStack[]> plans, Action worldCommit = null, bool force = false)
+        private void Commit(Dictionary<ContainerState, ItemStack[]> plans, Action worldCommit = null, bool force = false,
+            ContainerHandoffReceipt handoffReceipt = null)
         {
             var publications = new List<Publication>(); var handles = new List<ContainerHandle>();
             foreach (var pair in plans)
@@ -248,10 +300,13 @@ namespace SOLITUDE.Containers
             foreach (var p in publications) foreach (int index in p.Changed)
                 addresses.Add(new SlotAddress(p.State.Handle, index, p.Revisions[index]));
             lastChanges = addresses.AsReadOnly();
-            if (publications.Count == 0 && worldCommit == null) return;
+            if (publications.Count == 0 && worldCommit == null && handoffReceipt == null) return;
             publishing = true;
             try
             {
+                // After all revision planning, before publication: retries can observe the receipt
+                // alongside the complete ownership change. No failable external callback is used.
+                if (handoffReceipt != null) handoffs.Add(handoffReceipt.TransitionId, handoffReceipt);
                 foreach (var p in publications) { p.State.Slots = p.Slots; p.State.Revisions = p.Revisions; p.State.Clock = p.Clock; }
                 worldCommit?.Invoke();
                 var change = new ContainerChangeSet(handles, lastChanges);
