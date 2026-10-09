@@ -76,6 +76,22 @@ namespace SOLITUDE.Player
             if (currentTarget == null) return;
             currentTarget = null; events?.Publish(new InteractionFocusChangedEvent(null));
         }
+        public void RebuildProximityAfterRelocation()
+        {
+            ClearFocus(); nearby.Clear();
+            var playerColliders = GetComponents<Collider2D>();
+            foreach (var root in gameObject.scene.GetRootGameObjects())
+                foreach (var sensor in root.GetComponentsInChildren<InteractableProximitySensor>())
+                {
+                    if (!sensor.isActiveAndEnabled) continue;
+                    var target = sensor.GetComponentInParent<IInteractable>();
+                    if (target == null) continue;
+                    foreach (var trigger in sensor.GetComponents<Collider2D>())
+                        if (trigger.enabled && trigger.isTrigger)
+                            foreach (var player in playerColliders)
+                                if (player.enabled && Physics2D.Distance(trigger, player).isOverlapped) nearby.Add(target);
+                }
+        }
         private void OnDisable() => ClearFocus();
 
         public void TryInteract()

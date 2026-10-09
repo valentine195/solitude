@@ -2002,6 +2002,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 056ef8469bc514135ba844a45b684e7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Containers.ContainerSlotView
+--- !u!1 &608765384
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 608765386}
+  - component: {fileID: 608765385}
+  m_Layer: 0
+  m_Name: CryobayAwakeningPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &608765385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 608765384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0de1a9e38eeca4ad095f5298ff17ab2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Player.Succession.SurvivorAwakeningPoint
+--- !u!4 &608765386
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 608765384}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.89, y: -2.4, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -5972,6 +6016,8 @@ GameObject:
   m_Component:
   - component: {fileID: 770409761}
   - component: {fileID: 770409760}
+  - component: {fileID: 770409763}
+  - component: {fileID: 770409762}
   m_Layer: 0
   m_Name: SceneBindings
   m_TagString: Untagged
@@ -6012,6 +6058,10 @@ MonoBehaviour:
   - {fileID: 1134087490}
   - {fileID: 54178029}
   restorationJunctions: []
+  features:
+  - {fileID: 770409762}
+  journalView: {fileID: 0}
+  taskNoticeView: {fileID: 0}
   uiInput: {fileID: 1001239075}
 --- !u!4 &770409761
 Transform:
@@ -6028,6 +6078,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &770409762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 770409759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a0a25269ef754e9d8ad40d2b4ca95e4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Player.Succession.SurvivorSuccessionComposition
+  awakeningPoint: {fileID: 608765385}
+  avatar: {fileID: 770409763}
+--- !u!114 &770409763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 770409759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c6d753e2c6c24fce9da079ad3961ef3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Player.Succession.SurvivorAvatarAdapter
+  interactor: {fileID: 836098674}
+  movement: {fileID: 836098673}
+  vitals: {fileID: 836098667}
 --- !u!224 &783979031 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8871607598326939085, guid: db2642ea1599c4852bcf05c01412e0de, type: 3}
@@ -17539,3 +17618,4 @@ SceneRoots:
   - {fileID: 179786300}
   - {fileID: 770409761}
   - {fileID: 1601891045}
+  - {fileID: 608765386}

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using SOLITUDE.Application;
 using SOLITUDE.Player;
 using UnityEngine;
@@ -19,6 +21,31 @@ namespace SOLITUDE.Core.Input
         private TaskJournalScreenCoordinator journal;
         private InputControl lastBackControl;
         private double lastBackTime = -1;
+        private readonly Dictionary<InputAction, InputControl[]> heldAtReset = new();
+        private InputControl[] heldUI = new InputControl[0];
+        private event Action SurvivorInputChanged;
+        // Actions re-enabled by policy may observe held controls. Require their release before accepting a new survivor action.
+        public void ResetSurvivorInput()
+        {
+            heldAtReset.Clear();
+            foreach (var action in actions.asset)
+                if (action.actionMap.name == "Gameplay" || action.name == "Cancel")
+                {
+                    var held = action.controls.Where(c => c.IsActuated()).ToArray();
+                    if (held.Length != 0) heldAtReset[action] = held;
+                }
+            heldUI = actions.asset.Where(a => a.actionMap.name == "UI" && (a.name == "Click" || a.name == "Submit"))
+                .SelectMany(a => a.controls.Where(c => c.IsActuated())).ToArray();
+            movement?.SetInput(Vector2.zero); ConsumeUIActivation(); SurvivorInputChanged?.Invoke();
+        }
+        private bool Fresh(InputAction.CallbackContext context) => !heldAtReset.ContainsKey(context.action);
+        private void Update()
+        {
+            foreach (var action in heldAtReset.Keys.ToArray())
+                if (!heldAtReset[action].Any(c => c.IsActuated())) heldAtReset.Remove(action);
+            if (heldUI.Length != 0 && !heldUI.Any(c => c.IsActuated()))
+            { heldUI = new InputControl[0]; SurvivorInputChanged?.Invoke(); }
+        }
         private int consumedFrame = -1;
         public void ConsumeUIActivation() => consumedFrame = Time.frameCount;
         private bool GameplayAllowed => policy.Gameplay && consumedFrame != Time.frameCount;
@@ -36,11 +63,11 @@ namespace SOLITUDE.Core.Input
             var references = new[] { module.point, module.move, module.leftClick, module.rightClick, module.middleClick, module.scrollWheel,
                 module.submit, module.cancel, module.trackedDevicePosition, module.trackedDeviceOrientation };
             var boundPolicy = policy;
-            void ApplyUI() { if (module != null) module.enabled = boundPolicy.Pointer; }
-            boundPolicy.Changed += ApplyUI; ApplyUI();
+            void ApplyUI() { if (module != null) module.enabled = boundPolicy.Pointer && heldUI.Length == 0; }
+            boundPolicy.Changed += ApplyUI; SurvivorInputChanged += ApplyUI; ApplyUI();
             var lease = new Lease(() =>
             {
-                boundPolicy.Changed -= ApplyUI;
+                boundPolicy.Changed -= ApplyUI; SurvivorInputChanged -= ApplyUI;
                 if (module != null) { module.enabled = false; module.UnassignActions(); }
                 foreach (var reference in references) if (reference != null) Destroy(reference);
             });
@@ -81,17 +108,17 @@ namespace SOLITUDE.Core.Input
             Enable(actions.Container.Point, policy.Pointer);
             // Click delivery belongs exclusively to the EventSystem.
         }
-        private void Move(InputAction.CallbackContext context) { if (GameplayAllowed && movement != null) movement.SetInput(context.ReadValue<Vector2>()); }
+        private void Move(InputAction.CallbackContext context) { if (Fresh(context) && GameplayAllowed && movement != null) movement.SetInput(context.ReadValue<Vector2>()); }
         private void Stop(InputAction.CallbackContext _) { if (movement != null) movement.SetInput(Vector2.zero); }
-        private void Interact(InputAction.CallbackContext _) { if (GameplayAllowed && interactor != null) interactor.TryInteract(); }
-        private void Inventory(InputAction.CallbackContext _) { if (policy.Inventory && consumedFrame != Time.frameCount) inventory?.Invoke(); }
+        private void Interact(InputAction.CallbackContext context) { if (Fresh(context) && GameplayAllowed && interactor != null) interactor.TryInteract(); }
+        private void Inventory(InputAction.CallbackContext context) { if (Fresh(context) && policy.Inventory && consumedFrame != Time.frameCount) inventory?.Invoke(); }
         private void Hotbar(InputAction.CallbackContext context)
-        { if (GameplayAllowed && int.TryParse(context.action.name.Substring(6), out int index)) selection?.Select(index - 1); }
+        { if (Fresh(context) && GameplayAllowed && int.TryParse(context.action.name.Substring(6), out int index)) selection?.Select(index - 1); }
         private void Pointer(InputAction.CallbackContext context)
         { if (!policy.Pointer) return; var point = context.ReadValue<Vector2>(); Point?.Invoke(point.x, point.y); }
-        private void ToggleJournal(InputAction.CallbackContext _)
+        private void ToggleJournal(InputAction.CallbackContext context)
         {
-            if (!policy.Ready || consumedFrame == Time.frameCount || journal == null) return;
+            if (!Fresh(context) || !policy.Ready || consumedFrame == Time.frameCount || journal == null) return;
             var result = journal.Toggle();
             if (result == OpenResult.Closed) ConsumeUIActivation();
             Apply();
@@ -107,7 +134,7 @@ namespace SOLITUDE.Core.Input
         }
         private void Back(InputAction.CallbackContext context)
         {
-            if (!policy.Ready || (lastBackControl == context.control && lastBackTime == context.time)) return;
+            if (!Fresh(context) || !policy.Ready || (lastBackControl == context.control && lastBackTime == context.time)) return;
             lastBackControl = context.control; lastBackTime = context.time;
             if (journal?.IsOpen == true) { ConsumeUIActivation(); journal.Back(); Apply(); return; }
             if (!(back?.Invoke() ?? false)) fallbackBack?.Invoke();
@@ -122,7 +149,7 @@ namespace SOLITUDE.Core.Input
             if (policy != null) policy.Changed -= Apply; policy = null;
             if (actions != null) { actions.Disable(); actions.Dispose(); actions = null; }
             lastBackTime = -1; lastBackControl = null;
-            consumedFrame = -1;
+            consumedFrame = -1; heldAtReset.Clear(); heldUI = new InputControl[0];
         }
         private void OnDestroy() => Release();
     }

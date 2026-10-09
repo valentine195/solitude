@@ -51,6 +51,7 @@ namespace SOLITUDE.Composition
         private UnityInputHost input;
         private ContainerModalCoordinator modal;
         private HotbarSelectionState selection;
+        private ContainerGestureCoordinator gestures;
         private HeldItemPresenter held;
         private SceneInteractionScope interactions;
         private Action released;
@@ -111,6 +112,7 @@ namespace SOLITUDE.Composition
             Dictionary<LootTable, RuntimeLootTable> loot, ContainerGestureCoordinator gestures, InputPolicyCoordinator policy,
             PauseCoordinator pause, IContainerScreenRequests screens, UnityInputHost input, GameManager game, Action released, TaskJournal tasks = null)
         {
+            this.gestures = gestures;
             Validate(); this.presentations = presentations; this.session = session; this.pickups = pickups; this.loot = loot; this.policy = policy; this.input = input; this.released = released;
             this.tasks = tasks; taskScope = Guid.NewGuid().ToString("N");
             try
@@ -162,7 +164,8 @@ namespace SOLITUDE.Composition
                     }
                 }
                 var featureContext = new SceneFeatureContext(session.Commands, inventory.Container, presentations,
-                    policy, input, tasks, taskScope, interactor, interactions.Events);
+                    policy, input, tasks, taskScope, interactor, interactions.Events,
+                    hotbar.Container, selection, CloseForTransition, interactions.Feedback);
                 foreach (var feature in features)
                 {
                     // Record before binding so a throwing initializer is also unwound.
@@ -212,6 +215,7 @@ namespace SOLITUDE.Composition
             journalScreen?.Close();
             foreach (var feature in boundFeatures) if (feature != null) feature.CloseForTransition();
             modal?.Close();
+            gestures?.Cancel();
         }
         public void ShowRecoveryNotice(Action acknowledged) => recoveryNotice.Show(acknowledged);
         public bool Open(LockerContainer source)
@@ -304,7 +308,7 @@ namespace SOLITUDE.Composition
             foreach (var source in lockers) { source.Release(); if (source != null) source.GetComponent<Locker>()?.Release(); }
             foreach (var junction in restorationJunctions) if (junction != null) junction.ReleaseBinding();
             foreach (var binding in bindings) binding.Dispose(); bindings.Clear();
-            inventory?.Release(); hotbar?.Release(); session = null;
+            inventory?.Release(); hotbar?.Release(); session = null; gestures = null;
         }
         private void OnDestroy() { var notify = released; released = null; notify?.Invoke(); Release(); }
     }

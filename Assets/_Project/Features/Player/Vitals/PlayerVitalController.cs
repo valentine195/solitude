@@ -24,6 +24,14 @@ namespace SOLITUDE.Player
 
         public PlayerVitals Vitals { get; private set; }
 
+        public void ResetForAwakening()
+        {
+            if (Vitals == null) Vitals = new PlayerVitals(maxHealth, maxOxygen);
+            // Retain the Vital objects to preserve HUD subscriptions.
+            Vitals.Health.Set(currentHealth);
+            Vitals.Oxygen.Set(currentOxygen);
+        }
+
         private void OnValidate()
         {
             if (Vitals != null)
@@ -35,9 +43,7 @@ namespace SOLITUDE.Player
 
         private void Awake()
         {
-            Vitals = new PlayerVitals(maxHealth, maxOxygen);
-            Vitals.Health.Set(currentHealth);
-            Vitals.Oxygen.Set(currentOxygen);
+            if (Vitals == null) ResetForAwakening();
         }
     }
 
