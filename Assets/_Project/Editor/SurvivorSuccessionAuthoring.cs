@@ -12,6 +12,27 @@ namespace SOLITUDE.Editor
     public static class SurvivorSuccessionAuthoring
     {
         public const string ScenePath = "Assets/_Project/Scenes/Wakeup.unity";
+        public const string RecoveryPrefabPath = "Assets/_Project/Features/Player/Succession/SurvivorRecoveryContainer.prefab";
+        [MenuItem("SOLITUDE/Survivors/Author Recovery Prefab")]
+        public static void AuthorRecoveryPrefab()
+        {
+            if (EditorApplication.isPlaying) throw new InvalidOperationException("Author recovery outside Play Mode.");
+            var go = new GameObject("SurvivorRecoveryContainer"); go.SetActive(false);
+            try
+            {
+                var owner = go.AddComponent<SurvivorRecoveryContainer>();
+                var visual = new GameObject("EquipmentCache"); visual.transform.SetParent(go.transform, false);
+                var renderer = visual.AddComponent<SpriteRenderer>();
+                renderer.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/SOLITUDE/Props/solitude_locker_closed_normal_v01.png");
+                renderer.sortingOrder = 5;
+                var trigger = new GameObject("Proximity"); trigger.transform.SetParent(go.transform, false);
+                var collider = trigger.AddComponent<CircleCollider2D>(); collider.isTrigger = true; collider.radius = 1.25f;
+                var sensor = trigger.AddComponent<SOLITUDE.Core.Interaction.InteractableProximitySensor>();
+                owner.Configure(sensor, renderer); owner.ValidateAuthoring();
+                PrefabUtility.SaveAsPrefabAsset(go, RecoveryPrefabPath);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(go); }
+        }
         [MenuItem("SOLITUDE/Survivors/Author Wakeup Succession")]
         public static void AuthorWakeup()
         {

@@ -56,6 +56,7 @@ namespace SOLITUDE.Composition
         private SceneInteractionScope interactions;
         private Action released;
         private Guid inventoryToken, transferToken;
+        private string preparingTargetLabel = "Locker";
         public bool HasPlayer => inventory != null;
         public void Validate()
         {
@@ -142,7 +143,8 @@ namespace SOLITUDE.Composition
                 heldView.Initialize(presentations); held = new HeldItemPresenter(gestures.Interaction, heldView);
                 modal = new ContainerModalCoordinator(policy, pause, gestures, this, inventory.Container);
                 inventoryModal.Initialize(() => modal.ToggleInventory(), () => modal.Close());
-                transferModal.Initialize(source => source is LockerContainer locker && Open(locker), () => modal.Close());
+                transferModal.Initialize(source => source is LockerContainer locker ? Open(locker) :
+                    source != null && Open(source.Container, source.Label), () => modal.Close());
                 inventoryModal.RenderVisible(false); transferModal.RenderVisible(false);
                 foreach (var controller in controllers)
                     if (controller != inventoryModal.Controller && controller != transferModal.InventoryController && controller != transferModal.TargetController && controller.DefaultSource != null)
@@ -165,7 +167,7 @@ namespace SOLITUDE.Composition
                 }
                 var featureContext = new SceneFeatureContext(session.Commands, inventory.Container, presentations,
                     policy, input, tasks, taskScope, interactor, interactions.Events,
-                    hotbar.Container, selection, CloseForTransition, interactions.Feedback);
+                    hotbar.Container, selection, CloseForTransition, interactions.Feedback, Open, Close);
                 foreach (var feature in features)
                 {
                     // Record before binding so a throwing initializer is also unwound.
@@ -221,9 +223,22 @@ namespace SOLITUDE.Composition
         public bool Open(LockerContainer source)
         {
             if (modal == null || source == null || !source.EnsureInitialized()) return false;
-            var result = modal.OpenTarget(source.Container); return result == OpenResult.Opened || result == OpenResult.Closed;
+            return Open(source.Container, source.Label);
         }
         public void Close(LockerContainer source) { if (source?.Container != null) modal?.CloseTarget(source.Container.Handle); }
+        public bool Open(IContainerReader source, string label)
+        {
+            if (modal == null || source?.IsAvailable != true || string.IsNullOrWhiteSpace(label) ||
+                !ReferenceEquals(session?.Commands.Read(source.Handle), source)) return false;
+            var prior = preparingTargetLabel; preparingTargetLabel = label;
+            try
+            {
+                var result = modal.OpenTarget(source);
+                return result == OpenResult.Opened || result == OpenResult.Closed;
+            }
+            finally { preparingTargetLabel = prior; }
+        }
+        public void Close(ContainerHandle handle) => modal?.CloseTarget(handle);
         private sealed class ReaderSource : IContainerSource
         {
             public IContainerReader Container { get; }
@@ -233,7 +248,7 @@ namespace SOLITUDE.Composition
         public IModalBinding Prepare(ContainerModalKind kind, IContainerReader inventory, IContainerReader target)
         {
             if (!inventory.IsAvailable || (kind == ContainerModalKind.Transfer && target?.IsAvailable != true)) return null;
-            return new PreparedModal(this, kind, new ReaderSource(inventory, "Inventory"), target == null ? null : new ReaderSource(target, "Locker"));
+            return new PreparedModal(this, kind, new ReaderSource(inventory, "Inventory"), target == null ? null : new ReaderSource(target, preparingTargetLabel));
         }
         private sealed class PreparedModal : IModalBinding
         {

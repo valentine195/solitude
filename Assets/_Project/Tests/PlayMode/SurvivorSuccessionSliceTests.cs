@@ -66,14 +66,20 @@ namespace SOLITUDE.Tests
             var camera = Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None).Single(c => c.GetType().Name == "CinemachineCamera");
             var cameraTarget = new UnityEditor.SerializedObject(camera).FindProperty("Target.TrackingTarget").objectReferenceValue;
             Assert.AreEqual(SurvivorLifeStatus.Active, first.Status);
-            Assert.AreEqual(feature.AwakeningPoint.transform.position, player.transform.position);
+            Assert.LessOrEqual(Vector3.Distance(feature.AwakeningPoint.transform.position, player.transform.position), .000001f,
+                "Interpolated rendering must remain at the authored awakening location.");
             vitals.Health.Set(12); vitals.Oxygen.Set(9);
             var selection = Field<HotbarSelectionState>(One<SceneBindings>(), "selection"); selection.Select(2);
             player.GetComponent<Rigidbody2D>().position += Vector2.right * 3;
             Assert.AreEqual(SuccessionOutcome.Completed, feature.RequestDeath(first.Id));
+            Assert.AreEqual(feature.AwakeningPoint.transform.position, player.transform.position,
+                "Synchronous awakening must place the avatar exactly.");
             yield return null;
             Assert.AreEqual(SurvivorLifeStatus.Dead, first.Status); Assert.AreNotEqual(first.Id, feature.Coordinator.Current.Id);
-            Assert.AreEqual(feature.AwakeningPoint.transform.position, player.transform.position);
+            Assert.AreEqual((Vector2)feature.AwakeningPoint.transform.position, player.GetComponent<Rigidbody2D>().position,
+                "The physics body must remain exactly at the awakening point.");
+            Assert.LessOrEqual(Vector3.Distance(feature.AwakeningPoint.transform.position, player.transform.position), .000001f,
+                "Rigidbody interpolation may round the rendered Transform by one float unit.");
             Assert.AreSame(inventory, Inventory); Assert.AreSame(hotbar, One<SOLITUDE.Hotbar.Hotbar>().Container);
             Assert.IsTrue(inventory.GetSlots().All(s => s.IsEmpty)); Assert.IsTrue(hotbar.GetSlots().All(s => s.IsEmpty));
             Assert.AreSame(health, One<PlayerVitalsController>().Vitals.Health);

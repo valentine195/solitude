@@ -13,6 +13,20 @@ namespace SOLITUDE.Tests
 {
     public class SurvivorSuccessionAuthoringTests
     {
+        [Test] public void RecoveryPrefabAuthoringIsIdempotentAndHasNoPlayerOrSaveableOwner()
+        {
+            var guid = AssetDatabase.AssetPathToGUID(SurvivorSuccessionAuthoring.RecoveryPrefabPath);
+            Assert.IsNotEmpty(guid);
+            SurvivorSuccessionAuthoring.AuthorRecoveryPrefab();
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(SurvivorSuccessionAuthoring.RecoveryPrefabPath);
+            prefab.GetComponent<SurvivorRecoveryContainer>().ValidateAuthoring();
+            Assert.IsFalse(prefab.activeSelf);
+            Assert.IsEmpty(prefab.GetComponentsInChildren<PlayerInteractor>(true));
+            Assert.IsEmpty(prefab.GetComponentsInChildren<SOLITUDE.SaveLoad.SaveableId>(true));
+            Assert.IsEmpty(prefab.GetComponentsInChildren<SOLITUDE.Features.Interactables.LockerContainer>(true));
+            SurvivorSuccessionAuthoring.AuthorRecoveryPrefab();
+            Assert.AreEqual(guid, AssetDatabase.AssetPathToGUID(SurvivorSuccessionAuthoring.RecoveryPrefabPath));
+        }
         [Test] public void AuthoringIsIdempotentAndPreservesScenePlayerAndFeatureBindings()
         {
             var guid = AssetDatabase.AssetPathToGUID(SurvivorSuccessionAuthoring.ScenePath);

@@ -25,13 +25,17 @@ namespace SOLITUDE.Composition
         public string TaskScope { get; }
         public PlayerInteractor Interactor { get; }
         public SceneInteractionEvents InteractionEvents { get; }
+        public Func<IContainerReader, string, bool> OpenContainer { get; }
+        public Action<ContainerHandle> CloseContainer { get; }
 
         public SceneFeatureContext(ContainerCommandService commands, IContainerReader inventory,
             ItemPresentationCatalog presentations, InputPolicyCoordinator policy, UnityInputHost input,
             TaskJournal tasks, string taskScope, PlayerInteractor interactor, SceneInteractionEvents interactionEvents,
             IContainerReader hotbar = null, HotbarSelectionState selection = null,
-            Action closePlayerScreens = null, InteractionFeedbackService feedback = null)
+            Action closePlayerScreens = null, InteractionFeedbackService feedback = null,
+            Func<IContainerReader, string, bool> openContainer = null, Action<ContainerHandle> closeContainer = null)
         {
+            OpenContainer = openContainer; CloseContainer = closeContainer;
             Hotbar = hotbar; Selection = selection; ClosePlayerScreens = closePlayerScreens; Feedback = feedback;
             Commands = commands; Inventory = inventory; Presentations = presentations;
             Policy = policy; Input = input; Tasks = tasks; TaskScope = taskScope; Interactor = interactor; InteractionEvents = interactionEvents;
