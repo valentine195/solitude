@@ -3,6 +3,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using SOLITUDE.Core.Input;
+using SOLITUDE.Core.Events;
+using SOLITUDE.Core.Interaction;
 using SOLITUDE.Core.Systems;
 using SOLITUDE.Features.Interactables;
 using SOLITUDE.Tasks;
@@ -130,6 +132,32 @@ namespace SOLITUDE.Tests
                 Assert.IsTrue(All<ScrubberRoomFeedback>().Single().IsWarningVisible);Assert.IsTrue(All<ScrubberRoomFeedback>().Single().Alert.isPlaying);Assert.IsFalse(All<ScrubberRoomFeedback>().Single().RunningSound.isPlaying);
                 var notification=All<ScrubberTaskNotificationView>().Single();Assert.IsFalse(notification.IsVisible);Assert.AreEqual(0,notification.PresentationCount);CollectionAssert.AreEqual(bytes,File.ReadAllBytes(savePath));
             }
+        }
+        [UnityTest] public IEnumerator DestroyingTaskSourceDetachesFromTheStillLiveSceneScope()
+        {
+            yield return Load(Demo); yield return null;
+            var root = All<GameCompositionRoot>().Single(); var scope = All<SceneBindings>().Single();
+            var interactions = Field<SceneInteractionScope>(scope, "interactions"); var events = interactions.Events;
+            var source = All<ScrubberTaskSource>().Single(); var access = source.Access; var key = source.Key;
+            var journal = (TaskJournal)root.Tasks;
+            int Listeners() => Field<Delegate>(events, "FocusChanged")?.GetInvocationList().Length ?? 0;
+            int boundCount = Listeners(); Assert.GreaterOrEqual(boundCount, 1); Assert.IsTrue(source.IsRegistered);
+            events.Publish(new InteractionFocusChangedEvent(access));
+            Assert.IsTrue(journal.ReadSnapshot().Find(key).SourceAvailable);
+            for (int i = 0; i < 3; i++)
+            {
+                source.enabled = false; Assert.AreEqual(boundCount - 1, Listeners());
+                Assert.IsFalse(journal.ReadSnapshot().Find(key).SourceAvailable);
+                source.enabled = true; Assert.AreEqual(boundCount, Listeners()); Assert.IsTrue(source.IsRegistered);
+            }
+            Object.Destroy(source); yield return null;
+            Assert.IsTrue(source == null); Assert.AreSame(events, interactions.Events);
+            Assert.AreEqual(boundCount - 1, Listeners());
+            var detached = journal.ReadSnapshot().Find(key); Assert.IsFalse(detached.SourceAvailable);
+            events.Publish(new InteractionFocusChangedEvent(access));
+            Assert.AreEqual(detached.Revision, journal.ReadSnapshot().Find(key).Revision);
+            scope.Release(); scope.Release(); Assert.IsNull(journal.ReadSnapshot().Find(key));
+            Assert.AreEqual(0, Listeners()); Assert.IsNull(events.CurrentFocus);
         }
         [UnityTest] public IEnumerator ScrubberSessionRejectsProductionWithoutWritingEncounterItems()
         {

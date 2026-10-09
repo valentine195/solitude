@@ -42,7 +42,50 @@ namespace SOLITUDE.Editor
             source.Configure("scrubber-room-01", "DECK 01 / SCRUBBER ROOM", equipment, equipment.GetComponent<ScrubberAccess>());
             var data = new SerializedObject(All<SceneBindings>(scene).Single());
             data.FindProperty("journalView").objectReferenceValue = view;
-            data.ApplyModifiedPropertiesWithoutUndo(); EnsureComposition(scene); view.ValidateAuthoring();
+            data.ApplyModifiedPropertiesWithoutUndo(); EnsureComposition(scene); view.ValidateAuthoring(); EnsureTaskNotice(scene);
+        }
+        private static void EnsureTaskNotice(Scene scene)
+        {
+            string path = JournalFolder + "/TaskNotice.prefab";
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (prefab == null)
+            {
+                font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/UI/Fonts/pixel_operator/FontAssets/PixelOperator SDF.asset");
+                var root = new GameObject("TaskNotice", typeof(RectTransform), typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler));
+                try
+                {
+                    var canvas = root.GetComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.sortingOrder = 80;
+                    var scaler = root.GetComponent<UnityEngine.UI.CanvasScaler>(); scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                    scaler.referenceResolution = new Vector2(1920,1080); scaler.matchWidthOrHeight = .5f;
+                    var view = root.AddComponent<SOLITUDE.Tasks.UI.TaskNoticeView>();
+                    var panel = JRect("Panel",root.transform,Vector2.one,Vector2.one,new Vector2(-444,-348),new Vector2(-24,-96));
+                    JImage(panel,new Color(.035f,.05f,.055f,.98f)); JSet(view,"panel",panel.gameObject);
+                    JImage(JRect("AmberRule",panel,Vector2.zero,new Vector2(0,1),Vector2.zero,new Vector2(3,0)),Amber);
+                    NoticeText(view,"heading","Heading",panel,"TASK ADDED",24,Amber,-14,30);
+                    NoticeText(view,"title","Title",panel,"TASK TITLE",28,White,-48,58);
+                    NoticeText(view,"location","Location",panel,"UNKNOWN",22,new Color(.72f,.76f,.77f),-110,28);
+                    JImage(JRect("Divider",panel,new Vector2(0,1),Vector2.one,new Vector2(18,-144),new Vector2(-18,-143)),new Color(.3f,.35f,.36f));
+                    NoticeText(view,"outcome","Outcome",panel,"> ACTIVE",22,new Color(.72f,.76f,.77f),-150,28);
+                    NoticeText(view,"body","Body",panel,"NEXT STEP",22,White,-182,58);
+                    panel.gameObject.SetActive(false); view.ValidateAuthoring(); prefab = PrefabUtility.SaveAsPrefabAsset(root,path);
+                }
+                finally { UnityEngine.Object.DestroyImmediate(root); }
+            }
+            var notice = All<SOLITUDE.Tasks.UI.TaskNoticeView>(scene).SingleOrDefault();
+            if (notice == null) notice = ((GameObject)PrefabUtility.InstantiatePrefab(prefab,scene)).GetComponent<SOLITUDE.Tasks.UI.TaskNoticeView>();
+            JSet(All<SceneBindings>(scene).Single(),"taskNoticeView",notice); notice.ValidateAuthoring();
+            foreach (var legacy in All<ScrubberTaskNotificationView>(scene))
+            {
+                legacy.enabled = false; EditorUtility.SetDirty(legacy); PrefabUtility.RecordPrefabInstancePropertyModifications(legacy);
+                var legacyPanel = new SerializedObject(legacy).FindProperty("notice").objectReferenceValue as GameObject;
+                if (legacyPanel != null) { legacyPanel.SetActive(false); PrefabUtility.RecordPrefabInstancePropertyModifications(legacyPanel); }
+            }
+        }
+        private static void NoticeText(SOLITUDE.Tasks.UI.TaskNoticeView view,string field,string name,Transform parent,string text,float size,Color color,float top,float height)
+        {
+            var label = JText(name,parent,text,size,color); var rect = label.rectTransform;
+            rect.anchorMin = new Vector2(0,1); rect.anchorMax = Vector2.one; rect.offsetMin = new Vector2(18,top-height); rect.offsetMax = new Vector2(-18,top);
+            label.overflowMode = TextOverflowModes.Ellipsis; JSet(view,field,label);
         }
         // Deliberately migrate the existing scene; do not rebuild its authored content.
         [MenuItem("SOLITUDE/Migrations/Compose Scrubber Feature")]

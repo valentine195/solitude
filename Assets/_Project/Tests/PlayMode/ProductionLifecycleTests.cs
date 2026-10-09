@@ -104,6 +104,27 @@ namespace SOLITUDE.Tests
             var view=Field<ContainerModalView>(scope,"inventoryModal");UnityEngine.Object.Destroy(view.gameObject);yield return null;
             scope.Release();Assert.AreEqual(1,Time.timeScale);Assert.DoesNotThrow(scope.Release);
         }
+        [UnityTest] public IEnumerator NeverActivatedControllerDestroyedBeforeScopeStillReleasesItsPresenter()
+        {
+            var scope = PlayerScope;
+            var controller = Field<ContainerController[]>(scope, "controllers").First(c => c.DefaultSource is SOLITUDE.Hotbar.Hotbar);
+            controller.gameObject.SetActive(false);
+            var clone = UnityEngine.Object.Instantiate(controller.gameObject);
+            var inactive = clone.GetComponent<ContainerController>();
+            Assert.IsFalse(clone.activeInHierarchy);
+            inactive.Initialize(Field<ItemPresentationCatalog>(Root, "presentations"),
+                Field<ContainerGestureCoordinator>(Root, "gestures"), Field<InputPolicyCoordinator>(Root, "policy"),
+                Field<HotbarSelectionState>(scope, "selection"));
+            Assert.IsTrue(inactive.BindDefaultSource());
+            var reader = inactive.CurrentSource.Container;
+            typeof(SceneBindings).GetField("controllers", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(scope, Field<ContainerController[]>(scope, "controllers").Concat(new[] { inactive }).ToArray());
+            UnityEngine.Object.Destroy(clone); yield return null;
+            Assert.IsTrue(inactive == null);
+            Assert.IsNotNull(Field<ContainerPresenter>(inactive, "presenter"), "Never-active objects receive no OnDestroy cleanup.");
+            scope.Release(); Assert.IsNull(Field<ContainerPresenter>(inactive, "presenter"));
+            Assert.IsFalse(reader.IsAvailable); Assert.DoesNotThrow(scope.Release);
+        }
         [UnityTest] public IEnumerator EventSystemAndInputDestroyedBeforeScopeReleaseSafely()
         {
             var scope=PlayerScope;Field<ContainerModalCoordinator>(scope,"modal").ToggleInventory();

@@ -34,3 +34,54 @@ existing demo with `SOLITUDE/Migrations/Compose Scrubber Feature`; this preserve
 the scene scope and journal reference. Its builder also authors that registration.
 The disposable demo session/reset and production save isolation stay with
 `GameCompositionRoot`.
+
+## Interaction lifetime
+
+Each composed player scene has a `SceneInteractionScope` owned by
+`SceneBindings`. It creates `SceneInteractionEvents` and
+`InteractionFeedbackService` after inventory registration and before feature
+and input binding. It validates one local player and UI controller, discovers
+inactive feedback receivers, and explicitly binds their dependencies.
+`SceneFeatureContext.InteractionEvents` supplies the same event source to
+feature task sources. There is no static interaction owner or service resolver.
+
+`UIController` retains its serialized prompt/feedback views. Disable detaches
+its subscription; enable attaches once and replays current focus. Player input
+disable and transition close clear focus. Scene release detaches feature task
+sources before disposing the interaction scope, which clears delegates and
+feedback view references. Bind/release must work even when an endpoint has never
+been active.
+
+The older `SOLITUDE_Start` and `SOLITUDE_Expedition` scenes instead use
+`SceneInteractionBindings` for direct-entry interaction ownership. That owner
+cannot coexist with `SceneBindings`; it does not create a session, persistence,
+or an input host. Its lifetime ends on explicit release or destruction.
+
+## Add a scene feature
+
+1. Place a `SceneFeatureComposition` subclass with its owning feature and author
+   explicit references to its local equipment, screens, and task sources.
+2. Implement `Validate` for required, unique, same-scene references and feature
+   invariants. Include inactive endpoints. `SceneBindings.Validate` already
+   rejects missing, duplicate, wrong-scene, and unlisted feature compositions.
+3. Bind only the typed services needed from `SceneFeatureContext` in
+   `Initialize`. Inventory is already available; use the provided task scope
+   and interaction events. Record endpoints before binding so failures unwind.
+4. Implement `TryBack`, `CloseForTransition`, and repeat-safe `Release`. Close
+   screens and detach publishers/listeners before releasing their dependencies.
+   Preserve endpoint enable/disable behavior rather than starting another scope.
+5. Add the component exactly once to the scene's `features` list and update its
+   editor builder. Deliberately migrate existing scenes through Unity's Editor
+   API, retaining component instances, references, and metadata GUIDs.
+6. Run runtime composition validation and focused binding/failure, activation,
+   Back, and scene reload tests. Preserve production/demo save isolation.
+
+A new feature can own its equipment, screens, tasks, and cleanup without adding
+its concrete types to `SceneBindings`. A genuinely new shared dependency needs
+an explicit typed context addition, not a `Resolve<T>()` hook. Features do not
+need mirrored Domain/Application folders unless they have rules or workflows
+that belong there.
+
+See [architecture and placement](../../ARCHITECTURE.md),
+[confirmed legacy components](../../LEGACY_COMPONENTS.md), and
+[isolated verification](../../../../Tools/Verification/README.md).

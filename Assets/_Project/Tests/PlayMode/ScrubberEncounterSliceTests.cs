@@ -138,7 +138,8 @@ namespace SOLITUDE.Tests
                 Assert.AreSame(pickup,typeof(PlayerInteractor).GetField("currentTarget",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(player));
                 Press(keyboard,Key.E);yield return null;Assert.IsTrue(pickup.gameObject.activeSelf);
                 var feedback=All<SOLITUDE.Core.UI.InteractionFeedbackView>().Select(view=>(TMPro.TMP_Text)typeof(SOLITUDE.Core.UI.InteractionFeedbackView).GetField("label",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(view));
-                Assert.IsTrue(feedback.Any(label=>label!=null && label.text=="Inventory full" && label.gameObject.activeInHierarchy));
+                Assert.IsTrue(feedback.Any(label=>label!=null && label.text=="Inventory full" && label.gameObject.activeInHierarchy),
+                    string.Join("; ",feedback.Select(label=>label==null?"missing label":$"{label.text}: active={label.gameObject.activeInHierarchy}")));
                 session.Commands.Remove(inventory.GetSlot(0).Address,inventory.GetSlot(0).Stack.Quantity);
                 Press(keyboard,Key.E);yield return null;Assert.IsFalse(pickup.gameObject.activeSelf);
                 Assert.AreEqual(1,Enumerable.Range(0,inventory.Capacity).Select(i=>inventory.GetSlot(i)).Where(slot=>!slot.IsEmpty && slot.Stack.ItemId==pickup.Definition.Item.ItemId).Sum(slot=>slot.Stack.Quantity));
@@ -200,9 +201,14 @@ namespace SOLITUDE.Tests
         [UnityTest] public IEnumerator CompletionNotificationDefersExpiresAndNeverReplays()
         {
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single));yield return null;
-            var equipment=All<ScrubberEquipment>().Single();var screen=All<ScrubberScreenView>().Single();var notification=All<ScrubberTaskNotificationView>().Single();var room=All<ScrubberRoomFeedback>().Single();
+            var equipment=All<ScrubberEquipment>().Single();var screen=All<ScrubberScreenView>().Single();var notification=All<SOLITUDE.Tasks.UI.TaskNoticeView>().Single();var room=All<ScrubberRoomFeedback>().Single();
             var root=All<GameCompositionRoot>().Single();var session=(SOLITUDE.SaveLoad.ContainerSaveSession)typeof(GameCompositionRoot).GetField("session",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(root);
-            session.Commands.Grant(All<PlayerInventory>().Single().Container.Handle,ScrubberEquipment.FuseItemId,1);equipment.Install();Assert.IsTrue(screen.Open());equipment.Restart();
+            session.Commands.Grant(All<PlayerInventory>().Single().Container.Handle,ScrubberEquipment.FuseItemId,1);
+            // Journal notices require accepted discovery; access discovers while its open screen defers the notice.
+            Assert.IsTrue(All<ScrubberAccess>().Single().Interact(All<PlayerInteractor>().Single()).IsSuccess);
+            Assert.IsTrue(screen.IsOpen);
+            Assert.IsTrue(root.Tasks.ReadSnapshot().Find(All<ScrubberTaskSource>().Single().Key).State.Discovered);
+            equipment.Install(); equipment.Restart();
             var selected=EventSystem.current.currentSelectedGameObject;equipment.State.Advance(5);yield return null;
             Assert.IsTrue(equipment.State.Operational);Assert.IsFalse(room.IsWarningVisible);Assert.IsFalse(room.Alert.isPlaying);Assert.IsFalse(notification.IsVisible);Assert.AreEqual(0,notification.PresentationCount);Assert.AreSame(selected,EventSystem.current.currentSelectedGameObject);
             Assert.That(screen.GetComponentsInChildren<TMPro.TMP_Text>(true).Single(label=>label.name=="Objective").text,Does.Contain("complete"));

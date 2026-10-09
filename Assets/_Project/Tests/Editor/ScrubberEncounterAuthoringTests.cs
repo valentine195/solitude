@@ -22,6 +22,10 @@ namespace SOLITUDE.Tests
             SOLITUDE.Editor.ScrubberEncounterBuilder.AddTaskJournal();
             SOLITUDE.Editor.ScrubberEncounterBuilder.AddTaskJournal();
             Assert.AreEqual(guid,AssetDatabase.AssetPathToGUID(path));
+            var noticePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(SOLITUDE.Editor.ScrubberEncounterBuilder.JournalFolder+"/TaskNotice.prefab");
+            noticePrefab.GetComponent<SOLITUDE.Tasks.UI.TaskNoticeView>().ValidateAuthoring();
+            Assert.IsEmpty(noticePrefab.GetComponentsInChildren<UnityEngine.UI.Selectable>(true));
+            Assert.IsNull(noticePrefab.GetComponent<UnityEngine.UI.GraphicRaycaster>());
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(SOLITUDE.Editor.ScrubberEncounterBuilder.JournalFolder+"/TaskJournal.prefab");
             prefab.GetComponent<SOLITUDE.Tasks.UI.TaskJournalView>().ValidateAuthoring();
             Assert.AreEqual(2,prefab.GetComponentsInChildren<UnityEngine.UI.ScrollRect>(true).Length);
@@ -35,6 +39,9 @@ namespace SOLITUDE.Tests
                 Assert.AreEqual("scrubber-room-01",source.SourceId); Assert.IsNotNull(source.Equipment); Assert.IsNotNull(source.Access);
                 var data = new SerializedObject(roots.SelectMany(g=>g.GetComponentsInChildren<SceneBindings>(true)).Single());
                 Assert.AreSame(view,data.FindProperty("journalView").objectReferenceValue);
+                var notice = roots.SelectMany(g=>g.GetComponentsInChildren<SOLITUDE.Tasks.UI.TaskNoticeView>(true)).Single();
+                notice.ValidateAuthoring(); Assert.AreSame(notice,data.FindProperty("taskNoticeView").objectReferenceValue);
+                Assert.IsFalse(roots.SelectMany(g=>g.GetComponentsInChildren<ScrubberTaskNotificationView>(true)).Single().enabled);
                 var feature = roots.SelectMany(g => g.GetComponentsInChildren<ScrubberComposition>(true)).Single();
                 feature.Validate();
                 Assert.AreEqual(1, data.FindProperty("features").arraySize);
@@ -139,6 +146,9 @@ namespace SOLITUDE.Tests
             {
                 var roots = scene.GetRootGameObjects(); var pickups = roots.SelectMany(g=>g.GetComponentsInChildren<WorldPickup>(true)).ToArray();
                 Assert.AreEqual(1,pickups.Length); var pickup=pickups[0]; Assert.AreSame(item,pickup.Definition.Item); Assert.AreEqual(1,pickup.Definition.Quantity);
+                Assert.IsTrue(pickup.gameObject.activeInHierarchy, "The demo fuse must be available on direct entry and reset.");
+                var ui = scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<SOLITUDE.Core.UI.UIController>(true)).Single();
+                Assert.IsTrue(ui.isActiveAndEnabled, "The demo interaction UI must be active on direct entry and reset.");
                 Assert.IsFalse(string.IsNullOrEmpty(pickup.PickupId));
                 var ids=roots.SelectMany(g=>g.GetComponentsInChildren<SaveableId>(true)).Select(id=>id.Value).ToArray();
                 Assert.AreEqual(ids.Length,ids.Distinct().Count());

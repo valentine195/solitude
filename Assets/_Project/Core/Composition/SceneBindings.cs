@@ -32,6 +32,8 @@ namespace SOLITUDE.Composition
         [SerializeField] private RestorationJunction[] restorationJunctions = new RestorationJunction[0];
         [SerializeField] private SceneFeatureComposition[] features = new SceneFeatureComposition[0];
         [SerializeField] private SOLITUDE.Tasks.UI.TaskJournalView journalView;
+        [SerializeField] private SOLITUDE.Tasks.UI.TaskNoticeView taskNoticeView;
+        private TaskNoticeCoordinator taskNotices;
         private TaskJournal tasks;
         private string taskScope;
         private TaskJournalScreenCoordinator journalScreen;
@@ -145,6 +147,20 @@ namespace SOLITUDE.Composition
                         controller.BindDefaultSource();
                 uiLease = input.ConnectUI(uiInput);
                 input.Point += Point;
+                if (taskNoticeView != null && tasks != null)
+                {
+                    try
+                    {
+                        taskNotices = new TaskNoticeCoordinator(tasks, policy);
+                        taskNotices.PresentationError += NoticeError;
+                        taskNoticeView.Initialize(taskNotices);
+                    }
+                    catch (Exception error)
+                    {
+                        taskNoticeView.Release(); taskNotices?.Dispose(); taskNotices = null;
+                        Debug.LogWarning("Optional task notice UI unavailable: " + error.Message);
+                    }
+                }
                 var featureContext = new SceneFeatureContext(session.Commands, inventory.Container, presentations,
                     policy, input, tasks, taskScope, interactor, interactions.Events);
                 foreach (var feature in features)
@@ -165,6 +181,8 @@ namespace SOLITUDE.Composition
             }
             catch { Release(); throw; }
         }
+        private static void NoticeError(Exception error) => Debug.LogWarning("Optional task notice render failed: " + error.Message);
+        private void Update() => taskNotices?.Advance(Time.unscaledDeltaTime);
         public IDisposable RegisterPickup(WorldPickup pickup)
         {
             if (pickups == null || pickup == null || pickup.Definition?.Item == null || pickup.Definition.Quantity < 1 || presentations.Resolve(pickup.Definition.Item.ItemId) == null)
@@ -264,6 +282,8 @@ namespace SOLITUDE.Composition
         public void Release()
         {
             if (session == null) return;
+            taskNotices?.Dispose(); taskNotices = null;
+            if (taskNoticeView != null) taskNoticeView.Release();
             journalScreen?.Dispose(); journalScreen = null; journalPresenter?.Dispose(); journalPresenter = null;
             if (journalView != null) journalView.Release();
             for (int i = boundFeatures.Count - 1; i >= 0; i--)
@@ -276,7 +296,9 @@ namespace SOLITUDE.Composition
             if (input != null && selection != null) { input.Point -= Point; input.Bind(null, null, null, null, null, null); }
             uiLease?.Dispose(); uiLease = null;
             held?.Dispose(); held = null;
-            foreach (var controller in controllers) if (controller != null) controller.Unbind();
+            // Never-active controllers may be destroyed without OnDestroy. Their managed
+            // presenters must detach before owner unregistration, even after Unity's null check fails.
+            foreach (var controller in controllers) if (!ReferenceEquals(controller, null)) controller.Unbind();
             selection?.Dispose(); selection = null;
             foreach (var pickup in registeredPickups) pickup.ReleaseBinding(); registeredPickups.Clear();
             foreach (var source in lockers) { source.Release(); if (source != null) source.GetComponent<Locker>()?.Release(); }
