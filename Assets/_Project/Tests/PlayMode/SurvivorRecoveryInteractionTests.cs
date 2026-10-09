@@ -109,6 +109,47 @@ namespace SOLITUDE.Tests
             yield return ApproachAndOpen(cache); Assert.IsTrue(cache.Container.GetSlots().All(s => s.IsEmpty));
         }
 
+        [UnityTest] public IEnumerator FullRecoveryCapacityCanScrollAndTransferTheLastSlot()
+        {
+            var capacity = Inventory.Capacity + One<SOLITUDE.Hotbar.Hotbar>().Container.Capacity;
+            var cache = SurvivorRecoveryContainer.Prepare(Prefab, Context, Guid.NewGuid(),
+                One<PlayerInteractor>().transform.position + Vector3.right * .7f, capacity);
+            var saved = new ContainerSaveData();
+            saved.slots.Add(new ContainerSlotSaveData { index = capacity - 1, itemId = Item, quantity = 7 });
+            Assert.AreEqual(CommandStatus.Applied, Commands.Restore(cache.Container.Handle, saved).Status);
+            cache.Publish(); yield return ApproachAndOpen(cache); yield return null;
+            Canvas.ForceUpdateCanvases();
+            var modalView = One<ContainerTransferModalView>();
+            var view = modalView.TargetController.GetComponent<ContainerView>();
+            var scroll = view.GetComponentInChildren<UnityEngine.UI.ScrollRect>();
+            Assert.IsNotNull(scroll); Assert.IsFalse(scroll.horizontal); Assert.IsTrue(scroll.vertical);
+            Assert.Greater(scroll.content.rect.height, scroll.viewport.rect.height);
+            var pointer = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current)
+                { scrollDelta = Vector2.down };
+            for (var i = 0; i < capacity; i++)
+                UnityEngine.EventSystems.ExecuteEvents.Execute(scroll.gameObject, pointer, UnityEngine.EventSystems.ExecuteEvents.scrollHandler);
+            yield return null; Canvas.ForceUpdateCanvases();
+            var slots = Field<System.Collections.Generic.List<ContainerSlotView>>(view, "slotViews");
+            var last = slots[capacity - 1]; var corners = new Vector3[4];
+            last.GetComponent<RectTransform>().GetWorldCorners(corners);
+            foreach (var corner in corners)
+            {
+                var local = scroll.viewport.InverseTransformPoint(corner);
+                Assert.That(local.x, Is.InRange(scroll.viewport.rect.xMin - .01f, scroll.viewport.rect.xMax + .01f));
+                Assert.That(local.y, Is.InRange(scroll.viewport.rect.yMin - .01f, scroll.viewport.rect.yMax + .01f));
+            }
+            var inventoryView = modalView.InventoryController.GetComponent<ContainerView>();
+            var destination = Field<System.Collections.Generic.List<ContainerSlotView>>(inventoryView, "slotViews")[0];
+            UnityEngine.EventSystems.ExecuteEvents.Execute(last.gameObject, pointer, UnityEngine.EventSystems.ExecuteEvents.beginDragHandler);
+            UnityEngine.EventSystems.ExecuteEvents.Execute(destination.gameObject, pointer, UnityEngine.EventSystems.ExecuteEvents.dropHandler);
+            UnityEngine.EventSystems.ExecuteEvents.Execute(last.gameObject, pointer, UnityEngine.EventSystems.ExecuteEvents.endDragHandler);
+            Assert.IsTrue(cache.Container.GetSlot(capacity - 1).IsEmpty);
+            Assert.AreEqual(7, Inventory.GetSlot(0).Stack.Quantity);
+            modalView.Close(); yield return null; yield return ApproachAndOpen(cache); yield return null;
+            Canvas.ForceUpdateCanvases();
+            Assert.That(scroll.content.anchoredPosition.y, Is.EqualTo(0).Within(.01f), "Reopen begins at the first slots.");
+        }
+
         [UnityTest] public IEnumerator LeavingAndClosingCancelGesturesAndReturnInput()
         {
             var cache = Seed(); yield return ApproachAndOpen(cache);

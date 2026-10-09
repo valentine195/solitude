@@ -25,6 +25,8 @@ namespace SOLITUDE.Containers
         [Tooltip("If assigned, its column count is set from Columns below on every Bind - lets one prefab type serve containers of different shapes (e.g. a 9-wide inventory vs. a 5-wide locker).")]
         [SerializeField] private GridLayoutGroup gridLayoutGroup;
         [SerializeField] private int columns;
+        [SerializeField] private ScrollRect scrollRect;
+        [SerializeField] private float maximumViewportHeight = 379;
 
         [Tooltip("Label of the container")]
         [SerializeField] private TextMeshProUGUI label;
@@ -69,6 +71,23 @@ namespace SOLITUDE.Containers
                 slot.Hovered += Hover; slot.Unhovered += Unhover; slot.Clicked += Select;
                 slot.BeginDrag += Begin; slot.EndDrag += End; slot.Dropped += Dropped;
                 slotViews.Add(slot);
+            }
+            if (scrollRect != null && gridLayoutGroup != null)
+            {
+                var width = Mathf.Max(1, columns);
+                var rows = Mathf.CeilToInt((float)capacity / width);
+                var viewport = scrollRect.GetComponent<LayoutElement>();
+                viewport.preferredWidth = gridLayoutGroup.padding.horizontal + width * gridLayoutGroup.cellSize.x +
+                    (width - 1) * gridLayoutGroup.spacing.x;
+                viewport.preferredHeight = Mathf.Min(maximumViewportHeight, gridLayoutGroup.padding.vertical +
+                    rows * gridLayoutGroup.cellSize.y + Mathf.Max(0, rows - 1) * gridLayoutGroup.spacing.y);
+                scrollRect.StopMovement();
+                // Legacy scene overrides may retain a width from the old fixed grid.
+                // Stretched scrolling content must match the authored viewport.
+                var size = scrollRect.content.sizeDelta;
+                size.x = 0;
+                scrollRect.content.sizeDelta = size;
+                scrollRect.content.anchoredPosition = Vector2.zero;
             }
         }
         public void Render(SOLITUDE.Application.SlotPresentation slot)

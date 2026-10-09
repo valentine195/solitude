@@ -57,6 +57,8 @@ namespace SOLITUDE.Editor
                 adapter.Configure(player);
                 var feature = scope.GetComponent<SurvivorSuccessionComposition>() ?? scope.gameObject.AddComponent<SurvivorSuccessionComposition>();
                 feature.Configure(point, adapter);
+                feature.ConfigureRecovery(AssetDatabase.LoadAssetAtPath<GameObject>(RecoveryPrefabPath)
+                    .GetComponent<SurvivorRecoveryContainer>());
                 var data = new SerializedObject(scope); var list = data.FindProperty("features");
                 if (!Enumerable.Range(0, list.arraySize).Any(i => list.GetArrayElementAtIndex(i).objectReferenceValue == feature))
                 { list.InsertArrayElementAtIndex(list.arraySize); list.GetArrayElementAtIndex(list.arraySize - 1).objectReferenceValue = feature; }
