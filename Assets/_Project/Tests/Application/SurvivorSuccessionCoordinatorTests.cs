@@ -14,6 +14,7 @@ namespace SOLITUDE.Tests
             public bool ThrowPreparation, ThrowActivation, ThrowAfterAcknowledgment, InvalidReceipt;
             public int Preparations, Cancellations, Commits, Activations, Acknowledgments;
             public Action OnCommit;
+            public Action OnActivation, OnAcknowledgment;
             private readonly HashSet<Guid> delivered = new HashSet<Guid>();
             public void SetTransitionGated(bool gated) => Gated = gated;
             public bool TryPrepare(SurvivorTransition transition, out string error)
@@ -37,12 +38,14 @@ namespace SOLITUDE.Tests
                 error = "activation rejected";
                 if (ThrowActivation) throw new InvalidOperationException("activation exception");
                 if (FailActivation) return false;
+                OnActivation?.Invoke();
                 Activations++; return true;
             }
             public bool TryAcknowledge(SurvivorTransition transition, out string error)
             {
                 error = "acknowledgment rejected";
                 if (FailAcknowledgment) return false;
+                OnAcknowledgment?.Invoke();
                 if (delivered.Add(transition.Id)) Acknowledgments++;
                 if (ThrowAfterAcknowledgment) throw new InvalidOperationException("uncertain delivery");
                 return true;
@@ -144,6 +147,26 @@ namespace SOLITUDE.Tests
             Assert.AreSame(b, flow.Current); Assert.AreEqual(1, ports.Activations);
             Assert.AreEqual(1, ports.Acknowledgments); Assert.AreEqual(1, ports.Commits);
             Assert.AreEqual(SuccessionOutcome.StaleSurvivor, flow.RequestDeath(a.Id));
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void ReentrantActivationAndAcknowledgmentCannotStartAnotherDeath(bool duringAcknowledgment)
+        {
+            var ports = new Ports(); var a = Active();
+            var flow = new SurvivorSuccessionCoordinator(a, ports);
+            Action check = () =>
+            {
+                Assert.AreEqual(SurvivorLifeStatus.Dead, a.Status);
+                Assert.IsTrue(ports.Gated);
+                Assert.AreEqual(SuccessionOutcome.Busy, flow.RequestDeath(a.Id));
+                Assert.AreEqual(SuccessionOutcome.Busy, flow.RequestDeath(flow.Pending.Successor.Id));
+                Assert.AreEqual(SuccessionOutcome.Busy, flow.Retry());
+            };
+            if (duringAcknowledgment) ports.OnAcknowledgment = check; else ports.OnActivation = check;
+            Assert.AreEqual(SuccessionOutcome.Completed, flow.RequestDeath(a.Id));
+            Assert.AreEqual(1, ports.Commits); Assert.AreEqual(1, ports.Activations);
+            Assert.AreEqual(1, ports.Acknowledgments); Assert.AreNotEqual(a.Id, flow.Current.Id);
+            Assert.IsFalse(ports.Gated); Assert.IsNull(flow.Pending);
         }
 
         [Test] public void InvalidCommittedReceiptRemainsGatedAndNeverRetransfers()

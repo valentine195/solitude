@@ -96,6 +96,8 @@ namespace SOLITUDE.Player.Succession
                 context?.CloseContainer(Container.Handle);
                 context?.Commands.Unregister(Container.Handle);
             }
+            // Release can precede Unity's deferred destruction and trigger callbacks.
+            context?.Interactor.Unregister(this);
             Container = null; context = null;
             if (gameObject.activeSelf) gameObject.SetActive(false);
         }
