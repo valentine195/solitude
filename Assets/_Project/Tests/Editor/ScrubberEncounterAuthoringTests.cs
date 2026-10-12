@@ -44,7 +44,9 @@ namespace SOLITUDE.Tests
                 Assert.IsFalse(roots.SelectMany(g=>g.GetComponentsInChildren<ScrubberTaskNotificationView>(true)).Single().enabled);
                 var feature = roots.SelectMany(g => g.GetComponentsInChildren<ScrubberComposition>(true)).Single();
                 feature.Validate();
-                Assert.AreEqual(1, data.FindProperty("features").arraySize);
+                Assert.AreEqual(2, data.FindProperty("features").arraySize);
+                var succession = roots.SelectMany(g => g.GetComponentsInChildren<SOLITUDE.Player.Succession.SurvivorSuccessionComposition>(true)).Single();
+                succession.Validate(); Assert.AreSame(succession, data.FindProperty("features").GetArrayElementAtIndex(1).objectReferenceValue);
                 Assert.AreSame(feature, data.FindProperty("features").GetArrayElementAtIndex(0).objectReferenceValue);
                 var featureData = new SerializedObject(feature);
                 Assert.AreEqual(1, featureData.FindProperty("taskSources").arraySize);

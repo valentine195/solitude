@@ -27,7 +27,7 @@ namespace SOLITUDE.Editor
             AuthorJournalPrefabs();
             var previous = SceneManager.GetActiveScene();
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Additive);
-            try { EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets(); }
+            try { EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene); SurvivorSuccessionAuthoring.SaveConfiguredScene(scene); AssetDatabase.SaveAssets(); }
             finally { EditorSceneManager.CloseScene(scene,true); if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }
         private static void EnsureJournal(Scene scene)
@@ -101,7 +101,7 @@ namespace SOLITUDE.Editor
                 if (scene.isDirty) throw new InvalidOperationException("Save the scrubber scene before migration.");
                 EnsureComposition(scene);
                 CompositionValidator.ValidateScene(scene);
-                EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene);
+                EditorSceneManager.MarkSceneDirty(scene); SurvivorSuccessionAuthoring.SaveConfiguredScene(scene);
             }
             finally
             {
@@ -122,6 +122,7 @@ namespace SOLITUDE.Editor
             if (!present) { int index = features.arraySize++; features.GetArrayElementAtIndex(index).objectReferenceValue = feature; }
             data.ApplyModifiedPropertiesWithoutUndo();
             feature.Validate();
+            SurvivorSuccessionAuthoring.ConfigureScene(scene, "ScrubberTestAwakeningPoint");
         }
         private static RectTransform JRect(string name, Transform parent, Vector2 min, Vector2 max, Vector2 low, Vector2 high)
         {
@@ -312,7 +313,7 @@ namespace SOLITUDE.Editor
                 var player = All<PlayerInteractor>(scene).Single(); player.transform.position = new Vector3(23,4.5f);
                 var camera = All<Camera>(scene).Single(); camera.transform.position = new Vector3(23,4.5f,-10);
                 camera.GetComponent<SolitudeCameraFollow2D>().Configure(player.transform,new Vector2(23,23),new Vector2(4.5f,4.5f));
-                EnsureJournal(scene); scope.Validate(); EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+                EnsureJournal(scene); scope.Validate(); EditorSceneManager.MarkSceneDirty(scene); SurvivorSuccessionAuthoring.SaveConfiguredScene(scene); AssetDatabase.SaveAssets();
             }
             finally { EditorSceneManager.CloseScene(scene,true); if (previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }
@@ -374,7 +375,7 @@ namespace SOLITUDE.Editor
                 instance.GetComponent<SOLITUDE.SaveLoad.SaveableId>().AssignMissingSceneIdentity();
                 var binding = new SerializedObject(All<SceneBindings>(scene).Single()); var pickups = binding.FindProperty("worldPickups");
                 pickups.arraySize = 1; pickups.GetArrayElementAtIndex(0).objectReferenceValue = instance.GetComponent<WorldPickup>(); binding.ApplyModifiedPropertiesWithoutUndo();
-                EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene); EditorSceneManager.SaveScene(scene); AssetDatabase.SaveAssets();
+                EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene); SurvivorSuccessionAuthoring.SaveConfiguredScene(scene); AssetDatabase.SaveAssets();
                 if (AssetDatabase.AssetPathToGUID(ScenePath) != sceneGuid) throw new InvalidOperationException("Scene GUID changed.");
             }
             finally { EditorSceneManager.CloseScene(scene,true); if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
@@ -407,7 +408,7 @@ namespace SOLITUDE.Editor
             // Pixel Perfect can adjust the Edit-mode viewport to the current dock size.
             // Retain the encounter's authored viewport when saving presentation changes.
             All<Camera>(scene).Single().rect=new Rect(0,.125f,1,.75000006f);
-            EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+            EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene);SurvivorSuccessionAuthoring.SaveConfiguredScene(scene);AssetDatabase.SaveAssets();
         }
         private static void StyleAction(UnityEngine.UI.Button button)
         {
@@ -426,7 +427,7 @@ namespace SOLITUDE.Editor
                 var source=data.FindProperty("runningSound").objectReferenceValue as AudioSource;
                 if(source==null) { source=equipment.gameObject.AddComponent<AudioSource>();source.loop=true;source.playOnAwake=false;source.volume=.15f;source.spatialBlend=0;data.FindProperty("runningSound").objectReferenceValue=source; }
                 source.clip=AssetDatabase.LoadAssetAtPath<AudioClip>(Feature+"/Audio/scrubber_running.wav");if(source.clip==null) throw new InvalidOperationException("Running clip missing.");
-                data.ApplyModifiedPropertiesWithoutUndo();EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+                data.ApplyModifiedPropertiesWithoutUndo();EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene);SurvivorSuccessionAuthoring.SaveConfiguredScene(scene);AssetDatabase.SaveAssets();
             }
             finally { EditorSceneManager.CloseScene(scene,true);if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }
@@ -457,7 +458,7 @@ namespace SOLITUDE.Editor
             {
                 var notification=All<ScrubberTaskNotificationView>(scene).Single();var data=new SerializedObject(notification);
                 data.FindProperty("equipment").objectReferenceValue=All<ScrubberEquipment>(scene).Single();data.ApplyModifiedPropertiesWithoutUndo();
-                EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);AssetDatabase.SaveAssets();
+                EnsureJournal(scene); EditorSceneManager.MarkSceneDirty(scene);SurvivorSuccessionAuthoring.SaveConfiguredScene(scene);AssetDatabase.SaveAssets();
             }
             finally { EditorSceneManager.CloseScene(scene,true);if(previous.IsValid()) SceneManager.SetActiveScene(previous); }
         }

@@ -298,6 +298,7 @@ namespace SOLITUDE.Tests
         }
         private static void ComposeDemoSuccession()
         {
+            if (Scope.GetComponent<SurvivorSuccessionComposition>() != null) return;
             var point = new GameObject("TestPoint").AddComponent<SurvivorAwakeningPoint>(); point.transform.position = One<PlayerInteractor>().transform.position;
             var avatar = Scope.gameObject.AddComponent<SurvivorAvatarAdapter>(); avatar.Configure(One<PlayerInteractor>());
             var feature = Scope.gameObject.AddComponent<SurvivorSuccessionComposition>(); feature.Configure(point, avatar);

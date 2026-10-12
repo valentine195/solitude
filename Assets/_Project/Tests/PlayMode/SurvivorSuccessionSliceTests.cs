@@ -268,12 +268,11 @@ namespace SOLITUDE.Tests
             One<ContainerTransferModalView>().Close();
             Assert.IsTrue(socket.Powered); Assert.IsTrue(door.IsOpen);
         }
-        [UnityTest] public IEnumerator OpenJournalClosesWithoutRebindingUnconfiguredDemo()
+        [UnityTest] public IEnumerator OpenJournalClosesWithoutRebindingAuthoredDemo()
         {
             if (Root != null) { Object.Destroy(Root.gameObject); yield return null; }
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity", new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
-            Assert.IsEmpty(Object.FindObjectsByType<SurvivorSuccessionComposition>(FindObjectsSortMode.None));
-            var feature = ComposeTestSuccession();
+            var feature = Feature; feature.Validate();
             var equipment = One<SOLITUDE.World.ScrubberEncounter.ScrubberEquipment>(); var state = equipment.State;
             var fuse = SOLITUDE.World.ScrubberEncounter.ScrubberEquipment.FuseItemId;
             Assert.AreEqual(CommandStatus.Applied, Commands.Grant(Inventory.Handle, fuse, 3).Status);
@@ -293,7 +292,9 @@ namespace SOLITUDE.Tests
         }
         private static SurvivorSuccessionComposition ComposeTestSuccession()
         {
-            var scope = One<SceneBindings>(); var point = new GameObject("TestPoint").AddComponent<SurvivorAwakeningPoint>();
+            var scope = One<SceneBindings>();
+            var authored = scope.GetComponent<SurvivorSuccessionComposition>(); if (authored != null) return authored;
+            var point = new GameObject("TestPoint").AddComponent<SurvivorAwakeningPoint>();
             point.transform.position = One<PlayerInteractor>().transform.position;
             var avatar = scope.gameObject.AddComponent<SurvivorAvatarAdapter>(); avatar.Configure(One<PlayerInteractor>());
             var feature = scope.gameObject.AddComponent<SurvivorSuccessionComposition>(); feature.Configure(point, avatar);

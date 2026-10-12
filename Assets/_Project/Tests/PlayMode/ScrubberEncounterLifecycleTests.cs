@@ -66,10 +66,11 @@ namespace SOLITUDE.Tests
             var root = All<GameCompositionRoot>().Single(); var scope = All<SceneBindings>().Single();
             var feature = All<ScrubberComposition>().Single(); var screen = All<ScrubberScreenView>().Single();
             var policy = Field<InputPolicyCoordinator>(root, "policy"); var input = Field<UnityInputHost>(root, "input");
+            var authoredFeatures = Field<SceneFeatureComposition[]>(scope, "features");
             scope.Release();
             var failure = scope.gameObject.AddComponent<FailingSceneFeature>(); failure.Screen = screen;
             typeof(SceneBindings).GetField("features", BindingFlags.NonPublic | BindingFlags.Instance)
-                .SetValue(scope, new SceneFeatureComposition[] { feature, failure });
+                .SetValue(scope, authoredFeatures.Concat(new SceneFeatureComposition[] { failure }).ToArray());
             Assert.Throws<InvalidOperationException>(() => scope.Initialize(
                 Field<ContainerSaveSession>(root, "session"), Field<PickupCollectionService>(root, "pickups"),
                 Field<ItemPresentationCatalog>(root, "presentations"), Field<Dictionary<LootTable, RuntimeLootTable>>(root, "loot"),
