@@ -15,6 +15,7 @@ namespace SOLITUDE.Player.Succession
         [SerializeField] private InteractableProximitySensor sensor;
         [SerializeField] private SpriteRenderer presentation;
         private SceneFeatureContext context;
+        private bool contentsChanged;
         public IContainerReader Container { get; private set; }
         public Guid SourceSurvivorId { get; private set; }
         public Vector3 DeathPosition { get; private set; }
@@ -55,6 +56,7 @@ namespace SOLITUDE.Player.Succession
                 instance.ValidateAuthoring();
                 instance.context = context; instance.SourceSurvivorId = sourceSurvivorId; instance.DeathPosition = position;
                 instance.Container = context.Commands.Register("survivor.recovery." + Guid.NewGuid().ToString("N"), capacity);
+                instance.Container.SlotChanged += instance.ContentsChanged;
                 instance.sensor.OnLeave += instance.Left;
                 return instance;
             }
@@ -77,11 +79,22 @@ namespace SOLITUDE.Player.Succession
         }
         public override string GetPrompt() => "Recover equipment";
         public override bool CanInteract(PlayerInteractor player) => IsPublished && isActiveAndEnabled &&
-            Container?.IsAvailable == true && context != null && player == context.Interactor;
+            Container?.IsAvailable == true && context != null && player == context.Interactor &&
+            Container.GetSlots().Any(s => !s.IsEmpty);
         public override InteractionResult Interact(PlayerInteractor player) =>
             CanInteract(player) && context.OpenContainer(Container, Label) ? InteractionResult.Success() :
                 InteractionResult.Blocked("Recovery unavailable");
         private void Left(bool left) { if (left && Container != null) context?.CloseContainer(Container.Handle); }
+        private void ContentsChanged(int index) => contentsChanged = true;
+        private void LateUpdate()
+        {
+            if (!contentsChanged || !IsPublished || context == null || context.Commands.IsBusy) return;
+            contentsChanged = false;
+            // Finish transfer publication/gesture handling before closing presentation.
+            // Retain the owner until scene release, but let other overlapping caches gain focus.
+            if (Container?.IsAvailable == true && Container.GetSlots().All(s => s.IsEmpty))
+                gameObject.SetActive(false);
+        }
         private void OnDisable()
         {
             if (Container != null) context?.CloseContainer(Container.Handle);
@@ -93,6 +106,7 @@ namespace SOLITUDE.Player.Succession
             if (sensor != null) sensor.OnLeave -= Left;
             if (Container != null)
             {
+                Container.SlotChanged -= ContentsChanged;
                 context?.CloseContainer(Container.Handle);
                 context?.Commands.Unregister(Container.Handle);
             }

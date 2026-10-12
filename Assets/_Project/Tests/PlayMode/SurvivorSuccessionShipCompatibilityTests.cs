@@ -137,6 +137,50 @@ namespace SOLITUDE.Tests
             Assert.IsTrue(pickups.All(p => !p.gameObject.activeSelf)); SameContents(lockerContents, lockerReader);
         }
 
+        [UnityTest] public IEnumerator SamePositionDeathsRemainRecoverableThroughOrdinaryFocusAfterExhaustion()
+        {
+            var position = Player.GetComponent<Rigidbody2D>().position;
+            var a = Feature.Coordinator.Current;
+            Assert.AreEqual(CommandStatus.Applied, Commands.Grant(Inventory.Handle, Battery, 2).Status);
+            Assert.AreEqual(CommandStatus.Applied, Commands.Grant(Hotbar.Handle, Battery, 1).Status);
+            Assert.AreEqual(SuccessionOutcome.Completed, Feature.RequestDeath(a.Id));
+            var b = Feature.Coordinator.Current;
+            Assert.AreEqual(position, Player.GetComponent<Rigidbody2D>().position);
+            Assert.AreEqual(CommandStatus.Applied, Commands.Grant(Inventory.Handle, Battery, 4).Status);
+            Assert.AreEqual(CommandStatus.Applied, Commands.Grant(Hotbar.Handle, Battery, 1).Status);
+            Assert.AreEqual(SuccessionOutcome.Completed, Feature.RequestDeath(b.Id));
+            var c = Feature.Coordinator.Current;
+            Assert.AreNotEqual(a.Id, c.Id); Assert.AreNotEqual(b.Id, c.Id);
+            Assert.AreEqual(SurvivorLifeStatus.Dead, a.Status); Assert.AreEqual(SurvivorLifeStatus.Dead, b.Status);
+            var caches = Feature.RecoveryContainers.ToArray(); Assert.AreEqual(2, caches.Length);
+            var handles = caches.Select(cache => cache.Container.Handle).ToArray();
+            Assert.AreNotEqual(handles[0], handles[1]);
+            foreach (var cache in caches) Assert.AreEqual(position, (Vector2)cache.DeathPosition);
+            yield return new WaitForFixedUpdate(); yield return null; yield return null;
+            // Use the cache ordinary proximity selected; do not pick/release a target to break the tie.
+            var first = Field<IInteractable>(Player, "currentTarget") as SurvivorRecoveryContainer;
+            Assert.Contains(first, caches);
+            var second = caches.Single(cache => cache != first);
+            yield return Recover(first); yield return null;
+            Assert.IsFalse(first.gameObject.activeSelf); Assert.IsFalse(first.CanInteract(Player));
+            Assert.AreSame(first.Container, Commands.Read(first.Container.Handle));
+            Assert.AreSame(second, Field<IInteractable>(Player, "currentTarget"));
+            Assert.IsTrue(second.CanInteract(Player));
+            yield return Recover(second); yield return null;
+            Assert.IsFalse(second.gameObject.activeSelf);
+            Assert.AreEqual(8, Inventory.GetSlots().Sum(slot => slot.Stack?.Quantity ?? 0));
+            Assert.IsTrue(Hotbar.GetSlots().All(slot => slot.IsEmpty));
+            foreach (var cache in caches)
+            {
+                Assert.IsTrue(cache.Container.GetSlots().All(slot => slot.IsEmpty));
+                Assert.AreSame(cache.Container, Commands.Read(cache.Container.Handle));
+                Assert.AreEqual(position, (Vector2)cache.DeathPosition);
+                Assert.IsFalse(Field<HashSet<IInteractable>>(Player, "nearby").Contains(cache));
+            }
+            Assert.IsFalse(Field<IInteractable>(Player, "currentTarget") is SurvivorRecoveryContainer);
+            Assert.AreEqual(1, Time.timeScale);
+        }
+
         [UnityTest] public IEnumerator RestorationTerminalDoorAndLaterRepairRemainLiveUntilSceneReload()
         {
             Object.Destroy(Root.gameObject); yield return null; yield return Load(RestorationScene); yield return null;

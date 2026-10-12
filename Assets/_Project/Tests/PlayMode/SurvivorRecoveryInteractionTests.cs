@@ -106,7 +106,10 @@ namespace SOLITUDE.Tests
             Keys(Key.Escape); Keys(); yield return null;
             Assert.AreEqual(ContainerModalKind.Closed, Modal.Kind); Assert.AreEqual(1, Time.timeScale);
             Assert.IsTrue(Field<InputPolicyCoordinator>(Root, "policy").Gameplay);
-            yield return ApproachAndOpen(cache); Assert.IsTrue(cache.Container.GetSlots().All(s => s.IsEmpty));
+            Assert.IsTrue(cache.Container.GetSlots().All(s => s.IsEmpty));
+            Assert.IsFalse(cache.gameObject.activeSelf, "Exhausted cache must stop competing for focus.");
+            Assert.IsFalse(cache.CanInteract(One<PlayerInteractor>()));
+            Assert.AreSame(cache.Container, Commands.Read(cache.Container.Handle), "Ownership survives until scene release.");
         }
 
         [UnityTest] public IEnumerator FullRecoveryCapacityCanScrollAndTransferTheLastSlot()
@@ -124,6 +127,10 @@ namespace SOLITUDE.Tests
             var scroll = view.GetComponentInChildren<UnityEngine.UI.ScrollRect>();
             Assert.IsNotNull(scroll); Assert.IsFalse(scroll.horizontal); Assert.IsTrue(scroll.vertical);
             Assert.Greater(scroll.content.rect.height, scroll.viewport.rect.height);
+            scroll.content.anchoredPosition = new Vector2(0, scroll.content.rect.height);
+            modalView.Close(); yield return null; yield return ApproachAndOpen(cache); yield return null;
+            Canvas.ForceUpdateCanvases();
+            Assert.That(scroll.content.anchoredPosition.y, Is.EqualTo(0).Within(.01f), "Nonempty reopen begins at the first slots.");
             var pointer = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current)
                 { scrollDelta = Vector2.down };
             for (var i = 0; i < capacity; i++)
@@ -145,9 +152,9 @@ namespace SOLITUDE.Tests
             UnityEngine.EventSystems.ExecuteEvents.Execute(last.gameObject, pointer, UnityEngine.EventSystems.ExecuteEvents.endDragHandler);
             Assert.IsTrue(cache.Container.GetSlot(capacity - 1).IsEmpty);
             Assert.AreEqual(7, Inventory.GetSlot(0).Stack.Quantity);
-            modalView.Close(); yield return null; yield return ApproachAndOpen(cache); yield return null;
-            Canvas.ForceUpdateCanvases();
-            Assert.That(scroll.content.anchoredPosition.y, Is.EqualTo(0).Within(.01f), "Reopen begins at the first slots.");
+            yield return null; yield return null;
+            Assert.IsFalse(cache.gameObject.activeSelf);
+            Assert.AreEqual(ContainerModalKind.Closed, Modal.Kind);
         }
 
         [UnityTest] public IEnumerator LeavingAndClosingCancelGesturesAndReturnInput()
