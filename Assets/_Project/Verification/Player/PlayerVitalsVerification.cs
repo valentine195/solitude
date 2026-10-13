@@ -16,7 +16,7 @@ namespace SOLITUDE.Verification
     {
         [Serializable] private sealed class Capture
         {
-            public string state, file, reason, text;
+            public string state, file, reason, text, detail;
             public int width, height;
             public float health, hunger, oxygen, canvasScale, preferredTextWidth, textRectWidth;
         }
@@ -62,14 +62,16 @@ namespace SOLITUDE.Verification
                     if(state=="boundary")player.Vitals.Health.Set(50);
                     yield return null;yield return new WaitForEndOfFrame();
                     var status=FindFirstObjectByType<VitalRecoveryStatusView>().GetComponent<TMP_Text>();
-                    string expected=state=="delayed"?"Recovery delayed":state=="recovering"?"Recovering":state=="hungry"?"Recovery paused: hungry":"";
+                    string expected=state=="delayed"?"Recovery delayed":state=="recovering"?"Recovering":state=="hungry"?"HUNGRY":"";
                     if(status.text!=expected){Fail(directory,"Unexpected "+state+" text: "+status.text);yield break;}
+                    var detail=status.transform.Find("RecoveryDetail").GetComponent<TMP_Text>();
+                    if(detail.text!=(state=="hungry"?"Recovery paused":"")){Fail(directory,"Unexpected recovery detail: "+detail.text);yield break;}
                     var scaler=status.GetComponentInParent<UnityEngine.UI.CanvasScaler>();
                     var file=Path.Combine(directory,state+"-"+width+".png");
                     var frame=ScreenCapture.CaptureScreenshotAsTexture();
                     try { File.WriteAllBytes(file,frame.EncodeToPNG()); }
                     finally { Destroy(frame); }
-                    captures.Add(new Capture{state=state,file=file,width=Screen.width,height=Screen.height,health=player.Vitals.Health.Current,hunger=player.Vitals.Hunger.Current,oxygen=player.Vitals.Oxygen.Current,reason=player.RecoveryStatus.ToString(),text=status.text,canvasScale=scaler.GetComponent<Canvas>().scaleFactor,preferredTextWidth=status.GetPreferredValues(status.text).x,textRectWidth=status.rectTransform.rect.width});
+                    captures.Add(new Capture{state=state,file=file,width=Screen.width,height=Screen.height,health=player.Vitals.Health.Current,hunger=player.Vitals.Hunger.Current,oxygen=player.Vitals.Oxygen.Current,reason=player.RecoveryStatus.ToString(),text=status.text,detail=detail.text,canvasScale=scaler.GetComponent<Canvas>().scaleFactor,preferredTextWidth=status.GetPreferredValues(status.text).x,textRectWidth=status.rectTransform.rect.width});
                     yield return null;yield return new WaitForSecondsRealtime(.1f);
                     if(!File.Exists(file)){Fail(directory,"Screenshot not written: "+file);yield break;}
                 }

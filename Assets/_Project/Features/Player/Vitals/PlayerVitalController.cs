@@ -39,6 +39,7 @@ namespace SOLITUDE.Player
         private PreparedVitalsChange reserved;
         private bool reservedApplied;
         private Vital.Change healthChange, hungerChange, oxygenChange;
+        private double observedHealthMaximum, observedHungerMaximum;
 
         public PlayerVitals Vitals { get; private set; }
         public VitalsRecoverySettings Settings => settings;
@@ -71,6 +72,7 @@ namespace SOLITUDE.Player
             settings = AuthoredSettings();
             // Invalid authoring remains invalid; existing safe values are not corrupted by it.
             Vitals = new PlayerVitals(SafeMaximum(maxHealth), SafeMaximum(maxOxygen), SafeMaximum(maxHunger));
+            ObserveMaximums();
             Vitals.Health.Changed += ValuesChanged;
             Vitals.Hunger.Changed += ValuesChanged;
             Vitals.Oxygen.Changed += ValuesChanged;
@@ -188,12 +190,22 @@ namespace SOLITUDE.Player
         private void ValuesChanged(Vital vital)
         {
             if (publishing) return;
-            // Legacy maximum changes are settings changes, not damage.
-            if (settings != null && (settings.MaxHealth != Vitals.Health.PreciseMax || settings.MaxHunger != Vitals.Hunger.PreciseMax))
-                settings = new VitalsRecoverySettings(Vitals.Health.PreciseMax, Vitals.Hunger.PreciseMax,
+            // Only an actual supported maximum change corrects that setting. A current
+            // value or O2 notification must not replace rejected configuration.
+            bool healthMaximumChanged = observedHealthMaximum != Vitals.Health.PreciseMax;
+            bool hungerMaximumChanged = observedHungerMaximum != Vitals.Hunger.PreciseMax;
+            if (settings != null && (healthMaximumChanged || hungerMaximumChanged))
+                settings = new VitalsRecoverySettings(healthMaximumChanged ? Vitals.Health.PreciseMax : settings.MaxHealth,
+                    hungerMaximumChanged ? Vitals.Hunger.PreciseMax : settings.MaxHunger,
                     settings.SegmentCount, settings.FedThresholdFraction, settings.HungerDepletionRate,
                     settings.DamageDelay, settings.RecoveryRate);
+            ObserveMaximums();
             RefreshPresentation();
+        }
+        private void ObserveMaximums()
+        {
+            observedHealthMaximum = Vitals.Health.PreciseMax;
+            observedHungerMaximum = Vitals.Hunger.PreciseMax;
         }
         internal void RefreshPresentation()
         {
@@ -218,6 +230,7 @@ namespace SOLITUDE.Player
             try
             {
                 if (!notify) return;
+                ObserveMaximums();
                 Revision++;
                 Vitals.Health.Publish(healthChange);
                 Vitals.Hunger.Publish(hungerChange);

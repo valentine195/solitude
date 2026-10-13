@@ -67,11 +67,11 @@ namespace SOLITUDE.Tests
         [UnityTest] public IEnumerator HungryPauseMaximumChangeAndPrimaryScreenUseActualSceneBindings()
         {
             var p=Player;p.Configure(new VitalsRecoverySettings(damageDelay:.1));p.Vitals.Health.Set(40);p.Damage(10);p.Vitals.Hunger.Set(0);
-            yield return new WaitForSeconds(.2f);Assert.AreEqual(30,p.Vitals.Health.Current);Assert.AreEqual(0,p.RecoveryState.DelayRemaining);Assert.AreEqual("Recovery paused: hungry",Status.text);
+            yield return new WaitForSeconds(.2f);Assert.AreEqual(30,p.Vitals.Health.Current);Assert.AreEqual(0,p.RecoveryState.DelayRemaining);Assert.AreEqual("HUNGRY",Status.text);Assert.AreEqual("Recovery paused",Status.transform.Find("RecoveryDetail").GetComponent<TMP_Text>().text);
             Assert.IsTrue(p.TryApplyPrepared(p.PrepareFood(25)));yield return null;Assert.Greater(p.Vitals.Health.Current,30);Assert.AreEqual("Recovering",Status.text);
             float health=p.Vitals.Health.Current,hunger=p.Vitals.Hunger.Current;
             p.Configure(new VitalsRecoverySettings(maxHealth:200,maxHunger:200,segmentCount:3,fedThresholdFraction:.4));
-            Assert.AreEqual(health,p.Vitals.Health.Current);Assert.AreEqual(hunger,p.Vitals.Hunger.Current);Assert.AreEqual(health/200,Fill("HealthRow").fillAmount,1e-6f);Assert.AreEqual("Recovery paused: hungry",Status.text);
+            Assert.AreEqual(health,p.Vitals.Health.Current);Assert.AreEqual(hunger,p.Vitals.Hunger.Current);Assert.AreEqual(health/200,Fill("HealthRow").fillAmount,1e-6f);Assert.AreEqual("HUNGRY",Status.text);Assert.AreEqual("Recovery paused",Status.transform.Find("RecoveryDetail").GetComponent<TMP_Text>().text);
             using(Policy.AcquirePrimaryScreen())
             {
                 Assert.AreEqual(1,Time.timeScale);Assert.AreEqual("Recovery paused",Status.text);

@@ -217,6 +217,52 @@ namespace SOLITUDE.Tests
             Assert.AreEqual(5, player.RecoveryState.DelayRemaining);
         }
 
+        [TestCase("health")]
+        [TestCase("hunger")]
+        [TestCase("oxygen")]
+        public void CurrentValueChangesCannotClearRejectedConfiguration(string changedVital)
+        {
+            foreach (var invalid in new[] { null, new VitalsRecoverySettings(maxHealth: -1),
+                new VitalsRecoverySettings(maxHealth: 0), new VitalsRecoverySettings(maxHealth: double.NaN),
+                new VitalsRecoverySettings(maxHealth: double.PositiveInfinity), new VitalsRecoverySettings(maxHealth: double.MaxValue),
+                new VitalsRecoverySettings(maxHunger: 0), new VitalsRecoverySettings(maxHunger: double.NaN) })
+            {
+                Assert.IsTrue(player.Configure(new VitalsRecoverySettings()));
+                player.ResetForAwakening(); player.Vitals.Health.Set(30);
+                Assert.IsFalse(player.Configure(invalid));
+                var vital = changedVital == "health" ? player.Vitals.Health
+                    : changedVital == "hunger" ? player.Vitals.Hunger : player.Vitals.Oxygen;
+                vital.Set(vital.Current - 1);
+                Assert.AreSame(invalid, player.Settings, "Current changes must retain the rejected request.");
+                Assert.IsFalse(player.IsConfigurationValid); Assert.IsNotNull(player.ConfigurationError);
+                Assert.AreEqual(RecoveryReason.Unavailable, player.RecoveryStatus);
+                float health = player.Vitals.Health.Current, hunger = player.Vitals.Hunger.Current;
+                Assert.IsFalse(player.Advance(1).Accepted); Assert.IsNull(player.PrepareFood(25)); Assert.IsNull(player.PrepareMedical(25));
+                Assert.AreEqual(health, player.Vitals.Health.Current); Assert.AreEqual(hunger, player.Vitals.Hunger.Current);
+                player.ResetForAwakening(); Assert.IsFalse(player.IsConfigurationValid);
+            }
+            Assert.IsTrue(player.Configure(new VitalsRecoverySettings()));
+            player.Vitals.Health.Set(30); Assert.IsTrue(player.Advance(1).Accepted);
+            Assert.AreEqual(32, player.Vitals.Health.Current);
+        }
+
+        [Test] public void MaximumCorrectionChangesOnlyTheExplicitlyChangedSetting()
+        {
+            player.Vitals.Health.Set(30);
+            Assert.IsFalse(player.Configure(new VitalsRecoverySettings(maxHealth: -1)));
+            player.Vitals.Hunger.SetMax(200);
+            Assert.AreEqual(-1, player.Settings.MaxHealth); Assert.AreEqual(200, player.Settings.MaxHunger);
+            Assert.IsFalse(player.IsConfigurationValid); Assert.AreEqual(RecoveryReason.Unavailable, player.RecoveryStatus);
+            player.Vitals.Oxygen.SetMax(200); Assert.IsFalse(player.IsConfigurationValid);
+            player.Vitals.Health.SetMax(200);
+            Assert.IsTrue(player.IsConfigurationValid); Assert.AreEqual(200, player.Settings.MaxHealth);
+            Assert.AreEqual(0, player.RecoveryState.DelayRemaining); Assert.IsTrue(player.Advance(1).Accepted);
+            Assert.AreEqual(32, player.Vitals.Health.Current);
+            Assert.IsFalse(player.Configure(new VitalsRecoverySettings(maxHealth: -1, maxHunger: -1)));
+            player.Vitals.Health.SetMax(300); Assert.IsFalse(player.IsConfigurationValid);
+            Assert.AreEqual(-1, player.Settings.MaxHunger);
+        }
+
         [Test] public void HungerCooldownAndPolicyNotifyWhileHealthStaysConstant()
         {
             player.Vitals.Health.Set(40); player.Damage(10); player.Vitals.Hunger.Set(0);

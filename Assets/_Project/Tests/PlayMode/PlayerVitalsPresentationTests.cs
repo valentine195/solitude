@@ -25,6 +25,7 @@ namespace SOLITUDE.Tests
         private PlayerVitalsComposition feature;
         private InputPolicyCoordinator policy;
         private TMP_Text status;
+        private TMP_Text detail;
         private float previousScale;
         private Scene fixtureScene, previousScene;
         private const string Folder = "Assets/_Project/Features/Player/Vitals/Views/";
@@ -49,6 +50,7 @@ namespace SOLITUDE.Tests
             canvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
             hud = Object.Instantiate(UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(Folder + "PlayerVitalsHud.prefab"), canvas.transform, false);
             status = hud.GetComponentInChildren<VitalRecoveryStatusView>(true).GetComponent<TMP_Text>();
+            detail = status.transform.Find("RecoveryDetail").GetComponent<TMP_Text>();
         }
         private void CreatePlayer()
         {
@@ -126,7 +128,7 @@ namespace SOLITUDE.Tests
         [Test] public void StatusPrecedenceMatchesRuntimeAndRespondsWhileHealthIsConstant()
         {
             player.Vitals.Health.Set(40); player.Damage(10); Assert.AreEqual("Recovery delayed", status.text);
-            player.Vitals.Hunger.Set(0); Assert.AreEqual("Recovery paused: hungry", status.text);
+            player.Vitals.Hunger.Set(0); Assert.AreEqual("HUNGRY", status.text);
             using (policy.AcquirePrimaryScreen())
             {
                 Assert.AreEqual("Recovery paused", status.text);
@@ -138,17 +140,39 @@ namespace SOLITUDE.Tests
                 player.Vitals.Health.Set(100); Assert.AreEqual("", status.text);
                 player.Vitals.Health.Set(30); Assert.AreEqual("Recovery paused", status.text);
             }
-            Assert.AreEqual("Recovery paused: hungry", status.text);
+            Assert.AreEqual("HUNGRY", status.text);
             player.Vitals.Hunger.Set(100); Assert.AreEqual("Recovery delayed", status.text);
             player.Advance(5); Assert.AreEqual(30, player.Vitals.Health.Current); Assert.AreEqual("Recovering", status.text);
+        }
+
+        [Test] public void HungryNotificationShowsCauseAndConsequenceAndClearsOnEveryOtherReason()
+        {
+            player.Vitals.Health.Set(30); player.Vitals.Hunger.Set(10);
+            Assert.AreEqual("HUNGRY", status.text); Assert.AreEqual("Recovery paused", detail.text);
+            Assert.AreNotEqual(status.color, detail.color, "Heading warns in amber; explanation remains muted.");
+            Canvas.ForceUpdateCanvases();
+            Assert.Greater(status.rectTransform.position.y, detail.rectTransform.position.y);
+            Assert.AreEqual("NUTRITION", hud.transform.Find("HungerRow/HungerBar").GetComponentInChildren<TMP_Text>().text);
+            using (policy.AcquirePrimaryScreen())
+            { Assert.AreEqual("Recovery paused", status.text); Assert.AreEqual("", detail.text); }
+            Assert.AreEqual("Recovery paused", detail.text);
+            player.Vitals.Health.Set(50); Assert.AreEqual("", status.text); Assert.AreEqual("", detail.text);
+            player.Vitals.Health.Set(30); player.Vitals.Hunger.Set(20);
+            Assert.AreEqual("Recovering", status.text); Assert.AreEqual("", detail.text);
+            player.Configure(new VitalsRecoverySettings(maxHealth: -1));
+            Assert.AreEqual("Recovery unavailable", status.text); Assert.AreEqual("", detail.text);
+            player.Vitals.Oxygen.Set(99); Assert.AreEqual("Recovery unavailable", status.text);
+            player.Vitals.Hunger.Set(10); Assert.AreEqual("Recovery unavailable", status.text); Assert.AreEqual("", detail.text);
+            player.Configure(new VitalsRecoverySettings()); Assert.AreEqual("Recovery paused", detail.text);
+            player.ResetForAwakening(); Assert.AreEqual("", status.text); Assert.AreEqual("", detail.text);
         }
 
         [Test] public void InclusiveThresholdAndCooldownChangesUpdateTextWithoutHealing()
         {
             player.Vitals.Health.Set(40); player.Damage(10); player.Vitals.Hunger.Set(0);
-            player.Advance(5); Assert.AreEqual(30, player.Vitals.Health.Current); Assert.AreEqual("Recovery paused: hungry", status.text);
+            player.Advance(5); Assert.AreEqual(30, player.Vitals.Health.Current); Assert.AreEqual("HUNGRY", status.text);
             player.Vitals.Hunger.Set(20); Assert.AreEqual("Recovering", status.text);
-            player.Vitals.Hunger.Set(19); Assert.AreEqual("Recovery paused: hungry", status.text);
+            player.Vitals.Hunger.Set(19); Assert.AreEqual("HUNGRY", status.text);
             Assert.AreEqual(30, player.Vitals.Health.Current);
         }
 
@@ -163,7 +187,7 @@ namespace SOLITUDE.Tests
                 foreach (var vital in new[] { health, hunger, oxygen }) Assert.AreEqual(0, ViewSubscriptions(vital, "Changed"));
                 hunger.Set(10); player.Configure(new VitalsRecoverySettings(segmentCount: 3));
                 Assert.AreEqual("Recovering", status.text); Assert.AreEqual(.6f, Fill("HungerRow").fillAmount);
-                hud.SetActive(true); Assert.AreEqual("Recovery paused: hungry", status.text); Assert.AreEqual(.1f, Fill("HungerRow").fillAmount);
+                hud.SetActive(true); Assert.AreEqual("HUNGRY", status.text); Assert.AreEqual(.1f, Fill("HungerRow").fillAmount);
                 AssertMarkers("HealthRow", 1f / 3, 2f / 3);
                 Assert.AreEqual(4, ViewSubscriptions(player, "PresentationChanged"));
                 foreach (var vital in new[] { health, hunger, oxygen }) Assert.AreEqual(1, ViewSubscriptions(vital, "Changed"));
