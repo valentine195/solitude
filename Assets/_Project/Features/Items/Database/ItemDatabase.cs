@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using SOLITUDE.Vitals;
 
 namespace SOLITUDE.Items
 {
@@ -65,7 +66,16 @@ namespace SOLITUDE.Items
         public ItemPresentationCatalog BuildPresentationCatalog()
         {
             BuildRuntimeCatalog(); // Never create a partial presentation map.
-            return new ItemPresentationCatalog(items);
+            return new ItemPresentationCatalog(items, BuildVitalConsumableCatalog());
+        }
+
+        public VitalConsumableCatalog BuildVitalConsumableCatalog()
+        {
+            BuildRuntimeCatalog(); // Stable identities must match the inventory catalog.
+            var effects = new List<VitalConsumableSpec>();
+            foreach (var item in items)
+                effects.Add(new VitalConsumableSpec(item.ItemId, item.ConsumableKind, item.RestorationAmount));
+            return new VitalConsumableCatalog(effects);
         }
 
         public ItemDefinition Resolve(string itemId)

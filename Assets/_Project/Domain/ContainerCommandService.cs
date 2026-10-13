@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using SOLITUDE.Items;
 using SOLITUDE.SaveLoad;
+using SOLITUDE.Vitals;
 namespace SOLITUDE.Containers
 {
     public sealed class ContainerChangeSet
@@ -173,6 +174,39 @@ namespace SOLITUDE.Containers
             Commit(new Dictionary<ContainerState, ItemStack[]> { [state] = plan }, worldCommit);
             return new CommandResult(CommandStatus.Applied, quantity, stack.Quantity - quantity, lastChanges);
         }
+        internal VitalUseResult ConsumeVital(SlotAddress address, VitalConsumableSpec effect, IVitalEffectTarget target)
+        {
+            if (IsBusy) return new VitalUseResult(VitalUseOutcome.Busy, CommandStatus.Busy);
+            executing = true;
+            IVitalEffectReservation reservation = null;
+            try
+            {
+                var status = Address(address, out var state);
+                if (status != CommandStatus.Applied) return new VitalUseResult(VitalUseOutcome.InventoryRejected, status);
+                var stack = state.Slots[address.Index];
+                if (stack == null || stack.Quantity < 1)
+                    return new VitalUseResult(VitalUseOutcome.InventoryRejected, CommandStatus.InsufficientQuantity);
+                if (stack.ItemId != effect.ItemId)
+                    return new VitalUseResult(VitalUseOutcome.InventoryRejected, CommandStatus.Stale);
+                // One changed slot needs one new revision; reject before reserving or mutating.
+                if (state.Clock == long.MaxValue)
+                    return new VitalUseResult(VitalUseOutcome.InventoryRejected, CommandStatus.Invalid);
+                var slots = (ItemStack[])state.Slots.Clone();
+                slots[address.Index] = stack.Quantity == 1 ? null : new ItemStack(stack.Definition, stack.Quantity - 1);
+                var plans = new Dictionary<ContainerState, ItemStack[]> { [state] = slots };
+                var outcome = target.TryReserve(effect, out reservation);
+                if (outcome != VitalUseOutcome.Ready) return new VitalUseResult(outcome);
+                if (reservation == null) return new VitalUseResult(VitalUseOutcome.Unavailable);
+                Commit(plans, vitalEffect: reservation);
+                return new VitalUseResult(VitalUseOutcome.Committed, CommandStatus.Applied);
+            }
+            finally
+            {
+                try { reservation?.Complete(); }
+                catch (Exception error) { Report(error); }
+                executing = false;
+            }
+        }
         public CommandResult Transfer(SlotAddress source, SlotAddress target) => Execute(() => TransferCore(source, target));
         private CommandResult TransferCore(SlotAddress source, SlotAddress target)
         {
@@ -278,7 +312,7 @@ namespace SOLITUDE.Containers
         }
         private IReadOnlyList<SlotAddress> lastChanges = Array.AsReadOnly(new SlotAddress[0]);
         private void Commit(Dictionary<ContainerState, ItemStack[]> plans, Action worldCommit = null, bool force = false,
-            ContainerHandoffReceipt handoffReceipt = null)
+            ContainerHandoffReceipt handoffReceipt = null, IVitalEffectReservation vitalEffect = null)
         {
             var publications = new List<Publication>(); var handles = new List<ContainerHandle>();
             foreach (var pair in plans)
@@ -307,6 +341,9 @@ namespace SOLITUDE.Containers
                 // After all revision planning, before publication: retries can observe the receipt
                 // alongside the complete ownership change. No failable external callback is used.
                 if (handoffReceipt != null) handoffs.Add(handoffReceipt.TransitionId, handoffReceipt);
+                // Trusted, prevalidated vital writes are non-failing and non-publishing.
+                // All inventory revision planning has completed; observers run only after both.
+                vitalEffect?.ApplySilently();
                 foreach (var p in publications) { p.State.Slots = p.Slots; p.State.Revisions = p.Revisions; p.State.Clock = p.Clock; }
                 worldCommit?.Invoke();
                 var change = new ContainerChangeSet(handles, lastChanges);

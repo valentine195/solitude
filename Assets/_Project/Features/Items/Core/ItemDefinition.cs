@@ -1,4 +1,5 @@
 using UnityEngine;
+using SOLITUDE.Vitals;
 
 namespace SOLITUDE.Items
 {
@@ -19,6 +20,10 @@ namespace SOLITUDE.Items
         [Header("Inventory")]
         public bool Stackable = true;
         public int MaxStackSize = 99;
+
+        [Header("Vitals")]
+        public VitalConsumableKind ConsumableKind;
+        public double RestorationAmount;
 
         // Stable, save-portable identity - a raw ScriptableObject reference
         // can't be written into a plain JSON/binary save file. Derived from

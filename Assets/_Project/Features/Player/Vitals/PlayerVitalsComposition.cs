@@ -1,4 +1,5 @@
 using System;
+using SOLITUDE.Application;
 using SOLITUDE.Composition;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ namespace SOLITUDE.Player
         [SerializeField] private PlayerVitalsController controller;
         private bool initialized;
         public PlayerVitalsController Controller => controller;
+        public SelectedVitalItemUseCoordinator ItemUse { get; private set; }
         public void Configure(PlayerVitalsController player) { Release(); controller = player; }
         public override void Validate()
         {
@@ -22,6 +24,9 @@ namespace SOLITUDE.Player
             if (context?.Policy == null) throw new InvalidOperationException("Player vitals require gameplay policy.");
             controller.BindGameplay(this, context.Policy, () => initialized && isActiveAndEnabled);
             initialized = true; controller.RefreshPresentation();
+            if (context.Commands != null && context.Hotbar != null && context.Selection != null && context.Presentations != null)
+                ItemUse = new SelectedVitalItemUseCoordinator(context.Commands, context.Hotbar,
+                    context.Selection, context.Presentations.Consumables, controller, context.Policy);
         }
         private void Update() { if (initialized && controller != null) controller.Advance(Time.deltaTime); }
         private void OnEnable() { if (initialized && controller != null) controller.RefreshPresentation(); }
@@ -32,6 +37,7 @@ namespace SOLITUDE.Player
         public override void Release()
         {
             initialized = false;
+            ItemUse?.Dispose(); ItemUse = null;
             if (controller != null) controller.UnbindGameplay(this);
         }
     }

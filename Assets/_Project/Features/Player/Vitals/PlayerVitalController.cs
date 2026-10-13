@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace SOLITUDE.Player
 {
-    public class PlayerVitalsController : MonoBehaviour
+    public class PlayerVitalsController : MonoBehaviour, IVitalEffectTarget
     {
         private static PlayerVitalsController _instance;
         public static PlayerVitalsController Instance
@@ -148,6 +148,36 @@ namespace SOLITUDE.Player
         {
             if (!TryReservePrepared(change)) return false;
             ApplyReservedValues(); CompleteReserved(); return true;
+        }
+
+        public VitalUseOutcome TryReserve(VitalConsumableSpec effect, out IVitalEffectReservation reservation)
+        {
+            reservation = null; EnsureVitals();
+            if (publishing) return VitalUseOutcome.Busy;
+            if (effect == null || !effect.Supported) return VitalUseOutcome.Unsupported;
+            if (!effect.IsValid) return VitalUseOutcome.InvalidEffect;
+            if (!GameplayEligible) return VitalUseOutcome.Unavailable;
+            if (!IsConfigurationValid) return VitalUseOutcome.InvalidConfiguration;
+            if (Vitals.Health.PreciseCurrent <= 0) return VitalUseOutcome.Dead;
+            var vital = effect.Kind == VitalConsumableKind.Food ? Vitals.Hunger : Vitals.Health;
+            if (vital.PreciseCurrent >= vital.PreciseMax) return VitalUseOutcome.Full;
+            var prepared = effect.Kind == VitalConsumableKind.Food ? PrepareFood(effect.Amount) : PrepareMedical(effect.Amount);
+            if (prepared == null) return VitalUseOutcome.InvalidEffect;
+            // Allocate before acquiring the non-publishing mutation boundary.
+            var next = new ConsumableReservation(this);
+            if (!TryReservePrepared(prepared)) return VitalUseOutcome.Unavailable;
+            reservation = next; return VitalUseOutcome.Ready;
+        }
+        private sealed class ConsumableReservation : IVitalEffectReservation
+        {
+            private PlayerVitalsController owner;
+            public ConsumableReservation(PlayerVitalsController owner) { this.owner = owner; }
+            public void ApplySilently() => owner?.ApplyReservedValues();
+            public void Complete()
+            {
+                var target = owner; owner = null;
+                if (target != null) target.CompleteReserved();
+            }
         }
 
         // Reserve before inventory mutation, apply without callbacks in its commit, then
