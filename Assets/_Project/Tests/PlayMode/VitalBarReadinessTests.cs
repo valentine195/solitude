@@ -11,20 +11,22 @@ namespace SOLITUDE.Tests
 {
     public class VitalBarReadinessTests
     {
+        private Scene fixtureScene, previousScene;
+
         [UnityTest]
         public IEnumerator ViewBeforePlayer_BindsWhenReady_AndReconcilesWithoutHealing()
         {
-            // A single empty scene gives this startup-order test no ambient player or HUD.
+            // Keep Unity's runner scene while isolating the ambient player and HUD.
             foreach (var root in Object.FindObjectsByType<SOLITUDE.Composition.GameCompositionRoot>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 Object.Destroy(root.gameObject);
             yield return null;
-            var empty = SceneManager.CreateScene("VitalBarReadiness");
-            SceneManager.SetActiveScene(empty);
-            for (var i = SceneManager.sceneCount - 1; i >= 0; i--)
-            {
-                var scene = SceneManager.GetSceneAt(i);
-                if (scene != empty) yield return SceneManager.UnloadSceneAsync(scene);
-            }
+            foreach (var ambientView in Object.FindObjectsByType<VitalBarView>(FindObjectsInactive.Include, FindObjectsSortMode.None)) Object.Destroy(ambientView.gameObject);
+            foreach (var ambientView in Object.FindObjectsByType<VitalRecoveryStatusView>(FindObjectsInactive.Include, FindObjectsSortMode.None)) Object.Destroy(ambientView.gameObject);
+            foreach (var controller in Object.FindObjectsByType<PlayerVitalsController>(FindObjectsInactive.Include, FindObjectsSortMode.None)) Object.Destroy(controller.gameObject);
+            yield return null;
+            previousScene = SceneManager.GetActiveScene();
+            fixtureScene = SceneManager.CreateScene("VitalBarReadiness");
+            SceneManager.SetActiveScene(fixtureScene);
             var viewObject = new GameObject("ReadinessView", typeof(RectTransform), typeof(UnityEngine.UI.Image));
             viewObject.SetActive(false);
             var image = viewObject.GetComponent<UnityEngine.UI.Image>();
@@ -60,6 +62,12 @@ namespace SOLITUDE.Tests
             Object.Destroy(viewObject);
             Object.Destroy(playerObject);
             yield return null;
+        }
+
+        [UnityTearDown] public IEnumerator ReleaseFixtureScene()
+        {
+            if (previousScene.IsValid() && previousScene.isLoaded) SceneManager.SetActiveScene(previousScene);
+            if (fixtureScene.IsValid() && fixtureScene.isLoaded) yield return SceneManager.UnloadSceneAsync(fixtureScene);
         }
     }
 }
