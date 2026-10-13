@@ -24,6 +24,31 @@ namespace SOLITUDE.Core.Input
         private readonly Dictionary<InputAction, InputControl[]> heldAtReset = new();
         private InputControl[] heldUI = new InputControl[0];
         private event Action SurvivorInputChanged;
+        private Action vitalUse;
+        private object vitalUseOwner;
+        private InputControl[] heldUse = new InputControl[0];
+
+        public IDisposable BindVitalUse(Action callback)
+        {
+            if (actions == null || callback == null) throw new InvalidOperationException("Use requires initialized input and a callback.");
+            if (vitalUseOwner != null) throw new InvalidOperationException("Use already has a scene owner.");
+            var owner = new object(); vitalUseOwner = owner; vitalUse = callback; CaptureHeldUse();
+            return new Lease(() =>
+            {
+                if (!ReferenceEquals(vitalUseOwner, owner)) return;
+                CaptureHeldUse(); vitalUse = null; vitalUseOwner = null;
+            });
+        }
+        private void CaptureHeldUse()
+        {
+            if (actions != null) heldUse = actions.Gameplay.Use.controls.Where(c => c.IsActuated()).ToArray();
+        }
+        private void RefreshUseRelease()
+        {
+            heldUse = heldUse.Where(c => c.IsActuated()).ToArray();
+            if (actions != null && heldAtReset.TryGetValue(actions.Gameplay.Use, out var held)
+                && !held.Any(c => c.IsActuated())) heldAtReset.Remove(actions.Gameplay.Use);
+        }
         // Actions re-enabled by policy may observe held controls. Require their release before accepting a new survivor action.
         public void ResetSurvivorInput()
         {
@@ -36,6 +61,7 @@ namespace SOLITUDE.Core.Input
                 }
             heldUI = actions.asset.Where(a => a.actionMap.name == "UI" && (a.name == "Click" || a.name == "Submit"))
                 .SelectMany(a => a.controls.Where(c => c.IsActuated())).ToArray();
+            CaptureHeldUse();
             movement?.SetInput(Vector2.zero); ConsumeUIActivation(); SurvivorInputChanged?.Invoke();
         }
         private bool Fresh(InputAction.CallbackContext context) => !heldAtReset.ContainsKey(context.action);
@@ -81,6 +107,8 @@ namespace SOLITUDE.Core.Input
             actions.Gameplay.Interact.performed += Interact; actions.Gameplay.Inventory.performed += Inventory;
             actions.Gameplay.Pause.performed += Back; actions.Container.Cancel.performed += Back;
             actions.Gameplay.Journal.performed += ToggleJournal;
+            actions.Gameplay.Use.performed += Use;
+            InputSystem.onAfterUpdate += RefreshUseRelease;
             actions.Container.Point.performed += Pointer;
             for (int i = 0; i < 9; i++) actions.asset.FindAction("Gameplay/Hotbar" + (i + 1)).performed += Hotbar;
             policy.Changed += Apply; Apply();
@@ -101,6 +129,8 @@ namespace SOLITUDE.Core.Input
             if (!policy.Gameplay && movement != null) movement.SetInput(Vector2.zero);
             if (interactor != null) interactor.SetInputAllowed(policy.Gameplay);
             Enable(actions.Gameplay.Move, policy.Gameplay); Enable(actions.Gameplay.Interact, policy.Gameplay);
+            if (!policy.Gameplay || !isActiveAndEnabled || !actions.Gameplay.Use.enabled) CaptureHeldUse();
+            Enable(actions.Gameplay.Use, policy.Gameplay && isActiveAndEnabled);
             for (int i = 0; i < 9; i++) Enable(actions.asset.FindAction("Gameplay/Hotbar" + (i + 1)), policy.Gameplay);
             Enable(actions.Gameplay.Inventory, policy.Inventory);
             Enable(actions.Gameplay.Pause, policy.Ready); Enable(actions.Container.Cancel, policy.Ready);
@@ -111,6 +141,12 @@ namespace SOLITUDE.Core.Input
         private void Move(InputAction.CallbackContext context) { if (Fresh(context) && GameplayAllowed && movement != null) movement.SetInput(context.ReadValue<Vector2>()); }
         private void Stop(InputAction.CallbackContext _) { if (movement != null) movement.SetInput(Vector2.zero); }
         private void Interact(InputAction.CallbackContext context) { if (Fresh(context) && GameplayAllowed && interactor != null) interactor.TryInteract(); }
+        private void Use(InputAction.CallbackContext context)
+        {
+            RefreshUseRelease();
+            if (!Fresh(context) || !GameplayAllowed || !isActiveAndEnabled || heldUse.Length != 0 || vitalUse == null) return;
+            CaptureHeldUse(); vitalUse();
+        }
         private void Inventory(InputAction.CallbackContext context) { if (Fresh(context) && policy.Inventory && consumedFrame != Time.frameCount) inventory?.Invoke(); }
         private void Hotbar(InputAction.CallbackContext context)
         { if (Fresh(context) && GameplayAllowed && int.TryParse(context.action.name.Substring(6), out int index)) selection?.Select(index - 1); }
@@ -141,6 +177,8 @@ namespace SOLITUDE.Core.Input
         }
         public void Release()
         {
+            InputSystem.onAfterUpdate -= RefreshUseRelease;
+            vitalUse = null; vitalUseOwner = null; heldUse = new InputControl[0];
             journal?.Close(); journal = null;
             foreach (var lease in uiLeases) lease.Dispose();
             uiLeases.Clear();
@@ -152,5 +190,11 @@ namespace SOLITUDE.Core.Input
             consumedFrame = -1; heldAtReset.Clear(); heldUI = new InputControl[0];
         }
         private void OnDestroy() => Release();
+        private void OnEnable() { if (actions != null) Apply(); }
+        private void OnDisable()
+        {
+            CaptureHeldUse();
+            if (actions != null) actions.Gameplay.Use.Disable();
+        }
     }
 }

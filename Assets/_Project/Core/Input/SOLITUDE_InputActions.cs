@@ -231,6 +231,16 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""Use"",
+                    ""type"": ""Button"",
+                    ""id"": ""063096fe-f44b-40f7-acad-238af293440a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -473,6 +483,28 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Journal"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""251a3ea6-715d-4090-921a-4fbff948e8cd"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Use"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""be6f4d06-fd58-48c4-b1f9-6d701d865bcf"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Use"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1139,6 +1171,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         m_Gameplay_Hotbar8 = m_Gameplay.FindAction("Hotbar8", throwIfNotFound: true);
         m_Gameplay_Hotbar9 = m_Gameplay.FindAction("Hotbar9", throwIfNotFound: true);
         m_Gameplay_Journal = m_Gameplay.FindAction("Journal", throwIfNotFound: true);
+        m_Gameplay_Use = m_Gameplay.FindAction("Use", throwIfNotFound: true);
         // Container
         m_Container = asset.FindActionMap("Container", throwIfNotFound: true);
         m_Container_Point = m_Container.FindAction("Point", throwIfNotFound: true);
@@ -1252,6 +1285,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
     private readonly InputAction m_Gameplay_Hotbar8;
     private readonly InputAction m_Gameplay_Hotbar9;
     private readonly InputAction m_Gameplay_Journal;
+    private readonly InputAction m_Gameplay_Use;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -1320,6 +1354,10 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         /// </summary>
         public InputAction @Journal => m_Wrapper.m_Gameplay_Journal;
         /// <summary>
+        /// Provides access to the underlying input action "Gameplay/Use".
+        /// </summary>
+        public InputAction @Use => m_Wrapper.m_Gameplay_Use;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
@@ -1387,6 +1425,9 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             @Journal.started += instance.OnJournal;
             @Journal.performed += instance.OnJournal;
             @Journal.canceled += instance.OnJournal;
+            @Use.started += instance.OnUse;
+            @Use.performed += instance.OnUse;
+            @Use.canceled += instance.OnUse;
         }
 
         /// <summary>
@@ -1440,6 +1481,9 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             @Journal.started -= instance.OnJournal;
             @Journal.performed -= instance.OnJournal;
             @Journal.canceled -= instance.OnJournal;
+            @Use.started -= instance.OnUse;
+            @Use.performed -= instance.OnUse;
+            @Use.canceled -= instance.OnUse;
         }
 
         /// <summary>
@@ -1904,6 +1948,13 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnJournal(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Use" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnUse(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Container" which allows adding and removing callbacks.
