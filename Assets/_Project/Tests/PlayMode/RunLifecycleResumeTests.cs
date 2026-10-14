@@ -12,6 +12,7 @@ using SOLITUDE.Player;
 using SOLITUDE.Player.Succession;
 using SOLITUDE.SaveLoad;
 using SOLITUDE.Survivors;
+using SOLITUDE.Items;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -33,6 +34,11 @@ namespace SOLITUDE.Tests
         private static SurvivorSuccessionComposition Feature => One<SurvivorSuccessionComposition>();
         private static SurvivorAvatarAdapter Avatar => One<SurvivorAvatarAdapter>();
         private static PlayerVitalsController Vitals => One<PlayerVitalsController>();
+        private static string SavePath
+        {
+            get { var args = Environment.GetCommandLineArgs(); return Path.Combine(args[Array.IndexOf(args, "-solitudeSaveDirectory") + 1], "solitude-save.json"); }
+        }
+        private static SaveGameData ReadSave() => new SaveJsonCodec(Field<ItemCatalog>(Root, "catalog")).Decode(File.ReadAllText(SavePath));
         private static SceneFeatureContext Context => Field<SceneFeatureContext>(Feature, "context");
 
         [UnitySetUp] public IEnumerator Prepare()
@@ -187,10 +193,14 @@ namespace SOLITUDE.Tests
             state.scenePath = "Assets/_Project/Scenes/AnotherProductionScene.unity";
             var priorPosition = One<PlayerInteractor>().GetComponent<Rigidbody2D>().position;
             Feature.Release(); Session.StoreLifecycle(state, saved.expedition);
-            Assert.Throws<InvalidDataException>(() => Feature.Initialize(context));
-            Assert.IsFalse(Policy.Ready); Assert.IsNull(Feature.Coordinator);
-            Assert.AreEqual(state.scenePath, Session.Capture().survivor.scenePath);
-            Assert.AreEqual(priorPosition, One<PlayerInteractor>().GetComponent<Rigidbody2D>().position);
+            try
+            {
+                Assert.Throws<InvalidDataException>(() => Feature.Initialize(context));
+                Assert.IsFalse(Policy.Ready); Assert.IsNull(Feature.Coordinator);
+                Assert.AreEqual(state.scenePath, Session.Capture().survivor.scenePath);
+                Assert.AreEqual(priorPosition, One<PlayerInteractor>().GetComponent<Rigidbody2D>().position);
+            }
+            finally { Session.StoreLifecycle(saved.survivor, saved.expedition); }
             yield return null;
         }
 
@@ -229,6 +239,68 @@ namespace SOLITUDE.Tests
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(demo, new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
             Assert.AreNotEqual(first, Feature.Coordinator.Current.Id); Assert.AreEqual(100, Vitals.Vitals.Health.Current);
             Assert.AreEqual(SurvivorSceneEntry.DisposableAwakening, Feature.EntryKind); Assert.IsNull(Session.Capture().survivor);
+        }
+
+        [UnityTest] public IEnumerator CleanSessionCheckpointsCaptureLiveMovementVitalsAndRecovery()
+        {
+            var host = Field<SaveGameService>(Root, "persistence"); host.Flush();
+            var expedition = Session.Capture().expedition.id;
+            foreach (var checkpoint in new[] { "Flush", "OnApplicationPause", "OnApplicationQuit" })
+            {
+                Assert.IsFalse(Session.IsDirty);
+                var state = PlaceOffAwakeningPoint(); state.health.current -= checkpoint.Length;
+                Avatar.Restore(state, Feature.AwakeningPoint, true);
+                Assert.IsFalse(Session.IsDirty, "Movement/vitals alone do not mutate a container.");
+                if (checkpoint == "Flush") host.Flush();
+                else host.SendMessage(checkpoint, checkpoint == "OnApplicationPause" ? (object)true : null);
+                var saved = ReadSave();
+                Assert.AreEqual(JsonUtility.ToJson(state), JsonUtility.ToJson(saved.survivor));
+                Assert.AreEqual(expedition, saved.expedition.id); Assert.IsFalse(Session.IsDirty);
+            }
+            yield return null;
+        }
+
+        [UnityTest] public IEnumerator StartupSelectsSavedProductionSceneBeforeBindingAndNewSaveReturnsToCryobay()
+        {
+            const string destination = "Assets/_Project/Tests/Fixtures/LifecycleResume.unity";
+            var id = Feature.Coordinator.Current.Id; var expedition = Session.Capture().expedition.id;
+            Assert.IsTrue(Session.Commands.Grant(Context.Inventory.Handle, "c756a156ba7f34cb2b65e32264413a60", 3).Succeeded);
+            yield return Root.TransitionTo(destination); yield return null;
+            Assert.AreEqual(id, Feature.Coordinator.Current.Id);
+            var saved = Session.Capture(); saved.ship.permanentDiscoveryIds.Add("verification.discovery");
+            saved.expedition.defeatedEncounterIds.Add("verification.encounter");
+            Session.StoreShipState(saved.ship); Session.StoreLifecycle(saved.survivor, saved.expedition);
+            Field<SaveGameService>(Root, "persistence").Flush();
+            Object.Destroy(Root.gameObject); yield return null; pauseLease.Dispose(); pauseLease = null;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            for (int i = 0; i < 120 && (Root == null || Root.State != RuntimeStartupState.Ready); i++) yield return null;
+            Assert.AreEqual(RuntimeStartupState.Ready, Root.State);
+            Assert.AreEqual(destination, SceneManager.GetActiveScene().path);
+            Assert.AreEqual(id, Feature.Coordinator.Current.Id); Assert.AreEqual(expedition, Session.Capture().expedition.id);
+            Assert.AreEqual(3, Context.Inventory.GetSlot(0).Stack.Quantity);
+            Assert.AreEqual(SurvivorSceneEntry.SavedResume, Feature.EntryKind);
+            Root.StartNewSave(); yield return null; yield return null;
+            Assert.AreEqual(ScenePath, SceneManager.GetActiveScene().path);
+            Assert.AreNotEqual(id, Feature.Coordinator.Current.Id); Assert.AreNotEqual(expedition, Session.Capture().expedition.id);
+            Assert.IsEmpty(Session.Capture().ship.permanentDiscoveryIds); Assert.IsEmpty(Session.Capture().expedition.defeatedEncounterIds);
+            Assert.IsTrue(Context.Inventory.GetSlots().All(slot => slot.IsEmpty));
+        }
+
+        [UnityTest] public IEnumerator UnavailableSavedSceneBlocksStartupPreservesBytesAndAllowsExplicitNewSave()
+        {
+            var codec = new SaveJsonCodec(Field<ItemCatalog>(Root, "catalog"));
+            Object.Destroy(Root.gameObject); yield return null; pauseLease.Dispose(); pauseLease = null;
+            var saved = codec.Decode(File.ReadAllText(SavePath)); saved.survivor.scenePath = "Assets/_Project/Scenes/MissingProductionScene.unity";
+            File.WriteAllText(SavePath, codec.Encode(saved)); var primary = File.ReadAllBytes(SavePath);
+            var backup = File.ReadAllBytes(SavePath + ".bak");
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex(".*Saved production scene is unavailable:.*"));
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
+            Assert.AreEqual(RuntimeStartupState.Failed, Root.State); Assert.IsFalse(Policy.Ready);
+            Field<SaveGameService>(Root, "persistence").Flush();
+            CollectionAssert.AreEqual(primary, File.ReadAllBytes(SavePath)); CollectionAssert.AreEqual(backup, File.ReadAllBytes(SavePath + ".bak"));
+            Root.StartNewSave(); yield return null; yield return null;
+            Assert.AreEqual(RuntimeStartupState.Ready, Root.State); Assert.AreEqual(ScenePath, Session.Capture().survivor.scenePath);
+            Assert.AreNotEqual(saved.survivor.id, Session.Capture().survivor.id);
         }
     }
 }

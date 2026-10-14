@@ -13,16 +13,22 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.EventSystems;
+using SOLITUDE.Player.Succession;
+using SOLITUDE.Survivors;
 public sealed class SolitudeCompositionSmoke : MonoBehaviour
 {
+    private static IDisposable lifecyclePause;
     private static T Field<T>(object owner, string name) => (T)owner.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(owner);
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)] static void Boot()
     {
         if (UnityEngine.Application.isEditor || FindFirstObjectByType<SolitudeCompositionSmoke>() != null) return;
         var go = new GameObject("CompositionSmoke"); DontDestroyOnLoad(go); go.AddComponent<SolitudeCompositionSmoke>();
+        if (Flag("-verifySnapshotOnly") || Flag("-lifecycleWrite") || Flag("-lifecycleResume") || Flag("-lifecycleFallback"))
+            lifecyclePause = Field<PauseCoordinator>(FindFirstObjectByType<GameCompositionRoot>(), "pause").Acquire();
     }
     private static void Check(bool condition, string text) { if (!condition) throw new Exception(text); }
     [Serializable] private sealed class Expected { public string pickupId, lockerId, lockerJson; public int quantity; }
+    [Serializable] private sealed class LifecycleExpected { public SurvivorSnapshot survivor; public string expeditionId; }
     private static readonly string manifest = System.IO.Path.Combine(DirectoryArgument, "world-expected.json");
     private static string DirectoryArgument
     {
@@ -59,6 +65,7 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
         } catch(Exception error) { Debug.LogException(error); UnityEngine.Application.Quit(1); yield break; }
         if (returnFromStart) yield break;
         var verification = Verify();
+        if (Flag("-lifecycleWrite") || Flag("-lifecycleResume") || Flag("-lifecycleFallback")) verification = VerifyLifecycle();
         while (true)
         {
             bool more;
@@ -89,6 +96,56 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
             UnityEngine.Application.Quit(0);
         }
         catch(Exception error) { Debug.LogException(error); UnityEngine.Application.Quit(1); }
+    }
+    private static IEnumerator VerifyLifecycle()
+    {
+        var root = FindFirstObjectByType<GameCompositionRoot>();
+        Check(root.State == RuntimeStartupState.Ready && Field<InputPolicyCoordinator>(root, "policy").Ready, "Living resume was not ready");
+        var session = Field<ContainerSaveSession>(root, "session");
+        var avatar = FindFirstObjectByType<SurvivorAvatarAdapter>(); var feature = FindFirstObjectByType<SurvivorSuccessionComposition>();
+        var inventory = FindFirstObjectByType<PlayerInventory>(); var hotbar = FindFirstObjectByType<SOLITUDE.Hotbar.Hotbar>();
+        string expectedPath = System.IO.Path.Combine(DirectoryArgument, "lifecycle-expected.json");
+        if (Flag("-lifecycleWrite"))
+        {
+            Check(session.Commands.Grant(inventory.Container.Handle, "c756a156ba7f34cb2b65e32264413a60", 3).Succeeded, "Lifecycle inventory grant failed");
+            Check(session.Commands.Grant(hotbar.Container.Handle, "c756a156ba7f34cb2b65e32264413a60", 2).Succeeded, "Lifecycle hotbar grant failed");
+            Field<SaveGameService>(root, "persistence").Flush(); Check(!session.IsDirty, "Initial lifecycle checkpoint failed");
+            var changed = avatar.Capture(feature.Coordinator.Current.Id);
+            changed.health = new SavedVital { current = 33.125, max = 200 };
+            changed.oxygen = new SavedVital { current = 72.5, max = 120 };
+            changed.hunger = new SavedVital { current = 62.875, max = 150 };
+            changed.recoveryDelayRemaining = 3.25;
+            bool placed = false;
+            foreach (var offset in new[] { Vector2.right, Vector2.left, Vector2.up, Vector2.down })
+            {
+                changed.x = feature.AwakeningPoint.transform.position.x + .2f * offset.x;
+                changed.y = feature.AwakeningPoint.transform.position.y + .2f * offset.y;
+                avatar.Restore(changed, feature.AwakeningPoint, true);
+                if (!avatar.UsedResumeFallback) { placed = true; break; }
+            }
+            Check(placed, "No valid non-default living location");
+            Check(!session.IsDirty, "Movement/vitals incorrectly depended on a container mutation");
+            var expected = new LifecycleExpected { survivor = avatar.Capture(feature.Coordinator.Current.Id), expeditionId = session.Capture().expedition.id };
+            System.IO.File.WriteAllText(expectedPath, JsonUtility.ToJson(expected));
+            // Deliberately omit Flush: orderly application quit must capture this clean session.
+            Result("Living checkpoint prepared for orderly quit"); UnityEngine.Application.Quit(0); yield break;
+        }
+        var persisted = JsonUtility.FromJson<LifecycleExpected>(System.IO.File.ReadAllText(expectedPath));
+        var actual = avatar.Capture(feature.Coordinator.Current.Id);
+        Check(actual.id == persisted.survivor.id && session.Capture().expedition.id == persisted.expeditionId, "Restart changed colonist or expedition");
+        Check(actual.scenePath == persisted.survivor.scenePath, "Restart changed the saved scene");
+        Check(inventory.Container.GetSlots().Where(s => !s.IsEmpty).Sum(s => s.Stack.Quantity) == 3, "Restart changed inventory");
+        Check(hotbar.Container.GetSlots().Where(s => !s.IsEmpty).Sum(s => s.Stack.Quantity) == 2, "Restart changed hotbar");
+        if (Flag("-lifecycleFallback"))
+        {
+            Check(avatar.UsedResumeFallback, "Invalid saved position did not use fallback");
+            Check(avatar.Interactor.GetComponent<Rigidbody2D>().position == (Vector2)feature.AwakeningPoint.transform.position, "Fallback was not the authored safe point");
+            persisted.survivor.x = actual.x; persisted.survivor.y = actual.y; persisted.survivor.z = actual.z;
+        }
+        else Check(!avatar.UsedResumeFallback, "Valid saved position unexpectedly fell back");
+        Check(JsonUtility.ToJson(actual) == JsonUtility.ToJson(persisted.survivor), "Restart changed precise vitals, recovery or location");
+        Check(avatar.Interactor.GetComponent<Rigidbody2D>().linearVelocity == Vector2.zero, "Restart retained velocity");
+        Result("Living snapshot restored without offline simulation"); UnityEngine.Application.Quit(0); yield break;
     }
     private static IEnumerator Verify()
     {

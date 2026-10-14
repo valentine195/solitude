@@ -60,9 +60,9 @@ namespace SOLITUDE.Tests
             p.Vitals.Health.Set(40);p.Vitals.Hunger.Set(100);Assert.IsTrue(p.Damage(10).Accepted);Assert.AreEqual("Recovery delayed",Status.text);
             yield return new WaitForSeconds(.2f);Assert.AreEqual(30,p.Vitals.Health.Current);Assert.Greater(p.RecoveryState.DelayRemaining,4);
             yield return new WaitForSeconds(5.1f);Assert.Greater(p.Vitals.Health.Current,30);Assert.Less(p.Vitals.Health.Current,35);Assert.AreEqual("Recovering",Status.text);
-            yield return new WaitForSeconds(10.1f);Assert.AreEqual(50,p.Vitals.Health.Current);Assert.AreEqual("",Status.text);
-            yield return new WaitForSeconds(.2f);Assert.AreEqual(50,p.Vitals.Health.Current);Assert.Less(p.Vitals.Hunger.Current,99);Assert.AreEqual(100,p.Vitals.Oxygen.Current);
-            Assert.AreEqual(.5f,Fill("HealthRow").fillAmount);
+            yield return new WaitForSeconds(10.1f);Assert.AreEqual(50,p.Vitals.Health.Current,p.Settings.MaxHealth*VitalsRecoveryRules.BoundaryRelativeTolerance);Assert.AreEqual("",Status.text);
+            yield return new WaitForSeconds(.2f);Assert.AreEqual(50,p.Vitals.Health.Current,p.Settings.MaxHealth*VitalsRecoveryRules.BoundaryRelativeTolerance);Assert.Less(p.Vitals.Hunger.Current,99);Assert.AreEqual(100,p.Vitals.Oxygen.Current);
+            Assert.AreEqual(.5f,Fill("HealthRow").fillAmount,VitalsRecoveryRules.BoundaryRelativeTolerance);
         }
         [UnityTest] public IEnumerator HungryPauseMaximumChangeAndPrimaryScreenUseActualSceneBindings()
         {

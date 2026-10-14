@@ -9,6 +9,7 @@ namespace SOLITUDE.Editor
     public static class PhaseFiveFixtureBuilder
     {
         public const string Context="Assets/_Project/Tests/Fixtures/Context.unity", Unrelated="Assets/_Project/Tests/Fixtures/Unrelated.unity";
+        public const string Resume="Assets/_Project/Tests/Fixtures/LifecycleResume.unity";
         public static void Prepare()
         {
             System.IO.Directory.CreateDirectory("Assets/_Project/Tests/Fixtures");AssetDatabase.Refresh();
@@ -24,7 +25,9 @@ namespace SOLITUDE.Editor
                 var findings=WakeupValidation.ValidateScene(scene,false);
                 if(findings.Count!=0)throw new System.InvalidOperationException("Invalid context fixture: "+findings[0].code+" "+findings[0].message);
             }
-            EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/_Project/Scenes/Wakeup.unity",true),new EditorBuildSettingsScene(Context,true),new EditorBuildSettingsScene(Unrelated,true)};
+            var production = EditorSceneManager.OpenScene("Assets/_Project/Scenes/Wakeup.unity", OpenSceneMode.Single);
+            EditorSceneManager.SaveScene(production, Resume);
+            EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/_Project/Scenes/Wakeup.unity",true),new EditorBuildSettingsScene(Context,true),new EditorBuildSettingsScene(Unrelated,true),new EditorBuildSettingsScene(Resume,true)};
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);AssetDatabase.SaveAssets();
         }
         public static void RestoreBuildScope()=>EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene("Assets/_Project/Scenes/Wakeup.unity",true)};

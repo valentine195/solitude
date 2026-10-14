@@ -11,10 +11,12 @@ namespace SOLITUDE.SaveLoad
         private ContainerSaveSession session;
         private bool canWrite;
         private Action newSave;
+        private Action captureLivingState;
         private SaveRecoveryStore store;
         public SaveLoadResult LastLoad { get; private set; }
         public bool RecoveryNoticePending => store?.NoticePending ?? false;
         public void Configure(SaveRecoveryStore store) => this.store = store;
+        public void ConfigureCapture(Action capture) => captureLivingState = capture;
         public SaveGameData Load(int seed, IItemCatalog catalog, out string error)
         {
             if (store == null)
@@ -36,15 +38,22 @@ namespace SOLITUDE.SaveLoad
         public void AcknowledgeRecoveryNotice() => store?.AcknowledgeNotice();
         public void Initialize(ContainerSaveSession session, Action newSave, bool canWrite = true)
         { this.session = session; this.newSave = newSave; this.canWrite = canWrite; }
-        public void Flush()
+        public void Flush() => Flush(true);
+        private void Flush(bool checkpoint)
         {
-            if (!canWrite || session == null || session.HasIntegrityFailure || session.IsCollecting || !session.IsDirty || store == null || store.RecoveryPending) return;
-            try { store.Write(session.Capture()); session.MarkSaved(); }
+            if (!canWrite || session == null || session.HasIntegrityFailure || session.IsCollecting || store == null || store.RecoveryPending) return;
+            if (!checkpoint && !session.IsDirty) return;
+            try
+            {
+                captureLivingState?.Invoke();
+                if (!session.IsDirty) return;
+                store.Write(session.Capture()); session.MarkSaved();
+            }
             catch (Exception failure) { Debug.LogError("[SaveGameService] Failed to save: " + failure.Message); }
         }
-        public void Release() { Flush(); session = null; newSave = null; canWrite = false; }
+        public void Release() { Flush(); session = null; newSave = null; captureLivingState = null; canWrite = false; }
         [ContextMenu("Start New Save")] public void StartNewSave() => newSave?.Invoke();
-        private void LateUpdate() => Flush();
+        private void LateUpdate() => Flush(false);
         private void OnApplicationPause(bool paused) { if (paused) Flush(); }
         private void OnApplicationQuit() => Flush();
         private void OnDestroy() => Flush();

@@ -97,6 +97,24 @@ try:
   player(directory,['-verifySnapshotOnly','-solitudeCrashAt',checkpoint],'recovery-'+checkpoint,True)
   if (directory/'solitude-save.json.bak').read_bytes()!=backup:raise RuntimeError('Interrupted recovery changed backup')
   player(directory,['-verifySnapshotOnly','-expectRecovery'],'restart-recovery-'+checkpoint)
+ # Living-colonist process qualification uses separate saves and compares exact snapshots.
+ living=output/'lifecycle-write';shutil.rmtree(living,ignore_errors=True)
+ player(living,['-lifecycleWrite'],'lifecycle-write')
+ expected=json.loads((living/'lifecycle-expected.json').read_text())
+ saved=json.loads((living/'solitude-save.json').read_text())
+ if saved['survivor']!=expected['survivor'] or saved['expedition']['id']!=expected['expeditionId']:
+  raise RuntimeError('Orderly quit did not capture the clean living session')
+ for kind in ['resume','fallback','unavailable-scene']:
+  directory=output/('lifecycle-'+kind);shutil.rmtree(directory,ignore_errors=True);shutil.copytree(living,directory)
+  primary=directory/'solitude-save.json';backup=directory/'solitude-save.json.bak'
+  data=json.loads(primary.read_text())
+  if kind=='fallback':data['survivor']['x']=100000;data['survivor']['y']=100000
+  if kind=='unavailable-scene':data['survivor']['scenePath']='Assets/_Project/Scenes/MissingProductionScene.unity'
+  if kind!='resume':primary.write_text(json.dumps(data))
+  before=primary.read_bytes();backup_before=backup.read_bytes()
+  player(directory,['-expectBlocked'] if kind=='unavailable-scene' else ['-lifecycleFallback' if kind=='fallback' else '-lifecycleResume'],'lifecycle-'+kind)
+  if kind=='unavailable-scene' and (primary.read_bytes()!=before or backup.read_bytes()!=backup_before):
+   raise RuntimeError('Unavailable saved scene changed primary or backup bytes')
  status='Passed' if not a.skip_build else 'Player scenarios passed (partial gate)';(output/'results.json').write_text(json.dumps(dict(status=status,platform='macOS ARM64',results=results),indent=2));print(status,flush=True)
 except Exception as error:
  (output/'results.json').write_text(json.dumps(dict(status='Failed',error=str(error),results=results),indent=2));print(error,file=sys.stderr);sys.exit(1)

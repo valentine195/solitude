@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
 using SOLITUDE.Application;
 using SOLITUDE.Containers;
 using SOLITUDE.Core.Input;
@@ -9,6 +11,8 @@ using SOLITUDE.Items;
 using SOLITUDE.SaveLoad;
 using SOLITUDE.World.Restoration;
 using SOLITUDE.Tasks;
+using SOLITUDE.Player.Succession;
+using SOLITUDE.Survivors;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 namespace SOLITUDE.Composition
@@ -38,6 +42,8 @@ namespace SOLITUDE.Composition
         private IDisposable failedPause;
         private bool initialized;
         private bool disposableSession;
+        private const string CryobayScenePath = "Assets/_Project/Scenes/Wakeup.unity";
+        private string startupDestination;
         public bool UsesDisposableSession => disposableSession;
         public RuntimeStartupState State { get; private set; }
         private void Awake()
@@ -62,7 +68,15 @@ namespace SOLITUDE.Composition
                 var data = persistence.Load(config.worldSeed, catalog, out var error);
                 if (data == null) throw new InvalidOperationException(error);
                 CreateSession(data);
+                if (!disposableSession && data.survivor != null)
+                {
+                    startupDestination = data.survivor.scenePath;
+                    if (!UnityEngine.Application.CanStreamedLevelBeLoaded(startupDestination))
+                        throw new System.IO.InvalidDataException("Saved production scene is unavailable: " + startupDestination);
+                }
                 SceneManager.sceneLoaded += Loaded; SceneManager.sceneUnloaded += Unloaded; initialized = true;
+                if (startupDestination != null && startupDestination != startupScene.path)
+                { StartCoroutine(LoadSavedScene()); return; }
                 for (int i = 0; i < SceneManager.sceneCount; i++) BindScene(SceneManager.GetSceneAt(i));
                 // The initial scene can still be loading during bootstrap Awake.
                 // sceneLoaded binds it before input is allowed.
@@ -73,6 +87,7 @@ namespace SOLITUDE.Composition
         private void FinishStartup()
         {
             persistence.CompleteRecovery();
+            startupDestination = null;
             State = RuntimeStartupState.Ready; policy.SetReady(true);
             if (persistence.RecoveryNoticePending) interactive.ShowRecoveryNotice(persistence.AcknowledgeRecoveryNotice);
         }
@@ -83,6 +98,29 @@ namespace SOLITUDE.Composition
             pickups = new PickupCollectionService(session);
             gestures = new ContainerGestureCoordinator(new ContainerInteractionController(session.Commands), policy);
             persistence.Initialize(session, StartNewSave);
+            persistence.ConfigureCapture(CaptureLivingState);
+        }
+        private void CaptureLivingState()
+        {
+            if (disposableSession || State != RuntimeStartupState.Ready || interactive == null || session == null
+                || !interactive.gameObject.scene.isLoaded) return;
+            var saved = session.Capture();
+            if (saved.survivor == null || saved.pendingDeath != null) return;
+            var roots = interactive.gameObject.scene.GetRootGameObjects();
+            var feature = roots.SelectMany(r => r.GetComponentsInChildren<SurvivorSuccessionComposition>(true)).SingleOrDefault();
+            var avatar = roots.SelectMany(r => r.GetComponentsInChildren<SurvivorAvatarAdapter>(true)).SingleOrDefault();
+            if (feature?.Coordinator?.Current?.Status != SurvivorLifeStatus.Active || avatar == null || !avatar.IsAvailable
+                || feature.Coordinator.Current.Id.ToString("D") != saved.survivor.id) return;
+            session.StoreLifecycle(avatar.Capture(feature.Coordinator.Current.Id), saved.expedition);
+        }
+        private IEnumerator LoadSavedScene()
+        {
+            // Let the opening scene finish loading without binding or overwriting the saved survivor.
+            yield return null;
+            AsyncOperation loading;
+            try { loading = SceneManager.LoadSceneAsync(startupDestination, LoadSceneMode.Single); }
+            catch (Exception error) { Fail(error); yield break; }
+            yield return loading;
         }
         private void Fail(Exception error)
         {
@@ -95,8 +133,9 @@ namespace SOLITUDE.Composition
         }
         private void Loaded(Scene scene, LoadSceneMode mode)
         {
+            if (startupDestination != null && scene.path != startupDestination) return;
             try { BindScene(scene);
-                if (mode == LoadSceneMode.Single && interactive == null) throw new InvalidOperationException("No composed player scene is available.");
+                if (mode == LoadSceneMode.Single && interactive == null) throw new System.IO.InvalidDataException("No composed player scene is available.");
                 if (interactive != null && failedPause == null) { FinishStartup(); policy.SetTransition(false); } }
             catch (Exception error) { Fail(error); }
         }
@@ -114,6 +153,7 @@ namespace SOLITUDE.Composition
         private void BindScene(Scene scene)
         {
             if (!scene.isLoaded || scopes.ContainsKey(scene) || session == null) return;
+            if (startupDestination != null && scene.path != startupDestination) return;
             SceneBindings entry = null;
             foreach (var root in scene.GetRootGameObjects())
             {
@@ -151,6 +191,7 @@ namespace SOLITUDE.Composition
             if (State != RuntimeStartupState.Ready || !UnityEngine.Application.CanStreamedLevelBeLoaded(scenePath))
                 throw new InvalidOperationException("Scene transition is unavailable: " + scenePath);
             policy.SetTransition(true); interactive?.CloseForTransition();
+            persistence.Flush();
             try { return SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Single); }
             catch { policy.SetTransition(false); throw; }
         }
@@ -158,6 +199,7 @@ namespace SOLITUDE.Composition
         public void StartNewSave()
         {
             if (catalog == null || pause == null || loot == null) return;
+            startupDestination = null;
             policy.SetTransition(true); failedPause?.Dispose(); failedPause = null;
             foreach (var scope in new List<SceneBindings>(scopes.Values)) scope.Release();
             scopes.Clear(); interactive = null; input.Bind(null, null, null, null, null, null); game.ResumeGame();
@@ -166,8 +208,8 @@ namespace SOLITUDE.Composition
             persistence.BeginNewSave();
             session.Reset(config.worldSeed, releaseOwners: true); persistence.Initialize(session, StartNewSave); persistence.Flush();
             if (!initialized) { SceneManager.sceneLoaded += Loaded; SceneManager.sceneUnloaded += Unloaded; initialized = true; }
-            var scene = SceneManager.GetActiveScene();
-            if (!string.IsNullOrEmpty(scene.path)) SceneManager.LoadScene(scene.path);
+            var path = disposableSession ? SceneManager.GetActiveScene().path : CryobayScenePath;
+            if (!string.IsNullOrEmpty(path)) SceneManager.LoadScene(path);
         }
         private void OnDestroy()
         {
