@@ -131,6 +131,7 @@ namespace SOLITUDE.Composition
                 session.Reset(config.worldSeed, releaseOwners: true);
                 tasks?.Dispose(); tasks = new TaskJournal(); tasks.ObserverError += Debug.LogException;
             }
+            entry.ConfigureLifecyclePersistence(!disposableSession);
             entry.Initialize(session, pickups, presentations, loot, gestures, policy, pause, this, input, game, () => ReleaseScene(scene), tasks);
             scopes.Add(scene, entry);
             if (entry.HasPlayer) interactive = entry;

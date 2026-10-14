@@ -51,6 +51,7 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
             else if (Flag("-faultWrite"))
             {
                 var graph=FindFirstObjectByType<GameCompositionRoot>();var data=Field<ContainerSaveSession>(graph,"session").Capture();data.worldSeed++;
+                VerificationFaults.ArmWrite();
                 new SOLITUDE.Application.Persistence.SaveRecoveryStore(System.IO.Path.Combine(DirectoryArgument,"solitude-save.json"),new PhysicalSaveFiles(),new SaveJsonCodec(Field<ItemCatalog>(graph,"catalog"))).Write(data);
                 throw new Exception("Expected process interruption did not occur");
             }

@@ -2,12 +2,19 @@ using System;
 using System.IO;
 namespace SOLITUDE.SaveLoad
 {
-    internal static class VerificationFaults
+    public static class VerificationFaults
     {
+#if SOLITUDE_VERIFICATION
+        private static bool writeArmed;
+        // Write scenarios target the smoke's explicit write, after normal startup saves.
+        public static void ArmWrite() => writeArmed = true;
+#endif
         internal static void Hit(string checkpoint)
         {
 #if SOLITUDE_VERIFICATION
-            var args=Environment.GetCommandLineArgs();int i=Array.IndexOf(args,"-solitudeCrashAt");
+            var args=Environment.GetCommandLineArgs();
+            if(Array.IndexOf(args,"-faultWrite")>=0&&!writeArmed)return;
+            int i=Array.IndexOf(args,"-solitudeCrashAt");
             if(i<0||i+1>=args.Length||args[i+1]!=checkpoint)return;
             int location=Array.IndexOf(args,"-solitudeSaveDirectory");
             if(location<0)throw new InvalidOperationException("Fault injection requires an isolated save directory.");

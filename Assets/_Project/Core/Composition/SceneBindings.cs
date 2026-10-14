@@ -57,7 +57,13 @@ namespace SOLITUDE.Composition
         private Action released;
         private Guid inventoryToken, transferToken;
         private string preparingTargetLabel = "Locker";
+        private bool persistentLifecycle;
         public bool HasPlayer => inventory != null;
+        internal void ConfigureLifecyclePersistence(bool enabled)
+        {
+            if (session != null) throw new InvalidOperationException("Lifecycle persistence must be configured before scene binding.");
+            persistentLifecycle = enabled;
+        }
         public void Validate()
         {
             var ids = new HashSet<string>(StringComparer.Ordinal);
@@ -165,9 +171,11 @@ namespace SOLITUDE.Composition
                         Debug.LogWarning("Optional task notice UI unavailable: " + error.Message);
                     }
                 }
+                var savedSurvivor = persistentLifecycle ? session.Capture().survivor : null;
                 var featureContext = new SceneFeatureContext(session.Commands, inventory.Container, presentations,
                     policy, input, tasks, taskScope, interactor, interactions.Events,
-                    hotbar.Container, selection, CloseForTransition, interactions.Feedback, Open, Close);
+                    hotbar.Container, selection, CloseForTransition, interactions.Feedback, Open, Close,
+                    persistentLifecycle ? session : null, savedSurvivor != null && savedSurvivor.scenePath != gameObject.scene.path);
                 foreach (var feature in features)
                 {
                     // Record before binding so a throwing initializer is also unwound.
@@ -323,7 +331,7 @@ namespace SOLITUDE.Composition
             foreach (var source in lockers) { source.Release(); if (source != null) source.GetComponent<Locker>()?.Release(); }
             foreach (var junction in restorationJunctions) if (junction != null) junction.ReleaseBinding();
             foreach (var binding in bindings) binding.Dispose(); bindings.Clear();
-            inventory?.Release(); hotbar?.Release(); session = null; gestures = null;
+            inventory?.Release(); hotbar?.Release(); session = null; gestures = null; persistentLifecycle = false;
         }
         private void OnDestroy() { var notify = released; released = null; notify?.Invoke(); Release(); }
     }

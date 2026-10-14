@@ -7,6 +7,7 @@ using System;
 using SOLITUDE.Items;
 using SOLITUDE.Player;
 using SOLITUDE.Tasks;
+using SOLITUDE.SaveLoad;
 
 namespace SOLITUDE.Composition
 {
@@ -27,14 +28,19 @@ namespace SOLITUDE.Composition
         public SceneInteractionEvents InteractionEvents { get; }
         public Func<IContainerReader, string, bool> OpenContainer { get; }
         public Action<ContainerHandle> CloseContainer { get; }
+        // Null for disposable/demo bindings; production lifecycle belongs to this session.
+        public ContainerSaveSession LifecycleSession { get; }
+        public bool IsSceneArrival { get; }
 
         public SceneFeatureContext(ContainerCommandService commands, IContainerReader inventory,
             ItemPresentationCatalog presentations, InputPolicyCoordinator policy, UnityInputHost input,
             TaskJournal tasks, string taskScope, PlayerInteractor interactor, SceneInteractionEvents interactionEvents,
             IContainerReader hotbar = null, HotbarSelectionState selection = null,
             Action closePlayerScreens = null, InteractionFeedbackService feedback = null,
-            Func<IContainerReader, string, bool> openContainer = null, Action<ContainerHandle> closeContainer = null)
+            Func<IContainerReader, string, bool> openContainer = null, Action<ContainerHandle> closeContainer = null,
+            ContainerSaveSession lifecycleSession = null, bool isSceneArrival = false)
         {
+            LifecycleSession = lifecycleSession; IsSceneArrival = isSceneArrival;
             OpenContainer = openContainer; CloseContainer = closeContainer;
             Hotbar = hotbar; Selection = selection; ClosePlayerScreens = closePlayerScreens; Feedback = feedback;
             Commands = commands; Inventory = inventory; Presentations = presentations;

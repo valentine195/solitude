@@ -6,9 +6,11 @@ using SOLITUDE.Composition;
 using SOLITUDE.Containers;
 using SOLITUDE.Core.Interaction;
 using SOLITUDE.Survivors;
+using SOLITUDE.Expeditions;
 using UnityEngine;
 namespace SOLITUDE.Player.Succession
 {
+    public enum SurvivorSceneEntry { FreshAwakening, SavedResume, SceneArrival, DisposableAwakening }
     public sealed class SurvivorSuccessionComposition : SceneFeatureComposition, ISurvivorSuccessionPorts
     {
         [SerializeField] private SurvivorAwakeningPoint awakeningPoint;
@@ -23,6 +25,7 @@ namespace SOLITUDE.Player.Succession
         private ContainerHandoffReceipt committedHandoff;
         private SurvivorEquipmentReceipt preparedReceipt;
         public SurvivorSuccessionCoordinator Coordinator { get; private set; }
+        public SurvivorSceneEntry EntryKind { get; private set; }
         public SurvivorAwakeningPoint AwakeningPoint => awakeningPoint;
         public int AcknowledgmentCount => acknowledged.Count;
         public SurvivorRecoveryContainer RecoveryPrefab => recoveryPrefab;
@@ -30,6 +33,7 @@ namespace SOLITUDE.Player.Succession
         public void ConfigureRecovery(SurvivorRecoveryContainer prefab) => recoveryPrefab = prefab;
         public void Configure(SurvivorAwakeningPoint point, SurvivorAvatarAdapter adapter)
         { awakeningPoint = point; avatar = adapter; }
+        public void ValidateResumeAuthoring() { Validate(); avatar.ValidateResumePoint(awakeningPoint); }
         public override void Validate()
         {
             if (awakeningPoint == null || avatar == null || awakeningPoint.gameObject.scene != gameObject.scene ||
@@ -50,9 +54,37 @@ namespace SOLITUDE.Player.Succession
                 source.Interactor != avatar.Interactor || source.OpenContainer == null || source.CloseContainer == null)
                 throw new InvalidOperationException("Survivor succession requires retained composed player bindings.");
             context = source;
-            var first = new SurvivorState(); first.TryActivate();
-            Coordinator = new SurvivorSuccessionCoordinator(first, this);
-            avatar.Awaken(awakeningPoint); context.Selection.Select(-1);
+            SurvivorState first;
+            if (context.LifecycleSession == null)
+            {
+                EntryKind = SurvivorSceneEntry.DisposableAwakening;
+                first = new SurvivorState(); first.TryActivate(); avatar.Awaken(awakeningPoint);
+            }
+            else
+            {
+                // Only the root opens readiness after the complete scene has been restored.
+                context.Policy.SetReady(false); context.Input.ResetSurvivorInput();
+                ValidateResumeAuthoring();
+                var saved = context.LifecycleSession.Capture();
+                if (saved.pendingDeath != null)
+                    throw new System.IO.InvalidDataException("A committed succession requires forward recovery before scene control.");
+                if (saved.survivor == null)
+                {
+                    EntryKind = SurvivorSceneEntry.FreshAwakening;
+                    first = new SurvivorState(); first.TryActivate(); avatar.Awaken(awakeningPoint);
+                    if (!context.LifecycleSession.TryInitializeLifecycle(avatar.Capture(first.Id),
+                        new ExpeditionState { id = Guid.NewGuid().ToString("D") }))
+                        throw new InvalidOperationException("The production lifecycle was already initialized.");
+                }
+                else
+                {
+                    EntryKind = context.IsSceneArrival ? SurvivorSceneEntry.SceneArrival : SurvivorSceneEntry.SavedResume;
+                    avatar.Restore(saved.survivor, awakeningPoint, !context.IsSceneArrival);
+                    first = new SurvivorState(Guid.Parse(saved.survivor.id)); first.TryActivate();
+                    context.LifecycleSession.StoreLifecycle(avatar.Capture(first.Id), saved.expedition);
+                }
+            }
+            Coordinator = new SurvivorSuccessionCoordinator(first, this); context.Selection.Select(-1);
         }
         public SuccessionOutcome RequestDeath(Guid expectedSurvivor) => Coordinator?.RequestDeath(expectedSurvivor) ?? SuccessionOutcome.Failed;
         [ContextMenu("Debug/Retire Current Survivor")]
@@ -140,7 +172,15 @@ namespace SOLITUDE.Player.Succession
             error = null; return true;
         }
         public override bool TryBack() => false;
-        public override void CloseForTransition() { }
+        public override void CloseForTransition() => CaptureLivingState();
+        private void CaptureLivingState()
+        {
+            if (context?.LifecycleSession == null || Coordinator?.Current?.Status != SurvivorLifeStatus.Active
+                || avatar == null || !avatar.IsAvailable || !gameObject.scene.isLoaded) return;
+            var saved = context.LifecycleSession.Capture();
+            if (saved.pendingDeath == null)
+                context.LifecycleSession.StoreLifecycle(avatar.Capture(Coordinator.Current.Id), saved.expedition);
+        }
         private void OnDestroy() => Release();
         private void ClearPreparation()
         {
@@ -149,6 +189,7 @@ namespace SOLITUDE.Player.Succession
         }
         public override void Release()
         {
+            CaptureLivingState();
             foreach (var recovery in recoveryContainers)
                 if (recovery != null) { recovery.Release(); Destroy(recovery.gameObject); }
             recoveryContainers.Clear(); ClearPreparation();

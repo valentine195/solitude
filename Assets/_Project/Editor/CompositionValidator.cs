@@ -39,6 +39,9 @@ namespace SOLITUDE.Editor
             {
                 if (scopes.Length != 1 || bootstraps.Length > 1) throw new InvalidOperationException("Expected one scene scope and at most one bootstrap.");
                 scopes[0].Validate();
+                if (!roots.Any(r => r.GetComponentsInChildren<SOLITUDE.World.Restoration.RestorationDemoSession>(true).Length != 0))
+                    foreach (var succession in roots.SelectMany(r => r.GetComponentsInChildren<SOLITUDE.Player.Succession.SurvivorSuccessionComposition>(true)))
+                        succession.ValidateResumeAuthoring();
                 var scrubbers = roots.SelectMany(r => r.GetComponentsInChildren<SOLITUDE.World.ScrubberEncounter.ScrubberEquipment>(true)).ToArray();
                 var scrubberScreens = roots.SelectMany(r => r.GetComponentsInChildren<SOLITUDE.World.ScrubberEncounter.ScrubberScreenView>(true)).ToArray();
                 var scrubberSources = roots.SelectMany(r => r.GetComponentsInChildren<SOLITUDE.World.ScrubberEncounter.ScrubberTaskSource>(true)).ToArray();

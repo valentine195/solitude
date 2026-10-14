@@ -2,6 +2,7 @@ using System;
 using SOLITUDE.Application;
 using SOLITUDE.Player.Vitals;
 using SOLITUDE.Vitals;
+using SOLITUDE.Survivors;
 using UnityEngine;
 
 namespace SOLITUDE.Player
@@ -89,6 +90,42 @@ namespace SOLITUDE.Player
             oxygenChange = Vitals.Oxygen.ApplySilently(Vitals.Oxygen.PreciseMax, Authored(currentOxygen, Vitals.Oxygen));
             hungerChange = Vitals.Hunger.ApplySilently(Vitals.Hunger.PreciseMax, Authored(currentHunger, Vitals.Hunger));
             timing = default;
+            FinishMutation(true);
+        }
+
+        public void CaptureVitals(SurvivorSnapshot snapshot)
+        {
+            if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
+            EnsureVitals();
+            if (publishing) throw new InvalidOperationException("Cannot capture vitals during a mutation/publication.");
+            snapshot.health = new SavedVital { current = Vitals.Health.PreciseCurrent, max = Vitals.Health.PreciseMax };
+            snapshot.oxygen = new SavedVital { current = Vitals.Oxygen.PreciseCurrent, max = Vitals.Oxygen.PreciseMax };
+            snapshot.hunger = new SavedVital { current = Vitals.Hunger.PreciseCurrent, max = Vitals.Hunger.PreciseMax };
+            snapshot.recoveryDelayRemaining = timing.DelayRemaining;
+        }
+
+        public void ValidateRestore(SurvivorSnapshot snapshot)
+        {
+            if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
+            EnsureVitals(); snapshot.Validate();
+            if (publishing) throw new InvalidOperationException("Cannot restore vitals during a mutation/publication.");
+            if (!IsConfigurationValid || snapshot.health.max > float.MaxValue || snapshot.oxygen.max > float.MaxValue
+                || snapshot.hunger.max > float.MaxValue)
+                throw new System.IO.InvalidDataException("Saved vitals are incompatible with this avatar.");
+        }
+
+        public void RestoreVitals(SurvivorSnapshot snapshot)
+        {
+            ValidateRestore(snapshot);
+            // Preserve the scene's recovery rules, restore saved maxima/values and timing together.
+            var next = new VitalsRecoverySettings(snapshot.health.max, snapshot.hunger.max, settings.SegmentCount,
+                settings.FedThresholdFraction, settings.HungerDepletionRate, settings.DamageDelay, settings.RecoveryRate);
+            if (!next.IsValid) throw new System.IO.InvalidDataException("Saved vitals settings are invalid.");
+            BeginMutation(); settings = next;
+            healthChange = Vitals.Health.ApplySilently(snapshot.health.max, snapshot.health.current);
+            oxygenChange = Vitals.Oxygen.ApplySilently(snapshot.oxygen.max, snapshot.oxygen.current);
+            hungerChange = Vitals.Hunger.ApplySilently(snapshot.hunger.max, snapshot.hunger.current);
+            timing = new VitalsRecoveryState(snapshot.recoveryDelayRemaining);
             FinishMutation(true);
         }
 
