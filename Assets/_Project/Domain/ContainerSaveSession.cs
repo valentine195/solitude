@@ -3,6 +3,8 @@ using System.IO;
 using System.Collections.Generic;
 using SOLITUDE.Containers;
 using SOLITUDE.Items;
+using SOLITUDE.Survivors;
+using SOLITUDE.Expeditions;
 namespace SOLITUDE.SaveLoad
 {
     public sealed class ContainerSaveSession
@@ -22,6 +24,7 @@ namespace SOLITUDE.SaveLoad
         {
             this.catalog = new ItemCatalog((catalog ?? throw new ArgumentNullException(nameof(catalog))).Items);
             data = SaveGameData.Migrate(Clone(source ?? throw new ArgumentNullException(nameof(source))));
+            IsDirty = source.version != SaveGameData.CurrentVersion;
             data.containers ??= new List<ContainerSaveRecord>();
             var ids = new HashSet<string>(StringComparer.Ordinal);
             foreach (var record in data.containers)
@@ -81,7 +84,33 @@ namespace SOLITUDE.SaveLoad
             var snapshot = Clone(data);
             foreach (var binding in bindings.Values) Store(snapshot, binding.Id, ContainerSaveSerializer.Capture(binding.Container));
             snapshot.collectedPickupIds = new List<string>(collected); snapshot.collectedPickupIds.Sort(StringComparer.Ordinal);
+            snapshot.ValidateLifecycle();
             return snapshot;
+        }
+        public bool TryInitializeLifecycle(SurvivorSnapshot survivor, ExpeditionState expedition)
+        {
+            if (Commands.IsBusy || HasIntegrityFailure) throw new InvalidOperationException("Session is not ready for lifecycle changes.");
+            if (data.survivor != null) return false;
+            if (survivor == null || expedition == null) throw new ArgumentNullException("Initial lifecycle state is required.");
+            StoreLifecycle(survivor, expedition);
+            return true;
+        }
+        public void StoreLifecycle(SurvivorSnapshot survivor, ExpeditionState expedition, SavedDeathTransition pendingDeath = null)
+        {
+            if (Commands.IsBusy || HasIntegrityFailure) throw new InvalidOperationException("Session is not ready for lifecycle changes.");
+            if (survivor == null || expedition == null) throw new ArgumentNullException("Lifecycle state is required.");
+            var candidate = Capture();
+            candidate.survivor = survivor.Clone(); candidate.expedition = expedition.Clone();
+            candidate.pendingDeath = pendingDeath?.Clone();
+            candidate.ValidateLifecycle();
+            data = candidate; IsDirty = true;
+        }
+        public void StoreShipState(ShipStateSnapshot ship)
+        {
+            if (Commands.IsBusy || HasIntegrityFailure) throw new InvalidOperationException("Session is not ready for ship changes.");
+            if (ship == null) throw new ArgumentNullException(nameof(ship));
+            var candidate = Capture(); candidate.ship = ship.Clone(); candidate.ValidateLifecycle();
+            data = candidate; IsDirty = true;
         }
         public void MarkSaved()
         {
@@ -115,7 +144,9 @@ namespace SOLITUDE.SaveLoad
         {
             var result = new SaveGameData { version = source.version, worldSeed = source.worldSeed,
                 containers = source.containers == null ? null : new List<ContainerSaveRecord>(),
-                collectedPickupIds = source.collectedPickupIds == null ? null : new List<string>(source.collectedPickupIds) };
+                collectedPickupIds = source.collectedPickupIds == null ? null : new List<string>(source.collectedPickupIds),
+                survivor = source.survivor?.Clone(), expedition = source.expedition?.Clone(),
+                ship = source.ship?.Clone(), pendingDeath = source.pendingDeath?.Clone() };
             if (source.containers != null) foreach (var record in source.containers)
                 result.containers.Add(record == null ? null : new ContainerSaveRecord { saveableId = record.saveableId, state = ContainerSaveSerializer.Clone(record.state) });
             return result;

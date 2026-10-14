@@ -16,7 +16,9 @@ def run(cmd,name,timeout=360,expected=0,input_data=None):
 def editor(method,name):return run([a.unity,'run',workspace,'--timeout','300','--no-tail','--log-file',output/(name+'.log'),'--','-nographics','-executeMethod',method],name)
 def tests(mode,name):
  location=output/(name+'-saves');location.mkdir(exist_ok=True)
- run([a.unity,'test',workspace,'--mode',mode,'--filter','SOLITUDE.Tests','--output',output/(name+'.xml'),'--timeout','300','--','-nographics','-logFile',output/(name+'.log'),'-solitudeSaveDirectory',location],name)
+ # PlayMode includes screenshot/render-request tests and therefore needs a real graphics device.
+ graphics=[] if mode=='PlayMode' else ['-nographics']
+ run([a.unity,'test',workspace,'--mode',mode,'--filter','SOLITUDE.Tests','--output',output/(name+'.xml'),'--timeout','300','--',*graphics,'-logFile',output/(name+'.log'),'-solitudeSaveDirectory',location],name)
  doc=ET.parse(output/(name+'.xml')).getroot()
  if int(doc.get('failed','0')) or int(doc.get('passed','0'))==0:raise RuntimeError(f'{name}: no passing test suite')
  results[-1]['passed']=int(doc.get('passed'));results[-1]['failed']=int(doc.get('failed','0'))

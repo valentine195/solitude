@@ -16,6 +16,77 @@ namespace SOLITUDE.SaveLoad
             if (token == null || token.Type != type) throw new SaveCandidateException("Missing or invalid " + field);
             return token;
         }
+        private static JObject OptionalObject(JObject obj, string field)
+        {
+            var token = obj[field];
+            if (token == null || (token.Type != JTokenType.Null && token.Type != JTokenType.Object))
+                throw new SaveCandidateException("Missing or invalid " + field);
+            return token.Type == JTokenType.Null ? null : (JObject)token;
+        }
+        private static void Number(JObject obj, string field)
+        {
+            var token = obj[field];
+            if (token == null || (token.Type != JTokenType.Integer && token.Type != JTokenType.Float))
+                throw new SaveCandidateException("Missing or invalid " + field);
+            double value = token.Value<double>();
+            if (double.IsNaN(value) || double.IsInfinity(value)) throw new SaveCandidateException("Invalid " + field);
+        }
+        private static void Keys(JObject obj, string field)
+        {
+            foreach (var key in (JArray)Required(obj, field, JTokenType.Array))
+                if (key.Type != JTokenType.String) throw new SaveCandidateException("Invalid " + field);
+        }
+        private static JObject Record(JToken token)
+        {
+            if (!(token is JObject record)) throw new SaveCandidateException("Invalid saved world record.");
+            Required(record, "id", JTokenType.String);
+            return record;
+        }
+        private static void Lifecycle(JObject obj)
+        {
+            var survivor = OptionalObject(obj, "survivor");
+            if (survivor != null)
+            {
+                Required(survivor, "id", JTokenType.String); Required(survivor, "status", JTokenType.Integer);
+                Required(survivor, "scenePath", JTokenType.String);
+                foreach (var field in new[] { "x", "y", "z", "recoveryDelayRemaining" }) Number(survivor, field);
+                foreach (var field in new[] { "health", "oxygen", "hunger" })
+                {
+                    var vital = (JObject)Required(survivor, field, JTokenType.Object);
+                    Number(vital, "current"); Number(vital, "max");
+                }
+            }
+            var expedition = OptionalObject(obj, "expedition");
+            if (expedition != null)
+            {
+                Required(expedition, "id", JTokenType.String);
+                Keys(expedition, "defeatedEncounterIds"); Keys(expedition, "collectedSupplySourceIds");
+            }
+            var ship = (JObject)Required(obj, "ship", JTokenType.Object);
+            foreach (var token in (JArray)Required(ship, "repairs", JTokenType.Array))
+            {
+                var record = Record(token); Required(record, "installed", JTokenType.Boolean);
+                Required(record, "running", JTokenType.Boolean); Number(record, "recoverySeconds");
+            }
+            foreach (var token in (JArray)Required(ship, "doors", JTokenType.Array))
+            {
+                var record = Record(token);
+                foreach (var field in new[] { "powered", "unlocked", "open" }) Required(record, field, JTokenType.Boolean);
+            }
+            foreach (var token in (JArray)Required(ship, "criticalSources", JTokenType.Array))
+            {
+                var record = Record(token); Required(record, "objectiveId", JTokenType.String);
+                Required(record, "available", JTokenType.Boolean);
+            }
+            Keys(ship, "permanentDiscoveryIds");
+            var pending = OptionalObject(obj, "pendingDeath");
+            if (pending != null)
+            {
+                foreach (var field in new[] { "id", "departingSurvivorId", "successorId", "departingExpeditionId", "expeditionId" })
+                    Required(pending, field, JTokenType.String);
+                Required(pending, "stage", JTokenType.Integer);
+            }
+        }
         public SaveGameData Decode(string json)
         {
             try
@@ -41,9 +112,8 @@ namespace SOLITUDE.SaveLoad
                         if (!catalog.TryGet(id, out _)) throw new SaveCandidateException("Saved item is not in the current catalog: " + id, true);
                     }
                 }
-                if (version == 2)
-                    foreach (var id in (JArray)Required(obj, "collectedPickupIds", JTokenType.Array))
-                        if (id.Type != JTokenType.String) throw new SaveCandidateException("Invalid pickup fact.");
+                if (version >= 2) Keys(obj, "collectedPickupIds");
+                if (version >= 3) Lifecycle(obj);
                 var data = obj.ToObject<SaveGameData>();
                 return new ContainerSaveSession(data, catalog).Capture();
             }

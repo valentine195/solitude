@@ -8,6 +8,8 @@ using SOLITUDE.Containers;
 using SOLITUDE.Items;
 using SOLITUDE.SaveLoad;
 using UnityEngine;
+using SOLITUDE.Survivors;
+using SOLITUDE.Expeditions;
 
 namespace SOLITUDE.Tests
 {
@@ -42,8 +44,11 @@ namespace SOLITUDE.Tests
             foreach (var entry in entries) state.slots.Add(new ContainerSlotSaveData { index = entry.index, itemId = entry.id, quantity = entry.quantity });
             return state;
         }
-        private static SaveGameData RoundTrip(ContainerSaveSession session) =>
-            JsonUtility.FromJson<SaveGameData>(JsonUtility.ToJson(session.Capture()));
+        private SaveGameData RoundTrip(ContainerSaveSession value)
+        {
+            var codec = new SaveJsonCodec(catalog);
+            return codec.Decode(codec.Encode(value.Capture()));
+        }
 
         [Test]
         public void PreviewAndCancelKeepSourceOwnership()
@@ -225,6 +230,30 @@ namespace SOLITUDE.Tests
             Assert.IsFalse(binding.Container.IsAvailable);
             using var replacement = other.Register("locker", 2);
             Assert.AreEqual(8, replacement.Container.GetSlot(0).Stack.Quantity);
+        }
+
+        [Test]
+        public void ProductionSerializationAndOwnerReleaseRetainLifecycleAndShipFacts()
+        {
+            var colonist = new SurvivorSnapshot
+            {
+                id = Guid.NewGuid().ToString(), scenePath = "Assets/_Project/Scenes/Wakeup.unity", x = -2.5,
+                health = new SavedVital { current = 25, max = 100 }, oxygen = new SavedVital { current = 100, max = 100 },
+                hunger = new SavedVital { current = 75, max = 100 }, recoveryDelayRemaining = 2
+            };
+            var expedition = new ExpeditionState { id = Guid.NewGuid().ToString() };
+            expedition.collectedSupplySourceIds.Add("bandage");
+            Assert.IsTrue(session.TryInitializeLifecycle(colonist, expedition));
+            var ship = new ShipStateSnapshot(); ship.doors.Add(new DoorSaveRecord { id = "shortcut", powered = true, unlocked = true, open = true });
+            session.StoreShipState(ship); Grant(source, battery, 3);
+            using (var transient = session.Register("transient-locker", 1)) Grant(transient.Container, oxygen, 2);
+            var loaded = Session(RoundTrip(session));
+            Assert.AreEqual(colonist.id, loaded.Capture().survivor.id); Assert.AreEqual(-2.5, loaded.Capture().survivor.x);
+            Assert.AreEqual(25, loaded.Capture().survivor.health.current); Assert.AreEqual(2, loaded.Capture().survivor.recoveryDelayRemaining);
+            Assert.AreEqual(expedition.id, loaded.Capture().expedition.id); Assert.IsTrue(loaded.Capture().ship.doors[0].open);
+            Assert.AreEqual("bandage", loaded.Capture().expedition.collectedSupplySourceIds[0]);
+            using var rebound = loaded.Register("transient-locker", 1);
+            Assert.AreEqual(2, rebound.Container.GetSlot(0).Stack.Quantity);
         }
 
         [Test]

@@ -54,7 +54,8 @@ namespace SOLITUDE.Tests
         {
             service.Register("pickup.a", new PickupReward("test.item", 2));
             Assert.AreEqual(CollectResult.Collected, Collect("pickup.a", 2));
-            var data = JsonUtility.FromJson<SaveGameData>(JsonUtility.ToJson(session.Capture()));
+            var codec = new SaveJsonCodec(Catalog());
+            var data = codec.Decode(codec.Encode(session.Capture()));
             var restored = new ContainerSaveSession(data, Catalog());
             var restoredInventory = restored.Register(ContainerSaveSession.PlayerInventoryId, 2).Container;
             var restoredService = new PickupCollectionService(restored);
@@ -208,7 +209,7 @@ namespace SOLITUDE.Tests
             data.worldSeed = 123;
             data.collectedPickupIds = null;
             var migrated = SaveGameData.Migrate(data);
-            Assert.AreEqual(2, migrated.version);
+            Assert.AreEqual(SaveGameData.CurrentVersion, migrated.version);
             Assert.AreEqual(123, migrated.worldSeed);
             Assert.AreEqual(3, migrated.containers[0].state.slots[0].quantity);
             Assert.IsEmpty(migrated.collectedPickupIds);
@@ -231,21 +232,22 @@ namespace SOLITUDE.Tests
             string directory = Path.Combine(Path.GetTempPath(), "solitude-pickup-" + Guid.NewGuid());
             Directory.CreateDirectory(directory);
             string path = Path.Combine(directory, "save.json");
+            var codec = new SaveJsonCodec(Catalog());
             try
             {
-                string previous = JsonUtility.ToJson(session.Capture());
+                string previous = codec.Encode(session.Capture());
                 SaveFileStore.Write(path, previous);
                 session.MarkSaved();
                 service.Register("pickup.a", new PickupReward("test.item", 1));
                 Collect("pickup.a");
                 Directory.CreateDirectory(path + ".tmp");
-                Assert.Throws<UnauthorizedAccessException>(() => SaveFileStore.Write(path, JsonUtility.ToJson(session.Capture())));
+                Assert.Throws<UnauthorizedAccessException>(() => SaveFileStore.Write(path, codec.Encode(session.Capture())));
                 Assert.AreEqual(previous, File.ReadAllText(path));
                 Assert.IsTrue(session.IsDirty);
                 Directory.Delete(path + ".tmp");
-                SaveFileStore.Write(path, JsonUtility.ToJson(session.Capture()));
+                SaveFileStore.Write(path, codec.Encode(session.Capture()));
                 session.MarkSaved();
-                var saved = JsonUtility.FromJson<SaveGameData>(File.ReadAllText(path));
+                var saved = codec.Decode(File.ReadAllText(path));
                 Assert.Contains("pickup.a", saved.collectedPickupIds);
                 Assert.AreEqual(1, saved.containers[0].state.slots[0].quantity);
             }
@@ -319,9 +321,10 @@ namespace SOLITUDE.Tests
             view.Initialize(runtimeService);
             Assert.IsTrue(view.Interact(null).IsSuccess);
             Assert.IsFalse(instance.activeSelf);
-            var json = JsonUtility.ToJson(runtimeSession.Capture());
+            var codec = new SaveJsonCodec(catalog);
+            var json = codec.Encode(runtimeSession.Capture());
             yield return SceneManager.UnloadSceneAsync(scene);
-            runtimeSession = new ContainerSaveSession(JsonUtility.FromJson<SaveGameData>(json), catalog);
+            runtimeSession = new ContainerSaveSession(codec.Decode(json), catalog);
             model = runtimeSession.Register(ContainerSaveSession.PlayerInventoryId, 2).Container;
             runtimeService = new PickupCollectionService(runtimeSession);
             scene = SceneManager.CreateScene("PickupTestWorldReloaded");
