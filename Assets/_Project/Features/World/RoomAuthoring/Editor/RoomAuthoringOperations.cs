@@ -49,6 +49,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return null;
         }
 
+        public static bool PaintCell(ShipRoomAuthoring room, Vector3Int position, TileBase marker)
+        {
+            var issue = GetSafetyIssue(room, allowMissingOutput: true);
+            if (issue != null || position.z != 0) return false;
+            Undo.RegisterCompleteObjectUndo(room.Occupancy, marker == null ? "Erase Room Cell" : "Paint Room Cell");
+            room.Occupancy.SetTile(position, marker);
+            return Rebuild(room);
+        }
+
         public static bool Rebuild(ShipRoomAuthoring room)
         {
             var issue = GetSafetyIssue(room, allowMissingOutput: true);
