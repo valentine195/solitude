@@ -40,7 +40,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return room;
         }
 
-        public static string GetOwnershipIssue(ShipRoomAuthoring room)
+        public static string GetOwnershipIssue(ShipRoomAuthoring room, bool allowMissingOutput = false)
         {
             if (room == null || !room.gameObject.scene.IsValid() || !room.gameObject.scene.isLoaded)
                 return "Select a room in a loaded scene.";
@@ -48,9 +48,19 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var rooms = room.gameObject.scene.GetRootGameObjects()
                 .SelectMany(root => root.GetComponentsInChildren<ShipRoomAuthoring>(true)).ToArray();
             if (rooms.Count(other => other.RoomId == room.RoomId) != 1) return "Room identity is ambiguous in this scene.";
-            if (room.Occupancy == null || room.GeneratedOutput == null) return "Room occupancy or output reference is missing.";
+            if (room.Occupancy == null) return "Room occupancy reference is missing.";
             if (room.Occupancy.transform == room.transform || !room.Occupancy.transform.IsChildOf(room.transform))
                 return "Occupancy must belong to this room's hierarchy.";
+            if (rooms.Any(other => other != room && other.Occupancy == room.Occupancy))
+                return "Room occupancy is referenced by another room.";
+            if (room.GeneratedOutput == null)
+            {
+                if (!allowMissingOutput) return "Room output reference is missing.";
+                if (room.gameObject.scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<RoomGeneratedOutput>(true))
+                    .Any(output => output.Owner == room || output.transform.IsChildOf(room.transform)))
+                    return "Existing generated ownership must be resolved before replacing a missing output reference.";
+                return null;
+            }
             if (room.GeneratedOutput.Owner != room || room.GeneratedOutput.transform == room.transform ||
                 !room.GeneratedOutput.transform.IsChildOf(room.transform)) return "Generated output is not owned by this room.";
             if (room.Occupancy.transform.IsChildOf(room.GeneratedOutput.transform) ||
