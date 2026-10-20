@@ -56,7 +56,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsNull(room.GeneratedOutput.GetComponentInChildren<Tilemap>().GetTile(Vector3Int.right));
             brush.Paint(grid, room.Occupancy.gameObject, new Vector3Int(1, 1, 0));
             Assert.AreEqual(2, RoomAuthoringOperations.ReadCells(room).Length);
-            Assert.That(room.GenerationDiagnostic, Does.Contain("rectangle"));
+            Assert.IsEmpty(room.GenerationDiagnostic);
             Assert.AreEqual(2, RoomAuthoringTestFixtures.FloorCount(room));
             RoomAuthoringPaletteSetup.EndEditing();
             Assert.IsFalse(room.Occupancy.gameObject.activeSelf);

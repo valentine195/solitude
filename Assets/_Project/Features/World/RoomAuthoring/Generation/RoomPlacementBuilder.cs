@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -38,19 +39,25 @@ namespace SOLITUDE.World.RoomAuthoring
             var floorIssue = CheckFloor(style.FloorTile);
             if (floorIssue == null) result.Floor = (Tile)style.FloorTile;
             else result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.Floor, "floorTile", floorIssue));
-            if (!geometry.IsRectangle)
+            var unresolvedJoins = new HashSet<RoomJunction>();
+            foreach (var join in geometry.Junctions)
             {
-                result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.Geometry, "occupancy", "Only one filled rectangle is supported in this intermediate preview."));
-                issue = string.Join("\n", result.Issues.ConvertAll(i => i.Reason));
-                return false;
+                var joinIssue = CheckModule(JoinModule(style, join), join.Role + " corner", false);
+                if (!style.SupportsDiagonalContact && geometry.DiagonalContacts.Contains(join.Position))
+                    joinIssue = "Configured artwork cannot resolve separate diagonal branches at this junction.";
+                if (joinIssue == null) continue;
+                unresolvedJoins.Add(join);
+                result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.Join, join.Role, joinIssue, true, join.Position, join.Position));
             }
-            var bounds = geometry.Bounds;
             foreach (var run in geometry.Runs)
             {
                 var modules = run.Side == RoomSide.North ? style.NorthWalls : new[] { run.Side == RoomSide.West ? style.WestCap : run.Side == RoomSide.East ? style.EastCap : style.SouthCap };
-                var reservations = run.Side == RoomSide.North ? style.NorthReservationsPixels : run.Side == RoomSide.West ? style.WestReservationsPixels : run.Side == RoomSide.East ? style.EastReservationsPixels : style.SouthReservationsPixels;
+                var convex = Reservations(style, run.Side, false);
+                var concave = Reservations(style, run.Side, true);
+                var reservations = new Vector2Int(run.StartJoin.Kind == RoomJoinKind.Concave ? concave.x : convex.x,
+                    run.EndJoin.Kind == RoomJoinKind.Concave ? concave.y : convex.y);
                 var repeat = modules == null || modules.Length == 0 ? 0 : modules[0]?.RepeatPixels ?? 0;
-                var end = run.Start + (run.Side == RoomSide.North || run.Side == RoomSide.South ? Vector2Int.right : Vector2Int.up) * run.Length;
+                var end = run.End;
                 string runIssue = null;
                 if (modules == null || modules.Length == 0) runIssue = run.Side + " wall modules are missing.";
                 else foreach (var module in modules)
@@ -62,6 +69,19 @@ namespace SOLITUDE.World.RoomAuthoring
                 if (runIssue != null)
                 {
                     result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.Asset, run.Side.ToString(), runIssue, true, run.Start, end));
+                    continue;
+                }
+                if ((reservations.x > 0 && unresolvedJoins.Contains(run.StartJoin)) ||
+                    (reservations.y > 0 && unresolvedJoins.Contains(run.EndJoin)))
+                {
+                    result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.Span, run.Side.ToString(),
+                        run.Side + " span requires its unresolved endpoint join to supply reserved coverage.", true, run.Start, end));
+                    continue;
+                }
+                if (run.Side == RoomSide.North && (style.NorthWallClearanceCells < 0 ||
+                    geometry.Cells.Any(c => c.x >= run.Start.x && c.x < end.x && c.y >= run.Start.y && (long)c.y - run.Start.y < style.NorthWallClearanceCells)))
+                {
+                    result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.VisualFit, "North", "North wall's declared clearance conflicts with authored floor or has an invalid clearance setting.", true, run.Start, end));
                     continue;
                 }
                 var span = (long)run.Length * 32 - reservations.x - reservations.y;
@@ -78,22 +98,27 @@ namespace SOLITUDE.World.RoomAuthoring
                     Add(result, run.Side.ToString(), modules[n % modules.Length], origin);
                 }
             }
-            var corners = new[] { style.Southwest, style.Southeast, style.Northwest, style.Northeast };
-            var origins = new[] { new Vector2(bounds.xMin, bounds.yMin), new Vector2(bounds.xMax, bounds.yMin), new Vector2(bounds.xMin, bounds.yMax), new Vector2(bounds.xMax, bounds.yMax) };
-            var names = new[] { "Southwest", "Southeast", "Northwest", "Northeast" };
-            for (var n = 0; n < 4; n++)
-            {
-                var cornerIssue = CheckModule(corners[n], names[n] + " corner", false);
-                if (cornerIssue != null)
-                {
-                    var at = Vector2Int.RoundToInt(origins[n]);
-                    result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.Asset, names[n], cornerIssue, true, at, at));
-                    continue;
-                }
-                Add(result, names[n], corners[n], origins[n]);
-            }
+            foreach (var join in geometry.Junctions)
+                if (!unresolvedJoins.Contains(join)) Add(result, join.Role, JoinModule(style, join), join.Position);
             issue = result.Issues.Count == 0 ? null : string.Join("\n", result.Issues.ConvertAll(i => i.Reason));
             return issue == null;
+        }
+
+        private static RoomStyleDefinition.Module JoinModule(RoomStyleDefinition style, RoomJunction join)
+        {
+            if (join.Kind == RoomJoinKind.Concave)
+                return join.Corner == RoomCorner.Southwest ? style.ConcaveSouthwest : join.Corner == RoomCorner.Southeast ? style.ConcaveSoutheast
+                    : join.Corner == RoomCorner.Northwest ? style.ConcaveNorthwest : style.ConcaveNortheast;
+            return join.Corner == RoomCorner.Southwest ? style.Southwest : join.Corner == RoomCorner.Southeast ? style.Southeast
+                : join.Corner == RoomCorner.Northwest ? style.Northwest : style.Northeast;
+        }
+
+        private static Vector2Int Reservations(RoomStyleDefinition style, RoomSide side, bool concave)
+        {
+            if (concave) return side == RoomSide.North ? style.ConcaveNorthReservationsPixels : side == RoomSide.South ? style.ConcaveSouthReservationsPixels
+                : side == RoomSide.West ? style.ConcaveWestReservationsPixels : style.ConcaveEastReservationsPixels;
+            return side == RoomSide.North ? style.NorthReservationsPixels : side == RoomSide.South ? style.SouthReservationsPixels
+                : side == RoomSide.West ? style.WestReservationsPixels : style.EastReservationsPixels;
         }
 
         private static bool Finite(Vector2 v) => !float.IsNaN(v.x) && !float.IsNaN(v.y) && !float.IsInfinity(v.x) && !float.IsInfinity(v.y);

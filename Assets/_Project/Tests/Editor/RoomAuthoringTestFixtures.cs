@@ -25,6 +25,8 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Style.WestCap = Module(32, 32, 32); Style.EastCap = Module(32, 32, 32); Style.SouthCap = Module(32, 32, 32);
             Style.Northwest = Module(32, 32, 32); Style.Northeast = Module(32, 32, 32);
             Style.Southwest = Module(32, 32, 32); Style.Southeast = Module(32, 32, 32);
+            Style.ConcaveSouthwest = Module(32, 32, 32); Style.ConcaveSoutheast = Module(32, 32, 32);
+            Style.ConcaveNorthwest = Module(32, 32, 32); Style.ConcaveNortheast = Module(32, 32, 32);
         }
         public Sprite Sprite(int width, int height)
         {

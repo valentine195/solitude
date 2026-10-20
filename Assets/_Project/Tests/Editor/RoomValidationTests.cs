@@ -20,8 +20,8 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var retained = other.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>();
             room.Occupancy.SetTile(Vector3Int.zero, null);
             Assert.AreEqual(47, RoomAuthoringOperations.ReadCells(room).Length);
-            Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
-            Assert.That(room.GenerationDiagnostic, Does.Contain("rectangle"));
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room), room.GenerationDiagnostic);
+            Assert.IsEmpty(room.GenerationDiagnostic);
             Assert.AreEqual(47, RoomAuthoringTestFixtures.FloorCount(room));
             CollectionAssert.AreEqual(retained, other.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>());
             room.Occupancy.SetTile(Vector3Int.zero, f.Style.FloorTile);

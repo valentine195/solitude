@@ -37,6 +37,31 @@ namespace SOLITUDE.World.RoomAuthoring
         [SerializeField] private Vector2Int eastReservationsPixels;
         [SerializeField] private Vector2Int southReservationsPixels;
 
+        [SerializeField] private Module concaveSouthwest = new Module();
+        [SerializeField] private Module concaveSoutheast = new Module();
+        [SerializeField] private Module concaveNorthwest = new Module();
+        [SerializeField] private Module concaveNortheast = new Module();
+        [Tooltip("Start/end coverage reservations when the corresponding run endpoint is concave. Same axis order as convex reservations.")]
+        [SerializeField] private Vector2Int concaveNorthReservationsPixels;
+        [SerializeField] private Vector2Int concaveWestReservationsPixels;
+        [SerializeField] private Vector2Int concaveEastReservationsPixels;
+        [SerializeField] private Vector2Int concaveSouthReservationsPixels;
+        [Tooltip("Declared empty-cell clearance north of each north-facing boundary. Zero leaves visual fit unqualified; production artwork needs explicit verification.")]
+        [Min(0), SerializeField] private int northWallClearanceCells;
+        [Tooltip("Whether the configured artwork supports two separate branches at a diagonal-only cell contact.")]
+        [SerializeField] private bool supportsDiagonalContact = true;
+
+        public Module ConcaveSouthwest { get => concaveSouthwest; set => concaveSouthwest = value; }
+        public Module ConcaveSoutheast { get => concaveSoutheast; set => concaveSoutheast = value; }
+        public Module ConcaveNorthwest { get => concaveNorthwest; set => concaveNorthwest = value; }
+        public Module ConcaveNortheast { get => concaveNortheast; set => concaveNortheast = value; }
+        public Vector2Int ConcaveNorthReservationsPixels { get => concaveNorthReservationsPixels; set => concaveNorthReservationsPixels = value; }
+        public Vector2Int ConcaveWestReservationsPixels { get => concaveWestReservationsPixels; set => concaveWestReservationsPixels = value; }
+        public Vector2Int ConcaveEastReservationsPixels { get => concaveEastReservationsPixels; set => concaveEastReservationsPixels = value; }
+        public Vector2Int ConcaveSouthReservationsPixels { get => concaveSouthReservationsPixels; set => concaveSouthReservationsPixels = value; }
+        public int NorthWallClearanceCells { get => northWallClearanceCells; set => northWallClearanceCells = value; }
+        public bool SupportsDiagonalContact { get => supportsDiagonalContact; set => supportsDiagonalContact = value; }
+
         public string StyleId => styleId;
         public string DisplayName { get => displayName; set => displayName = value; }
         public TileBase FloorTile { get => floorTile; set => floorTile = value; }

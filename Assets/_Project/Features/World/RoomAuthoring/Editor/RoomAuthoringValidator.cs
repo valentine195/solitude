@@ -90,7 +90,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 text.Append(EditorJsonUtility.ToJson(style));
                 if (style.FloorTile is Tile tile) { text.Append(EditorJsonUtility.ToJson(tile)); SpriteFingerprint(text, tile.sprite); }
                 var modules = (style.NorthWalls ?? System.Array.Empty<RoomStyleDefinition.Module>()).Concat(new[]
-                    { style.WestCap, style.EastCap, style.SouthCap, style.Northwest, style.Northeast, style.Southwest, style.Southeast });
+                    { style.WestCap, style.EastCap, style.SouthCap, style.Northwest, style.Northeast, style.Southwest, style.Southeast,
+                        style.ConcaveNorthwest, style.ConcaveNortheast, style.ConcaveSouthwest, style.ConcaveSoutheast });
                 foreach (var module in modules) if (module != null) SpriteFingerprint(text, module.Sprite);
             }
             return Hash(text);

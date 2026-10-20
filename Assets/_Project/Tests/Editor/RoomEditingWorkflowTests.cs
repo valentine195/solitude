@@ -45,7 +45,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 brush.Erase(grid, target, new Vector3Int(11, 5, 0));
                 Assert.AreEqual(71, RoomAuthoringOperations.ReadCells(room).Length);
                 Assert.AreEqual(71, RoomAuthoringTestFixtures.FloorCount(room));
-                Assert.That(room.GenerationDiagnostic, Does.Contain("rectangle"));
+                Assert.That(room.GenerationDiagnostic, Does.Contain("not exactly coverable"));
                 var invalid = RoomUndoRedoTests.Snapshot(room); UnrelatedUnchanged();
                 Undo.PerformUndo(); CollectionAssert.AreEqual(valid, RoomUndoRedoTests.Snapshot(room)); UnrelatedUnchanged();
                 Undo.PerformRedo(); CollectionAssert.AreEqual(invalid, RoomUndoRedoTests.Snapshot(room)); UnrelatedUnchanged();

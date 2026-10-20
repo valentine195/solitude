@@ -28,7 +28,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
 
         [TestCase("Paint")]
         [TestCase("Paint stroke")]
-        [TestCase("Erase invalid")]
+        [TestCase("Erase notch")]
         [TestCase("Box fill")]
         [TestCase("Box expansion")]
         [TestCase("Box erase")]
@@ -41,7 +41,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var before = Snapshot(room);
             var brush = ScriptableObject.CreateInstance<ShipRoomBrush>(); brush.OccupancyMarker = f.Style.FloorTile;
             var editor = (ShipRoomBrushEditor)UnityEditor.Editor.CreateEditor(brush);
-            var tool = operation.StartsWith("Paint") ? GridBrushBase.Tool.Paint : operation == "Erase invalid" ? GridBrushBase.Tool.Erase : GridBrushBase.Tool.Box;
+            var tool = operation.StartsWith("Paint") ? GridBrushBase.Tool.Paint : operation == "Erase notch" ? GridBrushBase.Tool.Erase : GridBrushBase.Tool.Box;
             try
             {
                 editor.RegisterUndo(room.Occupancy.gameObject, tool);
@@ -53,7 +53,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
                         brush.Paint(grid, target, Vector3Int.right);
                         brush.Paint(grid, target, Vector3Int.right * 2);
                         break;
-                    case "Erase invalid": brush.Erase(grid, target, new Vector3Int(7, 5, 0)); break;
+                    case "Erase notch": brush.Erase(grid, target, new Vector3Int(7, 5, 0)); break;
                     case "Box fill": brush.BoxFill(grid, target, new BoundsInt(0, 0, 0, 8, 6, 1)); break;
                     case "Box expansion": brush.BoxFill(grid, target, new BoundsInt(8, 0, 0, 4, 6, 1)); break;
                     case "Box erase": brush.BoxErase(grid, target, new BoundsInt(0, 0, 0, 8, 6, 1)); break;
@@ -65,11 +65,11 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 editor.OnToolDeactivated(tool);
                 var after = Snapshot(room);
                 CollectionAssert.AreNotEqual(before, after);
-                if (operation == "Erase invalid")
+                if (operation == "Erase notch")
                 {
                     Assert.AreEqual(47, RoomAuthoringOperations.ReadCells(room).Length);
                     Assert.AreEqual(47, RoomAuthoringTestFixtures.FloorCount(room));
-                    Assert.That(room.GenerationDiagnostic, Does.Contain("rectangle"));
+                    Assert.IsEmpty(room.GenerationDiagnostic);
                 }
                 Undo.PerformUndo();
                 CollectionAssert.AreEqual(before, Snapshot(room), operation + " Undo");

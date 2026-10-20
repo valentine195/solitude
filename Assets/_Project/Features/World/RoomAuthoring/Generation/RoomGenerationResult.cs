@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SOLITUDE.World.RoomAuthoring
 {
     public enum RoomGenerationStatus { Complete, IncompletePreview, Empty, Refused }
-    public enum RoomIssueKind { Style, Floor, Asset, Span, Geometry, Safety }
+    public enum RoomIssueKind { Style, Floor, Asset, Span, Geometry, Safety, Join, VisualFit }
 
     [Serializable]
     public sealed class RoomGenerationIssue
