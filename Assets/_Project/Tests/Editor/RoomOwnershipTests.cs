@@ -11,6 +11,55 @@ namespace SOLITUDE.Tests.RoomAuthoring
 {
     public sealed class RoomOwnershipTests
     {
+        [TestCase("valid", false)]
+        [TestCase("invalid", false)]
+        [TestCase("empty", false)]
+        [TestCase("valid", true)]
+        public void DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved(string state, bool separateScene)
+        {
+            using var f = new RoomAuthoringTestFixtures();
+            var room = f.Room();
+            var neighbor = f.Room(); neighbor.transform.position = Vector3.right * 8;
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(neighbor));
+            var duplicate = UnityEngine.Object.Instantiate(room.GeneratedOutput.gameObject, room.transform);
+            var foreignScene = default(Scene);
+            try
+            {
+                Assert.AreSame(room, duplicate.GetComponent<SOLITUDE.World.RoomAuthoring.RoomGeneratedOutput>().Owner);
+                if (separateScene)
+                {
+                    duplicate.transform.SetParent(null);
+                    foreignScene = EditorSceneManager.NewPreviewScene();
+                    SceneManager.MoveGameObjectToScene(duplicate, foreignScene);
+                }
+                if (state == "invalid") f.Style.NorthWalls[0].Sprite = null;
+                if (state == "empty") room.Occupancy.ClearAllTiles();
+                var cells = RoomAuthoringOperations.ReadCells(room);
+                var primaryObjects = room.GeneratedOutput.GetComponentsInChildren<Transform>(true);
+                var duplicateObjects = duplicate.GetComponentsInChildren<Transform>(true);
+                var neighborObjects = neighbor.GeneratedOutput.GetComponentsInChildren<Transform>(true);
+                Assert.That(RoomAuthoringValidator.Validate(room), Does.Contain("exactly one output root"));
+                Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
+                Assert.That(room.GenerationDiagnostic, Does.Contain("exactly one output root"));
+                Assert.Throws<System.InvalidOperationException>(() => RoomGeometryWriter.Clear(room));
+                CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
+                CollectionAssert.AreEqual(primaryObjects, room.GeneratedOutput.GetComponentsInChildren<Transform>(true));
+                CollectionAssert.AreEqual(duplicateObjects, duplicate.GetComponentsInChildren<Transform>(true));
+                CollectionAssert.AreEqual(neighborObjects, neighbor.GeneratedOutput.GetComponentsInChildren<Transform>(true));
+                UnityEngine.Object.DestroyImmediate(duplicate);
+                var rebuilt = RoomAuthoringOperations.Rebuild(room);
+                Assert.AreEqual(state != "invalid", rebuilt, room.GenerationDiagnostic);
+                Assert.AreEqual(state == "valid" ? 28 : 0, room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Length);
+                CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
+                CollectionAssert.AreEqual(neighborObjects, neighbor.GeneratedOutput.GetComponentsInChildren<Transform>(true));
+            }
+            finally
+            {
+                if (foreignScene.IsValid() && foreignScene.isLoaded) EditorSceneManager.ClosePreviewScene(foreignScene);
+            }
+        }
+
         [TestCase(false, false)]
         [TestCase(true, false)]
         [TestCase(true, true)]

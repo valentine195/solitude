@@ -53,16 +53,19 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 return "Occupancy must belong to this room's hierarchy.";
             if (rooms.Any(other => other != room && other.Occupancy == room.Occupancy))
                 return "Room occupancy is referenced by another room.";
+            var outputs = Resources.FindObjectsOfTypeAll<RoomGeneratedOutput>()
+                .Where(output => output.gameObject.scene.IsValid() && output.gameObject.scene.isLoaded).ToArray();
             if (room.GeneratedOutput == null)
             {
                 if (!allowMissingOutput) return "Room output reference is missing.";
-                if (room.gameObject.scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<RoomGeneratedOutput>(true))
-                    .Any(output => output.Owner == room || output.transform.IsChildOf(room.transform)))
+                if (outputs.Any(output => output.Owner == room || output.transform.IsChildOf(room.transform)))
                     return "Existing generated ownership must be resolved before replacing a missing output reference.";
                 return null;
             }
             if (room.GeneratedOutput.Owner != room || room.GeneratedOutput.transform == room.transform ||
                 !room.GeneratedOutput.transform.IsChildOf(room.transform)) return "Generated output is not owned by this room.";
+            if (outputs.Count(output => output.Owner == room) != 1)
+                return "Generated output ownership is ambiguous: this room must own exactly one output root.";
             if (room.Occupancy.transform.IsChildOf(room.GeneratedOutput.transform) ||
                 room.GeneratedOutput.transform.IsChildOf(room.Occupancy.transform)) return "Occupancy and generated output must be separate.";
             if (rooms.Any(other => other != room && (other.Occupancy == room.Occupancy || other.GeneratedOutput == room.GeneratedOutput)))
