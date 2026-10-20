@@ -35,6 +35,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
             if (room.GeneratedOutput != null && (room.GeneratedOutput.GetComponentsInChildren<ShipRoomAuthoring>(true).Length != 0 ||
                 room.GeneratedOutput.GetComponentsInChildren<RoomGeneratedOutput>(true).Any(o => o != room.GeneratedOutput)))
                 return "Generated hierarchy contains another ownership root; destructive writes refused.";
+            if (room.GeneratedOutput != null)
+                foreach (var other in Resources.FindObjectsOfTypeAll<ShipRoomAuthoring>())
+                {
+                    if (!other.gameObject.scene.IsValid() || !other.gameObject.scene.isLoaded || other.Occupancy == null) continue;
+                    var authored = other.Occupancy.transform;
+                    var output = room.GeneratedOutput.transform;
+                    if (authored == output || authored.IsChildOf(output))
+                        return "Generated hierarchy contains referenced authored occupancy from room " + other.RoomId + "; destructive writes refused.";
+                }
             foreach (var position in room.Occupancy.cellBounds.allPositionsWithin)
                 if (position.z != 0 && room.Occupancy.HasTile(position)) return "Occupancy must be on the XY plane at z=0.";
             return null;

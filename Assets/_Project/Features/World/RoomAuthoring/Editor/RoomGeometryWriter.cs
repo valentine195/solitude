@@ -9,6 +9,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
     {
         public static void Clear(ShipRoomAuthoring room)
         {
+            var issue = RoomAuthoringOperations.GetSafetyIssue(room);
+            if (issue != null) throw new System.InvalidOperationException("Cannot clear room output: " + issue);
             var root = room.GeneratedOutput.transform;
             for (var i = root.childCount - 1; i >= 0; i--) Undo.DestroyObjectImmediate(root.GetChild(i).gameObject);
         }
