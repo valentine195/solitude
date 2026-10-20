@@ -12,6 +12,43 @@ namespace SOLITUDE.Editor.RoomAuthoring
     {
         public static event System.Action<ShipRoomAuthoring> GenerationCompleted;
 
+        public sealed class RoomEdit : System.IDisposable
+        {
+            private readonly int group;
+            internal readonly ShipRoomAuthoring Room;
+            internal bool IsDisposed { get; private set; }
+
+            internal RoomEdit(ShipRoomAuthoring room, string name)
+            {
+                Room = room;
+                Undo.IncrementCurrentGroup();
+                group = Undo.GetCurrentGroup();
+                Undo.SetCurrentGroupName(name);
+            }
+
+            public void Dispose()
+            {
+                if (IsDisposed) return;
+                Undo.FlushUndoRecordObjects();
+                Undo.CollapseUndoOperations(group);
+                Undo.IncrementCurrentGroup();
+                IsDisposed = true;
+            }
+        }
+
+        public static RoomEdit BeginEdit(ShipRoomAuthoring room, string name)
+        {
+            var issue = GetSafetyIssue(room, allowMissingOutput: true);
+            if (issue != null) throw new System.InvalidOperationException(issue);
+            return new RoomEdit(room, name);
+        }
+
+        private static void CheckEdit(ShipRoomAuthoring room, RoomEdit edit)
+        {
+            if (edit != null && (edit.IsDisposed || edit.Room != room))
+                throw new System.InvalidOperationException("Room edit is closed or belongs to another room.");
+        }
+
         public static Vector2Int[] ReadCells(ShipRoomAuthoring room)
         {
             var cells = new List<Vector2Int>();
@@ -51,34 +88,44 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return null;
         }
 
-        public static bool PaintCell(ShipRoomAuthoring room, Vector3Int position, TileBase marker)
+        public static bool PaintCell(ShipRoomAuthoring room, Vector3Int position, TileBase marker, RoomEdit edit = null)
         {
             var issue = GetSafetyIssue(room, allowMissingOutput: true);
             if (issue != null || position.z != 0) return false;
-            Undo.RegisterCompleteObjectUndo(room.Occupancy, marker == null ? "Erase Room Cell" : "Paint Room Cell");
+            CheckEdit(room, edit);
+            using var ownedEdit = edit == null ? BeginEdit(room, marker == null ? "Erase Room Cell" : "Paint Room Cell") : null;
+            // Generated-object Undo registrations end native recording between stroke samples.
+            // Capture each authored mutation, then collapse the samples into the gesture group.
+            Undo.RegisterCompleteObjectUndo(room.Occupancy, "Paint Room Cells");
             room.Occupancy.SetTile(position, marker);
-            return Rebuild(room);
+            return RebuildCore(room);
         }
 
-        public static bool PaintBox(ShipRoomAuthoring room, BoundsInt bounds, TileBase marker)
+        public static bool PaintBox(ShipRoomAuthoring room, BoundsInt bounds, TileBase marker, RoomEdit edit = null)
         {
             if (GetSafetyIssue(room, allowMissingOutput: true) != null || bounds.z != 0 ||
                 bounds.size.z != 1 || bounds.size.x <= 0 || bounds.size.y <= 0) return false;
             var tiles = new TileBase[checked(bounds.size.x * bounds.size.y)];
             if (marker != null)
                 for (var i = 0; i < tiles.Length; i++) tiles[i] = marker;
-            Undo.RegisterCompleteObjectUndo(room.Occupancy, marker == null ? "Erase Room Box" : "Paint Room Box");
+            CheckEdit(room, edit);
+            using var ownedEdit = edit == null ? BeginEdit(room, marker == null ? "Erase Room Box" : "Paint Room Box") : null;
+            Undo.RegisterCompleteObjectUndo(room.Occupancy, "Paint Room Cells");
             room.Occupancy.SetTilesBlock(bounds, tiles);
-            return Rebuild(room);
+            return RebuildCore(room);
         }
 
         public static bool Rebuild(ShipRoomAuthoring room)
         {
             var issue = GetSafetyIssue(room, allowMissingOutput: true);
             if (issue != null) { SetDiagnostic(room, issue); return false; }
-            Undo.IncrementCurrentGroup();
-            var group = Undo.GetCurrentGroup();
-            Undo.SetCurrentGroupName("Rebuild Room");
+            using var edit = new RoomEdit(room, "Rebuild Room");
+            return RebuildCore(room);
+        }
+
+        private static bool RebuildCore(ShipRoomAuthoring room)
+        {
+            string issue;
             if (room.GeneratedOutput == null)
             {
                 var generated = new GameObject("Generated Architecture", typeof(RoomGeneratedOutput));
@@ -95,7 +142,6 @@ namespace SOLITUDE.Editor.RoomAuthoring
             else RoomGeometryWriter.Clear(room);
             SetDiagnostic(room, issue);
             EditorSceneManager.MarkSceneDirty(room.gameObject.scene);
-            Undo.CollapseUndoOperations(group);
             GenerationCompleted?.Invoke(room);
             return valid;
         }

@@ -83,6 +83,17 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 var styleGuid = AssetDatabase.AssetPathToGUID(folder + "/Style.asset");
                 var cells = RoomAuthoringOperations.ReadCells(room);
                 var placements = Placements(room);
+                var brush = ScriptableObject.CreateInstance<ShipRoomBrush>();
+                try
+                {
+                    brush.Erase(room.GetComponent<Grid>(), room.Occupancy.gameObject, new Vector3Int(7, 5, 0));
+                    Assert.AreEqual(47, RoomAuthoringOperations.ReadCells(room).Length);
+                    Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+                    Undo.PerformUndo();
+                    CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
+                    CollectionAssert.AreEqual(placements, Placements(room));
+                }
+                finally { Object.DestroyImmediate(brush); }
                 Assert.IsTrue(EditorSceneManager.SaveScene(scene, folder + "/Room.unity"));
                 Assert.IsFalse(scene.isDirty);
                 Assert.IsNull(RoomAuthoringValidator.Validate(room));

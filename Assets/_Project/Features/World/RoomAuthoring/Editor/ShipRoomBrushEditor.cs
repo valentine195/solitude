@@ -36,10 +36,20 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public override void OnPaintSceneGUI(GridLayout gridLayout, GameObject brushTarget, BoundsInt position, GridBrushBase.Tool tool, bool executing)
         {
+            if (!executing) ((ShipRoomBrush)target).EndGesture();
             RoomAuthoringPaletteSetup.ActivateTarget(brushTarget);
             base.OnPaintSceneGUI(gridLayout, brushTarget, position, tool, executing);
         }
 
         public override void OnMouseEnter() => RoomAuthoringPaletteSetup.ActivateTarget(GridPaintingState.scenePaintTarget);
+        public override void OnMouseLeave() => ((ShipRoomBrush)target).EndGesture();
+        public override void OnToolDeactivated(GridBrushBase.Tool tool) => ((ShipRoomBrush)target).EndGesture();
+
+        public override void RegisterUndo(GameObject brushTarget, GridBrushBase.Tool tool)
+        {
+            var grid = brushTarget == null ? null : brushTarget.GetComponentInParent<Grid>();
+            if (ShipRoomBrush.TryGetRoom(grid, brushTarget, out var room))
+                ((ShipRoomBrush)target).BeginGesture(room, tool);
+        }
     }
 }

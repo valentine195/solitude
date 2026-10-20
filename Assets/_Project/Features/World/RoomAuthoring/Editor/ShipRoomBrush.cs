@@ -12,29 +12,44 @@ namespace SOLITUDE.Editor.RoomAuthoring
     {
         [SerializeField] private TileBase occupancyMarker;
         public TileBase OccupancyMarker { get => occupancyMarker; set => occupancyMarker = value; }
+        private RoomAuthoringOperations.RoomEdit gesture;
+
+        public void BeginGesture(ShipRoomAuthoring room, Tool tool)
+        {
+            EndGesture();
+            gesture = RoomAuthoringOperations.BeginEdit(room, "Room " + tool);
+        }
+
+        public void EndGesture()
+        {
+            gesture?.Dispose();
+            gesture = null;
+        }
+
+        private void OnDisable() => EndGesture();
 
         public override void Paint(GridLayout gridLayout, GameObject brushTarget, Vector3Int position)
         {
             if (occupancyMarker != null && position.z == 0 && TryGetRoom(gridLayout, brushTarget, out var room))
-                RoomAuthoringOperations.PaintCell(room, position, occupancyMarker);
+                RoomAuthoringOperations.PaintCell(room, position, occupancyMarker, gesture);
         }
 
         public override void Erase(GridLayout gridLayout, GameObject brushTarget, Vector3Int position)
         {
             if (position.z == 0 && TryGetRoom(gridLayout, brushTarget, out var room))
-                RoomAuthoringOperations.PaintCell(room, position, null);
+                RoomAuthoringOperations.PaintCell(room, position, null, gesture);
         }
 
         public override void BoxFill(GridLayout gridLayout, GameObject brushTarget, BoundsInt bounds)
         {
             if (occupancyMarker != null && TryGetRoom(gridLayout, brushTarget, out var room))
-                RoomAuthoringOperations.PaintBox(room, bounds, occupancyMarker);
+                RoomAuthoringOperations.PaintBox(room, bounds, occupancyMarker, gesture);
         }
 
         public override void BoxErase(GridLayout gridLayout, GameObject brushTarget, BoundsInt bounds)
         {
             if (TryGetRoom(gridLayout, brushTarget, out var room))
-                RoomAuthoringOperations.PaintBox(room, bounds, null);
+                RoomAuthoringOperations.PaintBox(room, bounds, null, gesture);
         }
 
         public static bool TryGetRoom(GridLayout gridLayout, GameObject brushTarget, out ShipRoomAuthoring room)
