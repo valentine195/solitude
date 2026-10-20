@@ -10,6 +10,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
 {
     public static class RoomAuthoringOperations
     {
+        public static event System.Action<ShipRoomAuthoring> GenerationCompleted;
+
         public static Vector2Int[] ReadCells(ShipRoomAuthoring room)
         {
             var cells = new List<Vector2Int>();
@@ -58,6 +60,18 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return Rebuild(room);
         }
 
+        public static bool PaintBox(ShipRoomAuthoring room, BoundsInt bounds, TileBase marker)
+        {
+            if (GetSafetyIssue(room, allowMissingOutput: true) != null || bounds.z != 0 ||
+                bounds.size.z != 1 || bounds.size.x <= 0 || bounds.size.y <= 0) return false;
+            var tiles = new TileBase[checked(bounds.size.x * bounds.size.y)];
+            if (marker != null)
+                for (var i = 0; i < tiles.Length; i++) tiles[i] = marker;
+            Undo.RegisterCompleteObjectUndo(room.Occupancy, marker == null ? "Erase Room Box" : "Paint Room Box");
+            room.Occupancy.SetTilesBlock(bounds, tiles);
+            return Rebuild(room);
+        }
+
         public static bool Rebuild(ShipRoomAuthoring room)
         {
             var issue = GetSafetyIssue(room, allowMissingOutput: true);
@@ -82,6 +96,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             SetDiagnostic(room, issue);
             EditorSceneManager.MarkSceneDirty(room.gameObject.scene);
             Undo.CollapseUndoOperations(group);
+            GenerationCompleted?.Invoke(room);
             return valid;
         }
 

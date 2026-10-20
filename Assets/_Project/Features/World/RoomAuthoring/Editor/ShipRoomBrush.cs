@@ -7,7 +7,7 @@ using UnityEngine.Tilemaps;
 namespace SOLITUDE.Editor.RoomAuthoring
 {
     [CustomGridBrush(false, true, false, "Ship Room")]
-    [BrushTools(typeof(PaintTool), typeof(EraseTool))]
+    [BrushTools(typeof(PaintTool), typeof(EraseTool), typeof(BoxTool))]
     public sealed class ShipRoomBrush : GridBrushBase
     {
         [SerializeField] private TileBase occupancyMarker;
@@ -23,6 +23,18 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             if (position.z == 0 && TryGetRoom(gridLayout, brushTarget, out var room))
                 RoomAuthoringOperations.PaintCell(room, position, null);
+        }
+
+        public override void BoxFill(GridLayout gridLayout, GameObject brushTarget, BoundsInt bounds)
+        {
+            if (occupancyMarker != null && TryGetRoom(gridLayout, brushTarget, out var room))
+                RoomAuthoringOperations.PaintBox(room, bounds, occupancyMarker);
+        }
+
+        public override void BoxErase(GridLayout gridLayout, GameObject brushTarget, BoundsInt bounds)
+        {
+            if (TryGetRoom(gridLayout, brushTarget, out var room))
+                RoomAuthoringOperations.PaintBox(room, bounds, null);
         }
 
         public static bool TryGetRoom(GridLayout gridLayout, GameObject brushTarget, out ShipRoomAuthoring room)
