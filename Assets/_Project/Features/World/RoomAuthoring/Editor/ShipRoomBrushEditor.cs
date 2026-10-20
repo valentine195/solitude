@@ -29,7 +29,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public override void OnPaintInspectorGUI()
         {
-            EditorGUILayout.HelpBox(tooltip, MessageType.Info);
+            EditorGUILayout.HelpBox(tooltip + " Unresolved spans/joins have Scene markers; select the room to focus individual Inspector issues. Missing-floor cells remain visible as editor guides.", MessageType.Info);
             var brush = (ShipRoomBrush)target;
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel("Box action");
@@ -55,12 +55,17 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             if (!executing) ((ShipRoomBrush)target).EndGesture();
             RoomAuthoringPaletteSetup.ActivateTarget(brushTarget);
+            RoomAuthoringPreview.SetEditedRoom(brushTarget == null ? null : brushTarget.GetComponentInParent<ShipRoomAuthoring>(true));
             base.OnPaintSceneGUI(gridLayout, brushTarget, position, tool, executing);
         }
 
         public override void OnMouseEnter() => RoomAuthoringPaletteSetup.ActivateTarget(GridPaintingState.scenePaintTarget);
         public override void OnMouseLeave() => ((ShipRoomBrush)target).EndGesture();
-        public override void OnToolDeactivated(GridBrushBase.Tool tool) => ((ShipRoomBrush)target).EndGesture();
+        public override void OnToolDeactivated(GridBrushBase.Tool tool)
+        {
+            ((ShipRoomBrush)target).EndGesture();
+            RoomAuthoringPreview.SetEditedRoom(null);
+        }
 
         public override void RegisterUndo(GameObject brushTarget, GridBrushBase.Tool tool)
         {

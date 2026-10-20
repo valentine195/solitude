@@ -1,3 +1,4 @@
+using System.Linq;
 using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -28,28 +29,46 @@ namespace SOLITUDE.Editor.RoomAuthoring
             root.Add(new Button(() => RoomAuthoringPaletteSetup.EditRoom(room)) { text = "Edit Room in Tile Palette" });
             root.Add(new HelpBox("Choose Fill or Erase under Box action in the room brush, then drag a rectangle. Undo/Redo restores each gesture. After edits with another tool, use Validate Room and Rebuild Room.", HelpBoxMessageType.Info));
             var outcome = new HelpBox("", HelpBoxMessageType.Info);
-            void RefreshOutcome()
+            var issues = new VisualElement();
+            var focusedField = new Label();
+            string previousFeedback = null;
+            void RefreshFeedback()
             {
-                var saved = room.GenerationResult;
-                outcome.text = saved == null ? "No recorded preview. Rebuild Room to create a current result." :
-                    (saved.Status == RoomGenerationStatus.IncompletePreview ? "Incomplete preview" : saved.Status.ToString()) +
-                    (RoomAuthoringValidator.IsCurrent(room) ? " — current." : " — output not updated; Rebuild Room.");
+                if (room == null) return;
+                var feedback = RoomAuthoringPreview.GetFeedback(room);
+                var result = feedback.Assessment;
+                if (result == null) { outcome.text = "Editor preview is hidden in Play Mode and builds."; issues.Clear(); return; }
+                var title = result.Status == RoomGenerationStatus.IncompletePreview ? "Incomplete preview" : result.Status.ToString();
+                var summary = title + (feedback.IsCurrent ? " — current." : " — output not updated; Rebuild Room.");
+                var key = summary + string.Join("|", result.Issues.Select(i => i.Id + ":" + i.Reason));
+                outcome.text = summary;
+                outcome.messageType = result.Status == RoomGenerationStatus.Refused ? HelpBoxMessageType.Error :
+                    result.Issues.Length == 0 ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
+                if (key == previousFeedback) return;
+                previousFeedback = key;
+                focusedField.text = "";
+                issues.Clear();
+                foreach (var issue in result.Issues)
+                {
+                    var item = new VisualElement();
+                    item.Add(new HelpBox(issue.Kind + ": " + issue.Reason, HelpBoxMessageType.Warning));
+                    var field = RoomAuthoringPreview.FieldLabel(issue);
+                    item.Add(new Button(() =>
+                    {
+                        if (RoomAuthoringPreview.SelectIssue(room, issue.Id))
+                            focusedField.text = issue.HasRegion ? "Focused: " + field + " at " + issue.Start + " → " + issue.End : "Check field: " + field;
+                    }) { text = (issue.HasRegion ? "Focus " : "Locate ") + field });
+                    issues.Add(item);
+                }
             }
-            RefreshOutcome();
             root.Add(outcome);
-            root.TrackSerializedObjectValue(serializedObject, _ => RefreshOutcome());
-            var validation = new HelpBox("", HelpBoxMessageType.Info);
-            validation.SetEnabled(false);
-            root.Add(new Button(() =>
-            {
-                var assessment = RoomAuthoringValidator.Assess(room, out _);
-                validation.text = (assessment.Issues.Length == 0 ? "Current inputs: " + assessment.Status + "." : assessment.Summary) +
-                    (RoomAuthoringValidator.IsCurrent(room) ? " Preview is current." : " Stored output is not current; Rebuild Room.");
-                RefreshOutcome();
-                validation.SetEnabled(true);
-            }) { text = "Validate Room" });
-            root.Add(validation);
-            root.Add(new Button(() => { RoomAuthoringOperations.Rebuild(room); serializedObject.Update(); RefreshOutcome(); }) { text = "Rebuild Room" });
+            root.Add(issues);
+            root.Add(focusedField);
+            root.Add(new Button(() => RefreshFeedback()) { text = "Validate Room" });
+            root.Add(new Button(() => { RoomAuthoringOperations.Rebuild(room); serializedObject.Update(); RefreshFeedback(); }) { text = "Rebuild Room" });
+            root.TrackSerializedObjectValue(serializedObject, _ => RefreshFeedback());
+            root.schedule.Execute(RefreshFeedback).Every(300);
+            RefreshFeedback();
             return root;
         }
     }
