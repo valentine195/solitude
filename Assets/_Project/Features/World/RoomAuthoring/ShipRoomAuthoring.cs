@@ -4,6 +4,7 @@ using UnityEngine.Tilemaps;
 
 namespace SOLITUDE.World.RoomAuthoring
 {
+    [DefaultExecutionOrder(-32000)]
     [DisallowMultipleComponent]
     public sealed class ShipRoomAuthoring : MonoBehaviour
     {
@@ -28,6 +29,12 @@ namespace SOLITUDE.World.RoomAuthoring
             style = roomStyle;
             occupancy = authoredCells;
             generatedOutput = output;
+        }
+
+        private void Awake()
+        {
+            if (UnityEngine.Application.isPlaying && occupancy != null && occupancy.transform.parent == transform)
+                occupancy.gameObject.SetActive(false);
         }
 
         public void SetGenerationDiagnostic(string message) => generationDiagnostic = message ?? string.Empty;
