@@ -25,6 +25,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             if (room.Style == null) root.Add(new HelpBox("Assign a prepared room style. Production artwork is not supplied by this tool.", HelpBoxMessageType.Info));
             root.Add(new Button(() => Selection.activeGameObject = room.Occupancy == null ? room.gameObject : room.Occupancy.gameObject)
                 { text = "Select Authored Occupancy" });
+            root.Add(new Button(() => { RoomAuthoringOperations.Rebuild(room); serializedObject.Update(); }) { text = "Rebuild Room" });
             return root;
         }
     }
