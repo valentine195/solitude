@@ -10,6 +10,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
     [BrushTools(typeof(PaintTool), typeof(EraseTool), typeof(BoxTool))]
     public sealed class ShipRoomBrush : GridBrushBase
     {
+        public enum BoxEditMode { Fill, Erase }
+        // Tool-session state: reopening the Editor starts safely in Fill mode.
+        public BoxEditMode BoxMode { get; set; }
         [SerializeField] private TileBase occupancyMarker;
         public TileBase OccupancyMarker { get => occupancyMarker; set => occupancyMarker = value; }
         private RoomAuthoringOperations.RoomEdit gesture;
@@ -42,6 +45,11 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public override void BoxFill(GridLayout gridLayout, GameObject brushTarget, BoundsInt bounds)
         {
+            if (BoxMode == BoxEditMode.Erase)
+            {
+                BoxErase(gridLayout, brushTarget, bounds);
+                return;
+            }
             if (occupancyMarker != null && TryGetRoom(gridLayout, brushTarget, out var room))
                 RoomAuthoringOperations.PaintBox(room, bounds, occupancyMarker, gesture);
         }

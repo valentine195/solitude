@@ -26,6 +26,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             root.Add(new Button(() => Selection.activeGameObject = room.Occupancy == null ? room.gameObject : room.Occupancy.gameObject)
                 { text = "Select Authored Occupancy" });
             root.Add(new Button(() => RoomAuthoringPaletteSetup.EditRoom(room)) { text = "Edit Room in Tile Palette" });
+            root.Add(new HelpBox("Choose Fill or Erase under Box action in the room brush, then drag a rectangle. Undo/Redo restores each gesture. After edits with another tool, use Validate Room and Rebuild Room.", HelpBoxMessageType.Info));
             var validation = new HelpBox("", HelpBoxMessageType.Info);
             validation.SetEnabled(false);
             root.Add(new Button(() =>

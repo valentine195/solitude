@@ -32,6 +32,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
         [TestCase("Box fill")]
         [TestCase("Box expansion")]
         [TestCase("Box erase")]
+        [TestCase("Box erase mode")]
         public void NativePreActionBoundaryRestoresCompleteAuthoredAndGeneratedState(string operation)
         {
             using var f = new RoomAuthoringTestFixtures(32);
@@ -56,6 +57,10 @@ namespace SOLITUDE.Tests.RoomAuthoring
                     case "Box fill": brush.BoxFill(grid, target, new BoundsInt(0, 0, 0, 8, 6, 1)); break;
                     case "Box expansion": brush.BoxFill(grid, target, new BoundsInt(8, 0, 0, 4, 6, 1)); break;
                     case "Box erase": brush.BoxErase(grid, target, new BoundsInt(0, 0, 0, 8, 6, 1)); break;
+                    case "Box erase mode":
+                        brush.BoxMode = ShipRoomBrush.BoxEditMode.Erase;
+                        brush.BoxFill(grid, target, new BoundsInt(0, 0, 0, 8, 6, 1));
+                        break;
                 }
                 editor.OnToolDeactivated(tool);
                 var after = Snapshot(room);

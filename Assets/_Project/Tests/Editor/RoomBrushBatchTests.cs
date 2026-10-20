@@ -12,6 +12,35 @@ namespace SOLITUDE.Tests.RoomAuthoring
 {
     public sealed class RoomBrushBatchTests
     {
+        [Test] public void ExplicitBoxEraseModeBatchesOnceAndPreservesOtherRoomsAndGeneratedTargets()
+        {
+            using var f = new RoomAuthoringTestFixtures();
+            var room = f.Room(); var other = f.Room(); other.transform.position = Vector3.right * 20;
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room)); Assert.IsTrue(RoomAuthoringOperations.Rebuild(other));
+            var otherState = RoomUndoRedoTests.Snapshot(other);
+            var brush = ScriptableObject.CreateInstance<ShipRoomBrush>();
+            brush.BoxMode = ShipRoomBrush.BoxEditMode.Erase;
+            var applications = 0; Action<ShipRoomAuthoring> completed = changed => { Assert.AreSame(room, changed); applications++; };
+            RoomAuthoringOperations.GenerationCompleted += completed;
+            try
+            {
+                var grid = room.GetComponent<Grid>();
+                brush.BoxFill(grid, room.GeneratedOutput.GetComponentInChildren<Tilemap>().gameObject, new BoundsInt(0, 0, 0, 8, 6, 1));
+                Assert.AreEqual(0, applications);
+                brush.BoxFill(grid, room.Occupancy.gameObject, new BoundsInt(4, 0, 0, 4, 6, 1));
+                Assert.AreEqual(1, applications);
+                Assert.AreEqual(24, RoomAuthoringOperations.ReadCells(room).Length);
+                Assert.AreEqual(24, RoomUndoRedoTests.Snapshot(room).Count(s => s.StartsWith("floor:")));
+                Assert.IsEmpty(room.GenerationDiagnostic);
+                brush.BoxMode = ShipRoomBrush.BoxEditMode.Fill; brush.OccupancyMarker = f.Style.FloorTile;
+                brush.BoxFill(grid, room.Occupancy.gameObject, new BoundsInt(4, 0, 0, 4, 6, 1));
+                Assert.AreEqual(2, applications);
+                Assert.AreEqual(48, RoomAuthoringOperations.ReadCells(room).Length);
+                CollectionAssert.AreEqual(otherState, RoomUndoRedoTests.Snapshot(other));
+            }
+            finally { RoomAuthoringOperations.GenerationCompleted -= completed; Object.DestroyImmediate(brush); }
+        }
+
         private static string[] Output(ShipRoomAuthoring room) => room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>()
             .Select(r => r.name + ":" + r.transform.localPosition + ":" + r.sprite.GetEntityId()).OrderBy(s => s).ToArray();
 
