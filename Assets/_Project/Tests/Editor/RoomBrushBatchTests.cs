@@ -129,5 +129,32 @@ namespace SOLITUDE.Tests.RoomAuthoring
             }
             finally { RoomAuthoringOperations.GenerationCompleted -= completed; Object.DestroyImmediate(brush); }
         }
+        [Test] public void PartialHoleBoxEraseAppliesGenerationOnceAndRestoresCompleteOnFill()
+        {
+            using var f = new RoomAuthoringTestFixtures();
+            var room = f.Room(); Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
+            var brush = ScriptableObject.CreateInstance<ShipRoomBrush>(); brush.OccupancyMarker = f.Style.FloorTile;
+            var applications = 0;
+            void Applied(SOLITUDE.World.RoomAuthoring.ShipRoomAuthoring changed) { if (changed == room) applications++; }
+            RoomAuthoringOperations.GenerationCompleted += Applied;
+            try
+            {
+                brush.BoxMode = ShipRoomBrush.BoxEditMode.Erase;
+                brush.BoxFill(room.GetComponent<Grid>(), room.Occupancy.gameObject, new BoundsInt(6, 4, 0, 1, 1, 1));
+                Assert.AreEqual(1, applications);
+                Assert.AreEqual(47, RoomAuthoringTestFixtures.FloorCount(room));
+                Assert.AreEqual(SOLITUDE.World.RoomAuthoring.RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+                brush.BoxMode = ShipRoomBrush.BoxEditMode.Fill;
+                brush.BoxFill(room.GetComponent<Grid>(), room.Occupancy.gameObject, new BoundsInt(6, 4, 0, 1, 1, 1));
+                Assert.AreEqual(2, applications);
+                Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+                Assert.AreEqual(SOLITUDE.World.RoomAuthoring.RoomGenerationStatus.Complete, room.GenerationResult.Status);
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Applied;
+                Object.DestroyImmediate(brush);
+            }
+        }
     }
 }

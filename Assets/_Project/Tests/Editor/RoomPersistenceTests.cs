@@ -127,5 +127,68 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 AssetDatabase.DeleteAsset(folder);
             }
         }
+        [TestCase("complete")]
+        [TestCase("hole")]
+        [TestCase("missing floor")]
+        public void SavedResultReopensWithoutGenerationAndRebuildIsEquivalent(string state)
+        {
+            Assert.IsTrue(Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification"));
+            var folder = CreateAssets();
+            var previous = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var neighbor = CreateRoom(previous, folder); neighbor.transform.position = Vector3.right * 20;
+            var sentinel = new GameObject("Generated Architecture"); sentinel.transform.position = new Vector3(9, 11, 0);
+            EditorSceneManager.SaveScene(previous, folder + "/Neighbor.unity");
+            var neighborState = RoomUndoRedoTests.Snapshot(neighbor);
+            var neighborObjects = neighbor.GetComponentsInChildren<Transform>(true);
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
+            var applications = 0;
+            void Generated(ShipRoomAuthoring _) => applications++;
+            try
+            {
+                var room = CreateRoom(scene, folder);
+                if (state == "hole") room.Occupancy.SetTile(new Vector3Int(6, 4, 0), null);
+                if (state == "missing floor")
+                {
+                    room.Style.FloorTile = null;
+                    EditorUtility.SetDirty(room.Style); AssetDatabase.SaveAssets();
+                }
+                Assert.AreEqual(state == "complete", RoomAuthoringOperations.Rebuild(room));
+                Assert.AreEqual(state == "complete" ? RoomGenerationStatus.Complete : RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+                var expected = RoomUndoRedoTests.Snapshot(room);
+                var identity = room.RoomId;
+                var styleGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(room.Style));
+                var path = folder + "/SavedResult.unity";
+                RoomAuthoringOperations.GenerationCompleted += Generated;
+                Assert.IsTrue(EditorSceneManager.SaveScene(scene, path));
+                SceneManager.SetActiveScene(previous);
+                Assert.IsTrue(EditorSceneManager.CloseScene(scene, true));
+                scene = EditorSceneManager.OpenScene(path, OpenSceneMode.Additive);
+                room = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ShipRoomAuthoring>()).Single();
+                Selection.activeGameObject = room.gameObject;
+                Assert.AreEqual(0, applications, "Reopen and selection must not generate.");
+                Assert.AreEqual(identity, room.RoomId);
+                Assert.AreEqual(styleGuid, AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(room.Style)));
+                CollectionAssert.AreEqual(expected, RoomUndoRedoTests.Snapshot(room));
+                Assert.IsTrue(RoomAuthoringValidator.IsCurrent(room));
+                Assert.AreEqual(state == "missing floor" ? 0 : state == "hole" ? 47 : 48, RoomAuthoringTestFixtures.FloorCount(room));
+                Assert.IsFalse(room.Occupancy.gameObject.activeSelf);
+                Assert.IsNull(RoomAuthoringPreview.SelectedIssueId);
+                Assert.IsFalse(scene.isDirty);
+                Assert.AreEqual(state == "complete", RoomAuthoringOperations.Rebuild(room));
+                Assert.AreEqual(1, applications);
+                CollectionAssert.AreEqual(expected, RoomUndoRedoTests.Snapshot(room));
+                CollectionAssert.AreEqual(neighborState, RoomUndoRedoTests.Snapshot(neighbor));
+                CollectionAssert.AreEqual(neighborObjects, neighbor.GetComponentsInChildren<Transform>(true));
+                Assert.IsFalse(previous.isDirty);
+                Assert.AreEqual(new Vector3(9, 11, 0), sentinel.transform.position);
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                Selection.activeObject = null;
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                AssetDatabase.DeleteAsset(folder);
+            }
+        }
     }
 }

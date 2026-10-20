@@ -80,5 +80,57 @@ namespace SOLITUDE.Tests.RoomAuthoring
             }
             finally { brush.EndGesture(); Object.DestroyImmediate(editor); Object.DestroyImmediate(brush); }
         }
+        [TestCase(false)]
+        [TestCase(true)]
+        public void CompletePartialEmptyAndCorrectionRestoreEveryRecordedState(bool useBoxErase)
+        {
+            using var f = new RoomAuthoringTestFixtures();
+            var room = f.Room(); Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
+            var complete = Snapshot(room);
+            var brush = ScriptableObject.CreateInstance<ShipRoomBrush>(); brush.OccupancyMarker = f.Style.FloorTile;
+            var grid = room.GetComponent<Grid>(); var target = room.Occupancy.gameObject;
+            try
+            {
+                if (useBoxErase)
+                {
+                    brush.BoxMode = ShipRoomBrush.BoxEditMode.Erase;
+                    brush.BoxFill(grid, target, new BoundsInt(6, 4, 0, 1, 1, 1));
+                }
+                else brush.Erase(grid, target, new Vector3Int(6, 4, 0));
+                Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+                Assert.AreEqual(47, RoomAuthoringTestFixtures.FloorCount(room));
+                var partial = Snapshot(room);
+                brush.BoxMode = ShipRoomBrush.BoxEditMode.Erase;
+                brush.BoxFill(grid, target, new BoundsInt(0, 0, 0, 8, 6, 1));
+                Assert.AreEqual(RoomGenerationStatus.Empty, room.GenerationResult.Status);
+                Assert.IsEmpty(room.GenerationResult.Issues);
+                var empty = Snapshot(room);
+                Undo.PerformUndo(); CollectionAssert.AreEqual(partial, Snapshot(room));
+                Undo.PerformUndo(); CollectionAssert.AreEqual(complete, Snapshot(room));
+                Undo.PerformRedo(); CollectionAssert.AreEqual(partial, Snapshot(room));
+                Undo.PerformRedo(); CollectionAssert.AreEqual(empty, Snapshot(room));
+                Undo.PerformUndo();
+                brush.Paint(grid, target, new Vector3Int(6, 4, 0));
+                CollectionAssert.AreEqual(complete, Snapshot(room));
+                Undo.PerformUndo(); CollectionAssert.AreEqual(partial, Snapshot(room));
+                Undo.PerformRedo(); CollectionAssert.AreEqual(complete, Snapshot(room));
+            }
+            finally { Object.DestroyImmediate(brush); }
+        }
+
+        [Test] public void SplitComponentEraseUndoKeepsOneRoomIdentityAndBothBoundaryBranches()
+        {
+            using var f = new RoomAuthoringTestFixtures(32);
+            var room = f.Room(3, 1); Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
+            var before = Snapshot(room); var identity = room.RoomId;
+            Assert.IsTrue(RoomAuthoringOperations.PaintCell(room, Vector3Int.right, null));
+            Assert.AreEqual(2, RoomBoundaryExtractor.Extract(RoomAuthoringOperations.ReadCells(room)).ComponentCount);
+            Assert.AreEqual(identity, room.RoomId);
+            Assert.AreEqual(2, RoomAuthoringTestFixtures.FloorCount(room));
+            var split = Snapshot(room);
+            Undo.PerformUndo(); CollectionAssert.AreEqual(before, Snapshot(room));
+            Undo.PerformRedo(); CollectionAssert.AreEqual(split, Snapshot(room));
+            Assert.AreEqual(identity, room.RoomId);
+        }
     }
 }

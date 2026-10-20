@@ -36,7 +36,24 @@ namespace SOLITUDE.Tests.RoomAuthoring
             {
                 var c = new Vector3Int(x, y, 0); floorMap.SetTile(c, tile); room.Occupancy.SetTile(c, tile);
             }
+            floorMap.SetTile(new Vector3Int(6, 4, 0), null);
+            room.Occupancy.SetTile(new Vector3Int(6, 4, 0), null);
             room.Occupancy.SetTile(new Vector3Int(9, 0, 0), tile);
+            var issue = new RoomGenerationIssue(RoomIssueKind.Span, "North", "Unresolved short hole span", true, new Vector2Int(6, 4), new Vector2Int(7, 4));
+            issue.LocateInRoom(room.RoomId);
+            room.SetGenerationResult(new RoomGenerationResult { Status = RoomGenerationStatus.IncompletePreview, Issues = new[] { issue } });
+            var missingRoot = new GameObject("Missing Floor Preview", typeof(Grid), typeof(ShipRoomAuthoring));
+            SceneManager.MoveGameObjectToScene(missingRoot, scene);
+            var missingMask = new GameObject("Authored Occupancy", typeof(Tilemap)); missingMask.transform.SetParent(missingRoot.transform, false);
+            missingMask.tag = "EditorOnly"; missingMask.SetActive(false);
+            missingMask.GetComponent<Tilemap>().SetTile(new Vector3Int(12, 0, 0), tile);
+            var missingOutput = new GameObject("Generated Architecture", typeof(RoomGeneratedOutput)); missingOutput.transform.SetParent(missingRoot.transform, false);
+            var missingStyle = ScriptableObject.CreateInstance<RoomStyleDefinition>();
+            var missingRoom = missingRoot.GetComponent<ShipRoomAuthoring>();
+            missingRoom.Initialize(Guid.NewGuid().ToString("N"), missingStyle, missingMask.GetComponent<Tilemap>(), missingOutput.GetComponent<RoomGeneratedOutput>());
+            missingOutput.GetComponent<RoomGeneratedOutput>().Initialize(missingRoom);
+            missingRoom.SetGenerationResult(new RoomGenerationResult { Status = RoomGenerationStatus.IncompletePreview,
+                Issues = new[] { new RoomGenerationIssue(RoomIssueKind.Floor, "floorTile", "Missing floor") } });
             var architecture = new GameObject("North", typeof(SpriteRenderer)); architecture.transform.SetParent(output.transform, false);
             architecture.transform.localPosition = new Vector3(8.5f, 6.5f, 0); architecture.GetComponent<SpriteRenderer>().sprite = sprite;
             var player = new GameObject("RoomFloorPlayer", typeof(PlayerMovement), typeof(PlayerInteractor), typeof(PlayerVitalsController), typeof(SurvivorAvatarAdapter));
@@ -56,6 +73,16 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 Assert.DoesNotThrow(() => adapter.ValidateResumePoint(point));
                 Assert.DoesNotThrow(() => adapter.Awaken(point));
                 Assert.IsTrue(CanLand(point.transform.position));
+                point.transform.position = new Vector3(6.5f, 4.5f, 0);
+                Assert.Throws<InvalidOperationException>(() => adapter.ValidateResumePoint(point));
+                Assert.IsFalse(CanLand(point.transform.position), "An erased hole is not floor.");
+                point.transform.position = new Vector3(12.5f, .5f, 0);
+                Assert.Throws<InvalidOperationException>(() => adapter.ValidateResumePoint(point));
+                Assert.IsFalse(CanLand(point.transform.position), "Missing-floor editor-guide positions cannot become runtime floor.");
+                Assert.IsFalse(missingMask.activeInHierarchy);
+                Assert.IsEmpty(missingOutput.GetComponentsInChildren<TilemapRenderer>());
+                Assert.AreEqual(RoomGenerationStatus.IncompletePreview, missingRoom.GenerationResult.Status);
+                Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
                 point.transform.position = new Vector3(9.5f, .5f, 0);
                 Assert.Throws<InvalidOperationException>(() => adapter.ValidateResumePoint(point));
                 Assert.IsFalse(CanLand(point.transform.position), "Inactive mask-only cells cannot count as floor.");
@@ -68,11 +95,11 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 Assert.IsFalse(CanLand(blocker.transform.position), "Same-scene solid geometry blocks otherwise valid floor.");
                 blocker.GetComponent<BoxCollider2D>().isTrigger = true;
                 Assert.IsTrue(CanLand(blocker.transform.position), "Trigger geometry retains existing landing semantics.");
-                Assert.AreEqual(49, room.Occupancy.GetTilesBlock(new BoundsInt(0, 0, 0, 10, 6, 1)).CountNonNull());
+                Assert.AreEqual(48, room.Occupancy.GetTilesBlock(new BoundsInt(0, 0, 0, 10, 6, 1)).CountNonNull());
             }
             finally
             {
-                Object.Destroy(root); Object.Destroy(player); Object.Destroy(point.gameObject);
+                Object.Destroy(root); Object.Destroy(missingRoot); Object.Destroy(missingStyle); Object.Destroy(player); Object.Destroy(point.gameObject);
                 Object.Destroy(style); Object.Destroy(tile); Object.Destroy(sprite); Object.Destroy(texture);
             }
             yield return SceneManager.UnloadSceneAsync(scene);
