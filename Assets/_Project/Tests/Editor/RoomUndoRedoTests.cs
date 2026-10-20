@@ -14,7 +14,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
     {
         public static string[] Snapshot(ShipRoomAuthoring room)
         {
-            var result = new List<string> { "diagnostic:" + room.GenerationDiagnostic };
+            var result = new List<string> { "diagnostic:" + room.GenerationDiagnostic, "result:" + JsonUtility.ToJson(room.GenerationResult) };
             foreach (var c in RoomAuthoringOperations.ReadCells(room))
                 result.Add("authored:" + c + ":" + room.Occupancy.GetTile(new Vector3Int(c.x, c.y, 0)).GetEntityId());
             foreach (var renderer in room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>())
@@ -68,7 +68,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 if (operation == "Erase invalid")
                 {
                     Assert.AreEqual(47, RoomAuthoringOperations.ReadCells(room).Length);
-                    Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+                    Assert.AreEqual(47, RoomAuthoringTestFixtures.FloorCount(room));
                     Assert.That(room.GenerationDiagnostic, Does.Contain("rectangle"));
                 }
                 Undo.PerformUndo();

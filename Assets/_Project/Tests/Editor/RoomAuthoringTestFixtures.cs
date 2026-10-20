@@ -41,6 +41,14 @@ namespace SOLITUDE.Tests.RoomAuthoring
             foreach (var c in Cells(width, height)) room.Occupancy.SetTile(new Vector3Int(c.x, c.y, 0), Style.FloorTile);
             return room;
         }
+        public static int FloorCount(ShipRoomAuthoring room)
+        {
+            var count = 0;
+            foreach (var map in room.GeneratedOutput.GetComponentsInChildren<Tilemap>())
+                foreach (var cell in map.cellBounds.allPositionsWithin)
+                    if (map.HasTile(cell)) count++;
+            return count;
+        }
         public static Vector2Int[] Cells(int width = 8, int height = 6) => Enumerable.Range(0, height)
             .SelectMany(y => Enumerable.Range(0, width).Select(x => new Vector2Int(x, y))).ToArray();
         public void Dispose()

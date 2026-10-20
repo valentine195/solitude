@@ -27,15 +27,29 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 { text = "Select Authored Occupancy" });
             root.Add(new Button(() => RoomAuthoringPaletteSetup.EditRoom(room)) { text = "Edit Room in Tile Palette" });
             root.Add(new HelpBox("Choose Fill or Erase under Box action in the room brush, then drag a rectangle. Undo/Redo restores each gesture. After edits with another tool, use Validate Room and Rebuild Room.", HelpBoxMessageType.Info));
+            var outcome = new HelpBox("", HelpBoxMessageType.Info);
+            void RefreshOutcome()
+            {
+                var saved = room.GenerationResult;
+                outcome.text = saved == null ? "No recorded preview. Rebuild Room to create a current result." :
+                    (saved.Status == RoomGenerationStatus.IncompletePreview ? "Incomplete preview" : saved.Status.ToString()) +
+                    (RoomAuthoringValidator.IsCurrent(room) ? " — current." : " — output not updated; Rebuild Room.");
+            }
+            RefreshOutcome();
+            root.Add(outcome);
+            root.TrackSerializedObjectValue(serializedObject, _ => RefreshOutcome());
             var validation = new HelpBox("", HelpBoxMessageType.Info);
             validation.SetEnabled(false);
             root.Add(new Button(() =>
             {
-                validation.text = RoomAuthoringValidator.Validate(room) ?? "Room configuration is valid.";
+                var assessment = RoomAuthoringValidator.Assess(room, out _);
+                validation.text = (assessment.Issues.Length == 0 ? "Current inputs: " + assessment.Status + "." : assessment.Summary) +
+                    (RoomAuthoringValidator.IsCurrent(room) ? " Preview is current." : " Stored output is not current; Rebuild Room.");
+                RefreshOutcome();
                 validation.SetEnabled(true);
             }) { text = "Validate Room" });
             root.Add(validation);
-            root.Add(new Button(() => { RoomAuthoringOperations.Rebuild(room); serializedObject.Update(); }) { text = "Rebuild Room" });
+            root.Add(new Button(() => { RoomAuthoringOperations.Rebuild(room); serializedObject.Update(); RefreshOutcome(); }) { text = "Rebuild Room" });
             return root;
         }
     }

@@ -117,15 +117,21 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public static bool Rebuild(ShipRoomAuthoring room)
         {
-            var issue = GetSafetyIssue(room, allowMissingOutput: true);
-            if (issue != null) { SetDiagnostic(room, issue); return false; }
+            if (room == null) return false;
             using var edit = new RoomEdit(room, "Rebuild Room");
             return RebuildCore(room);
         }
 
         private static bool RebuildCore(ShipRoomAuthoring room)
         {
-            string issue;
+            var result = RoomAuthoringValidator.Assess(room, out var placement);
+            Undo.RegisterCompleteObjectUndo(room, "Room Generation Result");
+            if (result.Status == RoomGenerationStatus.Refused)
+            {
+                room.SetGenerationResult(result);
+                EditorUtility.SetDirty(room);
+                return false;
+            }
             if (room.GeneratedOutput == null)
             {
                 var generated = new GameObject("Generated Architecture", typeof(RoomGeneratedOutput));
@@ -137,21 +143,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 serialized.FindProperty("generatedOutput").objectReferenceValue = output;
                 serialized.ApplyModifiedProperties();
             }
-            var valid = RoomAuthoringValidator.TryValidate(room, out var placement, out issue);
-            if (valid) RoomGeometryWriter.Apply(room, placement);
-            else RoomGeometryWriter.Clear(room);
-            SetDiagnostic(room, issue);
+            RoomGeometryWriter.Apply(room, placement);
+            result.OutputFingerprint = RoomAuthoringValidator.OutputFingerprint(room);
+            Undo.RegisterCompleteObjectUndo(room, "Room Generation Result");
+            room.SetGenerationResult(result);
+            EditorUtility.SetDirty(room);
             EditorSceneManager.MarkSceneDirty(room.gameObject.scene);
             GenerationCompleted?.Invoke(room);
-            return valid;
+            return result.IsSuccessful;
         }
 
-        private static void SetDiagnostic(ShipRoomAuthoring room, string issue)
-        {
-            if (room == null) return;
-            Undo.RecordObject(room, "Room Diagnostic");
-            room.SetGenerationDiagnostic(issue);
-            EditorUtility.SetDirty(room);
-        }
     }
 }

@@ -88,7 +88,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 {
                     brush.Erase(room.GetComponent<Grid>(), room.Occupancy.gameObject, new Vector3Int(7, 5, 0));
                     Assert.AreEqual(47, RoomAuthoringOperations.ReadCells(room).Length);
-                    Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+                    Assert.AreEqual(47, RoomAuthoringTestFixtures.FloorCount(room));
                     Undo.PerformUndo();
                     CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
                     CollectionAssert.AreEqual(placements, Placements(room));

@@ -13,12 +13,17 @@ namespace SOLITUDE.World.RoomAuthoring
         [SerializeField] private Tilemap occupancy;
         [SerializeField] private RoomGeneratedOutput generatedOutput;
         [SerializeField, TextArea] private string generationDiagnostic;
+        [SerializeField] private RoomGenerationResult generationResult;
 
         public string RoomId => roomId;
         public RoomStyleDefinition Style { get => style; set => style = value; }
         public Tilemap Occupancy => occupancy;
         public RoomGeneratedOutput GeneratedOutput => generatedOutput;
         public string GenerationDiagnostic => generationDiagnostic;
+        public RoomGenerationResult GenerationResult => generationResult;
+
+        public void SetGenerationResult(RoomGenerationResult result)
+        { generationResult = result; SetGenerationDiagnostic(result?.Summary); }
 
         public void Initialize(string identity, RoomStyleDefinition roomStyle, Tilemap authoredCells, RoomGeneratedOutput output)
         {

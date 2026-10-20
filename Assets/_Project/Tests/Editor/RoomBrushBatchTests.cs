@@ -99,7 +99,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 else
                 {
                     Assert.That(room.GenerationDiagnostic, Does.Contain("not exactly coverable"));
-                    Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+                    Assert.AreEqual(66, RoomAuthoringTestFixtures.FloorCount(room));
                 }
                 brush.BoxErase(room.GetComponent<Grid>(), room.Occupancy.gameObject, new BoundsInt(0, 0, 0, 12, 6, 1));
                 Assert.AreEqual(2, applications);
