@@ -22,6 +22,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.AreEqual(48, floor.GetUsedTilesCount() == 1 ? floor.GetTilesBlock(floor.cellBounds).Count(t => t != null) : -1);
             foreach (var c in authored) Assert.AreSame(f.Style.FloorTile, floor.GetTile(new Vector3Int(c.x, c.y, 0)));
             Assert.IsNull(floor.GetTile(new Vector3Int(8, 0, 0)));
+            Assert.AreEqual((Vector3)((Tile)f.Style.FloorTile).sprite.pivot / 32f, floor.tileAnchor);
             Assert.AreEqual(4, room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Count(r => r.name == "North"));
             foreach (var t in room.GeneratedOutput.GetComponentsInChildren<Transform>()) Assert.AreEqual(Vector3.one, t.localScale);
             UnityEngine.Object.DestroyImmediate(floor.gameObject);

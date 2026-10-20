@@ -20,6 +20,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var floor = new GameObject("Generated Floor", typeof(Tilemap), typeof(TilemapRenderer));
             floor.transform.SetParent(room.GeneratedOutput.transform, false);
             var map = floor.GetComponent<Tilemap>();
+            map.tileAnchor = ((Tile)room.Style.FloorTile).sprite.pivot / 32f;
             foreach (var cell in placement.Geometry.Cells) map.SetTile(new Vector3Int(cell.x, cell.y, 0), room.Style.FloorTile);
             floor.GetComponent<TilemapRenderer>().sortingOrder = 0;
             Undo.RegisterCreatedObjectUndo(floor, "Rebuild Room");

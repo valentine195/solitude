@@ -44,10 +44,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             var issue = GetSafetyIssue(room);
             if (issue != null) { SetDiagnostic(room, issue); return false; }
-            var geometry = RoomBoundaryExtractor.Extract(ReadCells(room));
-            RoomPlacement placement = null;
-            issue = geometry.Cells.Length == 0 ? null : GetConfigurationIssue(room.Style);
-            var valid = issue == null && RoomPlacementBuilder.TryBuild(geometry, room.Style, out placement, out issue);
+            var valid = RoomAuthoringValidator.TryValidate(room, out var placement, out issue);
             Undo.IncrementCurrentGroup();
             var group = Undo.GetCurrentGroup();
             Undo.SetCurrentGroupName("Rebuild Room");
@@ -57,41 +54,6 @@ namespace SOLITUDE.Editor.RoomAuthoring
             EditorSceneManager.MarkSceneDirty(room.gameObject.scene);
             Undo.CollapseUndoOperations(group);
             return valid;
-        }
-
-        public static string GetConfigurationIssue(RoomStyleDefinition style)
-        {
-            if (style == null) return "Assign a room style.";
-            if (!(style.FloorTile is Tile tile) || tile.sprite == null) return "Floor requires a native sprite Tile.";
-            var issue = CheckSprite(tile.sprite, new Vector2Int(32, 32), "Floor");
-            if (issue != null) return issue;
-            if (tile.transform != Matrix4x4.identity) return "Floor tile transform must be identity.";
-            if (style.NorthWalls == null || style.NorthWalls.Length == 0) return "North wall modules are missing.";
-            foreach (var wall in style.NorthWalls)
-            {
-                if (wall == null || (wall.CanvasPixels != new Vector2Int(32, 64) && wall.CanvasPixels != new Vector2Int(64, 64))) return "North walls require 32x64 or 64x64 canvases.";
-                issue = CheckSprite(wall.Sprite, wall.CanvasPixels, "North wall");
-                if (issue != null) return issue;
-                if (wall.RepeatPixels != 32 && wall.RepeatPixels != 64) return "North structural repeat must be 32 or 64 pixels.";
-                if (wall.AnchorPixels.y != wall.OffsetPixels.y) return "North wall bottom must align with its north boundary and extend northward.";
-            }
-            var caps = new[] { style.WestCap, style.EastCap, style.SouthCap, style.Northwest, style.Northeast, style.Southwest, style.Southeast };
-            foreach (var cap in caps)
-            {
-                if (cap == null || cap.CanvasPixels != new Vector2Int(32, 32)) return "Caps and corners require 32x32 canvases.";
-                issue = CheckSprite(cap.Sprite, cap.CanvasPixels, "Cap/corner");
-                if (issue != null) return issue;
-            }
-            return null;
-        }
-
-        private static string CheckSprite(Sprite sprite, Vector2Int dimensions, string role)
-        {
-            if (sprite == null) return role + " sprite is missing.";
-            if (sprite.rect.size != (Vector2)dimensions) return role + " sprite dimensions do not match its canvas.";
-            if (!Mathf.Approximately(sprite.pixelsPerUnit, 32)) return role + " requires 32 PPU.";
-            if (sprite.texture.filterMode != FilterMode.Point) return role + " requires Point filtering.";
-            return null;
         }
 
         private static void SetDiagnostic(ShipRoomAuthoring room, string issue)
