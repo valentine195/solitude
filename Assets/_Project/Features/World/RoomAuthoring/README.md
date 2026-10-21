@@ -1,71 +1,90 @@
-# Room authoring
+# Ship layout and room authoring
 
-Paint the room's **Authored Occupancy** Tilemap with **ShipRoomBrush**. The room
-owns a separate **Generated Architecture** hierarchy containing its floor and
-walls. Paint is authoritative; generated architecture is replaceable.
+Paint **Authored Occupancy** with **ShipRoomBrush**. Painted cells are authoritative;
+generated floors and architecture are replaceable. This checkpoint supports one
+logical space per ShipLayout. Shared multi-space partitions, connections and the
+full Medbay workflow are later migration phases.
 
-## Create and paint
+## Create or adopt
 
-1. In Edit Mode, open a disposable scene and choose **GameObject > SOLITUDE >
-   Room Authoring**. Select the new ShipRoom root.
-2. Assign a prepared **Room Style** in the Inspector. Production Standard artwork
-   is still pending verification; the palette marker does not provide room art.
-3. Click **Edit Room in Tile Palette**. Confirm the **ShipRoomBrush** brush,
-   **RoomOccupancy** palette, and this room's **Authored Occupancy** target.
-4. Choose Paint to add cells or Erase to remove cells. The native grid outline
-   previews the cell. Choose **Fill** under **Box action**, then drag the Box tool
-   from cell (0,0) through (7,5) for an 8×6 room: 48 authored cells and 48 generated floor cells.
-5. Drag another box from (8,0) through (11,5) to expand east to 12×6, 72 cells.
-   Walls and corners move to the new boundary when the gesture completes.
-6. Choose **Erase** under **Box action**, then drag a box to remove cells. This
-   selects the Box tool and needs no modifier key. Return Box action to Fill to
-   add rectangles again. Erase a single exterior cell to see the unsupported-shape diagnostic; authored cells persist while
-   generated output clears. Erasing all cells leaves an empty room.
-7. Use **Edit > Undo/Redo** (macOS Cmd+Z / Cmd+Shift+Z) to restore a complete
-   gesture, including authored cells, floor, walls, and diagnostic. A paint stroke
-   spanning several cells is one gesture. Undo empty deletion to restore a room.
-8. Press **W** to leave painting before selecting the room root for its Inspector.
-   Focus the Scene view when using the gesture Undo/Redo shortcuts.
-9. Save and reopen the scene; select the room and click **Edit Room in Tile
-   Palette** again to continue. The authored layout is retained.
+1. Choose **GameObject > SOLITUDE > Ship Layout Authoring** in an Edit Mode scene.
+   Assign its Default Style. The layout Inspector lets you select the space, set
+   Room/Corridor metadata, and choose **Edit Space in Tile Palette**.
+2. Existing independent rooms remain usable. In a legacy room Inspector choose
+   **Adopt into New Ship Layout** to transfer authority explicitly. Adoption keeps
+   the room ID, painted map, style, world cells and output references. Its recorded
+   ownership mapping is visible in the Inspectors; one Undo restores independence.
+   Resolve any preflight refusal before adopting. Selection/reopen never migrates.
+3. Keep room and layout roots unrotated, unit scale and integer-aligned in XY.
+   Occupancy/output stay aligned direct children of their room. Do not share IDs,
+   map references or output roots between owners.
 
-Do not paint the generated floor. The occupancy marker is authoring data, not a
-floor-art variant selector. Palette preparation is additive and preserves existing
-palette layouts. Box action is tool-session state and resets to Fill when the
-Editor reloads. Cell Paint/Erase tools are independent of Box action. Keep room
-roots active, unrotated, unit scale, and aligned to integer XY coordinates. Move the whole room root, not its occupancy/output children.
+## Paint and restore
 
-## Dimensions and limits
+1. Enter **Edit Space in Tile Palette** (or **Edit Room in Tile Palette** for a
+   legacy room). Confirm ShipRoomBrush, RoomOccupancy palette and the intended
+   Authored Occupancy target. Do not paint the generated floor.
+2. Choose **Fill** under Box action and drag cells (0,0) through (7,5) for an
+   8×6 region: 48 authored cells and 48 floor cells. Add (8,0) through (11,5) to
+   expand it to 12×6, 72 cells.
+3. Choose **Erase** under Box action and drag only the cells to remove. No Shift
+   modifier is needed. Return to Fill to add cells; ordinary Paint/Erase tools
+   remain independent of Box action.
+4. A changed gesture generates once when it ends. During painting, pending cell
+   additions/removals have editor guides while the last completed architecture
+   remains visible. Unchanged/net-zero gestures do not regenerate. Escape cancels
+   the unfinished gesture; target/brush changes, save/reload and entering Play
+   Mode also cancel unfinished paint. Mouse leave/tool deactivation completes
+   the accepted gesture. Box action resets to Fill when the Editor reloads.
+5. Cmd+Z / Cmd+Shift+Z restores a completed gesture, including occupancy, output,
+   layout/room results and issues. Focus the Scene view for native shortcuts.
+   Empty erasure can be undone without manually rebuilding.
+6. Save and reopen to retain the committed layout. Re-enter the palette editing
+   command if saving deactivated its authoring mask. Reopen/selection does not
+   rebuild automatically.
 
-One logical cell is 32×32 pixels at 32 PPU and one Unity unit. Floors are 32×32;
-wall canvases are 32×64 or 64×64; cap/corner canvases are 32×32. A style uses one
-configured structural wall repeat width. A 64-pixel repeat with zero corner
-reservations requires an even room width; imported pixels are never resized to
-force a fit. Anchors and corner reservations belong to the prepared style.
+## Diagnostics and dimensions
 
-This version generates one filled rectangle. During an L shape, hole, unsupported
-width, or missing art configuration, it retains authored occupancy, clears owned
-generated output when safe, and reports the error in **Generation Diagnostic**.
-Never duplicate room IDs or reuse another room's occupancy/output references.
-Ownership errors refuse destructive generation so unrelated content stays intact.
+A logical cell is 32×32 pixels at 32 PPU and one Unity unit. Floors cover one
+logical cell. Prepared styles describe wall canvases, structural repeats, pivots,
+anchors and corner reservations; imported artwork is not resized to force a fit.
+The current checkpoint validates prepared 32-PPU modules; broader source-art
+placement compatibility is addressed in the later artwork integration phase.
 
-## Validate and recover
+Orthogonal irregular shapes use their actual occupied boundaries. Valid floor
+remains visible when a local art/span/join cannot resolve; only affected visuals
+are withheld. Missing floor/style still leaves editor-only cell guides. Unsafe
+ownership, overlaps or coordinates refuse destructive writes and clearly mark
+retained output as not updated. Safe empty occupancy clears owned output.
 
-**Validate Room** reports configuration errors without editing cells, output, or
-scene dirtiness. It does not synchronize generated output. After painting with a
-different tool or changing a style, click **Rebuild Room** explicitly. Rebuild
-uses current occupancy and replaces only that room's owned generated children.
-It also restores deleted generated visuals or a safely deleted output root.
-Resolve ambiguous ownership/reference errors before rebuilding.
+**Validate** is read-only. Select a reported issue and use its **Focus/Locate**
+button to frame/highlight a region or identify its configuration field. Correct
+its style/asset configuration, then **Rebuild Layout** (or Rebuild Room). Rebuild
+uses the current authored cells and replaces verified owned architecture. Other
+paint tools/style changes require this explicit rebuild; Validate alone does not
+synchronize output. Resolve ambiguous references before replacing missing roots.
 
-The tool needs no Play Mode loop. Its qualified authoring mask is inactive when
-saved and during runtime; selecting it for room painting activates it only for
-editing. The generated floor remains the runtime walkable Tilemap. Re-enter
-**Edit Room in Tile Palette** after saving if painting needs reactivation.
+Authoring masks/guides are excluded from Play Mode/build floor queries. Generated
+floor Tilemaps provide runtime walkability; runtime procedural generation is not
+part of this tool.
 
-## Verification status
+## Disposable walkthrough and qualification
 
-Phases 1–2 use disposable numeric styles and temporary native-sized white sprites.
-They establish geometry, ownership, editing, persistence, and Undo behavior.
-Production **Standard** bindings, native-pixel seams, and the final Standard demo
-are Phase 3 acceptance work and are not established by these fixtures.
+The **SOLITUDE > Room Authoring > Create Layout Walkthrough** command requires an
+isolated Editor launched with `-solitudeRoomAuthoringVerification`. It creates a
+new uniquely named Tests folder and additive scene, refuses existing destinations,
+and preserves other loaded scenes. Save a disposable baseline scene first; setup
+refuses an untitled scene and never saves it automatically. The editable main layout starts empty; two
+prepainted ownership sentinels and a same-name gameplay sentinel test isolation.
+Its colored sprites are synthetic workflow fixtures, not production artwork.
+Their opaque caps and corners sit outside painted floor cells: south caps occupy
+the row immediately below the floor, west caps the column immediately to its
+left. North faces start at the top boundary and extend upward.
+
+Review evidence lives outside Assets in
+`work/Reviews/RoomAuthoring/UnifiedSingleSpace.md` and its JSON companion. Automated
+checks and native visual checks are reported separately. Production perspective,
+source-art alignment, seams and the complete interconnected Medbay wing require
+later acceptance and are not established by synthetic fixtures. Earlier Phase 2a
+failed/inconclusive walkthrough evidence remains historical; it is not replaced
+by this checkpoint.

@@ -1,0 +1,175 @@
+{
+  "phase": "2b",
+  "step": 4,
+  "status": "Passed: Step2b.4 execution complete; independent phase review not yet run",
+  "source_head": "41f28fed8ac7b15ae0e51b6005c352995653bdd3",
+  "spec_sha256": "cae50d38ff5b77bf1aa2ef9e0f4f5b02de2b6c478f908aa58705964f2adcc057",
+  "plan_normalized_bundle_sha256": "27fcc225d305506965c811dd38beadcbc5548708201b1aae0dd74b9def9d8cd3",
+  "automated": {
+    "status": "Passed",
+    "passed": 45,
+    "failed": 0,
+    "skipped": 0,
+    "report": "phase-2b-step-4-editmode-attempt-4.xml",
+    "criteria": [
+      "S5",
+      "S6",
+      "S7",
+      "S10",
+      "S11",
+      "S14",
+      "S15",
+      "S16",
+      "S17",
+      "S18",
+      "S20",
+      "S21",
+      "S22",
+      "S26",
+      "S27",
+      "S28",
+      "S29",
+      "S44"
+    ]
+  },
+  "native": {
+    "status": "Passed for required native editing actions",
+    "project": "/private/tmp/solitude-layout-phase2b-step4-baseline-repair-20261021/SolitudeUnifiedNative2b4",
+    "pid": 62470,
+    "version": "6000.6.4f1",
+    "evidence_directory": "native-step4-attempt4",
+    "checks": [
+      {
+        "criteria": [
+          "S5",
+          "S6",
+          "S7",
+          "S10",
+          "S11",
+          "S21"
+        ],
+        "file": "13-native-fill.json",
+        "status": "Passed",
+        "cells": 48,
+        "generation_count": 1
+      },
+      {
+        "criteria": [
+          "S5",
+          "S6",
+          "S7",
+          "S10",
+          "S11",
+          "S21"
+        ],
+        "file": "14-native-expand.json",
+        "status": "Passed",
+        "cells": 72,
+        "generation_count": 2
+      },
+      {
+        "criteria": [
+          "S5",
+          "S6",
+          "S7",
+          "S10",
+          "S11",
+          "S21"
+        ],
+        "file": "15-native-erase.json",
+        "status": "Passed",
+        "cells": 68,
+        "generation_count": 3
+      },
+      {
+        "criteria": [
+          "S15",
+          "S16"
+        ],
+        "file": "16-native-undo.json",
+        "status": "Passed",
+        "restores": "14-native-expand.json"
+      },
+      {
+        "criteria": [
+          "S15",
+          "S16"
+        ],
+        "file": "17-native-redo.json",
+        "status": "Passed",
+        "restores": "15-native-erase.json"
+      },
+      {
+        "criteria": [
+          "S17",
+          "S26",
+          "S27",
+          "S28"
+        ],
+        "status": "Passed",
+        "files": [
+          "18-native-missing-corner.json",
+          "19-native-focus.json",
+          "20-native-focus-undo.json",
+          "21-native-focus-redo.json"
+        ],
+        "undo_counter_note": "Unity advances current group number on GUI input (126 to127). An initial equality assertion failed; it is not a stack-entry count. The native Undo/Redo probe confirms Focus adds no Undo entry: one Undo reverses the preceding Rebuild; Redo exactly restores its preview. Authored/output/dirty state remains unchanged by Focus."
+      },
+      {
+        "criteria": [
+          "S28",
+          "S29"
+        ],
+        "status": "Passed",
+        "files": [
+          "22-native-corrected.json",
+          "23-native-rebuild-first.json",
+          "24-native-rebuild-second.json",
+          "25-native-saved.json",
+          "26-native-unloaded.json",
+          "27-native-reopened.json"
+        ],
+        "observed": "Native picker restored the same fixture sprite; rebuilds equivalent; native Save/Open baseline/Open walkthrough restored72 floors, style GUIDs, stable global output IDs and current results; generation count remains7 on reopen."
+      },
+      {
+        "criteria": [
+          "S14",
+          "S20"
+        ],
+        "status": "Passed for disposable sentinels",
+        "observed": "Other-room/other-layout cells, output/result/style references unchanged; unrelated same-name root retained. Reopening recreates transient EntityIds; saved GlobalObjectIds remain stable."
+      }
+    ],
+    "asset_drag_note": "Asset drag was inconclusive and cancelled with Escape. Native object picker selected the correct same-fixture Convex sprite. No unintended roots remained; API main-thread timeout during active drag was a tooling incident, not a product assertion pass."
+  },
+  "production_comparison": {
+    "file_count_before": 7147,
+    "file_count_after": 7147,
+    "files_unchanged": false,
+    "changed_files": {
+      "Assets/_Project/Scenes/Demos/ShipSystemRestoration.unity": {
+        "before": "998a3dd0eee6a0234c96b5a41d98f23d061c2e442e5c13eeb4d7f5ab9da6398c",
+        "after": "e57d9ae1a38e95757b2d5b7275724ef504126124167b631ca68ae6b2e44f83e3"
+      },
+      "Assets/_Project/Art/Tiles/Floors/RT_Floor.asset": {
+        "before": "6ebbe13008afca9c979266b22f628d71a5df7f659030b250b3f15b26e2d67177",
+        "after": "d60b4b743f20125107c5f143db288d6d06013fd47d484c06a8a88a3530087ea7"
+      }
+    },
+    "status_unchanged": true,
+    "note": "Human closed production Unity during verification; no agent scene save/reload/close or painting commands targeted production.",
+    "human_clarification": "Yes I saved it.",
+    "interpretation": "The two differing production files are confirmed intended human saves, preserved as external work. 7145 other file hashes unchanged; git status unchanged. Production isolation verified without reverting concurrent human edits.",
+    "accepted_external_saves_still_preserved": true
+  },
+  "remaining_gate": "None for Step2b.4 execution; independent Phase2b checkpoint review remains a separate optional next gate.",
+  "play_mode_this_step": "Not Run; no runtime behavior changed; Phase2b.3 historical executed results retained separately",
+  "production_art": "Not Run; synthetic workflow fixture only",
+  "source_manifest": "phase-2b-step-4-source-attempt-4.json",
+  "historical_failures": "All attempts1-3 and desktop targeting failures preserved; Phase2a unfinished fixture untouched",
+  "verification_notes": {
+    "native_focus_counter_probe": "Initial current-group-number equality was not an Undo-stack-entry test; native Undo/Redo proved no authoring entry and exact output restoration. Historical snapshots/probe retained.",
+    "tooling": "Inconclusive sprite drag cancelled; native picker restored exact original sprite. Main-thread timeout during active drag did not execute a mutation. Earlier failed helper compilation/precondition/native-anchor attempts retained.",
+    "source": "All tested source/config hashes match attempt4 in active worktree. Native Assets/Packages matched; native config comparison retained separately."
+  }
+}
