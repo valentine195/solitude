@@ -68,8 +68,10 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 Assert.IsTrue(sprites.Where(r => r.name == "East" || r.name == "Northeast" || r.name == "Southeast").All(r => r.transform.localPosition.x == 12));
                 Assert.IsFalse(sprites.Any(r => r.name == "East" && r.transform.localPosition.x == 8));
                 var expected = Output(room);
+                var retained = room.GeneratedOutput.GetComponentsInChildren<Transform>(true);
                 brush.BoxFill(grid, target, new BoundsInt(0, 0, 0, 12, 6, 1));
-                Assert.AreEqual(3, applications);
+                Assert.AreEqual(2, applications, "An identical fill is not a changed gesture.");
+                CollectionAssert.AreEqual(retained, room.GeneratedOutput.GetComponentsInChildren<Transform>(true));
                 CollectionAssert.AreEqual(expected, Output(room));
                 Assert.AreEqual(1, room.GeneratedOutput.GetComponentsInChildren<Tilemap>().Length);
             }

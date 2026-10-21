@@ -20,7 +20,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
         static RoomAuthoringPaletteSetup()
         {
             GridPaintingState.scenePaintTargetChanged += ActivateTarget;
-            GridPaintingState.brushChanged += brush => { if (!(brush is ShipRoomBrush)) EndEditing(); };
+            GridPaintingState.brushChanged += brush => EndEditing();
             AssemblyReloadEvents.beforeAssemblyReload += EndEditing;
             EditorApplication.playModeStateChanged += state => { if (state == PlayModeStateChange.ExitingEditMode) EndEditing(); };
         }
@@ -85,14 +85,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || !(GridPaintingState.gridBrush is ShipRoomBrush)) return;
             var grid = target == null ? null : target.GetComponentInParent<Grid>();
-            if (!ShipRoomBrush.TryGetRoom(grid, target, out _)) return;
-            if (editingMask != target) EndEditing();
+            if (!ShipRoomBrush.TryGetRoom(grid, target, out _)) { EndEditing(); return; }
+            if (editingMask != null && editingMask != target) EndEditing();
             editingMask = target;
             if (!editingMask.activeSelf) editingMask.SetActive(true);
         }
 
         public static void EndEditing()
         {
+            RoomAuthoringOperations.CancelActiveEdit();
             if (editingMask != null) editingMask.SetActive(false);
             editingMask = null;
         }

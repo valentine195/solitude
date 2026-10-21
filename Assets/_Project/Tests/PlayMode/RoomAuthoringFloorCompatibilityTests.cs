@@ -16,7 +16,10 @@ namespace SOLITUDE.Tests.RoomAuthoring
 {
     public sealed class RoomAuthoringFloorCompatibilityTests
     {
-        [UnityTest] public IEnumerator ProductionSafePointAndLandingExcludeMaskAndArchitectureAndRetainSolidBlockers()
+        [UnityTest] public IEnumerator ProductionSafePointAndLandingExcludeMaskAndArchitectureAndRetainSolidBlockers() => Verify(false);
+        [UnityTest] public IEnumerator LayoutMembersExcludeMaskAndArchitectureFromRuntimeFloorQueries() => Verify(true);
+
+        private static IEnumerator Verify(bool layoutMember)
         {
             var scene = SceneManager.CreateScene("RoomFloorCompatibility");
             var texture = new Texture2D(32, 32) { filterMode = FilterMode.Point };
@@ -54,6 +57,19 @@ namespace SOLITUDE.Tests.RoomAuthoring
             missingOutput.GetComponent<RoomGeneratedOutput>().Initialize(missingRoom);
             missingRoom.SetGenerationResult(new RoomGenerationResult { Status = RoomGenerationStatus.IncompletePreview,
                 Issues = new[] { new RoomGenerationIssue(RoomIssueKind.Floor, "floorTile", "Missing floor") } });
+            ShipLayoutAuthoring Attach(ShipRoomAuthoring space)
+            {
+                var layoutRoot = new GameObject("Ship Layout", typeof(ShipLayoutAuthoring));
+                SceneManager.MoveGameObjectToScene(layoutRoot, scene);
+                space.transform.SetParent(layoutRoot.transform, false);
+                var layout = layoutRoot.GetComponent<ShipLayoutAuthoring>();
+                space.InitializeLayout(layout, LogicalSpaceType.Room);
+                space.GeneratedOutput.Initialize(space, layout);
+                layout.Initialize(Guid.NewGuid().ToString("N"), space.Style, space, space.GeneratedOutput);
+                return layout;
+            }
+            var layout = layoutMember ? Attach(room) : null;
+            var missingLayout = layoutMember ? Attach(missingRoom) : null;
             var architecture = new GameObject("North", typeof(SpriteRenderer)); architecture.transform.SetParent(output.transform, false);
             architecture.transform.localPosition = new Vector3(8.5f, 6.5f, 0); architecture.GetComponent<SpriteRenderer>().sprite = sprite;
             var player = new GameObject("RoomFloorPlayer", typeof(PlayerMovement), typeof(PlayerInteractor), typeof(PlayerVitalsController), typeof(SurvivorAvatarAdapter));
@@ -83,6 +99,12 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 Assert.IsEmpty(missingOutput.GetComponentsInChildren<TilemapRenderer>());
                 Assert.AreEqual(RoomGenerationStatus.IncompletePreview, missingRoom.GenerationResult.Status);
                 Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+                if (layoutMember)
+                {
+                    Assert.AreSame(room, layout.Spaces[0]);
+                    Assert.AreSame(layout, output.LayoutOwner);
+                    Assert.AreSame(missingLayout, missingRoom.GeneratedOutput.LayoutOwner);
+                }
                 point.transform.position = new Vector3(9.5f, .5f, 0);
                 Assert.Throws<InvalidOperationException>(() => adapter.ValidateResumePoint(point));
                 Assert.IsFalse(CanLand(point.transform.position), "Inactive mask-only cells cannot count as floor.");
@@ -101,6 +123,8 @@ namespace SOLITUDE.Tests.RoomAuthoring
             {
                 Object.Destroy(root); Object.Destroy(missingRoot); Object.Destroy(missingStyle); Object.Destroy(player); Object.Destroy(point.gameObject);
                 Object.Destroy(style); Object.Destroy(tile); Object.Destroy(sprite); Object.Destroy(texture);
+                if (layout != null) Object.Destroy(layout.gameObject);
+                if (missingLayout != null) Object.Destroy(missingLayout.gameObject);
             }
             yield return SceneManager.UnloadSceneAsync(scene);
         }

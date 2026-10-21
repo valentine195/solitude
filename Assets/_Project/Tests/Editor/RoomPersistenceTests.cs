@@ -64,6 +64,66 @@ namespace SOLITUDE.Tests.RoomAuthoring
         public static string[] Placements(ShipRoomAuthoring room) => room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>()
             .Select(r => r.name + ":" + AssetDatabase.GetAssetPath(r.sprite) + ":" + r.transform.localPosition).OrderBy(s => s).ToArray();
 
+        [TestCase("expanded")]
+        [TestCase("hole")]
+        [TestCase("empty")]
+        [TestCase("unfinished")]
+        public void LayoutGestureSaveReopenRetainsTheCommittedStateAndCancelsUnfinishedPaint(string state)
+        {
+            Assert.IsTrue(Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification"));
+            var folder = CreateAssets();
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var brush = ScriptableObject.CreateInstance<ShipRoomBrush>();
+            var applications = 0;
+            void Generated(ShipRoomAuthoring _) => applications++;
+            try
+            {
+                var room = CreateRoom(scene, folder);
+                var layout = RoomAuthoringCreation.AdoptIntoNewLayout(room);
+                brush.OccupancyMarker = room.Style.FloorTile;
+                var before = RoomUndoRedoTests.Snapshot(room);
+                brush.BeginGesture(room, GridBrushBase.Tool.Box);
+                RoomAuthoringOperations.GenerationCompleted += Generated;
+                var grid = room.GetComponent<Grid>();
+                if (state == "expanded") brush.BoxFill(grid, room.Occupancy.gameObject, new BoundsInt(8, 0, 0, 4, 6, 1));
+                else if (state == "empty") brush.BoxErase(grid, room.Occupancy.gameObject, new BoundsInt(0, 0, 0, 8, 6, 1));
+                else brush.Erase(grid, room.Occupancy.gameObject, new Vector3Int(6, 4, 0));
+                Assert.AreEqual(0, applications);
+                if (state != "unfinished") brush.EndGesture();
+                var path = folder + "/LayoutGesture.unity";
+                Assert.IsTrue(EditorSceneManager.SaveScene(scene, path));
+                Assert.AreEqual(state == "unfinished" ? 0 : 1, applications);
+                if (state == "unfinished") CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+                var identity = room.RoomId;
+                var layoutId = layout.LayoutId;
+                var expected = RoomUndoRedoTests.Snapshot(room);
+                var result = JsonUtility.ToJson(layout.GenerationResult);
+                brush.EndGesture();
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                scene = EditorSceneManager.OpenScene(path);
+                layout = scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<ShipLayoutAuthoring>()).Single();
+                room = layout.Spaces.Single();
+                Assert.AreEqual(identity, room.RoomId);
+                Assert.AreEqual(layoutId, layout.LayoutId);
+                CollectionAssert.AreEqual(expected, RoomUndoRedoTests.Snapshot(room));
+                Assert.AreEqual(result, JsonUtility.ToJson(layout.GenerationResult));
+                Assert.AreSame(room.GeneratedOutput, layout.GeneratedOutput);
+                Assert.AreSame(layout, room.GeneratedOutput.LayoutOwner);
+                Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+                Assert.IsFalse(room.Occupancy.gameObject.activeSelf);
+                Assert.IsFalse(scene.isDirty);
+                Assert.AreEqual(state == "unfinished" ? 0 : 1, applications, "Reopen must not generate.");
+            }
+            finally
+            {
+                brush.CancelGesture();
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                Object.DestroyImmediate(brush);
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                AssetDatabase.DeleteAsset(folder);
+            }
+        }
+
         [Test] public void SaveReopenPreservesReferencesCellsAndEquivalentRebuildWithoutDirtyingOtherScenes()
         {
             Assert.IsTrue(Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification"),

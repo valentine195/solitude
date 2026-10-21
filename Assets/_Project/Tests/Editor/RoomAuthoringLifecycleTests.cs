@@ -23,8 +23,12 @@ namespace SOLITUDE.Tests.RoomAuthoring
 
         [UnityTest] public IEnumerator NormalReloadKeepsPartialResultWithoutGuides() => Verify(false, true);
         [UnityTest] public IEnumerator DisabledReloadKeepsPartialResultWithoutGuides() => Verify(true, true);
+        [UnityTest] public IEnumerator LayoutNormalReloadPreservesMembershipAndOutput() => Verify(false, false, true);
+        [UnityTest] public IEnumerator LayoutDisabledReloadPreservesMembershipAndOutput() => Verify(true, false, true);
+        [UnityTest] public IEnumerator LayoutNormalReloadPreservesPartialResult() => Verify(false, true, true);
+        [UnityTest] public IEnumerator LayoutDisabledReloadPreservesPartialResult() => Verify(true, true, true);
 
-        private static IEnumerator Verify(bool disableReload, bool partial = false)
+        private static IEnumerator Verify(bool disableReload, bool partial = false, bool layoutMember = false)
         {
             RequireIsolatedRunner();
             SessionState.SetBool(Key + "enabled", EditorSettings.enterPlayModeOptionsEnabled);
@@ -35,6 +39,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var folder = RoomPersistenceTests.CreateAssets(); SessionState.SetString(Key + "folder", folder);
             var room = RoomPersistenceTests.CreateRoom(scene, folder);
+            if (layoutMember) RoomAuthoringCreation.AdoptIntoNewLayout(room);
             if (partial)
             {
                 room.Style.Northwest.Sprite = null; EditorUtility.SetDirty(room.Style); AssetDatabase.SaveAssets();
@@ -43,9 +48,22 @@ namespace SOLITUDE.Tests.RoomAuthoring
             SessionState.SetBool(Key + "partial", partial);
             SessionState.SetString(Key + "result", JsonUtility.ToJson(room.GenerationResult));
             SessionState.SetString(Key + "identity", room.RoomId);
+            SessionState.SetBool(Key + "layout", layoutMember);
+            if (layoutMember)
+            {
+                SessionState.SetString(Key + "layoutId", room.Layout.LayoutId);
+                SessionState.SetString(Key + "layoutResult", JsonUtility.ToJson(room.Layout.GenerationResult));
+            }
             Assert.IsTrue(EditorSceneManager.SaveScene(scene, folder + "/Room.unity"));
             room.Occupancy.gameObject.SetActive(true);
             Selection.activeGameObject = room.Occupancy.gameObject;
+            if (layoutMember)
+            {
+                var pending = RoomAuthoringOperations.BeginEdit(room, "Unfinished Layout Gesture");
+                RoomAuthoringOperations.PaintCell(room, new Vector3Int(10, 0, 0), room.Style.FloorTile, pending);
+                Assert.AreEqual(49, RoomAuthoringOperations.ReadCells(room).Length);
+                Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            }
             yield return new EnterPlayMode(!disableReload);
             var playingRoom = Object.FindAnyObjectByType<ShipRoomAuthoring>();
             Assert.IsNotNull(playingRoom);
@@ -55,6 +73,13 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var sprites = playingRoom.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>();
             Assert.AreEqual(SessionState.GetBool(Key + "partial", false) ? 27 : 28, sprites.Length);
             Assert.AreEqual(SessionState.GetString(Key + "result", ""), JsonUtility.ToJson(playingRoom.GenerationResult));
+            if (SessionState.GetBool(Key + "layout", false))
+            {
+                Assert.AreEqual(SessionState.GetString(Key + "layoutId", ""), playingRoom.Layout.LayoutId);
+                Assert.AreSame(playingRoom.GeneratedOutput, playingRoom.Layout.GeneratedOutput);
+                Assert.AreSame(playingRoom.Layout, playingRoom.GeneratedOutput.LayoutOwner);
+                Assert.AreEqual(SessionState.GetString(Key + "layoutResult", ""), JsonUtility.ToJson(playingRoom.Layout.GenerationResult));
+            }
             Assert.IsFalse(RoomAuthoringPreview.CanShow);
             Assert.IsNull(RoomAuthoringPreview.GetFeedback(playingRoom).Assessment);
             Assert.IsNull(RoomAuthoringPreview.CurrentRoom);
@@ -68,6 +93,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsFalse(restored.Occupancy.gameObject.activeSelf);
             Assert.AreEqual(SessionState.GetString(Key + "result", ""), JsonUtility.ToJson(restored.GenerationResult));
             Assert.IsTrue(RoomAuthoringValidator.IsCurrent(restored));
+            if (SessionState.GetBool(Key + "layout", false)) Assert.IsTrue(RoomAuthoringValidator.IsCurrent(restored.Layout));
             Selection.activeGameObject = restored.Occupancy.gameObject;
             Assert.AreSame(restored.Occupancy.gameObject, Selection.activeGameObject);
             Assert.AreEqual(!SessionState.GetBool(Key + "partial", false), RoomAuthoringOperations.Rebuild(restored), restored.GenerationDiagnostic);
@@ -86,16 +112,29 @@ namespace SOLITUDE.Tests.RoomAuthoring
             SessionState.SetBool(Key + "running", false);
         }
 
-        [TestCase(false)] [TestCase(true)] public void BuildMaskRemovalPreservesGeneratedOutputAndUnrelatedObjects(bool partial)
+        [TestCase(false, false)] [TestCase(true, false)]
+        [TestCase(false, true)] [TestCase(true, true)]
+        public void BuildMaskRemovalPreservesGeneratedOutputAndUnrelatedObjects(bool partial, bool layoutMember)
         {
             using var f = new RoomAuthoringTestFixtures();
             var room = f.Room(); Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
+            if (layoutMember) RoomAuthoringCreation.AdoptIntoNewLayout(room);
             if (partial) Assert.IsFalse(RoomAuthoringOperations.PaintCell(room, new Vector3Int(6, 4, 0), null));
             var generated = room.GeneratedOutput.GetComponentsInChildren<Transform>();
+            var sentinel = new GameObject("Authored Gameplay Sentinel");
+            SceneManager.MoveGameObjectToScene(sentinel, f.Scene);
+            var result = room.Layout == null ? null : JsonUtility.ToJson(room.Layout.GenerationResult);
             RoomAuthoringBuildProcessor.StripAuthoringMask(f.Scene);
             Assert.IsTrue(room.Occupancy == null);
             CollectionAssert.AreEqual(generated, room.GeneratedOutput.GetComponentsInChildren<Transform>());
             Assert.AreEqual(partial ? 35 : 28, room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Length);
+            Assert.IsTrue(sentinel != null);
+            if (layoutMember)
+            {
+                Assert.AreSame(room, room.Layout.Spaces.Single());
+                Assert.AreSame(room.GeneratedOutput, room.Layout.GeneratedOutput);
+                Assert.AreEqual(result, JsonUtility.ToJson(room.Layout.GenerationResult));
+            }
         }
     }
 }

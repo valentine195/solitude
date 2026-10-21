@@ -13,6 +13,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public RoomGenerationResult Assessment;
         public Vector2Int[] MissingFloorCells = Array.Empty<Vector2Int>();
         public bool IsCurrent;
+        public bool IsEditing;
+        public Vector2Int[] PendingAddedCells = Array.Empty<Vector2Int>();
+        public Vector2Int[] PendingRemovedCells = Array.Empty<Vector2Int>();
     }
 
     [InitializeOnLoad]
@@ -67,6 +70,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return new RoomPreviewFeedback
             {
                 Assessment = result,
+                IsEditing = RoomAuthoringOperations.IsEditing(room),
+                PendingAddedCells = RoomAuthoringOperations.PendingCells(room, false),
+                PendingRemovedCells = RoomAuthoringOperations.PendingCells(room, true),
                 MissingFloorCells = placement != null && placement.Floor == null ? placement.Geometry.Cells : Array.Empty<Vector2Int>(),
                 IsCurrent = saved != null && saved.Status != RoomGenerationStatus.Refused && result.Status != RoomGenerationStatus.Refused &&
                     !string.IsNullOrEmpty(saved.InputFingerprint) && saved.InputFingerprint == result.InputFingerprint &&
@@ -112,6 +118,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
             try
             {
                 Handles.zTest = CompareFunction.Always;
+                foreach (var cell in feedback.PendingAddedCells.Concat(feedback.PendingRemovedCells))
+                {
+                    var origin = room.Occupancy.CellToWorld(new Vector3Int(cell.x, cell.y, 0));
+                    var removed = feedback.PendingRemovedCells.Contains(cell);
+                    Handles.DrawSolidRectangleWithOutline(new[] { origin, origin + Vector3.right, origin + Vector3.right + Vector3.up, origin + Vector3.up },
+                        removed ? new Color(1f, .2f, .1f, .25f) : new Color(.1f, .8f, 1f, .25f), removed ? Color.red : Color.cyan);
+                    Handles.Label(origin + Vector3.one * .25f, removed ? "− pending" : "+ pending");
+                }
                 foreach (var cell in feedback.MissingFloorCells)
                 {
                     var origin = room.Occupancy.CellToWorld(new Vector3Int(cell.x, cell.y, 0));

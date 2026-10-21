@@ -25,6 +25,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static void PrepareForRuntime(Scene scene)
         {
             if (!scene.IsValid() || !scene.isLoaded) return;
+            RoomAuthoringOperations.CancelActiveEdit(scene);
             foreach (var room in scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<ShipRoomAuthoring>(true)))
             {
                 var mask = room.Occupancy;

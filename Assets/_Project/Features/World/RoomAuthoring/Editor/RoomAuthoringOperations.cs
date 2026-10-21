@@ -11,12 +11,35 @@ namespace SOLITUDE.Editor.RoomAuthoring
     public static class RoomAuthoringOperations
     {
         public static event System.Action<ShipRoomAuthoring> GenerationCompleted;
+        private static RoomEdit activeEdit;
+
+        static RoomAuthoringOperations()
+        {
+            AssemblyReloadEvents.beforeAssemblyReload += CancelActiveEdit;
+            Undo.undoRedoPerformed += () => activeEdit?.CloseAfterUndo();
+        }
+
+        public static bool IsEditing(ShipRoomAuthoring room) => activeEdit != null && activeEdit.Room == room;
+        public static void CancelActiveEdit() => activeEdit?.Cancel();
+        public static void CancelActiveEdit(UnityEngine.SceneManagement.Scene scene)
+        {
+            if (activeEdit?.Room != null && activeEdit.Room.gameObject.scene == scene) activeEdit.Cancel();
+        }
+
+        public static Vector2Int[] PendingCells(ShipRoomAuthoring room, bool removed)
+        {
+            if (!IsEditing(room) || activeEdit.originalTiles == null) return System.Array.Empty<Vector2Int>();
+            var before = activeEdit.originalTiles.Keys.Select(p => new Vector2Int(p.x, p.y));
+            var after = ReadCells(room);
+            return (removed ? before.Except(after) : after.Except(before)).OrderBy(p => p.y).ThenBy(p => p.x).ToArray();
+        }
 
         public sealed class RoomEdit : System.IDisposable
         {
             private readonly int group;
             internal readonly ShipRoomAuthoring Room;
             internal bool IsDisposed { get; private set; }
+            internal Dictionary<Vector3Int, TileBase> originalTiles;
 
             internal RoomEdit(ShipRoomAuthoring room, string name)
             {
@@ -26,21 +49,78 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 Undo.SetCurrentGroupName(name);
             }
 
-            public void Dispose()
+            internal void PrepareMutation()
+            {
+                if (originalTiles != null) return;
+                originalTiles = Tiles(Room);
+                Undo.RegisterCompleteObjectUndo(Room.Occupancy, "Paint Room Cells");
+            }
+
+            private static Dictionary<Vector3Int, TileBase> Tiles(ShipRoomAuthoring room)
+            {
+                var tiles = new Dictionary<Vector3Int, TileBase>();
+                foreach (var position in room.Occupancy.cellBounds.allPositionsWithin)
+                {
+                    var tile = room.Occupancy.GetTile(position);
+                    if (tile != null) tiles.Add(position, tile);
+                }
+                return tiles;
+            }
+
+            public bool Commit()
+            {
+                if (IsDisposed) return false;
+                if (originalTiles != null)
+                {
+                    var current = Tiles(Room);
+                    if (current.Count == originalTiles.Count && originalTiles.All(pair =>
+                        current.TryGetValue(pair.Key, out var tile) && tile == pair.Value))
+                    { Cancel(); return true; }
+                }
+                CloseAfterUndo();
+                try
+                {
+                    var result = originalTiles == null || RebuildCore(Room);
+                    FinishGroup();
+                    return result;
+                }
+                catch
+                {
+                    Undo.RevertAllDownToGroup(group);
+                    throw;
+                }
+            }
+
+            public void Cancel()
             {
                 if (IsDisposed) return;
+                CloseAfterUndo();
+                if (originalTiles != null) Undo.RevertAllDownToGroup(group);
+                else FinishGroup();
+            }
+
+            internal void CloseAfterUndo()
+            {
+                IsDisposed = true;
+                if (activeEdit == this) activeEdit = null;
+            }
+
+            private void FinishGroup()
+            {
                 Undo.FlushUndoRecordObjects();
                 Undo.CollapseUndoOperations(group);
                 Undo.IncrementCurrentGroup();
-                IsDisposed = true;
             }
+
+            public void Dispose() { if (!IsDisposed) Commit(); }
         }
 
         public static RoomEdit BeginEdit(ShipRoomAuthoring room, string name)
         {
             var issue = GetSafetyIssue(room, allowMissingOutput: true);
             if (issue != null) throw new System.InvalidOperationException(issue);
-            return new RoomEdit(room, name);
+            activeEdit?.Cancel();
+            return activeEdit = new RoomEdit(room, name);
         }
 
         private static void CheckEdit(ShipRoomAuthoring room, RoomEdit edit)
@@ -101,11 +181,10 @@ namespace SOLITUDE.Editor.RoomAuthoring
             if (issue != null || position.z != 0) return false;
             CheckEdit(room, edit);
             using var ownedEdit = edit == null ? BeginEdit(room, marker == null ? "Erase Room Cell" : "Paint Room Cell") : null;
-            // Generated-object Undo registrations end native recording between stroke samples.
-            // Capture each authored mutation, then collapse the samples into the gesture group.
-            Undo.RegisterCompleteObjectUndo(room.Occupancy, "Paint Room Cells");
+            if (room.Occupancy.GetTile(position) == marker) return true;
+            (edit ?? ownedEdit).PrepareMutation();
             room.Occupancy.SetTile(position, marker);
-            return RebuildCore(room);
+            return edit != null || ownedEdit.Commit();
         }
 
         public static bool PaintBox(ShipRoomAuthoring room, BoundsInt bounds, TileBase marker, RoomEdit edit = null)
@@ -117,9 +196,13 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 for (var i = 0; i < tiles.Length; i++) tiles[i] = marker;
             CheckEdit(room, edit);
             using var ownedEdit = edit == null ? BeginEdit(room, marker == null ? "Erase Room Box" : "Paint Room Box") : null;
-            Undo.RegisterCompleteObjectUndo(room.Occupancy, "Paint Room Cells");
+            var changed = false;
+            foreach (var position in bounds.allPositionsWithin)
+                if (room.Occupancy.GetTile(position) != marker) { changed = true; break; }
+            if (!changed) return true;
+            (edit ?? ownedEdit).PrepareMutation();
             room.Occupancy.SetTilesBlock(bounds, tiles);
-            return RebuildCore(room);
+            return edit != null || ownedEdit.Commit();
         }
 
         public static string GetSafetyIssue(ShipLayoutAuthoring layout, bool allowMissingOutput = false)
@@ -132,6 +215,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             if (layout == null) return false;
             var room = layout.Spaces.Count == 1 ? layout.Spaces[0] : null;
+            if (activeEdit != null && activeEdit.Room == room)
+                return activeEdit.originalTiles != null ? activeEdit.Commit() : RebuildLayoutCore(layout);
+            activeEdit?.Commit();
             using var edit = new RoomEdit(room, "Rebuild Layout");
             return RebuildLayoutCore(layout);
         }
@@ -139,6 +225,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static bool Rebuild(ShipRoomAuthoring room)
         {
             if (room == null) return false;
+            if (activeEdit != null && activeEdit.Room == room)
+                return activeEdit.originalTiles != null ? activeEdit.Commit() : RebuildCore(room);
+            activeEdit?.Commit();
             using var edit = new RoomEdit(room, "Rebuild Room");
             return RebuildCore(room);
         }
@@ -197,6 +286,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             room.SetGenerationResult(result);
             if (layout != null)
             {
+                Undo.RegisterCompleteObjectUndo(layout, "Layout Generation Result");
                 layout.SetGenerationResult(JsonUtility.FromJson<RoomGenerationResult>(JsonUtility.ToJson(result)));
                 EditorUtility.SetDirty(layout);
             }

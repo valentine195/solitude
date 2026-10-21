@@ -51,6 +51,17 @@ namespace SOLITUDE.Editor.RoomAuthoring
             TilemapEditorTool.SetActiveEditorTool(typeof(BoxTool));
         }
 
+        public override void OnSceneGUI(GridLayout gridLayout, GameObject brushTarget)
+        {
+            if (Event.current != null && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+            {
+                ((ShipRoomBrush)target).CancelGesture();
+                GUIUtility.hotControl = 0;
+                Event.current.Use();
+            }
+            base.OnSceneGUI(gridLayout, brushTarget);
+        }
+
         public override void OnPaintSceneGUI(GridLayout gridLayout, GameObject brushTarget, BoundsInt position, GridBrushBase.Tool tool, bool executing)
         {
             if (!executing) ((ShipRoomBrush)target).EndGesture();
