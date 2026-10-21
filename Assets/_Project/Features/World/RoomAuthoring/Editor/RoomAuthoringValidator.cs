@@ -79,6 +79,28 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 saved.OutputFingerprint == OutputFingerprint(room);
         }
 
+        public static string GetAdoptionOutputIssue(ShipRoomAuthoring room)
+        {
+            var output = room.GeneratedOutput;
+            if (output.GetComponents<Component>().Any(component => component == null ||
+                (component.GetType() != typeof(Transform) && component.GetType() != typeof(RoomGeneratedOutput))))
+                return "Generated output root contains unrecognized components; move authored content outside it before adoption.";
+            foreach (Transform child in output.transform)
+            {
+                var floor = child.GetComponent<Tilemap>() != null;
+                var allowed = floor ? new[] { typeof(Transform), typeof(Tilemap), typeof(TilemapRenderer) }
+                    : new[] { typeof(Transform), typeof(SpriteRenderer) };
+                var components = child.GetComponents<Component>();
+                if (child.childCount != 0 || components.Length != allowed.Length ||
+                    components.Any(component => component == null || !allowed.Contains(component.GetType())))
+                    return "Generated output contains unrecognized content at " + child.name + "; move authored content outside it before adoption.";
+            }
+            // Existing children must match the last recorded build. Names alone do not establish disposal rights.
+            if (output.transform.childCount != 0 && !IsCurrent(room))
+                return "Generated output is modified or stale. Review its content before rebuilding and adopting.";
+            return null;
+        }
+
         private static string Reference(UnityEngine.Object value)
         {
             if (value == null) return "null";

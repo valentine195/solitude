@@ -21,6 +21,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 root.Add(field);
             }
             var room = (ShipRoomAuthoring)target;
+            var adoptionFeedback = new HelpBox("", HelpBoxMessageType.Info);
+            var adopt = new Button(() =>
+            {
+                try { Selection.activeGameObject = RoomAuthoringCreation.AdoptIntoNewLayout(room).gameObject; }
+                catch (System.InvalidOperationException exception) { adoptionFeedback.text = exception.Message; }
+            }) { text = "Adopt into New Ship Layout" };
+            root.Add(adopt);
+            root.Add(adoptionFeedback);
             var issue = RoomAuthoringCreation.GetOwnershipIssue(room);
             if (issue != null) root.Add(new HelpBox(issue, HelpBoxMessageType.Error));
             if (room.Style == null) root.Add(new HelpBox("Assign a prepared room style. Production artwork is not supplied by this tool.", HelpBoxMessageType.Info));
@@ -35,6 +43,12 @@ namespace SOLITUDE.Editor.RoomAuthoring
             void RefreshFeedback()
             {
                 if (room == null) return;
+                var adoptionIssue = RoomAuthoringCreation.GetAdoptionIssue(room);
+                adopt.SetEnabled(adoptionIssue == null);
+                adoptionFeedback.text = room.Layout != null ? room.GeneratedOutput == null
+                    ? "Layout output reference is missing." : string.IsNullOrEmpty(room.GeneratedOutput.AdoptionRecord)
+                        ? "Layout space." : room.GeneratedOutput.AdoptionRecord
+                    : adoptionIssue ?? "Adoption preserves this room and its painted map. One Undo restores independent ownership.";
                 var feedback = RoomAuthoringPreview.GetFeedback(room);
                 var result = feedback.Assessment;
                 if (result == null) { outcome.text = "Editor preview is hidden in Play Mode and builds."; issues.Clear(); return; }

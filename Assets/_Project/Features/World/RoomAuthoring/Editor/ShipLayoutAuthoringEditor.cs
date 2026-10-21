@@ -32,6 +32,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             if (layout.Spaces.Count == 1 && layout.Spaces[0] != null)
             {
                 var room = layout.Spaces[0];
+                if (!string.IsNullOrEmpty(room.GeneratedOutput == null ? null : room.GeneratedOutput.AdoptionRecord))
+                    root.Add(new HelpBox(room.GeneratedOutput.AdoptionRecord, HelpBoxMessageType.Info));
                 var data = new SerializedObject(room);
                 foreach (var name in new[] { "spaceType", "authoringMetadata" })
                 {

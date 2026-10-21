@@ -197,7 +197,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             room.SetGenerationResult(result);
             if (layout != null)
             {
-                layout.SetGenerationResult(result);
+                layout.SetGenerationResult(JsonUtility.FromJson<RoomGenerationResult>(JsonUtility.ToJson(result)));
                 EditorUtility.SetDirty(layout);
             }
             EditorUtility.SetDirty(room);

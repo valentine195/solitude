@@ -8,8 +8,18 @@ namespace SOLITUDE.World.RoomAuthoring
     {
         [SerializeField] private ShipRoomAuthoring owner;
         [SerializeField] private ShipLayoutAuthoring layoutOwner;
+        [SerializeField, TextArea] private string adoptionRecord;
         public ShipRoomAuthoring Owner => owner;
         public ShipLayoutAuthoring LayoutOwner => layoutOwner;
+        public string AdoptionRecord => adoptionRecord;
+
+        public void RecordAdoption(string previousHierarchy)
+        {
+            if (owner == null || layoutOwner == null)
+                throw new InvalidOperationException("Record adoption after assigning room and layout ownership.");
+            adoptionRecord = "Room " + owner.RoomId + " at " + previousHierarchy +
+                ": independent output → layout " + layoutOwner.LayoutId + ". Existing room, occupancy, style and output references retained.";
+        }
 
         public void Initialize(ShipRoomAuthoring room) => Initialize(room, null);
 
