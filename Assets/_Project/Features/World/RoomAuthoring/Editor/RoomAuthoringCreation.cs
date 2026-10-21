@@ -18,6 +18,34 @@ namespace SOLITUDE.Editor.RoomAuthoring
             Selection.activeGameObject = room.gameObject;
         }
 
+        [MenuItem("GameObject/SOLITUDE/Ship Layout Authoring", false, 9)]
+        private static void CreateLayoutFromMenu()
+        {
+            Selection.activeGameObject = CreateLayout(SceneManager.GetActiveScene()).gameObject;
+        }
+
+        public static ShipLayoutAuthoring CreateLayout(Scene scene, RoomStyleDefinition style = null,
+            LogicalSpaceType type = LogicalSpaceType.Room)
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode || !scene.IsValid() || !scene.isLoaded)
+                throw new InvalidOperationException("Create a layout in a loaded Edit Mode scene.");
+            Undo.IncrementCurrentGroup();
+            var group = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName("Create Ship Layout");
+            var root = new GameObject("ShipLayout", typeof(ShipLayoutAuthoring));
+            SceneManager.MoveGameObjectToScene(root, scene);
+            Undo.RegisterCreatedObjectUndo(root, "Create Ship Layout");
+            var layout = root.GetComponent<ShipLayoutAuthoring>();
+            var room = Create(scene);
+            Undo.SetTransformParent(room.transform, root.transform, "Create Ship Layout");
+            room.InitializeLayout(layout, type);
+            room.GeneratedOutput.Initialize(room, layout);
+            layout.Initialize(Guid.NewGuid().ToString("N"), style, room, room.GeneratedOutput);
+            Undo.CollapseUndoOperations(group);
+            EditorSceneManager.MarkSceneDirty(scene);
+            return layout;
+        }
+
         public static ShipRoomAuthoring Create(Scene scene, RoomStyleDefinition style = null)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || !scene.IsValid() || !scene.isLoaded)
@@ -60,7 +88,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 if (!allowMissingOutput) return "Room output reference is missing.";
                 if (outputs.Any(output => output.Owner == room || output.transform.IsChildOf(room.transform)))
                     return "Existing generated ownership must be resolved before replacing a missing output reference.";
-                return null;
+                return GetMembershipIssue(room, allowMissingOutput);
             }
             if (room.GeneratedOutput.Owner != room || room.GeneratedOutput.transform == room.transform ||
                 !room.GeneratedOutput.transform.IsChildOf(room.transform)) return "Generated output is not owned by this room.";
@@ -70,6 +98,47 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 room.GeneratedOutput.transform.IsChildOf(room.Occupancy.transform)) return "Occupancy and generated output must be separate.";
             if (rooms.Any(other => other != room && (other.Occupancy == room.Occupancy || other.GeneratedOutput == room.GeneratedOutput)))
                 return "Room occupancy or output is referenced by another room.";
+            return GetMembershipIssue(room, allowMissingOutput);
+        }
+
+        private static ShipLayoutAuthoring[] LoadedLayouts() => Resources.FindObjectsOfTypeAll<ShipLayoutAuthoring>()
+            .Where(layout => layout.gameObject.scene.IsValid() && layout.gameObject.scene.isLoaded).ToArray();
+
+        private static string GetMembershipIssue(ShipRoomAuthoring room, bool allowMissingOutput)
+        {
+            var containing = LoadedLayouts().Where(layout => layout.Spaces.Contains(room)).ToArray();
+            if (room.Layout == null)
+                return containing.Length != 0 || (room.GeneratedOutput != null && room.GeneratedOutput.LayoutOwner != null)
+                    ? "Space layout membership is inconsistent." : null;
+            if (containing.Length != 1 || containing[0] != room.Layout)
+                return "Space layout membership is ambiguous or inconsistent.";
+            return GetLayoutOwnershipIssue(room.Layout, allowMissingOutput);
+        }
+
+        public static string GetLayoutOwnershipIssue(ShipLayoutAuthoring layout, bool allowMissingOutput = false)
+        {
+            if (layout == null || !layout.gameObject.scene.IsValid() || !layout.gameObject.scene.isLoaded)
+                return "Select a layout in a loaded scene.";
+            var layouts = LoadedLayouts();
+            if (string.IsNullOrWhiteSpace(layout.LayoutId)) return "Layout identity is missing.";
+            if (layouts.Count(other => other.gameObject.scene == layout.gameObject.scene && other.LayoutId == layout.LayoutId) != 1)
+                return "Layout identity is ambiguous in this scene.";
+            if (layout.Spaces.Count != 1 || layout.Spaces[0] == null)
+                return "This single-space checkpoint requires exactly one layout space.";
+            var room = layout.Spaces[0];
+            if (room.Layout != layout || room.gameObject.scene != layout.gameObject.scene ||
+                !room.transform.IsChildOf(layout.transform) || layouts.Count(other => other.Spaces.Contains(room)) != 1)
+                return "Layout space membership is ambiguous or inconsistent.";
+            if (layout.GeneratedOutput != room.GeneratedOutput) return "Layout output reference does not match its space.";
+            var outputs = Resources.FindObjectsOfTypeAll<RoomGeneratedOutput>()
+                .Where(output => output.gameObject.scene.IsValid() && output.gameObject.scene.isLoaded).ToArray();
+            if (layout.GeneratedOutput == null)
+                return allowMissingOutput && !outputs.Any(output => output.LayoutOwner == layout)
+                    ? null : "Layout output reference is missing or ambiguous.";
+            if (layout.GeneratedOutput.LayoutOwner != layout || layout.GeneratedOutput.Owner != room ||
+                outputs.Count(output => output.LayoutOwner == layout) != 1 ||
+                layouts.Any(other => other != layout && other.GeneratedOutput == layout.GeneratedOutput))
+                return "Layout generated output ownership is ambiguous.";
             return null;
         }
     }

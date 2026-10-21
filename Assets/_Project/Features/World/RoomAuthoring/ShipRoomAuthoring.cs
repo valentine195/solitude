@@ -9,6 +9,9 @@ namespace SOLITUDE.World.RoomAuthoring
     public sealed class ShipRoomAuthoring : MonoBehaviour
     {
         [SerializeField] private string roomId;
+        [SerializeField] private ShipLayoutAuthoring layout;
+        [SerializeField] private LogicalSpaceType spaceType;
+        [SerializeField, TextArea] private string authoringMetadata;
         [SerializeField] private RoomStyleDefinition style;
         [SerializeField] private Tilemap occupancy;
         [SerializeField] private RoomGeneratedOutput generatedOutput;
@@ -16,7 +19,18 @@ namespace SOLITUDE.World.RoomAuthoring
         [SerializeField] private RoomGenerationResult generationResult;
 
         public string RoomId => roomId;
-        public RoomStyleDefinition Style { get => style; set => style = value; }
+        public ShipLayoutAuthoring Layout => layout;
+        public LogicalSpaceType SpaceType { get => spaceType; set => spaceType = value; }
+        public string AuthoringMetadata { get => authoringMetadata; set => authoringMetadata = value; }
+        public RoomStyleDefinition Style { get => style != null ? style : layout == null ? null : layout.DefaultStyle; set => style = value; }
+
+        public void InitializeLayout(ShipLayoutAuthoring owner, LogicalSpaceType type)
+        {
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            if (layout != null) throw new InvalidOperationException("Space already belongs to a layout.");
+            layout = owner;
+            spaceType = type;
+        }
         public Tilemap Occupancy => occupancy;
         public RoomGeneratedOutput GeneratedOutput => generatedOutput;
         public string GenerationDiagnostic => generationDiagnostic;

@@ -62,6 +62,13 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var issue = RoomAuthoringCreation.GetOwnershipIssue(room, allowMissingOutput);
             if (issue != null) return issue;
             if (EditorApplication.isPlayingOrWillChangePlaymode) return "Rebuild is available in Edit Mode only.";
+            if (room.Layout != null)
+            {
+                var frame = room.Layout.transform;
+                if (frame.rotation != Quaternion.identity || frame.lossyScale != Vector3.one || frame.position.z != 0 ||
+                    frame.position.x != Mathf.Round(frame.position.x) || frame.position.y != Mathf.Round(frame.position.y))
+                    return "Layout requires an unrotated, unit-scale, integer-aligned XY transform.";
+            }
             if (room.transform.rotation != Quaternion.identity || room.transform.lossyScale != Vector3.one ||
                 room.transform.position.z != 0 || room.transform.position.x != Mathf.Round(room.transform.position.x) || room.transform.position.y != Mathf.Round(room.transform.position.y))
                 return "Room requires an unrotated, unit-scale, integer-aligned XY transform.";
@@ -115,6 +122,20 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return RebuildCore(room);
         }
 
+        public static string GetSafetyIssue(ShipLayoutAuthoring layout, bool allowMissingOutput = false)
+        {
+            var issue = RoomAuthoringCreation.GetLayoutOwnershipIssue(layout, allowMissingOutput);
+            return issue ?? GetSafetyIssue(layout.Spaces[0], allowMissingOutput);
+        }
+
+        public static bool Rebuild(ShipLayoutAuthoring layout)
+        {
+            if (layout == null) return false;
+            var room = layout.Spaces.Count == 1 ? layout.Spaces[0] : null;
+            using var edit = new RoomEdit(room, "Rebuild Layout");
+            return RebuildLayoutCore(layout);
+        }
+
         public static bool Rebuild(ShipRoomAuthoring room)
         {
             if (room == null) return false;
@@ -124,7 +145,28 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         private static bool RebuildCore(ShipRoomAuthoring room)
         {
+            if (room.Layout != null && GetSafetyIssue(room, allowMissingOutput: true) == null)
+                return RebuildLayoutCore(room.Layout);
             var result = RoomAuthoringValidator.Assess(room, out var placement);
+            return ApplyRebuild(room, null, result, placement);
+        }
+
+        private static bool RebuildLayoutCore(ShipLayoutAuthoring layout)
+        {
+            var result = RoomAuthoringValidator.Assess(layout, out var placement);
+            Undo.RegisterCompleteObjectUndo(layout, "Layout Generation Result");
+            if (result.Status == RoomGenerationStatus.Refused)
+            {
+                layout.SetGenerationResult(result);
+                EditorUtility.SetDirty(layout);
+                return false;
+            }
+            return ApplyRebuild(layout.Spaces[0], layout, result, placement);
+        }
+
+        private static bool ApplyRebuild(ShipRoomAuthoring room, ShipLayoutAuthoring layout,
+            RoomGenerationResult result, RoomPlacement placement)
+        {
             Undo.RegisterCompleteObjectUndo(room, "Room Generation Result");
             if (result.Status == RoomGenerationStatus.Refused)
             {
@@ -137,16 +179,27 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 var generated = new GameObject("Generated Architecture", typeof(RoomGeneratedOutput));
                 generated.transform.SetParent(room.transform, false);
                 var output = generated.GetComponent<RoomGeneratedOutput>();
-                output.Initialize(room);
+                output.Initialize(room, layout);
                 Undo.RegisterCreatedObjectUndo(generated, "Rebuild Room");
                 var serialized = new SerializedObject(room);
                 serialized.FindProperty("generatedOutput").objectReferenceValue = output;
                 serialized.ApplyModifiedProperties();
+                if (layout != null)
+                {
+                    var layoutData = new SerializedObject(layout);
+                    layoutData.FindProperty("generatedOutput").objectReferenceValue = output;
+                    layoutData.ApplyModifiedProperties();
+                }
             }
             RoomGeometryWriter.Apply(room, placement);
             result.OutputFingerprint = RoomAuthoringValidator.OutputFingerprint(room);
             Undo.RegisterCompleteObjectUndo(room, "Room Generation Result");
             room.SetGenerationResult(result);
+            if (layout != null)
+            {
+                layout.SetGenerationResult(result);
+                EditorUtility.SetDirty(layout);
+            }
             EditorUtility.SetDirty(room);
             EditorSceneManager.MarkSceneDirty(room.gameObject.scene);
             GenerationCompleted?.Invoke(room);

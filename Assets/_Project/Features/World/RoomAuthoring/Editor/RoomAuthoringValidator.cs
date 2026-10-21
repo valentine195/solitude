@@ -49,6 +49,26 @@ namespace SOLITUDE.Editor.RoomAuthoring
             };
         }
 
+        public static RoomGenerationResult Assess(ShipLayoutAuthoring layout, out RoomPlacement placement)
+        {
+            placement = null;
+            var safety = RoomAuthoringOperations.GetSafetyIssue(layout, allowMissingOutput: true);
+            if (safety == null) return Assess(layout.Spaces[0], out placement);
+            var issue = new RoomGenerationIssue(RoomIssueKind.Safety, "layout", safety + " Retained output was not updated.");
+            issue.LocateInRoom(layout == null ? "<missing-layout>" : layout.LayoutId);
+            return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = new[] { issue } };
+        }
+
+        public static bool IsCurrent(ShipLayoutAuthoring layout)
+        {
+            if (layout == null || layout.Spaces.Count != 1 || layout.Spaces[0] == null) return false;
+            var saved = layout.GenerationResult;
+            var roomResult = layout.Spaces[0].GenerationResult;
+            return saved != null && roomResult != null && saved.Status == roomResult.Status &&
+                saved.InputFingerprint == roomResult.InputFingerprint && saved.OutputFingerprint == roomResult.OutputFingerprint &&
+                IsCurrent(layout.Spaces[0]);
+        }
+
         public static bool IsCurrent(ShipRoomAuthoring room)
         {
             var saved = room == null ? null : room.GenerationResult;
@@ -82,6 +102,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
         private static string InputFingerprint(ShipRoomAuthoring room)
         {
             var text = new StringBuilder(room.RoomId).Append(JsonUtility.ToJson(room.transform.position));
+            if (room.Layout != null) text.Append(room.Layout.LayoutId);
             foreach (var cell in RoomAuthoringOperations.ReadCells(room).OrderBy(c => c.y).ThenBy(c => c.x)) text.Append(JsonUtility.ToJson(cell));
             var style = room.Style;
             text.Append(Reference(style));
