@@ -17,6 +17,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public static void Apply(ShipRoomAuthoring room, RoomPlacement placement)
         {
+            foreach (var sprite in placement.Sprites)
+                if (sprite.OwnerId != null && sprite.OwnerId != room.RoomId)
+                    throw new System.InvalidOperationException("Resolved architecture belongs to a different space; output was not changed.");
             Clear(room);
             if (placement.Geometry.Cells.Length == 0) return;
             if (placement.Floor != null)

@@ -28,9 +28,12 @@ namespace SOLITUDE.World.RoomAuthoring
         public readonly int Length;
         public readonly RoomJunction StartJoin;
         public readonly RoomJunction EndJoin;
+        public readonly bool HasStartJoin;
+        public readonly bool HasEndJoin;
         public Vector2Int End => Start + (Side == RoomSide.North || Side == RoomSide.South ? Vector2Int.right : Vector2Int.up) * Length;
-        public RoomBoundaryRun(RoomSide side, Vector2Int start, int length, RoomJunction startJoin = default, RoomJunction endJoin = default)
-        { Side = side; Start = start; Length = length; StartJoin = startJoin; EndJoin = endJoin; }
+        public RoomBoundaryRun(RoomSide side, Vector2Int start, int length, RoomJunction startJoin = default,
+            RoomJunction endJoin = default, bool hasStartJoin = true, bool hasEndJoin = true)
+        { Side = side; Start = start; Length = length; StartJoin = startJoin; EndJoin = endJoin; HasStartJoin = hasStartJoin; HasEndJoin = hasEndJoin; }
     }
 
     public sealed class RoomGeometry

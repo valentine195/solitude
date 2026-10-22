@@ -35,7 +35,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
         }
 
         private static RoomGenerationResult AssessSpace(ShipRoomAuthoring room, out RoomPlacement placement,
-            bool includeLayoutMembers = true)
+            bool includeLayoutMembers = true, bool buildBoundaries = true)
         {
             placement = null;
             var safety = RoomAuthoringOperations.GetSafetyIssue(room, allowMissingOutput: true);
@@ -47,7 +47,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = new[] { refusal } };
             }
             var geometry = RoomBoundaryExtractor.Extract(RoomAuthoringOperations.ReadCells(room));
-            RoomPlacementBuilder.TryBuild(geometry, room.Style, out placement, out _);
+            if (buildBoundaries) RoomPlacementBuilder.TryBuild(geometry, room.Style, out placement, out _);
+            else placement = RoomPlacementBuilder.BuildFloor(geometry, room.Style);
             if (room.Layout != null)
             {
                 var topology = ShipLayoutTopology.Build(new[] { new ShipSpaceCells(room.RoomId, geometry.Cells, Vector2Int.zero) });
@@ -133,7 +134,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var refused = false;
             foreach (var room in layout.Spaces.OrderBy(r => r.RoomId, System.StringComparer.Ordinal))
             {
-                var result = AssessSpace(room, out var placement, false);
+                var result = AssessSpace(room, out var placement, false, false);
                 refused |= result.Status == RoomGenerationStatus.Refused;
                 var offset = LayoutOffset(layout, room);
                 foreach (var issue in result.Issues)
@@ -144,14 +145,31 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 }
                 if (placement != null) placements.Add(room, new RoomPlacement { Geometry = placement.Geometry, Floor = placement.Floor });
             }
-            if (topology.Cells.Count != 0)
+            LayoutBoundaryGeometry boundaries;
+            try { boundaries = LayoutBoundaryResolver.Resolve(topology); }
+            catch (System.OverflowException)
             {
-                var pending = new RoomGenerationIssue(RoomIssueKind.Geometry, "boundaries", "Floor preview only: shared boundary generation is pending.");
-                pending.LocateInRoom(layout.LayoutId); issues.Add(pending);
+                var issue = new RoomGenerationIssue(RoomIssueKind.Safety, "coordinates", "Layout boundary coordinates exceed the supported integer grid.");
+                issue.LocateInRoom(layout.LayoutId);
+                return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = new[] { issue } };
+            }
+            if (!refused)
+            {
+                var styled = RoomPlacementBuilder.BuildLayout(boundaries, layout.Spaces.ToDictionary(r => r.RoomId, r => r.Style, System.StringComparer.Ordinal));
+                issues.AddRange(styled.Issues);
+                var owners = layout.Spaces.ToDictionary(r => r.RoomId, System.StringComparer.Ordinal);
+                foreach (var item in styled.Sprites)
+                {
+                    var room = owners[item.OwnerId];
+                    var offset = LayoutOffset(layout, room);
+                    placements[room].Sprites.Add(new RoomSpritePlacement(item.Role, item.Sprite,
+                        item.Position - new Vector3(offset.x, offset.y, 0), item.OwnerId));
+                }
             }
             return new RoomGenerationResult
             {
-                Status = refused ? RoomGenerationStatus.Refused : topology.Cells.Count == 0 ? RoomGenerationStatus.Empty : RoomGenerationStatus.IncompletePreview,
+                Status = refused ? RoomGenerationStatus.Refused : topology.Cells.Count == 0 ? RoomGenerationStatus.Empty :
+                    issues.Count == 0 ? RoomGenerationStatus.Complete : RoomGenerationStatus.IncompletePreview,
                 Issues = issues.OrderBy(i => i.Id, System.StringComparer.Ordinal).ToArray(),
                 InputFingerprint = LayoutInputFingerprint(layout)
             };

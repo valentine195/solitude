@@ -80,7 +80,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.AreEqual(RoomGenerationStatus.IncompletePreview, layout.GenerationResult.Status);
             Assert.AreEqual(2, RoomAuthoringTestFixtures.FloorCount(a));
             Assert.AreEqual(2, RoomAuthoringTestFixtures.FloorCount(b));
-            Assert.IsEmpty(layout.GetComponentsInChildren<SpriteRenderer>());
+            Assert.AreEqual(1, layout.GetComponentsInChildren<SpriteRenderer>().Count(r => r.name == "PartitionEast"));
             Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
             var before = RoomAuthoringValidator.OutputFingerprint(layout);
             Assert.IsFalse(RoomAuthoringOperations.Rebuild(b));
