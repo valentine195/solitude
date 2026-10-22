@@ -157,14 +157,14 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var room = f.Room(3, 1);
             Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
             var id = room.RoomId;
-            Assert.IsTrue(RoomAuthoringOperations.PaintCell(room, Vector3Int.right, null));
+            Assert.IsFalse(RoomAuthoringOperations.PaintCell(room, Vector3Int.right, null));
             Assert.AreEqual(id, room.RoomId);
             Assert.AreEqual(2, RoomBoundaryExtractor.Extract(RoomAuthoringOperations.ReadCells(room)).ComponentCount);
             Assert.AreEqual(2, RoomAuthoringTestFixtures.FloorCount(room));
             room.Occupancy.ClearAllTiles();
             room.Occupancy.SetTile(Vector3Int.zero, f.Style.FloorTile);
             room.Occupancy.SetTile(new Vector3Int(1, 1, 0), f.Style.FloorTile);
-            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
+            Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
             var geometry = RoomBoundaryExtractor.Extract(RoomAuthoringOperations.ReadCells(room));
             Assert.AreEqual(2, geometry.ComponentCount);
             Assert.AreEqual(8, geometry.Junctions.Length);
@@ -172,8 +172,12 @@ namespace SOLITUDE.Tests.RoomAuthoring
             f.Style.SupportsDiagonalContact = false;
             Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
             Assert.AreEqual(2, RoomAuthoringTestFixtures.FloorCount(room));
-            Assert.AreEqual(2, room.GenerationResult.Issues.Length);
-            Assert.IsTrue(room.GenerationResult.Issues.All(i => i.Start == Vector2Int.one && i.Kind == RoomIssueKind.Join));
+            Assert.AreEqual(4, room.GenerationResult.Issues.Length);
+            Assert.AreEqual(2, room.GenerationResult.Issues.Count(i => i.Kind == RoomIssueKind.Geometry && i.Field.StartsWith("Disconnected/")));
+            var joins = room.GenerationResult.Issues.Where(i => i.Kind == RoomIssueKind.Join).ToArray();
+            Assert.AreEqual(2, joins.Length);
+            Assert.IsTrue(joins.All(i => i.Start == Vector2Int.one));
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
             Assert.AreEqual(id, room.RoomId);
         }
     }

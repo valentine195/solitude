@@ -18,6 +18,24 @@ namespace SOLITUDE.World.RoomAuthoring
             [Tooltip("Structural anchor measured from the imported sprite rectangle's bottom-left, in pixels.")]
             public Vector2 AnchorPixels;
             public Vector2 OffsetPixels;
+            [Tooltip("Enable conservative footprint checks against the whole layout's walkable floor core. Existing bindings remain unqualified until declared.")]
+            public bool HasFootprint;
+            [Tooltip("Occupied visual rectangles in sprite pixels, measured from bottom-left. Use multiple rectangles for thin junction shapes.")]
+            public RectInt[] FootprintsPixels = Array.Empty<RectInt>();
+        }
+
+        [Serializable]
+        public sealed class JunctionModule
+        {
+            public LayoutJunctionRole Role;
+            public Module Artwork = new Module();
+            [Tooltip("Coverage supplied by this junction along west/east incident edges, in pixels.")]
+            public Vector2Int HorizontalReservationsPixels;
+            [Tooltip("Coverage supplied by this junction along south/north incident edges, in pixels.")]
+            public Vector2Int VerticalReservationsPixels;
+            public int Reservation(BoundaryDirections direction) => direction == BoundaryDirections.West ? HorizontalReservationsPixels.x :
+                direction == BoundaryDirections.East ? HorizontalReservationsPixels.y : direction == BoundaryDirections.South ?
+                VerticalReservationsPixels.x : VerticalReservationsPixels.y;
         }
 
         [SerializeField] private string styleId = Guid.NewGuid().ToString("N");
@@ -50,6 +68,12 @@ namespace SOLITUDE.World.RoomAuthoring
         [Min(0), SerializeField] private int northWallClearanceCells;
         [Tooltip("Whether the configured artwork supports two separate branches at a diagonal-only cell contact.")]
         [SerializeField] private bool supportsDiagonalContact = true;
+        [SerializeField] private JunctionModule[] junctionModules = Array.Empty<JunctionModule>();
+        [Tooltip("Visual boundary band around each floor cell, in pixels. Footprint checks keep the remaining core clear; maximum 15 preserves a nonempty core on a 32-pixel cell.")]
+        [Range(0, 15), SerializeField] private int floorEdgeInsetPixels;
+
+        public JunctionModule[] JunctionModules { get => junctionModules; set => junctionModules = value; }
+        public int FloorEdgeInsetPixels { get => floorEdgeInsetPixels; set => floorEdgeInsetPixels = value; }
 
         public Module ConcaveSouthwest { get => concaveSouthwest; set => concaveSouthwest = value; }
         public Module ConcaveSoutheast { get => concaveSoutheast; set => concaveSoutheast = value; }

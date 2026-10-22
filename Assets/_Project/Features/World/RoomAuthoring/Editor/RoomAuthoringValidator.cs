@@ -49,11 +49,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var geometry = RoomBoundaryExtractor.Extract(RoomAuthoringOperations.ReadCells(room));
             if (buildBoundaries) RoomPlacementBuilder.TryBuild(geometry, room.Style, out placement, out _);
             else placement = RoomPlacementBuilder.BuildFloor(geometry, room.Style);
-            if (room.Layout != null)
-            {
-                var topology = ShipLayoutTopology.Build(new[] { new ShipSpaceCells(room.RoomId, geometry.Cells, Vector2Int.zero) });
-                AddDisconnectedIssues(topology, room.RoomId, placement.Issues);
-            }
+            var topology = ShipLayoutTopology.Build(new[] { new ShipSpaceCells(room.RoomId, geometry.Cells, Vector2Int.zero) });
+            AddDisconnectedIssues(topology, room.RoomId, placement.Issues);
             foreach (var issue in placement.Issues) issue.LocateInRoom(room.RoomId);
             return new RoomGenerationResult
             {
@@ -258,7 +255,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 if (style.FloorTile is Tile tile) { text.Append(EditorJsonUtility.ToJson(tile)); SpriteFingerprint(text, tile.sprite); }
                 var modules = (style.NorthWalls ?? System.Array.Empty<RoomStyleDefinition.Module>()).Concat(new[]
                     { style.WestCap, style.EastCap, style.SouthCap, style.Northwest, style.Northeast, style.Southwest, style.Southeast,
-                        style.ConcaveNorthwest, style.ConcaveNortheast, style.ConcaveSouthwest, style.ConcaveSoutheast });
+                        style.ConcaveNorthwest, style.ConcaveNortheast, style.ConcaveSouthwest, style.ConcaveSoutheast })
+                    .Concat((style.JunctionModules ?? System.Array.Empty<RoomStyleDefinition.JunctionModule>())
+                        .Where(binding => binding != null).Select(binding => binding.Artwork));
                 foreach (var module in modules) if (module != null) SpriteFingerprint(text, module.Sprite);
             }
             return Hash(text);

@@ -123,13 +123,18 @@ namespace SOLITUDE.Tests.RoomAuthoring
             using var f = new RoomAuthoringTestFixtures(32);
             var room = f.Room(3, 1); Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
             var before = Snapshot(room); var identity = room.RoomId;
-            Assert.IsTrue(RoomAuthoringOperations.PaintCell(room, Vector3Int.right, null));
+            Assert.IsFalse(RoomAuthoringOperations.PaintCell(room, Vector3Int.right, null));
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+            Assert.AreEqual(2, room.GenerationResult.Issues.Count(i => i.Kind == RoomIssueKind.Geometry && i.Field.StartsWith("Disconnected/")));
             Assert.AreEqual(2, RoomBoundaryExtractor.Extract(RoomAuthoringOperations.ReadCells(room)).ComponentCount);
             Assert.AreEqual(identity, room.RoomId);
             Assert.AreEqual(2, RoomAuthoringTestFixtures.FloorCount(room));
             var split = Snapshot(room);
             Undo.PerformUndo(); CollectionAssert.AreEqual(before, Snapshot(room));
+            Assert.AreEqual(RoomGenerationStatus.Complete, room.GenerationResult.Status);
+            Assert.IsEmpty(room.GenerationDiagnostic);
             Undo.PerformRedo(); CollectionAssert.AreEqual(split, Snapshot(room));
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
             Assert.AreEqual(identity, room.RoomId);
         }
     }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using SOLITUDE.Editor.RoomAuthoring;
+using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
 using UnityEditor.Tilemaps;
 using UnityEngine;
@@ -40,6 +41,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
         {
             using var f = new RoomAuthoringTestFixtures(32);
             var room = f.Room(1, 1);
+            var identity = room.RoomId;
             var grid = room.GetComponent<Grid>();
             GridPaintingState.scenePaintTarget = room.Occupancy.gameObject;
             RoomAuthoringPaletteSetup.ActivateTarget(room.Occupancy.gameObject);
@@ -56,8 +58,15 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsNull(room.GeneratedOutput.GetComponentInChildren<Tilemap>().GetTile(Vector3Int.right));
             brush.Paint(grid, room.Occupancy.gameObject, new Vector3Int(1, 1, 0));
             Assert.AreEqual(2, RoomAuthoringOperations.ReadCells(room).Length);
-            Assert.IsEmpty(room.GenerationDiagnostic);
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+            Assert.AreEqual(2, room.GenerationResult.Issues.Count(i => i.Kind == RoomIssueKind.Geometry && i.Field.StartsWith("Disconnected/")));
+            Assert.IsTrue(room.GenerationResult.Issues.All(i => i.HasRegion && i.RoomId == identity));
+            Assert.AreEqual(identity, room.RoomId);
             Assert.AreEqual(2, RoomAuthoringTestFixtures.FloorCount(room));
+            brush.Paint(grid, room.Occupancy.gameObject, Vector3Int.right);
+            Assert.AreEqual(RoomGenerationStatus.Complete, room.GenerationResult.Status);
+            Assert.IsEmpty(room.GenerationDiagnostic);
+            Assert.AreEqual(3, RoomAuthoringTestFixtures.FloorCount(room));
             RoomAuthoringPaletteSetup.EndEditing();
             Assert.IsFalse(room.Occupancy.gameObject.activeSelf);
         }

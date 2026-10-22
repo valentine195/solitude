@@ -35,6 +35,7 @@ namespace SOLITUDE.World.RoomAuthoring
             foreach (var join in geometry.Junctions)
             {
                 var joinIssue = CheckModule(JoinModule(style, join), join.Role + " corner", false);
+                if (joinIssue == null) joinIssue = CheckFootprint(JoinModule(style, join), join.Position, geometry.Cells, style.FloorEdgeInsetPixels);
                 if (!style.SupportsDiagonalContact && geometry.DiagonalContacts.Contains(join.Position))
                     joinIssue = "Configured artwork cannot resolve separate diagonal branches at this junction.";
                 if (joinIssue == null) continue;
@@ -67,11 +68,18 @@ namespace SOLITUDE.World.RoomAuthoring
         {
             var result = new RoomPlacement { Geometry = geometry.Exterior };
             var unresolved = new HashSet<RoomJunction>();
+            var bindings = new Dictionary<Vector2Int, RoomStyleDefinition.JunctionModule>();
+            var missingEndpoints = new HashSet<Vector2Int>();
+            var inset = styles.Values.Where(s => s != null).Select(s => s.FloorEdgeInsetPixels).DefaultIfEmpty(0).Min();
             foreach (var join in geometry.Exterior.Junctions)
             {
+                var kind = geometry.JunctionAt(join.Position).Kind;
+                if (kind != RoomEndpointKind.Convex && kind != RoomEndpointKind.Concave && kind != RoomEndpointKind.Diagonal) continue;
                 var owner = JoinOwner(geometry, join);
                 var style = styles[owner];
-                var issue = style == null ? "Assign a style for this corner." : CheckModule(JoinModule(style, join), join.Role, false);
+                var module = style == null ? null : JoinModule(style, join);
+                var issue = style == null ? "Assign a style for this corner." : CheckModule(module, join.Role, false);
+                if (issue == null) issue = CheckFootprint(module, join.Position, result.Geometry.Cells, inset);
                 if (style != null && !style.SupportsDiagonalContact && geometry.Exterior.DiagonalContacts.Contains(join.Position))
                     issue = "Configured artwork cannot resolve separate diagonal branches at this junction.";
                 if (issue != null)
@@ -80,7 +88,29 @@ namespace SOLITUDE.World.RoomAuthoring
                     var located = new RoomGenerationIssue(RoomIssueKind.Join, join.Role, issue, true, join.Position, join.Position);
                     located.LocateInRoom(owner); result.Issues.Add(located);
                 }
-                else Add(result, join.Role, JoinModule(style, join), join.Position, owner);
+                else Add(result, join.Role, module, join.Position, owner);
+            }
+            foreach (var junction in geometry.Junctions.Where(j => j.Role.HasValue))
+            {
+                var owner = junction.Owners[0];
+                var style = styles[owner];
+                var configured = style == null ? Array.Empty<RoomStyleDefinition.JunctionModule>() :
+                    (style.JunctionModules ?? Array.Empty<RoomStyleDefinition.JunctionModule>()).Where(b => b != null && b.Role == junction.Role.Value).ToArray();
+                RoomStyleDefinition.JunctionModule binding = configured.Length == 1 ? configured[0] : null;
+                if (binding != null) bindings.Add(junction.Position, binding);
+                var issue = binding == null ? "Configure exactly one artwork binding for " + junction.Role.Value + "." :
+                    CheckModule(binding.Artwork, junction.Role.Value.ToString(), false);
+                if (issue == null && !binding.Artwork.HasFootprint) issue = "Declare the junction artwork's visual footprint.";
+                if (issue == null) issue = CheckFootprint(binding.Artwork, junction.Position, result.Geometry.Cells, inset);
+                if (issue == null) issue = CheckJunctionCoverage(binding, junction.Directions);
+                if (issue != null)
+                {
+                    missingEndpoints.Add(junction.Position);
+                    var located = new RoomGenerationIssue(RoomIssueKind.Join, "PartitionEndpoint", junction.Role.Value + ": " + issue,
+                        true, junction.Position, junction.Position);
+                    located.LocateInRoom(owner); result.Issues.Add(located);
+                }
+                else Add(result, junction.Role.Value.ToString(), binding.Artwork, junction.Position, owner);
             }
             foreach (var span in geometry.Spans)
             {
@@ -92,23 +122,21 @@ namespace SOLITUDE.World.RoomAuthoring
                         true, edge.Address.Start, span.End));
                 else
                 {
-                    var starts = geometry.Exterior.Junctions.Where(j => j.Position == edge.Address.Start && j.HasSide(edge.Side)).ToArray();
-                    var ends = geometry.Exterior.Junctions.Where(j => j.Position == span.End && j.HasSide(edge.Side)).ToArray();
+                    var starts = geometry.Exterior.Junctions.Where(j => j.Position == edge.Address.Start && j.HasSide(edge.Side) &&
+                        (span.StartKind == RoomEndpointKind.Convex || span.StartKind == RoomEndpointKind.Concave || span.StartKind == RoomEndpointKind.Diagonal)).ToArray();
+                    var ends = geometry.Exterior.Junctions.Where(j => j.Position == span.End && j.HasSide(edge.Side) &&
+                        (span.EndKind == RoomEndpointKind.Convex || span.EndKind == RoomEndpointKind.Concave || span.EndKind == RoomEndpointKind.Diagonal)).ToArray();
                     var run = new RoomBoundaryRun(edge.Side, edge.Address.Start, span.Length,
-                        starts.FirstOrDefault(), ends.FirstOrDefault(), starts.Length != 0, ends.Length != 0);
-                    AddRun(result, run, style, unresolved, edge.VisualOwner, edge.Kind == LayoutEdgeKind.Partition);
+                        starts.FirstOrDefault(), ends.FirstOrDefault(), starts.Length != 0, ends.Length != 0, span.StartKind, span.EndKind);
+                    var defaults = RunReservations(style, run, edge.Kind == LayoutEdgeKind.Partition);
+                    var reservations = new Vector2Int(bindings.TryGetValue(run.Start, out var startBinding) ?
+                        startBinding.Reservation(edge.Address.Horizontal ? BoundaryDirections.East : BoundaryDirections.North) : defaults.x,
+                        bindings.TryGetValue(run.End, out var endBinding) ?
+                        endBinding.Reservation(edge.Address.Horizontal ? BoundaryDirections.West : BoundaryDirections.South) : defaults.y);
+                    AddRun(result, run, style, unresolved, edge.VisualOwner, edge.Kind == LayoutEdgeKind.Partition,
+                        reservations, missingEndpoints.Contains(run.Start), missingEndpoints.Contains(run.End), inset);
                 }
                 foreach (var issue in result.Issues.Skip(before)) issue.LocateInRoom(edge.VisualOwner);
-            }
-            var endpoints = geometry.Spans.Where(s => s.First.Kind == LayoutEdgeKind.Partition)
-                .SelectMany(s => new[] { s.First.Address.Start, s.End }).Distinct().OrderBy(p => p.y).ThenBy(p => p.x);
-            foreach (var point in endpoints)
-            {
-                var incident = geometry.Edges.Where(e => e.Kind != LayoutEdgeKind.Open && (e.Address.Start == point || e.Address.End == point)).ToArray();
-                if (incident.Length <= 2) continue;
-                var issue = new RoomGenerationIssue(RoomIssueKind.Join, "PartitionEndpoint",
-                    "Shared partition is resolved; its multi-space endpoint treatment is pending junction resolution.", true, point, point);
-                issue.LocateInRoom(incident.First(e => e.Kind == LayoutEdgeKind.Partition).VisualOwner); result.Issues.Add(issue);
             }
             return result;
         }
@@ -126,14 +154,21 @@ namespace SOLITUDE.World.RoomAuthoring
                 .OrderBy(id => id, StringComparer.Ordinal).First();
         }
 
-        private static void AddRun(RoomPlacement result, RoomBoundaryRun run, RoomStyleDefinition style,
-            HashSet<RoomJunction> unresolvedJoins, string ownerId = null, bool partition = false)
+        private static Vector2Int RunReservations(RoomStyleDefinition style, RoomBoundaryRun run, bool partition)
         {
-            var modules = run.Side == RoomSide.North ? style.NorthWalls : new[] { run.Side == RoomSide.West ? style.WestCap : run.Side == RoomSide.East ? style.EastCap : style.SouthCap };
             var convex = Reservations(style, run.Side, false);
             var concave = Reservations(style, run.Side, true);
-            var reservations = new Vector2Int(!partition && run.HasStartJoin ? (run.StartJoin.Kind == RoomJoinKind.Concave ? concave.x : convex.x) : 0,
+            return new Vector2Int(!partition && run.HasStartJoin ? (run.StartJoin.Kind == RoomJoinKind.Concave ? concave.x : convex.x) : 0,
                 !partition && run.HasEndJoin ? (run.EndJoin.Kind == RoomJoinKind.Concave ? concave.y : convex.y) : 0);
+        }
+
+        private static void AddRun(RoomPlacement result, RoomBoundaryRun run, RoomStyleDefinition style,
+            HashSet<RoomJunction> unresolvedJoins, string ownerId = null, bool partition = false,
+            Vector2Int? endpointReservations = null, bool unresolvedStart = false, bool unresolvedEnd = false, int? floorInset = null)
+        {
+            var modules = run.Side == RoomSide.North ? style.NorthWalls : new[] { run.Side == RoomSide.West ? style.WestCap : style.EastCap };
+            if (run.Side == RoomSide.South) modules = new[] { style.SouthCap };
+            var reservations = endpointReservations ?? RunReservations(style, run, partition);
             var repeat = modules == null || modules.Length == 0 ? 0 : modules[0]?.RepeatPixels ?? 0;
             var end = run.End;
             string runIssue = null;
@@ -144,14 +179,14 @@ namespace SOLITUDE.World.RoomAuthoring
                 if (runIssue != null) break;
                 if (module.RepeatPixels != repeat) { runIssue = run.Side + " requires sprites with one structural repeat width."; break; }
             }
-            if (partition && repeat != 32) runIssue = "Placeholder partitions require a one-cell cap repeat.";
+            if (runIssue == null && partition && repeat != 32) runIssue = "Placeholder partitions require a one-cell cap repeat.";
             if (runIssue != null)
             {
                 result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.Asset, run.Side.ToString(), runIssue, true, run.Start, end));
                 return;
             }
-            if ((reservations.x > 0 && unresolvedJoins.Contains(run.StartJoin)) ||
-                (reservations.y > 0 && unresolvedJoins.Contains(run.EndJoin)))
+            if ((reservations.x > 0 && (unresolvedStart || run.HasStartJoin && unresolvedJoins.Contains(run.StartJoin))) ||
+                (reservations.y > 0 && (unresolvedEnd || run.HasEndJoin && unresolvedJoins.Contains(run.EndJoin))))
             {
                 result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.Span, run.Side.ToString(),
                     run.Side + " span requires its unresolved endpoint join to supply reserved coverage.", true, run.Start, end));
@@ -174,8 +209,68 @@ namespace SOLITUDE.World.RoomAuthoring
             for (var n = 0; n < span / repeat; n++)
             {
                 var origin = (Vector2)run.Start + (horizontal ? Vector2.right : Vector2.up) * ((reservations.x + n * repeat) / 32f);
+                var fit = CheckFootprint(modules[n % modules.Length], origin, result.Geometry.Cells, floorInset ?? style.FloorEdgeInsetPixels);
+                if (fit != null)
+                {
+                    var location = Vector2Int.FloorToInt(origin);
+                    result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.VisualFit, run.Side.ToString(), fit, true, location, location));
+                    continue;
+                }
                 Add(result, partition ? "Partition" + run.Side : run.Side.ToString(), modules[n % modules.Length], origin, ownerId);
             }
+        }
+
+        private static string CheckFootprint(RoomStyleDefinition.Module module, Vector2 origin, Vector2Int[] cells, int inset)
+        {
+            if (!module.HasFootprint) return null;
+            if (inset < 0 || inset > 15) return "Floor edge inset must be between 0 and 15 pixels, preserving a walkable cell core.";
+            if (module.FootprintsPixels == null || module.FootprintsPixels.Length == 0) return "Declare at least one visual footprint rectangle.";
+            foreach (var rect in module.FootprintsPixels)
+            {
+                if (rect.width <= 0 || rect.height <= 0 || rect.x < 0 || rect.y < 0 ||
+                    (long)rect.x + rect.width > module.CanvasPixels.x || (long)rect.y + rect.height > module.CanvasPixels.y)
+                    return "Visual footprint rectangles must be positive and inside the sprite canvas.";
+                var min = origin + ((Vector2)rect.position - module.AnchorPixels + module.OffsetPixels) / 32f;
+                var max = min + (Vector2)rect.size / 32f;
+                var band = inset / 32f;
+                foreach (var cell in cells)
+                    if (min.x < cell.x + 1 - band - 0.000001f && max.x > cell.x + band + 0.000001f &&
+                        min.y < cell.y + 1 - band - 0.000001f && max.y > cell.y + band + 0.000001f)
+                        return "Artwork footprint enters a walkable floor core at " + cell.x + "," + cell.y + ". Adjust compatible artwork or alignment.";
+            }
+            return null;
+        }
+
+        private static string CheckJunctionCoverage(RoomStyleDefinition.JunctionModule binding, BoundaryDirections mask)
+        {
+            foreach (var direction in new[] { BoundaryDirections.North, BoundaryDirections.East, BoundaryDirections.South, BoundaryDirections.West })
+            {
+                var required = binding.Reservation(direction);
+                if (required < 0 || ((mask & direction) == 0 && required != 0))
+                    return "Junction reservations must be nonnegative and belong to incident boundary directions.";
+                if (required == 0) continue;
+                var horizontal = direction == BoundaryDirections.East || direction == BoundaryDirections.West;
+                var positive = direction == BoundaryDirections.East || direction == BoundaryDirections.North;
+                var intervals = new List<Vector2>();
+                foreach (var rect in binding.Artwork.FootprintsPixels)
+                {
+                    var min = (Vector2)rect.position - binding.Artwork.AnchorPixels + binding.Artwork.OffsetPixels;
+                    var max = min + (Vector2)rect.size;
+                    var crossMin = horizontal ? min.y : min.x; var crossMax = horizontal ? max.y : max.x;
+                    if (crossMin > 0 || crossMax < 0) continue;
+                    var a = horizontal ? min.x : min.y; var b = horizontal ? max.x : max.y;
+                    intervals.Add(positive ? new Vector2(a, b) : new Vector2(-b, -a));
+                }
+                var covered = 0f;
+                foreach (var interval in intervals.OrderBy(i => i.x))
+                {
+                    if (interval.y <= covered) continue;
+                    if (interval.x > covered + 0.000001f) break;
+                    covered = interval.y;
+                }
+                if (covered + 0.000001f < required) return "Junction footprint does not supply its reserved " + direction + " coverage.";
+            }
+            return null;
         }
 
         private static RoomStyleDefinition.Module JoinModule(RoomStyleDefinition style, RoomJunction join)

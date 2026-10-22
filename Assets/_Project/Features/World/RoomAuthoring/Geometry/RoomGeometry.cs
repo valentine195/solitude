@@ -5,6 +5,15 @@ namespace SOLITUDE.World.RoomAuthoring
     public enum RoomSide { North, South, East, West }
     public enum RoomJoinKind { Convex, Concave }
     public enum RoomCorner { Southwest, Southeast, Northwest, Northeast }
+    public enum RoomEndpointKind { Straight, Convex, Concave, End, Bend, Tee, Cross, Diagonal }
+    [System.Flags]
+    public enum BoundaryDirections { None = 0, North = 1, East = 2, South = 4, West = 8 }
+    public enum LayoutJunctionRole
+    {
+        EndNorth, EndEast, EndSouth, EndWest,
+        BendNortheast, BendSoutheast, BendSouthwest, BendNorthwest,
+        TeeNorth, TeeEast, TeeSouth, TeeWest, Cross
+    }
 
     public readonly struct RoomJunction
     {
@@ -30,10 +39,18 @@ namespace SOLITUDE.World.RoomAuthoring
         public readonly RoomJunction EndJoin;
         public readonly bool HasStartJoin;
         public readonly bool HasEndJoin;
+        public readonly RoomEndpointKind StartEndpointKind;
+        public readonly RoomEndpointKind EndEndpointKind;
         public Vector2Int End => Start + (Side == RoomSide.North || Side == RoomSide.South ? Vector2Int.right : Vector2Int.up) * Length;
         public RoomBoundaryRun(RoomSide side, Vector2Int start, int length, RoomJunction startJoin = default,
-            RoomJunction endJoin = default, bool hasStartJoin = true, bool hasEndJoin = true)
-        { Side = side; Start = start; Length = length; StartJoin = startJoin; EndJoin = endJoin; HasStartJoin = hasStartJoin; HasEndJoin = hasEndJoin; }
+            RoomJunction endJoin = default, bool hasStartJoin = true, bool hasEndJoin = true,
+            RoomEndpointKind? startKind = null, RoomEndpointKind? endKind = null)
+        {
+            Side = side; Start = start; Length = length; StartJoin = startJoin; EndJoin = endJoin;
+            HasStartJoin = hasStartJoin; HasEndJoin = hasEndJoin;
+            StartEndpointKind = startKind ?? (hasStartJoin ? startJoin.Kind == RoomJoinKind.Convex ? RoomEndpointKind.Convex : RoomEndpointKind.Concave : RoomEndpointKind.Straight);
+            EndEndpointKind = endKind ?? (hasEndJoin ? endJoin.Kind == RoomJoinKind.Convex ? RoomEndpointKind.Convex : RoomEndpointKind.Concave : RoomEndpointKind.Straight);
+        }
     }
 
     public sealed class RoomGeometry
