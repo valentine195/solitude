@@ -284,7 +284,11 @@ namespace SOLITUDE.Editor.RoomAuthoring
                         text.Append(floorRenderer.enabled).Append(floorRenderer.forceRenderingOff)
                             .Append(floorRenderer.sortingLayerID).Append(floorRenderer.sortingOrder);
                     foreach (var cell in map.cellBounds.allPositionsWithin)
-                        if (map.HasTile(cell)) text.Append(JsonUtility.ToJson(cell)).Append(Reference(map.GetTile(cell)));
+                        if (map.HasTile(cell))
+                            text.Append(JsonUtility.ToJson(cell)).Append(Reference(map.GetTile(cell)))
+                                .Append(JsonUtility.ToJson(map.GetColor(cell)))
+                                .Append(JsonUtility.ToJson(map.GetTransformMatrix(cell)))
+                                .Append((int)map.GetTileFlags(cell));
                 }
             }
             return Hash(text);

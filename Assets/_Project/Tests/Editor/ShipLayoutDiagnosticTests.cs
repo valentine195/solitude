@@ -229,6 +229,68 @@ namespace SOLITUDE.Tests.RoomAuthoring
             }
         }
 
+        [TestCase("tint")]
+        [TestCase("transform")]
+        public void ModifiedFloorCellIsReadOnlyStaleAndExplicitRebuildRecovers(string change)
+        {
+            var folder = CreateSharedAssets(); var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var oldSelection = Selection.activeObject; var calls = 0;
+            void Generated(ShipRoomAuthoring _) => calls++;
+            try
+            {
+                var layout = CreateSharedLayout(scene, folder); var member = layout.Spaces[0];
+                Assert.AreEqual(RoomGenerationStatus.Complete, layout.GenerationResult.Status, layout.GenerationResult.Summary);
+                Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+                var cells = layout.Spaces.Select(RoomAuthoringOperations.ReadCells).ToArray();
+                var sentinel = new GameObject("Authored Sentinel"); sentinel.transform.position = new Vector3(20, 30, 0);
+                var floor = member.GeneratedOutput.GetComponentInChildren<Tilemap>(); var cell = new Vector3Int(1, 1, 0);
+                var tile = floor.GetTile(cell); Assert.IsNotNull(tile);
+                var color = floor.GetColor(cell); var matrix = floor.GetTransformMatrix(cell); var flags = floor.GetTileFlags(cell);
+                var originalFingerprint = RoomAuthoringValidator.OutputFingerprint(layout);
+                var unlocked = flags & ~(change == "tint" ? TileFlags.LockColor : TileFlags.LockTransform);
+                floor.SetTileFlags(cell, unlocked);
+                // Capture after unlocking so only the rendering change can satisfy the fingerprint assertion.
+                var unlockedFingerprint = RoomAuthoringValidator.OutputFingerprint(layout);
+                if (change == "tint") { floor.SetColor(cell, Color.clear); Assert.AreEqual(Color.clear, floor.GetColor(cell)); }
+                else { floor.SetTransformMatrix(cell, Matrix4x4.Translate(Vector3.right * 3)); Assert.AreNotEqual(matrix, floor.GetTransformMatrix(cell)); }
+                Assert.AreNotEqual(unlockedFingerprint, RoomAuthoringValidator.OutputFingerprint(layout));
+                Assert.AreSame(tile, floor.GetTile(cell)); Assert.AreEqual(Color.white, floor.color);
+                Assert.IsTrue(EditorSceneManager.SaveScene(scene, folder + "/StaleFloorCell.unity"));
+                var serialized = layout.Spaces.Select(r => EditorJsonUtility.ToJson(r)).ToArray();
+                var saved = JsonUtility.ToJson(layout.GenerationResult); var snapshot = Snapshot(layout);
+                var fingerprint = RoomAuthoringValidator.OutputFingerprint(layout);
+                Selection.activeGameObject = member.gameObject; var group = Undo.GetCurrentGroup();
+                RoomAuthoringOperations.GenerationCompleted += Generated;
+                Assert.AreEqual(RoomGenerationStatus.Complete, RoomAuthoringPreview.GetFeedback(layout).Assessment.Status);
+                Assert.IsFalse(RoomAuthoringValidator.IsCurrent(layout)); Assert.IsFalse(RoomAuthoringValidator.IsCurrent(member));
+                Assert.IsFalse(RoomAuthoringPreview.GetFeedback(layout).IsCurrent); Assert.IsFalse(RoomAuthoringPreview.GetFeedback(member).IsCurrent);
+                foreach (var target in new Object[] { layout, member })
+                {
+                    var editor = UnityEditor.Editor.CreateEditor(target);
+                    try { Assert.IsNotNull(editor.CreateInspectorGUI()); } finally { Object.DestroyImmediate(editor); }
+                }
+                Assert.AreEqual(saved, JsonUtility.ToJson(layout.GenerationResult));
+                CollectionAssert.AreEqual(serialized, layout.Spaces.Select(r => EditorJsonUtility.ToJson(r)).ToArray());
+                CollectionAssert.AreEqual(snapshot, Snapshot(layout));
+                Assert.AreEqual(fingerprint, RoomAuthoringValidator.OutputFingerprint(layout));
+                Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.IsFalse(scene.isDirty); Assert.AreEqual(0, calls);
+                Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+                var restored = member.GeneratedOutput.GetComponentInChildren<Tilemap>();
+                Assert.AreSame(tile, restored.GetTile(cell)); Assert.AreEqual(color, restored.GetColor(cell));
+                Assert.AreEqual(matrix, restored.GetTransformMatrix(cell)); Assert.AreEqual(flags, restored.GetTileFlags(cell));
+                Assert.AreEqual(originalFingerprint, RoomAuthoringValidator.OutputFingerprint(layout));
+                Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(member));
+                for (var i = 0; i < layout.Spaces.Count; i++) CollectionAssert.AreEqual(cells[i], RoomAuthoringOperations.ReadCells(layout.Spaces[i]));
+                Assert.AreEqual(48, layout.Spaces.Sum(RoomAuthoringTestFixtures.FloorCount));
+                Assert.AreEqual(new Vector3(20, 30, 0), sentinel.transform.position); Assert.AreEqual(1, calls);
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated; RoomAuthoringPreview.ClearSelection(); Selection.activeObject = oldSelection;
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single); AssetDatabase.DeleteAsset(folder);
+            }
+        }
+
         [Test] public void StaleAssessmentAndCorrectionClearOnlyObsoleteSelection()
         {
             using var f = new RoomAuthoringTestFixtures(32);
