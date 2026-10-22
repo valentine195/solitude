@@ -276,7 +276,12 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 var map = child.GetComponent<Tilemap>();
                 if (map != null)
                 {
-                    text.Append(JsonUtility.ToJson(map.tileAnchor));
+                    text.Append(JsonUtility.ToJson(map.tileAnchor)).Append(JsonUtility.ToJson(map.color));
+                    var floorRenderer = child.GetComponent<TilemapRenderer>();
+                    text.Append(floorRenderer == null ? "FloorRenderer:missing" : "FloorRenderer:present");
+                    if (floorRenderer != null)
+                        text.Append(floorRenderer.enabled).Append(floorRenderer.forceRenderingOff)
+                            .Append(floorRenderer.sortingLayerID).Append(floorRenderer.sortingOrder);
                     foreach (var cell in map.cellBounds.allPositionsWithin)
                         if (map.HasTile(cell)) text.Append(JsonUtility.ToJson(cell)).Append(Reference(map.GetTile(cell)));
                 }

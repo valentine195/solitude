@@ -132,6 +132,56 @@ namespace SOLITUDE.Tests.RoomAuthoring
             RoomAuthoringPreview.ClearSelection(); Selection.activeObject = null;
         }
 
+        [TestCase("disabled")]
+        [TestCase("removed")]
+        [TestCase("forced-off")]
+        [TestCase("sorting")]
+        [TestCase("tint")]
+        public void ModifiedFloorRenderingIsReadOnlyStaleAndExplicitRebuildRecovers(string change)
+        {
+            using var f = new RoomAuthoringTestFixtures(32);
+            var layout = RoomAuthoringCreation.CreateLayout(f.Scene, f.Style);
+            var room = layout.Spaces[0]; RoomAuthoringCreation.CreateSpace(layout);
+            Assert.IsTrue(RoomAuthoringOperations.PaintBox(room, new BoundsInt(0, 0, 0, 2, 2, 1), f.Style.FloorTile));
+            var neighbor = layout.Spaces[1]; neighbor.transform.localPosition = Vector3.right * 5;
+            Assert.IsTrue(RoomAuthoringOperations.PaintBox(neighbor, new BoundsInt(0, 0, 0, 2, 2, 1), f.Style.FloorTile));
+            Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+            var authored = RoomAuthoringOperations.ReadCells(room); var neighborCells = RoomAuthoringOperations.ReadCells(neighbor);
+            var sentinel = new GameObject("Authored Sentinel"); SceneManager.MoveGameObjectToScene(sentinel, f.Scene);
+            sentinel.transform.position = new Vector3(20, 30, 0);
+            var floor = room.GeneratedOutput.GetComponentInChildren<Tilemap>(); var renderer = floor.GetComponent<TilemapRenderer>();
+            if (change == "disabled") renderer.enabled = false;
+            else if (change == "removed") Object.DestroyImmediate(renderer);
+            else if (change == "forced-off") renderer.forceRenderingOff = true;
+            else if (change == "sorting") renderer.sortingOrder = -100;
+            else floor.color = Color.clear;
+            var staleFingerprint = RoomAuthoringValidator.OutputFingerprint(layout);
+            var saved = JsonUtility.ToJson(layout.GenerationResult); var group = Undo.GetCurrentGroup(); var dirty = f.Scene.isDirty; var calls = 0;
+            void Generated(ShipRoomAuthoring _) => calls++;
+            RoomAuthoringOperations.GenerationCompleted += Generated;
+            try
+            {
+                Assert.AreEqual(RoomGenerationStatus.Complete, RoomAuthoringPreview.GetFeedback(layout).Assessment.Status);
+                Assert.IsFalse(RoomAuthoringValidator.IsCurrent(layout));
+                Assert.IsFalse(RoomAuthoringValidator.IsCurrent(room));
+                Assert.IsFalse(RoomAuthoringPreview.GetFeedback(layout).IsCurrent);
+                Assert.IsFalse(RoomAuthoringPreview.GetFeedback(room).IsCurrent);
+                Assert.AreEqual(staleFingerprint, RoomAuthoringValidator.OutputFingerprint(layout));
+                Assert.AreEqual(saved, JsonUtility.ToJson(layout.GenerationResult));
+                Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.AreEqual(dirty, f.Scene.isDirty); Assert.AreEqual(0, calls);
+                Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+                var restored = room.GeneratedOutput.GetComponentInChildren<Tilemap>(); var visible = restored.GetComponent<TilemapRenderer>();
+                Assert.IsNotNull(visible); Assert.IsTrue(visible.enabled); Assert.IsFalse(visible.forceRenderingOff);
+                Assert.AreEqual(0, visible.sortingOrder); Assert.AreEqual(Color.white, restored.color);
+                Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(room));
+                Assert.AreEqual(4, RoomAuthoringTestFixtures.FloorCount(room));
+                CollectionAssert.AreEqual(authored, RoomAuthoringOperations.ReadCells(room));
+                CollectionAssert.AreEqual(neighborCells, RoomAuthoringOperations.ReadCells(neighbor));
+                Assert.AreEqual(new Vector3(20, 30, 0), sentinel.transform.position); Assert.AreEqual(1, calls);
+            }
+            finally { RoomAuthoringOperations.GenerationCompleted -= Generated; }
+        }
+
         [Test] public void StaleAssessmentAndCorrectionClearOnlyObsoleteSelection()
         {
             using var f = new RoomAuthoringTestFixtures(32);
