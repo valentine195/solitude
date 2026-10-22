@@ -1,3 +1,4 @@
+using System.Linq;
 using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -20,14 +21,31 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
             var layout = (ShipLayoutAuthoring)target;
             var feedback = new HelpBox("", HelpBoxMessageType.Info);
+            var issues = new VisualElement();
+            var focused = new Label();
+            string previous = null;
             void Refresh()
             {
                 if (layout == null) return;
-                var result = RoomAuthoringValidator.Assess(layout, out _);
-                feedback.text = result.Status + (RoomAuthoringValidator.IsCurrent(layout) ? " — current." : " — output not updated; Rebuild Layout.") +
+                var preview = RoomAuthoringPreview.GetFeedback(layout);
+                var result = preview.Assessment;
+                if (result == null) { feedback.text = "Editor preview is hidden in Play Mode and builds."; issues.Clear(); return; }
+                feedback.text = result.Status + (preview.IsCurrent ? " — current." : " — output not updated; Rebuild Layout.") +
                     (result.Issues.Length == 0 ? "" : "\n" + result.Summary);
                 feedback.messageType = result.Status == RoomGenerationStatus.Refused ? HelpBoxMessageType.Error :
                     result.Issues.Length == 0 ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
+                var key = feedback.text + string.Join("|", result.Issues.Select(i => i.Id + ":" + i.Reason));
+                if (key == previous) return;
+                previous = key; issues.Clear(); focused.text = "";
+                foreach (var issue in result.Issues)
+                {
+                    issues.Add(new HelpBox(RoomAuthoringPreview.IssueLabel(issue) + "\n" + issue.Reason,
+                        result.Status == RoomGenerationStatus.Refused ? HelpBoxMessageType.Error : HelpBoxMessageType.Warning));
+                    issues.Add(new Button(() =>
+                    {
+                        if (RoomAuthoringPreview.SelectIssue(layout, issue.Id)) focused.text = "Focused: " + RoomAuthoringPreview.IssueLabel(issue);
+                    }) { text = (issue.HasRegion ? "Focus " : "Locate ") + RoomAuthoringPreview.FieldLabel(issue) });
+                }
             }
             foreach (var room in layout.Spaces)
             {
@@ -49,6 +67,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             root.Add(new Button(() => Selection.activeGameObject = RoomAuthoringCreation.CreateSpace(layout).gameObject) { text = "New Room Space" });
             root.Add(new Button(() => Selection.activeGameObject = RoomAuthoringCreation.CreateSpace(layout, LogicalSpaceType.Corridor).gameObject) { text = "New Corridor Space" });
             root.Add(feedback);
+            root.Add(issues);
+            root.Add(focused);
             root.Add(new Button(Refresh) { text = "Validate Layout" });
             root.Add(new Button(() => { RoomAuthoringOperations.Rebuild(layout); serializedObject.Update(); Refresh(); }) { text = "Rebuild Layout" });
             root.schedule.Execute(Refresh).Every(300);

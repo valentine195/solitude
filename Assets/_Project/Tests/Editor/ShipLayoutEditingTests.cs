@@ -126,6 +126,77 @@ namespace SOLITUDE.Tests.RoomAuthoring
             }
         }
 
+        [Test] public void SharedEraseUndoRedoPreservesOtherAuthoredChoicesAndRestoresAllDerivedOutput()
+        {
+            var folder = ShipLayoutDiagnosticTests.CreateSharedAssets();
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            try
+            {
+                var layout = ShipLayoutDiagnosticTests.CreateSharedLayout(scene, folder);
+                Assert.AreEqual(RoomGenerationStatus.Complete, layout.GenerationResult.Status, layout.GenerationResult.Summary);
+                var a = layout.Spaces[0]; var b = layout.Spaces[1]; var c = layout.Spaces[2];
+                var sentinel = new GameObject("Gameplay Sentinel"); sentinel.transform.position = new Vector3(20, 30, 0);
+                var decoration = new GameObject("Authored Decoration"); decoration.transform.SetParent(b.transform, false);
+                var bCells = RoomAuthoringOperations.ReadCells(b); var cCells = RoomAuthoringOperations.ReadCells(c);
+                b.AuthoringMetadata = "Preserve B choice"; c.AuthoringMetadata = "Preserve C choice";
+                var bStyle = b.Style; var cStyle = c.Style; var bType = b.SpaceType; var cType = c.SpaceType;
+                Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+                var before = ShipLayoutDiagnosticTests.Snapshot(layout);
+                Assert.IsTrue(layout.GetComponentsInChildren<SpriteRenderer>().Any(r => r.name.StartsWith("Partition")));
+                Assert.IsTrue(RoomAuthoringOperations.PaintBox(a, new BoundsInt(3, 0, 0, 1, 6, 1), null));
+                Assert.AreEqual(18, RoomAuthoringTestFixtures.FloorCount(a));
+                CollectionAssert.AreEqual(bCells, RoomAuthoringOperations.ReadCells(b)); CollectionAssert.AreEqual(cCells, RoomAuthoringOperations.ReadCells(c));
+                Assert.AreSame(bStyle, b.Style); Assert.AreSame(cStyle, c.Style);
+                Assert.AreEqual(bType, b.SpaceType); Assert.AreEqual(cType, c.SpaceType);
+                Assert.AreEqual("Preserve B choice", b.AuthoringMetadata); Assert.AreEqual("Preserve C choice", c.AuthoringMetadata);
+                Assert.AreEqual(4, layout.GetComponentsInChildren<SpriteRenderer>().Count(r => r.name.StartsWith("Partition")), "Only B/C shared boundary remains.");
+                var after = ShipLayoutDiagnosticTests.Snapshot(layout);
+                Undo.PerformUndo(); CollectionAssert.AreEqual(before, ShipLayoutDiagnosticTests.Snapshot(layout));
+                Undo.PerformRedo(); CollectionAssert.AreEqual(after, ShipLayoutDiagnosticTests.Snapshot(layout));
+                Assert.AreEqual(new Vector3(20, 30, 0), sentinel.transform.position); Assert.AreSame(b.transform, decoration.transform.parent);
+                Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+                Assert.IsTrue(RoomAuthoringOperations.Rebuild(c)); CollectionAssert.AreEqual(after, ShipLayoutDiagnosticTests.Snapshot(layout));
+            }
+            finally { EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single); AssetDatabase.DeleteAsset(folder); }
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void SharedCompleteAndPartialScenesReopenWithoutGenerationAndRebuildEquivalently(bool partial)
+        {
+            Assert.IsTrue(Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification"));
+            var folder = ShipLayoutDiagnosticTests.CreateSharedAssets();
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single); var calls = 0;
+            void Generated(ShipRoomAuthoring _) => calls++;
+            try
+            {
+                var layout = ShipLayoutDiagnosticTests.CreateSharedLayout(scene, folder);
+                if (partial)
+                {
+                    layout.DefaultStyle.JunctionModules.Single(b => b.Role == LayoutJunctionRole.TeeEast).Artwork.Sprite = null;
+                    EditorUtility.SetDirty(layout.DefaultStyle); AssetDatabase.SaveAssets();
+                    Assert.IsFalse(RoomAuthoringOperations.Rebuild(layout));
+                }
+                Assert.AreEqual(partial ? RoomGenerationStatus.IncompletePreview : RoomGenerationStatus.Complete, layout.GenerationResult.Status);
+                var expected = ShipLayoutDiagnosticTests.Snapshot(layout); var id = layout.LayoutId;
+                var path = folder + "/Shared.unity"; Assert.IsTrue(EditorSceneManager.SaveScene(scene, path));
+                RoomAuthoringOperations.GenerationCompleted += Generated;
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single); scene = EditorSceneManager.OpenScene(path);
+                layout = scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<ShipLayoutAuthoring>()).Single();
+                Assert.AreEqual(id, layout.LayoutId); Assert.AreEqual(0, calls); Assert.IsFalse(scene.isDirty);
+                CollectionAssert.AreEqual(expected, ShipLayoutDiagnosticTests.Snapshot(layout)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+                Assert.AreEqual(48, layout.Spaces.Sum(RoomAuthoringTestFixtures.FloorCount));
+                var data = new SerializedObject(layout); data.FindProperty("spaces").MoveArrayElement(0, 2); data.ApplyModifiedPropertiesWithoutUndo();
+                Assert.AreEqual(!partial, RoomAuthoringOperations.Rebuild(layout.Spaces[0])); CollectionAssert.AreEqual(expected, ShipLayoutDiagnosticTests.Snapshot(layout));
+                Assert.AreEqual(!partial, RoomAuthoringOperations.Rebuild(layout)); CollectionAssert.AreEqual(expected, ShipLayoutDiagnosticTests.Snapshot(layout));
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single); AssetDatabase.DeleteAsset(folder);
+            }
+        }
+
         private static void AssertExteriorRectangle(ShipRoomAuthoring room, int width, int height)
         {
             var sprites = room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>(true);

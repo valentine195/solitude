@@ -65,7 +65,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 foreach (var issue in result.Issues)
                 {
                     var item = new VisualElement();
-                    item.Add(new HelpBox(issue.Kind + ": " + issue.Reason, HelpBoxMessageType.Warning));
+                    item.Add(new HelpBox(RoomAuthoringPreview.IssueLabel(issue) + "\n" + issue.Kind + ": " + issue.Reason, HelpBoxMessageType.Warning));
                     var field = RoomAuthoringPreview.FieldLabel(issue);
                     item.Add(new Button(() =>
                     {

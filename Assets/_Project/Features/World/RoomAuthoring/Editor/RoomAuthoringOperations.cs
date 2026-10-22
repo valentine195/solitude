@@ -262,6 +262,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 ApplyRebuild(member, layout, JsonUtility.FromJson<RoomGenerationResult>(JsonUtility.ToJson(result)),
                     placements[member], false);
             result.OutputFingerprint = RoomAuthoringValidator.OutputFingerprint(layout);
+            Undo.RegisterCompleteObjectUndo(layout, "Layout Generation Result");
             layout.SetGenerationResult(result);
             EditorUtility.SetDirty(layout);
             GenerationCompleted?.Invoke(layout.Spaces[0]);
