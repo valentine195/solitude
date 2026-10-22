@@ -28,9 +28,18 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public static RoomGenerationResult Assess(ShipRoomAuthoring room, out RoomPlacement placement)
         {
+            if (room != null && room.Layout != null && room.Layout.Spaces.Count > 1 &&
+                RoomAuthoringOperations.GetSafetyIssue(room, allowMissingOutput: true) == null)
+                return Assess(room.Layout, out placement);
+            return AssessSpace(room, out placement);
+        }
+
+        private static RoomGenerationResult AssessSpace(ShipRoomAuthoring room, out RoomPlacement placement,
+            bool includeLayoutMembers = true)
+        {
             placement = null;
             var safety = RoomAuthoringOperations.GetSafetyIssue(room, allowMissingOutput: true);
-            if (safety == null) safety = GetOverlapIssue(room);
+            if (safety == null) safety = GetOverlapIssue(room, includeLayoutMembers);
             if (safety != null)
             {
                 var refusal = new RoomGenerationIssue(RoomIssueKind.Safety, "room", safety + " Retained output was not updated.");
@@ -39,6 +48,11 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
             var geometry = RoomBoundaryExtractor.Extract(RoomAuthoringOperations.ReadCells(room));
             RoomPlacementBuilder.TryBuild(geometry, room.Style, out placement, out _);
+            if (room.Layout != null)
+            {
+                var topology = ShipLayoutTopology.Build(new[] { new ShipSpaceCells(room.RoomId, geometry.Cells, Vector2Int.zero) });
+                AddDisconnectedIssues(topology, room.RoomId, placement.Issues);
+            }
             foreach (var issue in placement.Issues) issue.LocateInRoom(room.RoomId);
             return new RoomGenerationResult
             {
@@ -52,17 +66,108 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static RoomGenerationResult Assess(ShipLayoutAuthoring layout, out RoomPlacement placement)
         {
             placement = null;
+            var result = AssessSpaces(layout, out var placements);
+            if (layout != null && layout.Spaces.Count == 1 && placements.TryGetValue(layout.Spaces[0], out var value)) placement = value;
+            return result;
+        }
+
+        public static Vector2Int LayoutOffset(ShipLayoutAuthoring layout, ShipRoomAuthoring room) =>
+            new Vector2Int(checked((int)((double)room.transform.position.x - layout.transform.position.x)),
+                checked((int)((double)room.transform.position.y - layout.transform.position.y)));
+
+        public static ShipLayoutTopology TopologyOf(ShipLayoutAuthoring layout) => ShipLayoutTopology.Build(
+            layout.Spaces.Select(room => new ShipSpaceCells(room.RoomId, RoomAuthoringOperations.ReadCells(room), LayoutOffset(layout, room))));
+
+        private static void AddDisconnectedIssues(ShipLayoutTopology topology, string roomId, List<RoomGenerationIssue> issues)
+        {
+            var components = topology.ComponentsOf(roomId);
+            if (components.Count <= 1) return;
+            for (var i = 0; i < components.Count; i++)
+            {
+                var component = components[i];
+                var start = new Vector2Int(component.Min(c => c.x), component.Min(c => c.y));
+                var end = new Vector2Int(component.Max(c => c.x), component.Max(c => c.y));
+                var issue = new RoomGenerationIssue(RoomIssueKind.Geometry, "Disconnected/" + i,
+                    "Space has " + components.Count + " disconnected regions. Reconnect or erase the separated cells.", true, start, end);
+                issue.LocateInRoom(roomId); issues.Add(issue);
+            }
+        }
+
+        public static RoomGenerationResult AssessSpaces(ShipLayoutAuthoring layout,
+            out Dictionary<ShipRoomAuthoring, RoomPlacement> placements)
+        {
+            placements = new Dictionary<ShipRoomAuthoring, RoomPlacement>();
             var safety = RoomAuthoringOperations.GetSafetyIssue(layout, allowMissingOutput: true);
-            if (safety == null) return Assess(layout.Spaces[0], out placement);
-            var issue = new RoomGenerationIssue(RoomIssueKind.Safety, "layout", safety + " Retained output was not updated.");
-            issue.LocateInRoom(layout == null ? "<missing-layout>" : layout.LayoutId);
-            return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = new[] { issue } };
+            if (safety != null)
+            {
+                var refusal = new RoomGenerationIssue(RoomIssueKind.Safety, "layout", safety + " Retained output was not updated.");
+                refusal.LocateInRoom(layout == null ? "<missing-layout>" : layout.LayoutId);
+                return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = new[] { refusal } };
+            }
+            ShipLayoutTopology topology;
+            try { topology = TopologyOf(layout); }
+            catch (System.OverflowException)
+            {
+                var refusal = new RoomGenerationIssue(RoomIssueKind.Safety, "coordinates", "Layout cell coordinates exceed the supported integer grid.");
+                refusal.LocateInRoom(layout.LayoutId);
+                return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = new[] { refusal } };
+            }
+            if (topology.Overlaps.Count != 0)
+            {
+                var conflicts = topology.Overlaps.Select(cell =>
+                {
+                    var owners = string.Join(", ", topology.OwnersAt(cell));
+                    var issue = new RoomGenerationIssue(RoomIssueKind.Safety, "overlap", "Cell has conflicting owners: " + owners,
+                        true, cell, cell);
+                    issue.LocateInRoom(owners); return issue;
+                }).ToArray();
+                return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = conflicts };
+            }
+            if (layout.Spaces.Count == 1)
+            {
+                var single = AssessSpace(layout.Spaces[0], out var placement);
+                if (placement != null) placements.Add(layout.Spaces[0], placement);
+                return single;
+            }
+            var issues = new List<RoomGenerationIssue>();
+            var refused = false;
+            foreach (var room in layout.Spaces.OrderBy(r => r.RoomId, System.StringComparer.Ordinal))
+            {
+                var result = AssessSpace(room, out var placement, false);
+                refused |= result.Status == RoomGenerationStatus.Refused;
+                var offset = LayoutOffset(layout, room);
+                foreach (var issue in result.Issues)
+                {
+                    var copy = JsonUtility.FromJson<RoomGenerationIssue>(JsonUtility.ToJson(issue));
+                    if (copy.HasRegion) { copy.Start += offset; copy.End += offset; copy.LocateInRoom(room.RoomId); }
+                    issues.Add(copy);
+                }
+                if (placement != null) placements.Add(room, new RoomPlacement { Geometry = placement.Geometry, Floor = placement.Floor });
+            }
+            if (topology.Cells.Count != 0)
+            {
+                var pending = new RoomGenerationIssue(RoomIssueKind.Geometry, "boundaries", "Floor preview only: shared boundary generation is pending.");
+                pending.LocateInRoom(layout.LayoutId); issues.Add(pending);
+            }
+            return new RoomGenerationResult
+            {
+                Status = refused ? RoomGenerationStatus.Refused : topology.Cells.Count == 0 ? RoomGenerationStatus.Empty : RoomGenerationStatus.IncompletePreview,
+                Issues = issues.OrderBy(i => i.Id, System.StringComparer.Ordinal).ToArray(),
+                InputFingerprint = LayoutInputFingerprint(layout)
+            };
         }
 
         public static bool IsCurrent(ShipLayoutAuthoring layout)
         {
-            if (layout == null || layout.Spaces.Count != 1 || layout.Spaces[0] == null) return false;
+            if (layout == null || layout.Spaces.Count == 0 || layout.Spaces.Any(room => room == null)) return false;
             var saved = layout.GenerationResult;
+            if (layout.Spaces.Count > 1)
+            {
+                if (saved == null || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint)) return false;
+                var assessment = AssessSpaces(layout, out _);
+                return assessment.Status != RoomGenerationStatus.Refused && saved.InputFingerprint == assessment.InputFingerprint &&
+                    saved.OutputFingerprint == OutputFingerprint(layout);
+            }
             var roomResult = layout.Spaces[0].GenerationResult;
             return saved != null && roomResult != null && saved.Status == roomResult.Status &&
                 saved.InputFingerprint == roomResult.InputFingerprint && saved.OutputFingerprint == roomResult.OutputFingerprint &&
@@ -71,6 +176,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public static bool IsCurrent(ShipRoomAuthoring room)
         {
+            if (room != null && room.Layout != null && room.Layout.Spaces.Count > 1) return IsCurrent(room.Layout);
             var saved = room == null ? null : room.GenerationResult;
             if (saved == null || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint) ||
                 string.IsNullOrEmpty(saved.OutputFingerprint)) return false;
@@ -161,13 +267,31 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return Hash(text);
         }
 
-        private static string GetOverlapIssue(ShipRoomAuthoring room)
+        private static string LayoutInputFingerprint(ShipLayoutAuthoring layout)
+        {
+            var text = new StringBuilder(layout.LayoutId).Append(JsonUtility.ToJson(layout.transform.position));
+            foreach (var room in layout.Spaces.OrderBy(r => r.RoomId, System.StringComparer.Ordinal))
+                text.Append(room.RoomId).Append(InputFingerprint(room));
+            return Hash(text);
+        }
+
+        public static string OutputFingerprint(ShipLayoutAuthoring layout)
+        {
+            if (layout.Spaces.Count == 1) return OutputFingerprint(layout.Spaces[0]);
+            var text = new StringBuilder(layout.LayoutId);
+            foreach (var room in layout.Spaces.OrderBy(r => r.RoomId, System.StringComparer.Ordinal))
+                text.Append(room.RoomId).Append(OutputFingerprint(room));
+            return Hash(text);
+        }
+
+        private static string GetOverlapIssue(ShipRoomAuthoring room, bool includeLayoutMembers = true)
         {
             var positions = new HashSet<Vector3>();
             foreach (var c in RoomAuthoringOperations.ReadCells(room)) positions.Add(room.Occupancy.CellToWorld(new Vector3Int(c.x, c.y, 0)));
             foreach (var other in room.gameObject.scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<ShipRoomAuthoring>(true)))
             {
                 if (other == room || other.Occupancy == null) continue;
+                if (!includeLayoutMembers && room.Layout != null && other.Layout == room.Layout) continue;
                 var issue = RoomAuthoringOperations.GetSafetyIssue(other);
                 if (issue != null) return "Cannot qualify room overlap: " + other.RoomId + ": " + issue;
                 foreach (var c in RoomAuthoringOperations.ReadCells(other))

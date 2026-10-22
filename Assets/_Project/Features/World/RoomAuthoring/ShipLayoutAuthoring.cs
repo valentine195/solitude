@@ -33,5 +33,19 @@ namespace SOLITUDE.World.RoomAuthoring
         }
 
         public void SetGenerationResult(RoomGenerationResult result) => generationResult = result;
+
+        public void AddSpace(ShipRoomAuthoring space)
+        {
+            if (space == null || space.Layout != this || space.gameObject.scene != gameObject.scene ||
+                !space.transform.IsChildOf(transform) || space.GeneratedOutput == null ||
+                space.GeneratedOutput.LayoutOwner != this || space.GeneratedOutput.Owner != space)
+                throw new ArgumentException("Space must have consistent layout, hierarchy and output ownership.");
+            foreach (var member in Spaces)
+                if (member == space || member == null || member.RoomId == space.RoomId ||
+                    member.Occupancy == space.Occupancy || member.GeneratedOutput == space.GeneratedOutput)
+                    throw new InvalidOperationException("Space membership or identity is ambiguous.");
+            var members = new List<ShipRoomAuthoring>(Spaces) { space };
+            spaces = members.ToArray();
+        }
     }
 }

@@ -29,21 +29,25 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 feedback.messageType = result.Status == RoomGenerationStatus.Refused ? HelpBoxMessageType.Error :
                     result.Issues.Length == 0 ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
             }
-            if (layout.Spaces.Count == 1 && layout.Spaces[0] != null)
+            foreach (var room in layout.Spaces)
             {
-                var room = layout.Spaces[0];
+                if (room == null) continue;
+                var spaceControls = new Foldout { text = room.name + " — " + room.RoomId, value = layout.Spaces.Count == 1 };
+                root.Add(spaceControls);
                 if (!string.IsNullOrEmpty(room.GeneratedOutput == null ? null : room.GeneratedOutput.AdoptionRecord))
-                    root.Add(new HelpBox(room.GeneratedOutput.AdoptionRecord, HelpBoxMessageType.Info));
+                    spaceControls.Add(new HelpBox(room.GeneratedOutput.AdoptionRecord, HelpBoxMessageType.Info));
                 var data = new SerializedObject(room);
                 foreach (var name in new[] { "spaceType", "authoringMetadata" })
                 {
                     var field = new PropertyField(data.FindProperty(name));
                     field.Bind(data);
-                    root.Add(field);
+                    spaceControls.Add(field);
                 }
-                root.Add(new Button(() => Selection.activeGameObject = room.gameObject) { text = "Select Space" });
-                root.Add(new Button(() => RoomAuthoringPaletteSetup.EditRoom(room)) { text = "Edit Space in Tile Palette" });
+                spaceControls.Add(new Button(() => Selection.activeGameObject = room.gameObject) { text = "Select Space" });
+                spaceControls.Add(new Button(() => RoomAuthoringPaletteSetup.EditRoom(room)) { text = "Edit Space in Tile Palette" });
             }
+            root.Add(new Button(() => Selection.activeGameObject = RoomAuthoringCreation.CreateSpace(layout).gameObject) { text = "New Room Space" });
+            root.Add(new Button(() => Selection.activeGameObject = RoomAuthoringCreation.CreateSpace(layout, LogicalSpaceType.Corridor).gameObject) { text = "New Corridor Space" });
             root.Add(feedback);
             root.Add(new Button(Refresh) { text = "Validate Layout" });
             root.Add(new Button(() => { RoomAuthoringOperations.Rebuild(layout); serializedObject.Update(); Refresh(); }) { text = "Rebuild Layout" });
