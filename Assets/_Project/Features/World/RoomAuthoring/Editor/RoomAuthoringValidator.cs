@@ -272,7 +272,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 text.Append(child.name).Append(child.gameObject.activeSelf).Append(JsonUtility.ToJson(child.localPosition))
                     .Append(JsonUtility.ToJson(child.localRotation)).Append(JsonUtility.ToJson(child.localScale));
                 var renderer = child.GetComponent<SpriteRenderer>();
-                if (renderer != null) text.Append(Reference(renderer.sprite)).Append(renderer.sortingOrder).Append(renderer.sortingLayerID).Append(renderer.enabled);
+                if (renderer != null) text.Append(Reference(renderer.sprite)).Append(renderer.sortingOrder).Append(renderer.sortingLayerID)
+                    .Append(renderer.enabled).Append(renderer.forceRenderingOff).Append(JsonUtility.ToJson(renderer.color));
                 var map = child.GetComponent<Tilemap>();
                 if (map != null)
                 {
