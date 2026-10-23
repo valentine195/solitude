@@ -14,6 +14,24 @@ Select either the layout or an individual space. The Inspector reports the curre
 
 Missing or incompatible local artwork retains useful floors and independent architecture; dependent pieces are withheld with located issues. Overlapping cell ownership refuses publication and retains stale output clearly marked as such. Missing floor artwork has editor-only cell guides. Correcting an issue removes its obsolete guide. Disconnected occupancy retains identity and cells but cannot be Complete; reconnect or erase the separated region.
 
+### Generated rendering-state audit
+
+Generated output currentness compares the following writer-owned 2D configuration. A changed value marks the retained output stale; Validate and selection only report that state. Explicit Rebuild recreates the disposable configuration from authored cells/styles.
+
+| Output | Compared state |
+| --- | --- |
+| Hierarchy | Names, active state, local transforms, GameObject layers and component type/order signatures, including missing components. |
+| Both renderer types | Enabled/forced-off state, sorting layer/order, rendering-layer mask, priority, dynamic occlusion, local/world culling bounds, material assignment array and property-block presence. The writer never installs a property block, so any block is stale. Material access uses sharedMaterials and never creates material instances. |
+| Architectural sprites | Sprite reference, tint, both flip axes, draw mode/size, tiling mode/threshold, mask interaction and sprite sort point. |
+| Floor Tilemap | Enabled state, anchor/tint, orientation/matrix, animation rate, occupied positions/Tile references and per-cell color/matrix/flags. |
+| Floor renderer | Render mode, tile sort order, mask interaction, chunk culling mode/bounds and chunk size/count/age. |
+
+The comparison uses public rendering values, without serializing Inspector selection state, engine cache/identity fields or editor visibility controls. Camera/global lighting/render-pipeline changes, 3D baking/ray-tracing settings and shared asset-content edits are outside this generated-component audit; asset admission and production-art qualification remain later work. Generated content is not an artistic override store. Keep durable authored content outside its disposable roots.
+
+The diagnostic regression matrix changes each listed rendering category independently, including asymmetric partition flipX/flipY. It checks stale member/layout feedback, read-only Inspector/validation behavior, original renderer/Tilemap state and culling-bound restoration, exact output-fingerprint recovery, all 48 floor cells, authored-neighbor preservation and a gameplay sentinel. Existing save/reopen, focus and rebuild-order tests guard against unstable fingerprints. Execution results for this repair are recorded separately in the QRSPI verification artifacts; this description does not claim those checks have run.
+
+Bounds and integer-vector components are encoded explicitly: Unity's JsonUtility emits `{}` for those structs when passed directly. Regression cases move an interior occupied cell without changing count or outer bounds, independently on the authoritative map and generated floor; authored changes must become stale and generated changes must be recoverable. An editor-frame test checks unchanged output through queued updates and member/layout selection, so engine updates must not create false stale feedback.
+
 ## Verification
 
 Actual Unity 6000.6.4f1 targeted Edit Mode run: **28 Passed, 0 Failed, 0 Skipped**. Covers shared erase/Undo/Redo and exact layout result restoration, complete/partial save-reopen, reversed member order and rebuild equivalence, read-only layout/member focus, offset coordinates, missing-floor guides, overlap refusal and stale/corrected results. Earlier failed attempts are retained in QRSPI evidence. A final layout-result Undo registration was needed after generated-object Undo writes to restore the matching Redo fingerprint.

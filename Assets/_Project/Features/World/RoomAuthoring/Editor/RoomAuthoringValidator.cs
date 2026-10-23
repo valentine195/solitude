@@ -246,7 +246,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             var text = new StringBuilder(room.RoomId).Append(JsonUtility.ToJson(room.transform.position));
             if (room.Layout != null) text.Append(room.Layout.LayoutId);
-            foreach (var cell in RoomAuthoringOperations.ReadCells(room).OrderBy(c => c.y).ThenBy(c => c.x)) text.Append(JsonUtility.ToJson(cell));
+            foreach (var cell in RoomAuthoringOperations.ReadCells(room).OrderBy(c => c.y).ThenBy(c => c.x))
+                GridCoordinateFingerprint(text, new Vector3Int(cell.x, cell.y, 0));
             var style = room.Style;
             text.Append(Reference(style));
             if (style != null)
@@ -269,30 +270,70 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var text = new StringBuilder();
             foreach (var child in room.GeneratedOutput.GetComponentsInChildren<Transform>(true))
             {
-                text.Append(child.name).Append(child.gameObject.activeSelf).Append(JsonUtility.ToJson(child.localPosition))
+                text.Append(child.name).Append(child.gameObject.activeSelf).Append(child.gameObject.layer)
+                    .Append(JsonUtility.ToJson(child.localPosition))
                     .Append(JsonUtility.ToJson(child.localRotation)).Append(JsonUtility.ToJson(child.localScale));
+                foreach (var component in child.GetComponents<Component>())
+                    text.Append(component == null ? "missing-component" : component.GetType().FullName);
                 var renderer = child.GetComponent<SpriteRenderer>();
-                if (renderer != null) text.Append(Reference(renderer.sprite)).Append(renderer.sortingOrder).Append(renderer.sortingLayerID)
-                    .Append(renderer.enabled).Append(renderer.forceRenderingOff).Append(JsonUtility.ToJson(renderer.color));
+                if (renderer != null)
+                {
+                    RendererFingerprint(text, renderer);
+                    text.Append(Reference(renderer.sprite)).Append(JsonUtility.ToJson(renderer.color))
+                        .Append(renderer.flipX).Append(renderer.flipY).Append(renderer.drawMode)
+                        .Append(JsonUtility.ToJson(renderer.size)).Append(renderer.tileMode)
+                        .Append(renderer.adaptiveModeThreshold.ToString("R", System.Globalization.CultureInfo.InvariantCulture))
+                        .Append(renderer.maskInteraction).Append(renderer.spriteSortPoint);
+                }
                 var map = child.GetComponent<Tilemap>();
                 if (map != null)
                 {
-                    text.Append(JsonUtility.ToJson(map.tileAnchor)).Append(JsonUtility.ToJson(map.color));
+                    text.Append(map.enabled).Append(JsonUtility.ToJson(map.tileAnchor)).Append(JsonUtility.ToJson(map.color))
+                        .Append(map.orientation).Append(JsonUtility.ToJson(map.orientationMatrix))
+                        .Append(map.animationFrameRate.ToString("R", System.Globalization.CultureInfo.InvariantCulture));
                     var floorRenderer = child.GetComponent<TilemapRenderer>();
                     text.Append(floorRenderer == null ? "FloorRenderer:missing" : "FloorRenderer:present");
                     if (floorRenderer != null)
-                        text.Append(floorRenderer.enabled).Append(floorRenderer.forceRenderingOff)
-                            .Append(floorRenderer.sortingLayerID).Append(floorRenderer.sortingOrder);
+                    {
+                        RendererFingerprint(text, floorRenderer);
+                        text.Append(floorRenderer.mode).Append(floorRenderer.sortOrder).Append(floorRenderer.maskInteraction)
+                            .Append(floorRenderer.detectChunkCullingBounds).Append(JsonUtility.ToJson(floorRenderer.chunkCullingBounds))
+                            .Append(floorRenderer.maxChunkCount).Append(floorRenderer.maxFrameAge);
+                        GridCoordinateFingerprint(text, floorRenderer.chunkSize);
+                    }
                     foreach (var cell in map.cellBounds.allPositionsWithin)
                         if (map.HasTile(cell))
-                            text.Append(JsonUtility.ToJson(cell)).Append(Reference(map.GetTile(cell)))
+                        {
+                            GridCoordinateFingerprint(text, cell);
+                            text.Append(Reference(map.GetTile(cell)))
                                 .Append(JsonUtility.ToJson(map.GetColor(cell)))
                                 .Append(JsonUtility.ToJson(map.GetTransformMatrix(cell)))
                                 .Append((int)map.GetTileFlags(cell));
+                        }
                 }
             }
             return Hash(text);
         }
+
+        private static void RendererFingerprint(StringBuilder text, Renderer renderer)
+        {
+            text.Append(renderer.enabled).Append(renderer.forceRenderingOff).Append(renderer.sortingLayerID).Append(renderer.sortingOrder)
+                .Append(renderer.renderingLayerMask).Append(renderer.rendererPriority).Append(renderer.allowOcclusionWhenDynamic)
+                // The writer never installs property blocks. Any block requires an explicit rebuild, regardless of its values.
+                .Append(renderer.HasPropertyBlock());
+            BoundsFingerprint(text, renderer.localBounds);
+            BoundsFingerprint(text, renderer.bounds);
+            var materials = renderer.sharedMaterials;
+            text.Append("materials:").Append(materials.Length);
+            foreach (var material in materials) text.Append(Reference(material));
+        }
+
+        // JsonUtility serializes Bounds and integer vectors as empty objects; encode their public components explicitly.
+        private static void GridCoordinateFingerprint(StringBuilder text, Vector3Int value) =>
+            text.Append('[').Append(value.x).Append(',').Append(value.y).Append(',').Append(value.z).Append(']');
+
+        private static void BoundsFingerprint(StringBuilder text, Bounds value) =>
+            text.Append(JsonUtility.ToJson(value.center)).Append(JsonUtility.ToJson(value.size));
 
         private static string LayoutInputFingerprint(ShipLayoutAuthoring layout)
         {

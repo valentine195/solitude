@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Rendering;
 using UnityEngine.Tilemaps;
 using Object = UnityEngine.Object;
 
@@ -287,6 +288,216 @@ namespace SOLITUDE.Tests.RoomAuthoring
             finally
             {
                 RoomAuthoringOperations.GenerationCompleted -= Generated; RoomAuthoringPreview.ClearSelection(); Selection.activeObject = oldSelection;
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single); AssetDatabase.DeleteAsset(folder);
+            }
+        }
+
+        [TestCase("sprite-flip-x")]
+        [TestCase("sprite-flip-y")]
+        [TestCase("sprite-draw-mode")]
+        [TestCase("sprite-size")]
+        [TestCase("sprite-tile-mode")]
+        [TestCase("sprite-threshold")]
+        [TestCase("sprite-mask")]
+        [TestCase("sprite-sort-point")]
+        [TestCase("sprite-material")]
+        [TestCase("sprite-render-layer")]
+        [TestCase("sprite-priority")]
+        [TestCase("sprite-occlusion")]
+        [TestCase("sprite-local-bounds")]
+        [TestCase("sprite-world-bounds")]
+        [TestCase("sprite-property-block")]
+        [TestCase("sprite-layer")]
+        [TestCase("sprite-component")]
+        [TestCase("floor-orientation")]
+        [TestCase("floor-matrix")]
+        [TestCase("floor-enabled")]
+        [TestCase("floor-mode")]
+        [TestCase("floor-sort-order")]
+        [TestCase("floor-mask")]
+        [TestCase("floor-chunk-mode")]
+        [TestCase("floor-chunk-bounds")]
+        [TestCase("floor-chunk-size")]
+        [TestCase("floor-chunk-count")]
+        [TestCase("floor-chunk-age")]
+        [TestCase("floor-frame-rate")]
+        [TestCase("floor-material")]
+        [TestCase("floor-property-block")]
+        [TestCase("floor-layer")]
+        public void ModifiedSharedRenderingStateIsReadOnlyStaleAndExplicitRebuildRecovers(string change)
+        {
+            var folder = CreateSharedAssets(); var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var oldSelection = Selection.activeObject; var calls = 0;
+            void Generated(ShipRoomAuthoring _) => calls++;
+            try
+            {
+                var layout = CreateSharedLayout(scene, folder);
+                Assert.AreEqual(RoomGenerationStatus.Complete, layout.GenerationResult.Status, layout.GenerationResult.Summary);
+                Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+                var partition = layout.GetComponentsInChildren<SpriteRenderer>().First(r => r.name.StartsWith("Partition", StringComparison.Ordinal));
+                var member = partition.GetComponentInParent<RoomGeneratedOutput>().Owner;
+                var floor = member.GeneratedOutput.GetComponentInChildren<Tilemap>(); var floorRenderer = floor.GetComponent<TilemapRenderer>();
+                var isFloor = change.StartsWith("floor-", StringComparison.Ordinal);
+                var target = isFloor ? (Renderer)floorRenderer : partition;
+                var role = partition.name; var position = partition.transform.localPosition;
+                // Boundary artwork is deliberately asymmetric: its thin strip changes sides when mirrored.
+                Assert.Greater(partition.sprite.rect.width, 1); Assert.Greater(partition.sprite.rect.height, 1);
+                var cells = layout.Spaces.Select(RoomAuthoringOperations.ReadCells).ToArray();
+                var sentinel = new GameObject("Authored Sentinel"); sentinel.transform.position = new Vector3(20, 30, 0);
+                var originalFingerprint = RoomAuthoringValidator.OutputFingerprint(layout);
+                var rendererState = EditorJsonUtility.ToJson(target); var mapState = EditorJsonUtility.ToJson(floor);
+                var localBounds = target.localBounds; var worldBounds = target.bounds;
+                switch (change)
+                {
+                    case "sprite-flip-x": partition.flipX = true; break;
+                    case "sprite-flip-y": partition.flipY = true; break;
+                    case "sprite-draw-mode": partition.drawMode = SpriteDrawMode.Tiled; break;
+                    case "sprite-size": partition.size = new Vector2(3, 4); break;
+                    case "sprite-tile-mode": partition.tileMode = SpriteTileMode.Adaptive; break;
+                    case "sprite-threshold": partition.adaptiveModeThreshold = .25f; break;
+                    case "sprite-mask": partition.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; break;
+                    case "sprite-sort-point": partition.spriteSortPoint = SpriteSortPoint.Pivot; break;
+                    case "sprite-material": case "floor-material": target.sharedMaterials = new Material[] { null }; break;
+                    case "sprite-render-layer": target.renderingLayerMask = 0; break;
+                    case "sprite-priority": target.rendererPriority = 10; break;
+                    case "sprite-occlusion": target.allowOcclusionWhenDynamic = false; break;
+                    case "sprite-local-bounds":
+                        target.localBounds = new Bounds(Vector3.one * 100, Vector3.one);
+                        Assert.AreNotEqual(localBounds, target.localBounds, "The bounds edit must actually take effect."); break;
+                    case "sprite-world-bounds":
+                        target.bounds = new Bounds(Vector3.one * 100, Vector3.one);
+                        Assert.AreNotEqual(worldBounds, target.bounds, "The bounds edit must actually take effect."); break;
+                    case "sprite-property-block": case "floor-property-block":
+                        var block = new MaterialPropertyBlock(); block.SetColor("_Color", Color.clear); target.SetPropertyBlock(block); break;
+                    case "sprite-layer": case "floor-layer": target.gameObject.layer = 2; break;
+                    case "sprite-component": target.gameObject.AddComponent<SortingGroup>(); break;
+                    case "floor-orientation": floor.orientation = Tilemap.Orientation.XZ; break;
+                    case "floor-matrix":
+                        floor.orientation = Tilemap.Orientation.Custom;
+                        var beforeMatrix = RoomAuthoringValidator.OutputFingerprint(layout);
+                        floor.orientationMatrix = Matrix4x4.Translate(Vector3.right * 3);
+                        Assert.AreNotEqual(beforeMatrix, RoomAuthoringValidator.OutputFingerprint(layout), "Matrix drift must be detected independently of selecting Custom orientation.");
+                        break;
+                    case "floor-enabled": floor.enabled = false; break;
+                    case "floor-mode": floorRenderer.mode = TilemapRenderer.Mode.Individual; break;
+                    case "floor-sort-order": floorRenderer.sortOrder = TilemapRenderer.SortOrder.TopRight; break;
+                    case "floor-mask": floorRenderer.maskInteraction = SpriteMaskInteraction.VisibleInsideMask; break;
+                    case "floor-chunk-mode": floorRenderer.detectChunkCullingBounds = TilemapRenderer.DetectChunkCullingBounds.Manual; break;
+                    case "floor-chunk-bounds": floorRenderer.chunkCullingBounds = Vector3.one * 3; break;
+                    case "floor-chunk-size":
+                        var oldChunkSize = floorRenderer.chunkSize; floorRenderer.chunkSize = Vector3Int.one * 16;
+                        Assert.AreNotEqual(oldChunkSize, floorRenderer.chunkSize, "The chunk-size edit must actually take effect."); break;
+                    case "floor-chunk-count": floorRenderer.maxChunkCount = 16; break;
+                    case "floor-chunk-age": floorRenderer.maxFrameAge = 16; break;
+                    case "floor-frame-rate": floor.animationFrameRate = 2; break;
+                    default: Assert.Fail("Unknown rendering-state case: " + change); break;
+                }
+                Assert.AreNotEqual(originalFingerprint, RoomAuthoringValidator.OutputFingerprint(layout), change);
+                Assert.IsTrue(EditorSceneManager.SaveScene(scene, folder + "/StaleRendering.unity"));
+                var serialized = layout.Spaces.Select(r => EditorJsonUtility.ToJson(r)).ToArray();
+                var snapshot = Snapshot(layout); var fingerprint = RoomAuthoringValidator.OutputFingerprint(layout);
+                Selection.activeGameObject = member.gameObject; var group = Undo.GetCurrentGroup();
+                RoomAuthoringOperations.GenerationCompleted += Generated;
+                Assert.AreEqual(RoomGenerationStatus.Complete, RoomAuthoringPreview.GetFeedback(layout).Assessment.Status);
+                Assert.IsFalse(RoomAuthoringValidator.IsCurrent(layout)); Assert.IsFalse(RoomAuthoringValidator.IsCurrent(member));
+                Assert.IsFalse(RoomAuthoringPreview.GetFeedback(layout).IsCurrent); Assert.IsFalse(RoomAuthoringPreview.GetFeedback(member).IsCurrent);
+                foreach (var selected in new Object[] { layout, member })
+                {
+                    var editor = UnityEditor.Editor.CreateEditor(selected);
+                    try { Assert.IsNotNull(editor.CreateInspectorGUI()); } finally { Object.DestroyImmediate(editor); }
+                }
+                CollectionAssert.AreEqual(serialized, layout.Spaces.Select(r => EditorJsonUtility.ToJson(r)).ToArray());
+                CollectionAssert.AreEqual(snapshot, Snapshot(layout)); Assert.AreEqual(fingerprint, RoomAuthoringValidator.OutputFingerprint(layout));
+                Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.IsFalse(scene.isDirty); Assert.AreEqual(0, calls);
+                Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+                var restoredFloor = member.GeneratedOutput.GetComponentInChildren<Tilemap>();
+                var restoredPartition = member.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>()
+                    .Single(r => r.name == role && r.transform.localPosition == position);
+                var restored = isFloor ? (Renderer)restoredFloor.GetComponent<TilemapRenderer>() : restoredPartition;
+                Assert.IsFalse(restoredPartition.flipX); Assert.IsFalse(restoredPartition.flipY);
+                Assert.IsFalse(restored.HasPropertyBlock()); Assert.AreEqual(localBounds, restored.localBounds); Assert.AreEqual(worldBounds, restored.bounds);
+                Assert.AreEqual(rendererState, EditorJsonUtility.ToJson(restored)); Assert.AreEqual(mapState, EditorJsonUtility.ToJson(restoredFloor));
+                Assert.AreEqual(originalFingerprint, RoomAuthoringValidator.OutputFingerprint(layout));
+                Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(member));
+                for (var i = 0; i < layout.Spaces.Count; i++) CollectionAssert.AreEqual(cells[i], RoomAuthoringOperations.ReadCells(layout.Spaces[i]));
+                Assert.AreEqual(48, layout.Spaces.Sum(RoomAuthoringTestFixtures.FloorCount));
+                Assert.AreEqual(new Vector3(20, 30, 0), sentinel.transform.position); Assert.AreEqual(1, calls);
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated; RoomAuthoringPreview.ClearSelection(); Selection.activeObject = oldSelection;
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single); AssetDatabase.DeleteAsset(folder);
+            }
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void SameCountInteriorCellMoveIsStaleAndRebuildPreservesTheAuthoritativeMap(bool editAuthoredMap)
+        {
+            var folder = CreateSharedAssets(); var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var calls = 0; void Generated(ShipRoomAuthoring _) => calls++;
+            try
+            {
+                var layout = CreateSharedLayout(scene, folder); var member = layout.Spaces[0];
+                member.Occupancy.SetTile(new Vector3Int(1, 1, 0), null);
+                Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+                var floor = member.GeneratedOutput.GetComponentInChildren<Tilemap>();
+                var originalOutput = RoomAuthoringValidator.OutputFingerprint(layout);
+                var neighborCells = layout.Spaces.Skip(1).Select(RoomAuthoringOperations.ReadCells).ToArray();
+                var map = editAuthoredMap ? member.Occupancy : floor; var bounds = map.cellBounds;
+                var moved = new Vector3Int(2, 2, 0); var filled = new Vector3Int(1, 1, 0); var tile = map.GetTile(moved);
+                Assert.IsNotNull(tile); Assert.IsNull(map.GetTile(filled));
+                map.SetTile(moved, null); map.SetTile(filled, tile);
+                Assert.AreEqual(bounds, map.cellBounds, "The same-count edit must retain the outer bounds.");
+                var authored = RoomAuthoringOperations.ReadCells(member); Assert.AreEqual(23, authored.Length);
+                if (editAuthoredMap) Assert.AreEqual(originalOutput, RoomAuthoringValidator.OutputFingerprint(layout), "Only authored inputs changed.");
+                else Assert.AreNotEqual(originalOutput, RoomAuthoringValidator.OutputFingerprint(layout), "Equal counts/bounds cannot hide changed floor coordinates.");
+                Assert.IsTrue(EditorSceneManager.SaveScene(scene, folder + "/MovedCell.unity"));
+                var snapshot = Snapshot(layout); var output = RoomAuthoringValidator.OutputFingerprint(layout); var group = Undo.GetCurrentGroup();
+                RoomAuthoringOperations.GenerationCompleted += Generated;
+                Assert.IsFalse(RoomAuthoringPreview.GetFeedback(layout).IsCurrent); Assert.IsFalse(RoomAuthoringPreview.GetFeedback(member).IsCurrent);
+                CollectionAssert.AreEqual(snapshot, Snapshot(layout)); Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(layout));
+                Assert.IsFalse(scene.isDirty); Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.AreEqual(0, calls);
+                Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout)); floor = member.GeneratedOutput.GetComponentInChildren<Tilemap>();
+                Assert.AreEqual(editAuthoredMap, floor.HasTile(filled)); Assert.AreEqual(!editAuthoredMap, floor.HasTile(moved));
+                Assert.AreEqual(47, layout.Spaces.Sum(RoomAuthoringTestFixtures.FloorCount));
+                CollectionAssert.AreEqual(authored, RoomAuthoringOperations.ReadCells(member));
+                for (var i = 1; i < layout.Spaces.Count; i++) CollectionAssert.AreEqual(neighborCells[i - 1], RoomAuthoringOperations.ReadCells(layout.Spaces[i]));
+                Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout)); Assert.AreEqual(1, calls);
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single); AssetDatabase.DeleteAsset(folder);
+            }
+        }
+
+        [UnityEngine.TestTools.UnityTest]
+        public System.Collections.IEnumerator UnchangedRenderingRemainsCurrentAcrossEditorFrames()
+        {
+            var folder = CreateSharedAssets(); var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var oldSelection = Selection.activeObject; var calls = 0;
+            void Generated(ShipRoomAuthoring _) => calls++;
+            try
+            {
+                var layout = CreateSharedLayout(scene, folder);
+                Assert.IsTrue(EditorSceneManager.SaveScene(scene, folder + "/StableRendering.unity"));
+                var fingerprint = RoomAuthoringValidator.OutputFingerprint(layout); var snapshot = Snapshot(layout);
+                RoomAuthoringOperations.GenerationCompleted += Generated;
+                for (var i = 0; i < 3; i++)
+                {
+                    Selection.activeGameObject = i == 1 ? layout.Spaces[1].gameObject : layout.gameObject;
+                    EditorApplication.QueuePlayerLoopUpdate();
+                    yield return null;
+                    Assert.AreEqual(fingerprint, RoomAuthoringValidator.OutputFingerprint(layout));
+                    Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+                    Assert.IsTrue(RoomAuthoringPreview.GetFeedback(layout.Spaces[1]).IsCurrent);
+                    CollectionAssert.AreEqual(snapshot, Snapshot(layout)); Assert.IsFalse(scene.isDirty); Assert.AreEqual(0, calls);
+                }
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated; Selection.activeObject = oldSelection;
                 EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single); AssetDatabase.DeleteAsset(folder);
             }
         }
