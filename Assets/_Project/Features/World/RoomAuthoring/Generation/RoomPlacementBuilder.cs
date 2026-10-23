@@ -79,7 +79,7 @@ namespace SOLITUDE.World.RoomAuthoring
                 var style = styles[owner];
                 var module = style == null ? null : JoinModule(style, join);
                 var issue = style == null ? "Assign a style for this corner." : CheckModule(module, join.Role, false);
-                if (issue == null) issue = CheckFootprint(module, join.Position, result.Geometry.Cells, inset);
+                if (issue == null) issue = CheckFootprint(module, join.Position, result.Geometry.Cells, inset, geometry.Edges);
                 if (style != null && !style.SupportsDiagonalContact && geometry.Exterior.DiagonalContacts.Contains(join.Position))
                     issue = "Configured artwork cannot resolve separate diagonal branches at this junction.";
                 if (issue != null)
@@ -101,7 +101,7 @@ namespace SOLITUDE.World.RoomAuthoring
                 var issue = binding == null ? "Configure exactly one artwork binding for " + junction.Role.Value + "." :
                     CheckModule(binding.Artwork, junction.Role.Value.ToString(), false);
                 if (issue == null && !binding.Artwork.HasFootprint) issue = "Declare the junction artwork's visual footprint.";
-                if (issue == null) issue = CheckFootprint(binding.Artwork, junction.Position, result.Geometry.Cells, inset);
+                if (issue == null) issue = CheckFootprint(binding.Artwork, junction.Position, result.Geometry.Cells, inset, geometry.Edges);
                 if (issue == null) issue = CheckJunctionCoverage(binding, junction.Directions);
                 if (issue != null)
                 {
@@ -134,7 +134,7 @@ namespace SOLITUDE.World.RoomAuthoring
                         bindings.TryGetValue(run.End, out var endBinding) ?
                         endBinding.Reservation(edge.Address.Horizontal ? BoundaryDirections.West : BoundaryDirections.South) : defaults.y);
                     AddRun(result, run, style, unresolved, edge.VisualOwner, edge.Kind == LayoutEdgeKind.Partition,
-                        reservations, missingEndpoints.Contains(run.Start), missingEndpoints.Contains(run.End), inset);
+                        reservations, missingEndpoints.Contains(run.Start), missingEndpoints.Contains(run.End), inset, geometry.Edges);
                 }
                 foreach (var issue in result.Issues.Skip(before)) issue.LocateInRoom(edge.VisualOwner);
             }
@@ -164,7 +164,7 @@ namespace SOLITUDE.World.RoomAuthoring
 
         private static void AddRun(RoomPlacement result, RoomBoundaryRun run, RoomStyleDefinition style,
             HashSet<RoomJunction> unresolvedJoins, string ownerId = null, bool partition = false,
-            Vector2Int? endpointReservations = null, bool unresolvedStart = false, bool unresolvedEnd = false, int? floorInset = null)
+            Vector2Int? endpointReservations = null, bool unresolvedStart = false, bool unresolvedEnd = false, int? floorInset = null, IReadOnlyList<LayoutBoundaryEdge> apertures = null)
         {
             var modules = run.Side == RoomSide.North ? style.NorthWalls : new[] { run.Side == RoomSide.West ? style.WestCap : style.EastCap };
             if (run.Side == RoomSide.South) modules = new[] { style.SouthCap };
@@ -209,7 +209,7 @@ namespace SOLITUDE.World.RoomAuthoring
             for (var n = 0; n < span / repeat; n++)
             {
                 var origin = (Vector2)run.Start + (horizontal ? Vector2.right : Vector2.up) * ((reservations.x + n * repeat) / 32f);
-                var fit = CheckFootprint(modules[n % modules.Length], origin, result.Geometry.Cells, floorInset ?? style.FloorEdgeInsetPixels);
+                var fit = CheckFootprint(modules[n % modules.Length], origin, result.Geometry.Cells, floorInset ?? style.FloorEdgeInsetPixels, apertures);
                 if (fit != null)
                 {
                     var location = Vector2Int.FloorToInt(origin);
@@ -220,8 +220,23 @@ namespace SOLITUDE.World.RoomAuthoring
             }
         }
 
-        private static string CheckFootprint(RoomStyleDefinition.Module module, Vector2 origin, Vector2Int[] cells, int inset)
+        private static string CheckFootprint(RoomStyleDefinition.Module module, Vector2 origin, Vector2Int[] cells, int inset, IReadOnlyList<LayoutBoundaryEdge> apertures = null)
         {
+            // Check actual declared ink, or conservatively the whole canvas when no footprint is supplied.
+            foreach (var rect in module.HasFootprint ? module.FootprintsPixels ?? Array.Empty<RectInt>() :
+                new[] { new RectInt(Vector2Int.zero, module.CanvasPixels) })
+            {
+                var min = origin + ((Vector2)rect.position - module.AnchorPixels + module.OffsetPixels) / 32f;
+                var max = min + (Vector2)rect.size / 32f;
+                foreach (var aperture in apertures ?? Array.Empty<LayoutBoundaryEdge>())
+                {
+                    if (aperture.Kind != LayoutEdgeKind.Opening) continue;
+                    var a = aperture.Address.Start; var b = aperture.Address.End;
+                    var enters = aperture.Address.Horizontal ? min.x < b.x - .000001f && max.x > a.x + .000001f && min.y <= a.y && max.y >= a.y :
+                        min.y < b.y - .000001f && max.y > a.y + .000001f && min.x <= a.x && max.x >= a.x;
+                    if (enters) return "Artwork footprint intrudes into connection " + aperture.ConnectionId + " at " + aperture.Address + ". Use compatible artwork or alignment; the aperture remains clear.";
+                }
+            }
             if (!module.HasFootprint) return null;
             if (inset < 0 || inset > 15) return "Floor edge inset must be between 0 and 15 pixels, preserving a walkable cell core.";
             if (module.FootprintsPixels == null || module.FootprintsPixels.Length == 0) return "Declare at least one visual footprint rectangle.";

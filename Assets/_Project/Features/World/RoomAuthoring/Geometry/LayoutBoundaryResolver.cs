@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace SOLITUDE.World.RoomAuthoring
 {
-    public enum LayoutEdgeKind { Open, Exterior, Partition }
+    public enum LayoutEdgeKind { Open, Exterior, Partition, Opening }
 
     public readonly struct LayoutEdgeAddress : IEquatable<LayoutEdgeAddress>
     {
@@ -28,14 +28,15 @@ namespace SOLITUDE.World.RoomAuthoring
         public readonly LayoutEdgeAddress Address;
         public readonly string NegativeOwner;
         public readonly string PositiveOwner;
-        public LayoutEdgeKind Kind => NegativeOwner == null || PositiveOwner == null ? LayoutEdgeKind.Exterior :
+        public readonly string ConnectionId;
+        public LayoutEdgeKind Kind => ConnectionId != null ? LayoutEdgeKind.Opening : NegativeOwner == null || PositiveOwner == null ? LayoutEdgeKind.Exterior :
             NegativeOwner == PositiveOwner ? LayoutEdgeKind.Open : LayoutEdgeKind.Partition;
         public string VisualOwner => Kind == LayoutEdgeKind.Partition
             ? (string.CompareOrdinal(NegativeOwner, PositiveOwner) <= 0 ? NegativeOwner : PositiveOwner) : NegativeOwner ?? PositiveOwner;
         public RoomSide Side => Address.Horizontal ? (NegativeOwner == null || Kind == LayoutEdgeKind.Partition ? RoomSide.South : RoomSide.North)
             : NegativeOwner == null ? RoomSide.West : RoomSide.East;
-        public LayoutBoundaryEdge(LayoutEdgeAddress address, string negativeOwner, string positiveOwner)
-        { Address = address; NegativeOwner = negativeOwner; PositiveOwner = positiveOwner; }
+        public LayoutBoundaryEdge(LayoutEdgeAddress address, string negativeOwner, string positiveOwner, string connectionId = null)
+        { Address = address; NegativeOwner = negativeOwner; PositiveOwner = positiveOwner; ConnectionId = connectionId; }
     }
 
     public readonly struct LayoutBoundarySpan
@@ -91,8 +92,14 @@ namespace SOLITUDE.World.RoomAuthoring
 
     public static class LayoutBoundaryResolver
     {
-        public static LayoutBoundaryGeometry Resolve(ShipLayoutTopology topology)
+        public static LayoutBoundaryGeometry Resolve(ShipLayoutTopology topology, IEnumerable<LayoutConnectionDefinition> connections = null)
         {
+            var definitions = (connections ?? Array.Empty<LayoutConnectionDefinition>()).ToArray();
+            if (definitions.Length != 0)
+            {
+                var issues = ConnectionIssues(topology, definitions);
+                if (issues.Length != 0) throw new InvalidOperationException(issues[0].Reason);
+            }
             if (topology.Overlaps.Count != 0) throw new InvalidOperationException("Resolve occupancy ownership before architectural boundaries.");
             if (topology.Cells.Count != 0 && ((long)topology.Cells.Max(c => c.x) - topology.Cells.Min(c => c.x) + 1 > int.MaxValue ||
                 (long)topology.Cells.Max(c => c.y) - topology.Cells.Min(c => c.y) + 1 > int.MaxValue))
@@ -110,10 +117,21 @@ namespace SOLITUDE.World.RoomAuthoring
                 _ = address.End;
                 edges.Add(address, new LayoutBoundaryEdge(address, negative, positive));
             }
+            var apertureEnds = new HashSet<Vector2Int>();
+            foreach (var connection in definitions)
+            {
+                var addressesInSpan = connection.Edges().ToArray();
+                apertureEnds.Add(addressesInSpan[0].Start); apertureEnds.Add(addressesInSpan.Last().End);
+                foreach (var address in addressesInSpan)
+                {
+                    var edge = edges[address];
+                    edges[address] = new LayoutBoundaryEdge(address, edge.NegativeOwner, edge.PositiveOwner, connection.Id);
+                }
+            }
             var spans = new List<LayoutBoundarySpan>();
-            var boundaries = edges.Values.Where(e => e.Kind != LayoutEdgeKind.Open).ToArray();
+            var boundaries = edges.Values.Where(e => e.Kind == LayoutEdgeKind.Exterior || e.Kind == LayoutEdgeKind.Partition).ToArray();
             var exterior = RoomBoundaryExtractor.Extract(topology.Cells);
-            var junctions = ResolveJunctions(boundaries, exterior);
+            var junctions = ResolveJunctions(boundaries, exterior, apertureEnds);
             foreach (var line in boundaries.GroupBy(e => (e.Address.Horizontal,
                 Axis: e.Address.Horizontal ? e.Address.Start.y : e.Address.Start.x, e.NegativeOwner, e.PositiveOwner))
                 .OrderBy(g => g.Key.Horizontal).ThenBy(g => g.Key.Axis)
@@ -133,7 +151,56 @@ namespace SOLITUDE.World.RoomAuthoring
             return new LayoutBoundaryGeometry(edges, spans.ToArray(), exterior, topology, junctions);
         }
 
-        private static Dictionary<Vector2Int, LayoutJunction> ResolveJunctions(LayoutBoundaryEdge[] boundaries, RoomGeometry exterior)
+        public static RoomGenerationIssue[] ConnectionIssues(ShipLayoutTopology topology, IEnumerable<LayoutConnectionDefinition> connections)
+        {
+            var definitions = connections.ToArray();
+            if (definitions.Length == 0) return Array.Empty<RoomGenerationIssue>();
+            var baseline = Resolve(topology);
+            var edges = baseline.Edges.ToDictionary(e => e.Address);
+            var claims = new Dictionary<LayoutEdgeAddress, List<LayoutConnectionDefinition>>();
+            var reasons = new Dictionary<LayoutConnectionDefinition, string>();
+            var issues = new List<RoomGenerationIssue>();
+            foreach (var connection in definitions)
+            {
+                if (connection == null)
+                { issues.Add(new RoomGenerationIssue(RoomIssueKind.Geometry, "Connection/<null>", "Missing connection record.")); continue; }
+                var reason = connection.AddressIssue();
+                if (reason == null && definitions.Count(c => c != null && c.Id == connection.Id) != 1)
+                    reason = "Duplicate connection identity: " + connection.Id;
+                if (reason == null && connection.Width > edges.Count) reason = "Connection extends beyond occupied shared boundaries.";
+                if (reason == null)
+                {
+                    var addresses = connection.Edges().ToArray();
+                    foreach (var address in addresses)
+                    {
+                        if (!claims.TryGetValue(address, out var list)) claims.Add(address, list = new List<LayoutConnectionDefinition>());
+                        list.Add(connection);
+                        if (!edges.TryGetValue(address, out var edge) || edge.Kind != LayoutEdgeKind.Partition ||
+                            edge.NegativeOwner != connection.NegativeOwner || edge.PositiveOwner != connection.PositiveOwner)
+                            reason = "Every edge must separate the recorded negative/positive owners without changing direction or owner pair. Invalid edge " + address;
+                    }
+                    if (reason == null)
+                        foreach (var endpoint in new[] { addresses[0].Start, addresses.Last().End })
+                            if (baseline.JunctionAt(endpoint).Kind != RoomEndpointKind.Straight)
+                                reason = "Connection endpoint " + endpoint + " requires an unambiguous straight boundary; move the span away from this junction.";
+                }
+                if (reason != null) reasons[connection] = reason;
+            }
+            foreach (var conflict in claims.Where(p => p.Value.Count > 1))
+                foreach (var connection in conflict.Value) reasons[connection] = "Connection overlaps another connection at " + conflict.Key;
+            foreach (var pair in reasons.OrderBy(p => p.Key.Id, StringComparer.Ordinal))
+            {
+                var connection = pair.Key;
+                var validAddress = connection.AddressIssue() == null;
+                var start = validAddress ? new Vector2Int((int)connection.Start.x, (int)connection.Start.y) : Vector2Int.zero;
+                var end = validAddress ? start + (connection.Horizontal ? Vector2Int.right : Vector2Int.up) * connection.Width : start;
+                var issue = new RoomGenerationIssue(RoomIssueKind.Geometry, "Connection/" + connection.Id, pair.Value, validAddress, start, end);
+                issue.LocateInRoom(connection.NegativeOwner + " / " + connection.PositiveOwner); issues.Add(issue);
+            }
+            return issues.OrderBy(i => i.Field, StringComparer.Ordinal).ToArray();
+        }
+
+        private static Dictionary<Vector2Int, LayoutJunction> ResolveJunctions(LayoutBoundaryEdge[] boundaries, RoomGeometry exterior, HashSet<Vector2Int> apertureEnds)
         {
             var incident = new Dictionary<Vector2Int, List<LayoutBoundaryEdge>>();
             foreach (var edge in boundaries)
@@ -178,6 +245,8 @@ namespace SOLITUDE.World.RoomAuthoring
                     role = mask == BoundaryDirections.North ? LayoutJunctionRole.EndNorth : mask == BoundaryDirections.East ? LayoutJunctionRole.EndEast :
                         mask == BoundaryDirections.South ? LayoutJunctionRole.EndSouth : LayoutJunctionRole.EndWest;
                 }
+                // Unframed aperture ends terminate cleanly; do not invent a cap that fills the gap.
+                if (apertureEnds.Contains(pair.Key)) role = null;
                 result.Add(pair.Key, new LayoutJunction(pair.Key, kind, mask, role,
                     pair.Value.SelectMany(e => new[] { e.NegativeOwner, e.PositiveOwner }).Where(id => id != null), corner));
             }

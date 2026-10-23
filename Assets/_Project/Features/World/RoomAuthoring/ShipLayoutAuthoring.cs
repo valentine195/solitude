@@ -12,12 +12,14 @@ namespace SOLITUDE.World.RoomAuthoring
         [SerializeField] private string layoutId;
         [SerializeField] private RoomStyleDefinition defaultStyle;
         [SerializeField] private ShipRoomAuthoring[] spaces = Array.Empty<ShipRoomAuthoring>();
+        [SerializeField] private LayoutConnectionDefinition[] connections = Array.Empty<LayoutConnectionDefinition>();
         [SerializeField] private RoomGeneratedOutput generatedOutput;
         [SerializeField] private RoomGenerationResult generationResult;
 
         public string LayoutId => layoutId;
         public RoomStyleDefinition DefaultStyle { get => defaultStyle; set => defaultStyle = value; }
         public IReadOnlyList<ShipRoomAuthoring> Spaces => spaces ?? Array.Empty<ShipRoomAuthoring>();
+        public IReadOnlyList<LayoutConnectionDefinition> Connections => connections ?? Array.Empty<LayoutConnectionDefinition>();
         public RoomGeneratedOutput GeneratedOutput => generatedOutput;
         public RoomGenerationResult GenerationResult => generationResult;
 
@@ -31,6 +33,10 @@ namespace SOLITUDE.World.RoomAuthoring
             spaces = new[] { space };
             generatedOutput = output;
         }
+
+        // Editor operations validate the complete proposed set before replacing authored records.
+        public void SetConnections(IEnumerable<LayoutConnectionDefinition> definitions) =>
+            connections = new List<LayoutConnectionDefinition>(definitions).ToArray();
 
         public void SetGenerationResult(RoomGenerationResult result) => generationResult = result;
 

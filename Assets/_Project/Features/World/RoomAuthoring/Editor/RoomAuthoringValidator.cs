@@ -121,6 +121,17 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 }).ToArray();
                 return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = conflicts };
             }
+            // Connections participate in the same assessment/publication path as shared boundaries.
+            RoomGenerationIssue[] connectionIssues;
+            try { connectionIssues = LayoutBoundaryResolver.ConnectionIssues(topology, layout.Connections); }
+            catch (System.OverflowException)
+            {
+                var issue = new RoomGenerationIssue(RoomIssueKind.Safety, "coordinates", "Layout boundary coordinates exceed the supported integer grid.");
+                issue.LocateInRoom(layout.LayoutId);
+                return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = new[] { issue } };
+            }
+            if (connectionIssues.Length != 0)
+                return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = connectionIssues };
             if (layout.Spaces.Count == 1)
             {
                 var single = AssessSpace(layout.Spaces[0], out var placement);
@@ -143,7 +154,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 if (placement != null) placements.Add(room, new RoomPlacement { Geometry = placement.Geometry, Floor = placement.Floor });
             }
             LayoutBoundaryGeometry boundaries;
-            try { boundaries = LayoutBoundaryResolver.Resolve(topology); }
+            try { boundaries = LayoutBoundaryResolver.Resolve(topology, layout.Connections); }
             catch (System.OverflowException)
             {
                 var issue = new RoomGenerationIssue(RoomIssueKind.Safety, "coordinates", "Layout boundary coordinates exceed the supported integer grid.");
@@ -340,6 +351,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var text = new StringBuilder(layout.LayoutId).Append(JsonUtility.ToJson(layout.transform.position));
             foreach (var room in layout.Spaces.OrderBy(r => r.RoomId, System.StringComparer.Ordinal))
                 text.Append(room.RoomId).Append(InputFingerprint(room));
+            foreach (var connection in layout.Connections.OrderBy(c => c?.Id, System.StringComparer.Ordinal))
+                text.Append(JsonUtility.ToJson(connection));
             return Hash(text);
         }
 

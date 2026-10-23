@@ -252,6 +252,55 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return null;
         }
 
+        public static string GetConnectionIssue(ShipLayoutAuthoring layout, LayoutConnectionDefinition connection)
+        {
+            var safety = GetSafetyIssue(layout, allowMissingOutput: true);
+            if (safety != null) return safety;
+            if (layout.Spaces.Any(IsEditing)) return "Finish or cancel the active paint stroke before placing a connection.";
+            try
+            {
+                var issues = LayoutBoundaryResolver.ConnectionIssues(RoomAuthoringValidator.TopologyOf(layout), layout.Connections.Concat(new[] { connection }));
+                return issues.Length == 0 ? null : string.Join("\n", issues.Select(i => i.Reason));
+            }
+            catch (System.Exception exception) when (exception is System.OverflowException || exception is System.InvalidOperationException)
+            { return exception.Message; }
+        }
+
+        public static bool AddConnection(ShipLayoutAuthoring layout, LayoutConnectionDefinition connection, out string issue)
+        {
+            issue = GetConnectionIssue(layout, connection);
+            if (issue != null) return false;
+            return ChangeConnections(layout, layout.Connections.Concat(new[] { connection }).ToArray(), "Add Layout Connection");
+        }
+
+        public static bool RemoveConnection(ShipLayoutAuthoring layout, string identity, out string issue)
+        {
+            issue = GetSafetyIssue(layout, allowMissingOutput: true);
+            if (issue != null) return false;
+            if (layout.Spaces.Any(IsEditing)) { issue = "Finish or cancel the active paint stroke first."; return false; }
+            if (string.IsNullOrWhiteSpace(identity) || layout.Connections.Count(c => c != null && c.Id == identity) != 1)
+            { issue = "Select one uniquely identified authored connection to remove."; return false; }
+            return ChangeConnections(layout, layout.Connections.Where(c => c == null || c.Id != identity).ToArray(), "Remove Layout Connection");
+        }
+
+        private static bool ChangeConnections(ShipLayoutAuthoring layout, LayoutConnectionDefinition[] definitions, string label)
+        {
+            // One authored action includes its derived walls and result state, even if artwork is incomplete.
+            using var edit = new RoomEdit(null, label);
+            var group = Undo.GetCurrentGroup();
+            try
+            {
+                Undo.RegisterCompleteObjectUndo(layout, label);
+                layout.SetConnections(definitions); EditorUtility.SetDirty(layout);
+                RebuildLayoutCore(layout);
+                return true;
+            }
+            catch
+            {
+                edit.CloseAfterUndo(); Undo.RevertAllDownToGroup(group); throw;
+            }
+        }
+
         public static bool Rebuild(ShipLayoutAuthoring layout)
         {
             if (layout == null) return false;

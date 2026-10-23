@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using UnityEngine;
 using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -9,6 +11,108 @@ namespace SOLITUDE.Editor.RoomAuthoring
     [CustomEditor(typeof(ShipLayoutAuthoring))]
     public sealed class ShipLayoutAuthoringEditor : UnityEditor.Editor
     {
+        private Vector2Int connectionStart;
+        private bool connectionHorizontal = true;
+        private int connectionWidth = 1;
+        private LayoutConnectionType connectionType;
+        private bool selectingBoundary;
+        private Action refreshConnection;
+        private Vector2IntField startField;
+        private Toggle horizontalField;
+        private string draftId = Guid.NewGuid().ToString("N");
+
+        private LayoutConnectionDefinition Candidate(ShipLayoutAuthoring layout)
+        {
+            string negative = null, positive = null;
+            if (RoomAuthoringOperations.GetSafetyIssue(layout, true) == null)
+            {
+                var topology = RoomAuthoringValidator.TopologyOf(layout);
+                positive = topology.OwnersAt(connectionStart).Count == 1 ? topology.OwnersAt(connectionStart)[0] : null;
+                if (connectionHorizontal ? connectionStart.y != int.MinValue : connectionStart.x != int.MinValue)
+                    {
+                    var owners = topology.OwnersAt(connectionStart - (connectionHorizontal ? Vector2Int.up : Vector2Int.right));
+                    negative = owners.Count == 1 ? owners[0] : null;
+                }
+            }
+            return new LayoutConnectionDefinition(draftId, negative, positive, connectionStart, connectionHorizontal, connectionWidth, connectionType);
+        }
+
+        private void OnSceneGUI()
+        {
+            if (!selectingBoundary || !RoomAuthoringPreview.CanShow) return;
+            var layout = (ShipLayoutAuthoring)target;
+            var current = Event.current;
+            HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
+            var ray = HandleUtility.GUIPointToWorldRay(current.mousePosition);
+            if (new Plane(Vector3.forward, layout.transform.position).Raycast(ray, out var distance))
+            {
+                var p = ray.GetPoint(distance) - layout.transform.position;
+                if (current.type == EventType.MouseDown && current.button == 0 && !current.alt)
+                {
+                    connectionHorizontal = Mathf.Abs(p.y - Mathf.Round(p.y)) <= Mathf.Abs(p.x - Mathf.Round(p.x));
+                    connectionStart = connectionHorizontal ? new Vector2Int(Mathf.FloorToInt(p.x), Mathf.RoundToInt(p.y)) :
+                        new Vector2Int(Mathf.RoundToInt(p.x), Mathf.FloorToInt(p.y));
+                    startField.SetValueWithoutNotify(connectionStart); horizontalField.SetValueWithoutNotify(connectionHorizontal);
+                    refreshConnection?.Invoke(); current.Use();
+                }
+            }
+            if (current.type == EventType.KeyDown && current.keyCode == KeyCode.Escape)
+            { selectingBoundary = false; current.Use(); }
+            RoomAuthoringPreview.DrawConnectionPreview(layout, Candidate(layout));
+        }
+
+        private VisualElement ConnectionControls(ShipLayoutAuthoring layout)
+        {
+            var controls = new Foldout { text = "Boundary connections", value = true };
+            controls.Add(new HelpBox("Select a shared boundary in Scene view, then choose width and type. Width runs east for horizontal boundaries and north for vertical boundaries. Escape exits selection. Doorway and airlock treatments currently use an unframed structural gap.", HelpBoxMessageType.Info));
+            var picking = new Toggle("Select boundary in Scene");
+            picking.RegisterValueChangedCallback(e => { selectingBoundary = e.newValue; SceneView.RepaintAll(); }); controls.Add(picking);
+            startField = new Vector2IntField("Boundary start") { value = connectionStart };
+            horizontalField = new Toggle("Horizontal (eastward)") { value = connectionHorizontal };
+            var widthField = new IntegerField("Opening width (cells)") { value = connectionWidth };
+            var typeField = new EnumField("Connection type", connectionType);
+            var feedback = new HelpBox("", HelpBoxMessageType.Info);
+            var list = new VisualElement();
+            var add = new Button(() =>
+            {
+                if (RoomAuthoringOperations.AddConnection(layout, Candidate(layout), out var issue)) draftId = Guid.NewGuid().ToString("N");
+                feedback.text = issue ?? "Connection added. Select another boundary to place another connection.";
+                refreshConnection?.Invoke();
+            }) { text = "Place connection" };
+            string previous = null;
+            refreshConnection = () =>
+            {
+                if (layout == null) return;
+                var candidate = Candidate(layout);
+                var issue = RoomAuthoringOperations.GetConnectionIssue(layout, candidate);
+                feedback.text = issue ?? "Valid shared span: " + candidate.NegativeOwner + " → " + candidate.PositiveOwner;
+                feedback.messageType = issue == null ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
+                add.SetEnabled(issue == null);
+                var key = string.Join("|", layout.Connections.Select(c => c == null ? "<missing>" : JsonUtility.ToJson(c)));
+                if (previous == key) return;
+                previous = key; list.Clear();
+                foreach (var definition in layout.Connections.Where(c => c != null))
+                {
+                    var record = definition;
+                    list.Add(new Label(record.Type + " — " + record.Start + " / " + record.Width + " cells — " + record.Id));
+                    list.Add(new Button(() =>
+                    {
+                        RoomAuthoringOperations.RemoveConnection(layout, record.Id, out var removalIssue);
+                        if (removalIssue != null) feedback.text = removalIssue;
+                        refreshConnection?.Invoke();
+                    }) { text = "Remove " + record.Type });
+                }
+            };
+            startField.RegisterValueChangedCallback(e => { connectionStart = e.newValue; refreshConnection(); SceneView.RepaintAll(); });
+            horizontalField.RegisterValueChangedCallback(e => { connectionHorizontal = e.newValue; refreshConnection(); SceneView.RepaintAll(); });
+            widthField.RegisterValueChangedCallback(e => { connectionWidth = e.newValue; refreshConnection(); SceneView.RepaintAll(); });
+            typeField.RegisterValueChangedCallback(e => { connectionType = (LayoutConnectionType)e.newValue; refreshConnection(); });
+            controls.Add(startField); controls.Add(horizontalField); controls.Add(widthField); controls.Add(typeField);
+            controls.Add(feedback); controls.Add(add); controls.Add(list);
+            controls.schedule.Execute(() => refreshConnection?.Invoke()).Every(300);
+            refreshConnection(); return controls;
+        }
+
         public override VisualElement CreateInspectorGUI()
         {
             var root = new VisualElement();
@@ -68,6 +172,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
             root.Add(new Button(() => Selection.activeGameObject = RoomAuthoringCreation.CreateSpace(layout).gameObject) { text = "New Room Space" });
             root.Add(new Button(() => Selection.activeGameObject = RoomAuthoringCreation.CreateSpace(layout, LogicalSpaceType.Corridor).gameObject) { text = "New Corridor Space" });
+            root.Add(ConnectionControls(layout));
             root.Add(feedback);
             root.Add(issues);
             root.Add(focused);

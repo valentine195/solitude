@@ -127,6 +127,22 @@ namespace SOLITUDE.Editor.RoomAuthoring
             finally { Handles.color = color; Handles.zTest = depth; }
         }
 
+        public static void DrawConnectionPreview(ShipLayoutAuthoring layout, LayoutConnectionDefinition connection)
+        {
+            if (!CanShow || layout == null || connection.AddressIssue() != null) return;
+            var issue = RoomAuthoringOperations.GetConnectionIssue(layout, connection);
+            var color = Handles.color; var depth = Handles.zTest;
+            try
+            {
+                Handles.zTest = CompareFunction.Always; Handles.color = issue == null ? Color.cyan : Color.red;
+                var a = layout.transform.position + (Vector3)connection.Start;
+                var b = a + (connection.Horizontal ? Vector3.right : Vector3.up) * connection.Width;
+                Handles.DrawAAPolyLine(5, a, b);
+                Handles.Label((a + b) * .5f, issue ?? connection.Type + " / " + connection.Width + " cells");
+            }
+            finally { Handles.color = color; Handles.zTest = depth; }
+        }
+
         public static string IssueLabel(RoomGenerationIssue issue) => issue.RoomId + " — " + FieldLabel(issue) +
             (issue.HasRegion ? " at " + issue.Start + " → " + issue.End : "");
 
