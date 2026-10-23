@@ -1,3 +1,4 @@
+using System.Linq;
 using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
 using UnityEngine;
@@ -7,6 +8,23 @@ namespace SOLITUDE.Editor.RoomAuthoring
 {
     public static class RoomGeometryWriter
     {
+        public static string GetEmptyCleanupIssue(ShipLayoutAuthoring layout)
+        {
+            foreach (var room in layout.Spaces)
+            {
+                var output = room.GeneratedOutput;
+                if (output == null) continue;
+                if (output.GetComponents<Component>().Any(c => c == null ||
+                    (c.GetType() != typeof(Transform) && c.GetType() != typeof(RoomGeneratedOutput))))
+                    return "Output root for " + room.RoomId + " contains unrecognized components; move authored content outside generated output before cleanup.";
+                // Compare output independently from authored input: erasure legitimately makes the input stale.
+                if (output.transform.childCount != 0 && (string.IsNullOrEmpty(room.GenerationResult?.OutputFingerprint) ||
+                    room.GenerationResult.OutputFingerprint != RoomAuthoringValidator.OutputFingerprint(room)))
+                    return "Output for " + room.RoomId + " changed since its verified generation; inspect and preserve added/modified content before empty cleanup.";
+            }
+            return null;
+        }
+
         public static void Clear(ShipRoomAuthoring room)
         {
             var issue = RoomAuthoringOperations.GetSafetyIssue(room);

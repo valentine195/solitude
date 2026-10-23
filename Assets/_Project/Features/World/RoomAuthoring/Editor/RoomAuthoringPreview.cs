@@ -106,7 +106,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             };
         }
 
-        public static string FieldLabel(RoomGenerationIssue issue) => issue.HasRegion ? issue.Field :
+        public static string FieldLabel(RoomGenerationIssue issue) => issue.Field != null && issue.Field.StartsWith("Connection/", StringComparison.Ordinal) ?
+            issue.Field : issue.HasRegion ? issue.Field :
             issue.Kind == RoomIssueKind.Floor ? "style.floorTile" : issue.Kind == RoomIssueKind.Style ? "style" : "room ownership / coordinates";
 
         public static void DrawCorridorPreview(ShipRoomAuthoring room, Vector2Int[] cells, string issue)
@@ -127,10 +128,10 @@ namespace SOLITUDE.Editor.RoomAuthoring
             finally { Handles.color = color; Handles.zTest = depth; }
         }
 
-        public static void DrawConnectionPreview(ShipLayoutAuthoring layout, LayoutConnectionDefinition connection)
+        public static void DrawConnectionPreview(ShipLayoutAuthoring layout, LayoutConnectionDefinition connection, string replacingIdentity = null)
         {
             if (!CanShow || layout == null || connection.AddressIssue() != null) return;
-            var issue = RoomAuthoringOperations.GetConnectionIssue(layout, connection);
+            var issue = RoomAuthoringOperations.GetConnectionIssue(layout, connection, replacingIdentity);
             var color = Handles.color; var depth = Handles.zTest;
             try
             {
@@ -143,7 +144,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             finally { Handles.color = color; Handles.zTest = depth; }
         }
 
-        public static string IssueLabel(RoomGenerationIssue issue) => issue.RoomId + " — " + FieldLabel(issue) +
+        public static string IssueLabel(RoomGenerationIssue issue) => (issue.Inactive ? "[inactive] " : "") + issue.RoomId + " — " + FieldLabel(issue) +
             (issue.HasRegion ? " at " + issue.Start + " → " + issue.End : "");
 
         private static Vector3 IssueWorld(ShipRoomAuthoring room, Vector2Int cell) =>
@@ -156,11 +157,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
         private static Bounds RegionBounds(Vector3 a, Vector3 b) => new Bounds((a + b) * .5f,
             Vector3.Max(new Vector3(.75f, .75f, .1f), new Vector3(Mathf.Abs(b.x - a.x), Mathf.Abs(b.y - a.y), .1f)));
 
+        private static Vector3 IssuePosition(ShipRoomAuthoring room, ShipLayoutAuthoring layout, RoomGenerationIssue issue, Vector2Int cell) =>
+            layout != null && issue.Field != null && issue.Field.StartsWith("Connection/", StringComparison.Ordinal)
+                ? layout.transform.position + (Vector3)(Vector2)cell : room != null ? IssueWorld(room, cell) : IssueWorld(layout, cell);
+
         public static Bounds IssueBounds(ShipRoomAuthoring room, RoomGenerationIssue issue) =>
-            RegionBounds(IssueWorld(room, issue.Start), IssueWorld(room, issue.End));
+            RegionBounds(IssuePosition(room, room.Layout, issue, issue.Start), IssuePosition(room, room.Layout, issue, issue.End));
 
         public static Bounds IssueBounds(ShipLayoutAuthoring layout, RoomGenerationIssue issue) =>
-            RegionBounds(IssueWorld(layout, issue.Start), IssueWorld(layout, issue.End));
+            RegionBounds(IssuePosition(null, layout, issue, issue.Start), IssuePosition(null, layout, issue, issue.End));
 
         public static bool SelectIssue(ShipRoomAuthoring room, string id, bool frame = true)
         {
@@ -224,8 +229,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 }
                 foreach (var issue in result.Issues.Where(i => i.HasRegion))
                 {
-                    var a = room != null ? IssueWorld(room, issue.Start) : IssueWorld(layout, issue.Start);
-                    var b = room != null ? IssueWorld(room, issue.End) : IssueWorld(layout, issue.End);
+                    var a = IssuePosition(room, layout, issue, issue.Start);
+                    var b = IssuePosition(room, layout, issue, issue.End);
                     var selected = selectedIssueId == issue.Id;
                     var bounds = room != null ? IssueBounds(room, issue) : IssueBounds(layout, issue);
                     Handles.color = selected ? Color.yellow : Color.red;

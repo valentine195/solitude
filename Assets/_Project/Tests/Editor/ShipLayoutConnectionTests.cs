@@ -73,7 +73,9 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var placement = RoomPlacementBuilder.BuildLayout(geometry, layout.Spaces.ToDictionary(r => r.RoomId, r => r.Style));
             Assert.IsEmpty(placement.Issues, string.Join("\n", placement.Issues.Select(i => i.Reason)));
             Assert.AreEqual(8 - width, placement.Sprites.Count(p => p.Role.StartsWith("Partition")));
-            Assert.AreEqual(RoomGenerationStatus.Complete, layout.GenerationResult.Status, layout.GenerationResult.Summary);
+            Assert.AreEqual(type == LayoutConnectionType.OpenPassage ? RoomGenerationStatus.Complete : RoomGenerationStatus.IncompletePreview,
+                layout.GenerationResult.Status, layout.GenerationResult.Summary);
+            Assert.AreEqual(type == LayoutConnectionType.OpenPassage ? 0 : 1, layout.GenerationResult.Issues.Length);
             Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
             CollectionAssert.AreEqual(ids, layout.Spaces.Select(r => r.RoomId));
             for (var i = 0; i < cells.Length; i++) CollectionAssert.AreEqual(cells[i], RoomAuthoringOperations.ReadCells(layout.Spaces[i]));
@@ -181,7 +183,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             CollectionAssert.AreEqual(before, Snapshot()); Assert.AreEqual(group, Undo.GetCurrentGroup());
             layout.SetConnections(new[] { Connection(type: LayoutConnectionType.Doorway, id: connection.Id) });
             Assert.IsFalse(RoomAuthoringValidator.IsCurrent(layout), "Connection identity, type and address participate in currentness.");
-            Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+            Assert.IsFalse(RoomAuthoringOperations.Rebuild(layout)); Assert.AreEqual(RoomGenerationStatus.IncompletePreview, layout.GenerationResult.Status); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
         }
     }
 }

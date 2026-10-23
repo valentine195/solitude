@@ -16,6 +16,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
         private int connectionWidth = 1;
         private LayoutConnectionType connectionType;
         private bool selectingBoundary;
+        private string editingConnectionId;
+        private Toggle boundarySelection;
         private Action refreshConnection;
         private Vector2IntField startField;
         private Toggle horizontalField;
@@ -29,12 +31,12 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 var topology = RoomAuthoringValidator.TopologyOf(layout);
                 positive = topology.OwnersAt(connectionStart).Count == 1 ? topology.OwnersAt(connectionStart)[0] : null;
                 if (connectionHorizontal ? connectionStart.y != int.MinValue : connectionStart.x != int.MinValue)
-                    {
+                {
                     var owners = topology.OwnersAt(connectionStart - (connectionHorizontal ? Vector2Int.up : Vector2Int.right));
                     negative = owners.Count == 1 ? owners[0] : null;
                 }
             }
-            return new LayoutConnectionDefinition(draftId, negative, positive, connectionStart, connectionHorizontal, connectionWidth, connectionType);
+            return new LayoutConnectionDefinition(editingConnectionId ?? draftId, negative, positive, connectionStart, connectionHorizontal, connectionWidth, connectionType);
         }
 
         private void OnSceneGUI()
@@ -57,15 +59,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 }
             }
             if (current.type == EventType.KeyDown && current.keyCode == KeyCode.Escape)
-            { selectingBoundary = false; current.Use(); }
-            RoomAuthoringPreview.DrawConnectionPreview(layout, Candidate(layout));
+            { selectingBoundary = false; boundarySelection?.SetValueWithoutNotify(false); SceneView.RepaintAll(); current.Use(); }
+            RoomAuthoringPreview.DrawConnectionPreview(layout, Candidate(layout), editingConnectionId);
         }
 
         private VisualElement ConnectionControls(ShipLayoutAuthoring layout)
         {
             var controls = new Foldout { text = "Boundary connections", value = true };
             controls.Add(new HelpBox("Select a shared boundary in Scene view, then choose width and type. Width runs east for horizontal boundaries and north for vertical boundaries. Escape exits selection. Doorway and airlock treatments currently use an unframed structural gap.", HelpBoxMessageType.Info));
-            var picking = new Toggle("Select boundary in Scene");
+            var picking = boundarySelection = new Toggle("Select boundary in Scene");
             picking.RegisterValueChangedCallback(e => { selectingBoundary = e.newValue; SceneView.RepaintAll(); }); controls.Add(picking);
             startField = new Vector2IntField("Boundary start") { value = connectionStart };
             horizontalField = new Toggle("Horizontal (eastward)") { value = connectionHorizontal };
@@ -75,7 +77,10 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var list = new VisualElement();
             var add = new Button(() =>
             {
-                if (RoomAuthoringOperations.AddConnection(layout, Candidate(layout), out var issue)) draftId = Guid.NewGuid().ToString("N");
+                string issue;
+                var changed = editingConnectionId == null ? RoomAuthoringOperations.AddConnection(layout, Candidate(layout), out issue) :
+                    RoomAuthoringOperations.UpdateConnection(layout, editingConnectionId, Candidate(layout), out issue);
+                if (changed) { editingConnectionId = null; draftId = Guid.NewGuid().ToString("N"); }
                 feedback.text = issue ?? "Connection added. Select another boundary to place another connection.";
                 refreshConnection?.Invoke();
             }) { text = "Place connection" };
@@ -84,7 +89,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             {
                 if (layout == null) return;
                 var candidate = Candidate(layout);
-                var issue = RoomAuthoringOperations.GetConnectionIssue(layout, candidate);
+                var issue = RoomAuthoringOperations.GetConnectionIssue(layout, candidate, editingConnectionId);
+                add.text = editingConnectionId == null ? "Place connection" : "Apply connection correction";
                 feedback.text = issue ?? "Valid shared span: " + candidate.NegativeOwner + " → " + candidate.PositiveOwner;
                 feedback.messageType = issue == null ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
                 add.SetEnabled(issue == null);
@@ -97,8 +103,18 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     list.Add(new Label(record.Type + " — " + record.Start + " / " + record.Width + " cells — " + record.Id));
                     list.Add(new Button(() =>
                     {
+                        editingConnectionId = record.Id;
+                        connectionStart = Vector2Int.RoundToInt(record.Start); connectionHorizontal = record.Horizontal;
+                        connectionWidth = record.Width; connectionType = record.Type;
+                        startField.SetValueWithoutNotify(connectionStart); horizontalField.SetValueWithoutNotify(connectionHorizontal);
+                        widthField.SetValueWithoutNotify(connectionWidth); typeField.SetValueWithoutNotify(connectionType);
+                        refreshConnection?.Invoke(); SceneView.RepaintAll();
+                    }) { text = "Correct " + record.Type });
+                    list.Add(new Button(() =>
+                    {
                         RoomAuthoringOperations.RemoveConnection(layout, record.Id, out var removalIssue);
                         if (removalIssue != null) feedback.text = removalIssue;
+                        else if (editingConnectionId == record.Id) editingConnectionId = null;
                         refreshConnection?.Invoke();
                     }) { text = "Remove " + record.Type });
                 }
@@ -108,7 +124,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
             widthField.RegisterValueChangedCallback(e => { connectionWidth = e.newValue; refreshConnection(); SceneView.RepaintAll(); });
             typeField.RegisterValueChangedCallback(e => { connectionType = (LayoutConnectionType)e.newValue; refreshConnection(); });
             controls.Add(startField); controls.Add(horizontalField); controls.Add(widthField); controls.Add(typeField);
-            controls.Add(feedback); controls.Add(add); controls.Add(list);
+            controls.Add(feedback); controls.Add(add);
+            controls.Add(new Button(() => { editingConnectionId = null; refreshConnection(); SceneView.RepaintAll(); }) { text = "Cancel connection correction" });
+            controls.Add(list);
             controls.schedule.Execute(() => refreshConnection?.Invoke()).Every(300);
             refreshConnection(); return controls;
         }

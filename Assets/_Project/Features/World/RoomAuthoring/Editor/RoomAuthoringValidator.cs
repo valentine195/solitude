@@ -28,7 +28,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public static RoomGenerationResult Assess(ShipRoomAuthoring room, out RoomPlacement placement)
         {
-            if (room != null && room.Layout != null && room.Layout.Spaces.Count > 1 &&
+            if (room != null && room.Layout != null &&
                 RoomAuthoringOperations.GetSafetyIssue(room, allowMissingOutput: true) == null)
                 return Assess(room.Layout, out placement);
             return AssessSpace(room, out placement);
@@ -121,6 +121,31 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 }).ToArray();
                 return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = conflicts };
             }
+            // Safe emptiness takes precedence over connectivity, but never over output-disposal safety.
+            if (topology.Cells.Count == 0)
+            {
+                var cleanupIssue = RoomGeometryWriter.GetEmptyCleanupIssue(layout);
+                if (cleanupIssue != null)
+                {
+                    var issue = new RoomGenerationIssue(RoomIssueKind.Safety, "empty cleanup", cleanupIssue);
+                    issue.LocateInRoom(layout.LayoutId);
+                    return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = new[] { issue } };
+                }
+                var inactive = LayoutBoundaryResolver.ConnectionIssues(topology, layout.Connections);
+                foreach (var issue in inactive)
+                {
+                    issue.Kind = RoomIssueKind.Connection; issue.Inactive = true;
+                    issue.Reason = "Inactive connection retained: layout has no occupied cells. " + issue.Reason;
+                    issue.LocateInRoom(string.IsNullOrEmpty(issue.RoomId) ? layout.LayoutId : issue.RoomId);
+                }
+                foreach (var room in layout.Spaces)
+                    placements.Add(room, RoomPlacementBuilder.BuildFloor(RoomBoundaryExtractor.Extract(System.Array.Empty<Vector2Int>()), room.Style));
+                return new RoomGenerationResult
+                {
+                    Status = inactive.Length == 0 ? RoomGenerationStatus.Empty : RoomGenerationStatus.IncompletePreview,
+                    Issues = inactive, InputFingerprint = LayoutInputFingerprint(layout)
+                };
+            }
             // Connections participate in the same assessment/publication path as shared boundaries.
             RoomGenerationIssue[] connectionIssues;
             try { connectionIssues = LayoutBoundaryResolver.ConnectionIssues(topology, layout.Connections); }
@@ -131,7 +156,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = new[] { issue } };
             }
             if (connectionIssues.Length != 0)
+            {
+                foreach (var issue in connectionIssues)
+                {
+                    issue.Kind = RoomIssueKind.Connection;
+                    issue.Reason += " Retained architecture is stale; correct or explicitly remove this connection, then rebuild.";
+                    issue.LocateInRoom(string.IsNullOrEmpty(issue.RoomId) ? layout.LayoutId : issue.RoomId);
+                }
                 return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = connectionIssues };
+            }
             if (layout.Spaces.Count == 1)
             {
                 var single = AssessSpace(layout.Spaces[0], out var placement);
@@ -165,6 +198,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
             {
                 var styled = RoomPlacementBuilder.BuildLayout(boundaries, layout.Spaces.ToDictionary(r => r.RoomId, r => r.Style, System.StringComparer.Ordinal));
                 issues.AddRange(styled.Issues);
+                foreach (var connection in layout.Connections.Where(c => c.Type != LayoutConnectionType.OpenPassage))
+                {
+                    var start = new Vector2Int((int)connection.Start.x, (int)connection.Start.y);
+                    var end = start + (connection.Horizontal ? Vector2Int.right : Vector2Int.up) * connection.Width;
+                    var frame = new RoomGenerationIssue(RoomIssueKind.Asset, "Connection/" + connection.Id + "/Frame",
+                        connection.Type + " frame artwork is not configured. The exact opening is retained as an unframed gap.", true, start, end);
+                    frame.LocateInRoom(connection.NegativeOwner + " / " + connection.PositiveOwner); issues.Add(frame);
+                }
                 var owners = layout.Spaces.ToDictionary(r => r.RoomId, System.StringComparer.Ordinal);
                 foreach (var item in styled.Sprites)
                 {

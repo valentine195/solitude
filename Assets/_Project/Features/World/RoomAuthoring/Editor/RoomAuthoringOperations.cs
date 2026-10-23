@@ -252,14 +252,21 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return null;
         }
 
-        public static string GetConnectionIssue(ShipLayoutAuthoring layout, LayoutConnectionDefinition connection)
+        public static string GetConnectionIssue(ShipLayoutAuthoring layout, LayoutConnectionDefinition connection, string replacingIdentity = null)
         {
             var safety = GetSafetyIssue(layout, allowMissingOutput: true);
             if (safety != null) return safety;
             if (layout.Spaces.Any(IsEditing)) return "Finish or cancel the active paint stroke before placing a connection.";
             try
             {
-                var issues = LayoutBoundaryResolver.ConnectionIssues(RoomAuthoringValidator.TopologyOf(layout), layout.Connections.Concat(new[] { connection }));
+                if (replacingIdentity != null && (connection == null || connection.Id != replacingIdentity ||
+                    layout.Connections.Count(c => c != null && c.Id == replacingIdentity) != 1))
+                    return "Correction must preserve one existing connection identity.";
+                var proposed = layout.Connections.Where(c => replacingIdentity == null || c == null || c.Id != replacingIdentity).Concat(new[] { connection });
+                var issues = LayoutBoundaryResolver.ConnectionIssues(RoomAuthoringValidator.TopologyOf(layout), proposed);
+                // A correction can improve one external invalid record while unrelated records remain stale.
+                // Any conflict involving the corrected span still rejects this operation atomically.
+                if (replacingIdentity != null) issues = issues.Where(i => i.Field == "Connection/" + replacingIdentity).ToArray();
                 return issues.Length == 0 ? null : string.Join("\n", issues.Select(i => i.Reason));
             }
             catch (System.Exception exception) when (exception is System.OverflowException || exception is System.InvalidOperationException)
@@ -271,6 +278,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
             issue = GetConnectionIssue(layout, connection);
             if (issue != null) return false;
             return ChangeConnections(layout, layout.Connections.Concat(new[] { connection }).ToArray(), "Add Layout Connection");
+        }
+
+        public static bool UpdateConnection(ShipLayoutAuthoring layout, string identity, LayoutConnectionDefinition replacement, out string issue)
+        {
+            if (string.IsNullOrWhiteSpace(identity)) { issue = "Select an existing connection to correct."; return false; }
+            issue = GetConnectionIssue(layout, replacement, identity);
+            if (issue != null) return false;
+            return ChangeConnections(layout, layout.Connections.Select(c => c != null && c.Id == identity ? replacement : c).ToArray(), "Correct Layout Connection");
         }
 
         public static bool RemoveConnection(ShipLayoutAuthoring layout, string identity, out string issue)
