@@ -10,7 +10,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
     [CustomEditor(typeof(ShipRoomBrush))]
     public sealed class ShipRoomBrushEditor : GridBrushEditorBase
     {
-        public override string tooltip => "Paint room cells. Erase removes cells. Walls and floors follow the room style.";
+        public override string tooltip => "Paint room cells or a continuous corridor route. Erase removes cells. Walls and floors follow the space style.";
         public override bool canChangeZPosition { get => false; set { } }
         public override GameObject[] validTargets => Resources.FindObjectsOfTypeAll<ShipRoomAuthoring>()
             .Where(room => room.gameObject.scene.IsValid() && room.gameObject.scene.isLoaded && room.gameObject.activeInHierarchy &&
@@ -24,6 +24,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var mode = new EnumField("Box action", ((ShipRoomBrush)target).BoxMode);
             mode.RegisterValueChangedCallback(evt => SetBoxMode((ShipRoomBrush.BoxEditMode)evt.newValue));
             root.Add(mode);
+            var width = new IntegerField("Corridor width (cells)") { value = ((ShipRoomBrush)target).CorridorWidth };
+            width.RegisterValueChangedCallback(evt =>
+            {
+                var value = Mathf.Max(1, evt.newValue); ((ShipRoomBrush)target).CorridorWidth = value;
+                width.SetValueWithoutNotify(value); SceneView.RepaintAll();
+            });
+            root.Add(width);
+            root.Add(new Label("Even widths place the extra cell east/north. Esc cancels a stroke."));
             return root;
         }
 
@@ -36,6 +44,10 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var mode = (ShipRoomBrush.BoxEditMode)GUILayout.Toolbar((int)brush.BoxMode, new[] { "Fill", "Erase" });
             EditorGUILayout.EndHorizontal();
             if (mode != brush.BoxMode) SetBoxMode(mode);
+            var width = Mathf.Max(1, EditorGUILayout.IntField("Corridor width (cells)", brush.CorridorWidth));
+            if (width != brush.CorridorWidth) { brush.CorridorWidth = width; SceneView.RepaintAll(); }
+            EditorGUILayout.LabelField("Even widths extend east/north; Esc cancels.", EditorStyles.wordWrappedMiniLabel);
+            if (!string.IsNullOrEmpty(brush.StrokeIssue)) EditorGUILayout.HelpBox(brush.StrokeIssue, MessageType.Error);
             if (GUILayout.Button("Edit Selected Room"))
             {
                 var room = Selection.activeGameObject == null ? null : Selection.activeGameObject.GetComponentInParent<ShipRoomAuthoring>(true);
@@ -67,6 +79,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
             if (!executing) ((ShipRoomBrush)target).EndGesture();
             RoomAuthoringPaletteSetup.ActivateTarget(brushTarget);
             RoomAuthoringPreview.SetEditedRoom(brushTarget == null ? null : brushTarget.GetComponentInParent<ShipRoomAuthoring>(true));
+            if (ShipRoomBrush.TryGetRoom(gridLayout, brushTarget, out var room) && room.SpaceType == LogicalSpaceType.Corridor &&
+                (tool == GridBrushBase.Tool.Paint || tool == GridBrushBase.Tool.Erase))
+            {
+                var brush = (ShipRoomBrush)target;
+                var cells = brush.PreviewCorridor(room, position.min, tool, out var issue);
+                RoomAuthoringPreview.DrawCorridorPreview(room, cells, issue);
+                return;
+            }
             base.OnPaintSceneGUI(gridLayout, brushTarget, position, tool, executing);
         }
 

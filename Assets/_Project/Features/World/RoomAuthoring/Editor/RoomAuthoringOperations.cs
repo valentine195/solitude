@@ -205,6 +205,41 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return edit != null || ownedEdit.Commit();
         }
 
+        public static string GetCellPaintIssue(ShipRoomAuthoring room, IEnumerable<Vector2Int> cells, TileBase marker)
+        {
+            var safety = GetSafetyIssue(room, allowMissingOutput: true);
+            if (safety != null || marker == null) return safety;
+            var candidates = cells.Distinct().OrderBy(c => c.y).ThenBy(c => c.x).ToArray();
+            foreach (var other in Resources.FindObjectsOfTypeAll<ShipRoomAuthoring>()
+                .Where(r => r != room && r.gameObject.scene == room.gameObject.scene && r.Occupancy != null)
+                .OrderBy(r => r.RoomId, System.StringComparer.Ordinal))
+            {
+                safety = GetSafetyIssue(other, allowMissingOutput: true);
+                if (safety != null) return "Cannot check space " + other.RoomId + ": " + safety;
+                var occupied = new HashSet<Vector3>(ReadCells(other).Select(c => other.Occupancy.CellToWorld(new Vector3Int(c.x, c.y, 0))));
+                foreach (var cell in candidates)
+                    if (occupied.Contains(room.Occupancy.CellToWorld(new Vector3Int(cell.x, cell.y, 0))))
+                        return "Cell " + cell + " in space " + room.RoomId + " overlaps space " + other.RoomId + ". Stroke rejected; neither space was changed.";
+            }
+            return null;
+        }
+
+        public static bool PaintCells(ShipRoomAuthoring room, IEnumerable<Vector2Int> cells, TileBase marker,
+            out string issue, RoomEdit edit = null)
+        {
+            var positions = cells.Distinct().OrderBy(c => c.y).ThenBy(c => c.x).ToArray();
+            issue = GetCellPaintIssue(room, positions, marker);
+            if (issue != null) return false;
+            CheckEdit(room, edit);
+            using var ownedEdit = edit == null ? BeginEdit(room, "Paint Corridor Cells") : null;
+            var changed = positions.Where(c => room.Occupancy.GetTile(new Vector3Int(c.x, c.y, 0)) != marker).ToArray();
+            if (changed.Length == 0) return true;
+            (edit ?? ownedEdit).PrepareMutation();
+            room.Occupancy.SetTiles(changed.Select(c => new Vector3Int(c.x, c.y, 0)).ToArray(),
+                Enumerable.Repeat(marker, changed.Length).ToArray());
+            return edit != null || ownedEdit.Commit();
+        }
+
         public static string GetSafetyIssue(ShipLayoutAuthoring layout, bool allowMissingOutput = false)
         {
             var issue = RoomAuthoringCreation.GetLayoutOwnershipIssue(layout, allowMissingOutput);

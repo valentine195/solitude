@@ -63,6 +63,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 }
                 spaceControls.Add(new Button(() => Selection.activeGameObject = room.gameObject) { text = "Select Space" });
                 spaceControls.Add(new Button(() => RoomAuthoringPaletteSetup.EditRoom(room)) { text = "Edit Space in Tile Palette" });
+                if (room.SpaceType == LogicalSpaceType.Corridor)
+                    spaceControls.Add(new HelpBox("Choose Paint or Erase in Tile Palette and set Corridor width. Drag a route through bends or existing branches. The preview shows the full stroke; release to apply it. Even widths extend east/north.", HelpBoxMessageType.Info));
             }
             root.Add(new Button(() => Selection.activeGameObject = RoomAuthoringCreation.CreateSpace(layout).gameObject) { text = "New Room Space" });
             root.Add(new Button(() => Selection.activeGameObject = RoomAuthoringCreation.CreateSpace(layout, LogicalSpaceType.Corridor).gameObject) { text = "New Corridor Space" });

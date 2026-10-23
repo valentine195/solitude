@@ -80,14 +80,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 RoomAuthoringValidator.AssessSpaces(room.Layout, out var placements);
                 if (placements.TryGetValue(room, out var own) && own.Floor == null) missing = own.Geometry.Cells;
             }
+            var editing = room.Layout == null ? RoomAuthoringOperations.IsEditing(room) : room.Layout.Spaces.Any(RoomAuthoringOperations.IsEditing);
             return new RoomPreviewFeedback
             {
                 Assessment = result,
-                IsEditing = RoomAuthoringOperations.IsEditing(room),
+                IsEditing = editing,
                 PendingAddedCells = RoomAuthoringOperations.PendingCells(room, false),
                 PendingRemovedCells = RoomAuthoringOperations.PendingCells(room, true),
                 MissingFloorCells = missing,
-                IsCurrent = RoomAuthoringValidator.IsCurrent(room)
+                IsCurrent = !editing && RoomAuthoringValidator.IsCurrent(room)
             };
         }
 
@@ -98,7 +99,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return new RoomPreviewFeedback
             {
                 Assessment = result,
-                IsCurrent = RoomAuthoringValidator.IsCurrent(layout),
+                IsEditing = layout.Spaces.Any(RoomAuthoringOperations.IsEditing),
+                IsCurrent = !layout.Spaces.Any(RoomAuthoringOperations.IsEditing) && RoomAuthoringValidator.IsCurrent(layout),
                 MissingFloorCells = placements.Where(p => p.Value.Floor == null)
                     .SelectMany(p => p.Value.Geometry.Cells.Select(c => c + RoomAuthoringValidator.LayoutOffset(layout, p.Key))).ToArray()
             };
@@ -106,6 +108,24 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public static string FieldLabel(RoomGenerationIssue issue) => issue.HasRegion ? issue.Field :
             issue.Kind == RoomIssueKind.Floor ? "style.floorTile" : issue.Kind == RoomIssueKind.Style ? "style" : "room ownership / coordinates";
+
+        public static void DrawCorridorPreview(ShipRoomAuthoring room, Vector2Int[] cells, string issue)
+        {
+            var color = Handles.color; var depth = Handles.zTest;
+            try
+            {
+                Handles.zTest = CompareFunction.Always;
+                foreach (var cell in cells)
+                {
+                    var origin = room.Occupancy.CellToWorld(new Vector3Int(cell.x, cell.y, 0));
+                    Handles.DrawSolidRectangleWithOutline(new[] { origin, origin + Vector3.right, origin + Vector3.right + Vector3.up, origin + Vector3.up },
+                        issue == null ? new Color(.1f, .8f, 1f, .2f) : new Color(1f, .2f, .1f, .2f), issue == null ? Color.cyan : Color.red);
+                }
+                if (issue != null && cells.Length != 0)
+                    Handles.Label(room.Occupancy.CellToWorld(new Vector3Int(cells[0].x, cells[0].y, 0)), issue);
+            }
+            finally { Handles.color = color; Handles.zTest = depth; }
+        }
 
         public static string IssueLabel(RoomGenerationIssue issue) => issue.RoomId + " — " + FieldLabel(issue) +
             (issue.HasRegion ? " at " + issue.Start + " → " + issue.End : "");
