@@ -62,10 +62,10 @@ namespace SOLITUDE.Tests.RoomAuthoring
             layout.transform.position = new Vector3(-10, -8, 0);
             var a = layout.Spaces[0]; var b = layout.Spaces[1];
             RoomAuthoringOperations.Rebuild(layout);
-            var role = horizontal ? "PartitionSouth" : "PartitionEast";
+            var role = horizontal ? "PartitionNorth" : "PartitionEast";
             var partitions = layout.GetComponentsInChildren<SpriteRenderer>().Where(r => r.name == role).ToArray();
             Assert.AreEqual(horizontal ? 2 : 4, partitions.Length);
-            var owner = string.CompareOrdinal(a.RoomId, b.RoomId) <= 0 ? a : b;
+            var owner = horizontal ? a : string.CompareOrdinal(a.RoomId, b.RoomId) <= 0 ? a : b;
             Assert.IsTrue(partitions.All(r => r.transform.parent == owner.GeneratedOutput.transform));
             var expected = horizontal ? new[] { new Vector3(-10, -4, 0), new Vector3(-9, -4, 0) } :
                 Enumerable.Range(0, 4).Select(y => new Vector3(-8, -8 + y, 0)).ToArray();

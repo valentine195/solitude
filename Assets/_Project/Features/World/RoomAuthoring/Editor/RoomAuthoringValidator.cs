@@ -172,6 +172,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 return single;
             }
             var issues = new List<RoomGenerationIssue>();
+            var styleResolutions = new List<RoomStyleResolution>();
             var refused = false;
             foreach (var room in layout.Spaces.OrderBy(r => r.RoomId, System.StringComparer.Ordinal))
             {
@@ -196,8 +197,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
             if (!refused)
             {
-                var styled = RoomPlacementBuilder.BuildLayout(boundaries, layout.Spaces.ToDictionary(r => r.RoomId, r => r.Style, System.StringComparer.Ordinal));
+                var styled = RoomPlacementBuilder.BuildLayout(boundaries, layout.Spaces.ToDictionary(r => r.RoomId, r => r.Style, System.StringComparer.Ordinal), layout.DefaultStyle);
                 issues.AddRange(styled.Issues);
+                styleResolutions.AddRange(styled.StyleResolutions);
                 foreach (var connection in layout.Connections.Where(c => c.Type != LayoutConnectionType.OpenPassage))
                 {
                     var start = new Vector2Int((int)connection.Start.x, (int)connection.Start.y);
@@ -220,6 +222,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 Status = refused ? RoomGenerationStatus.Refused : topology.Cells.Count == 0 ? RoomGenerationStatus.Empty :
                     issues.Count == 0 ? RoomGenerationStatus.Complete : RoomGenerationStatus.IncompletePreview,
                 Issues = issues.OrderBy(i => i.Id, System.StringComparer.Ordinal).ToArray(),
+                StyleResolutions = styleResolutions.OrderBy(r => r.Start.y).ThenBy(r => r.Start.x)
+                    .ThenBy(r => r.Role, System.StringComparer.Ordinal).ThenBy(r => r.OwnerId, System.StringComparer.Ordinal).ToArray(),
                 InputFingerprint = LayoutInputFingerprint(layout)
             };
         }
@@ -300,20 +304,22 @@ namespace SOLITUDE.Editor.RoomAuthoring
             if (room.Layout != null) text.Append(room.Layout.LayoutId);
             foreach (var cell in RoomAuthoringOperations.ReadCells(room).OrderBy(c => c.y).ThenBy(c => c.x))
                 GridCoordinateFingerprint(text, new Vector3Int(cell.x, cell.y, 0));
-            var style = room.Style;
-            text.Append(Reference(style));
-            if (style != null)
-            {
-                text.Append(EditorJsonUtility.ToJson(style));
-                if (style.FloorTile is Tile tile) { text.Append(EditorJsonUtility.ToJson(tile)); SpriteFingerprint(text, tile.sprite); }
-                var modules = (style.NorthWalls ?? System.Array.Empty<RoomStyleDefinition.Module>()).Concat(new[]
-                    { style.WestCap, style.EastCap, style.SouthCap, style.Northwest, style.Northeast, style.Southwest, style.Southeast,
-                        style.ConcaveNorthwest, style.ConcaveNortheast, style.ConcaveSouthwest, style.ConcaveSoutheast })
-                    .Concat((style.JunctionModules ?? System.Array.Empty<RoomStyleDefinition.JunctionModule>())
-                        .Where(binding => binding != null).Select(binding => binding.Artwork));
-                foreach (var module in modules) if (module != null) SpriteFingerprint(text, module.Sprite);
-            }
+            StyleFingerprint(text, room.Style);
             return Hash(text);
+        }
+
+        private static void StyleFingerprint(StringBuilder text, RoomStyleDefinition style)
+        {
+            text.Append(Reference(style));
+            if (style == null) return;
+            text.Append(EditorJsonUtility.ToJson(style));
+            if (style.FloorTile is Tile tile) { text.Append(EditorJsonUtility.ToJson(tile)); SpriteFingerprint(text, tile.sprite); }
+            var modules = (style.NorthWalls ?? System.Array.Empty<RoomStyleDefinition.Module>()).Concat(new[]
+                { style.WestCap, style.EastCap, style.SouthCap, style.Northwest, style.Northeast, style.Southwest, style.Southeast,
+                    style.ConcaveNorthwest, style.ConcaveNortheast, style.ConcaveSouthwest, style.ConcaveSoutheast })
+                .Concat((style.JunctionModules ?? System.Array.Empty<RoomStyleDefinition.JunctionModule>())
+                    .Where(binding => binding != null).Select(binding => binding.Artwork));
+            foreach (var module in modules) if (module != null) SpriteFingerprint(text, module.Sprite);
         }
 
         public static string OutputFingerprint(ShipRoomAuthoring room)
@@ -390,6 +396,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
         private static string LayoutInputFingerprint(ShipLayoutAuthoring layout)
         {
             var text = new StringBuilder(layout.LayoutId).Append(JsonUtility.ToJson(layout.transform.position));
+            StyleFingerprint(text, layout.DefaultStyle);
             foreach (var room in layout.Spaces.OrderBy(r => r.RoomId, System.StringComparer.Ordinal))
                 text.Append(room.RoomId).Append(InputFingerprint(room));
             foreach (var connection in layout.Connections.OrderBy(c => c?.Id, System.StringComparer.Ordinal))

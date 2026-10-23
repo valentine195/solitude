@@ -31,11 +31,24 @@ namespace SOLITUDE.World.RoomAuthoring
         }
     }
 
+    // Informational decisions are separate from failures: a qualified fallback can be Complete.
+    [Serializable]
+    public sealed class RoomStyleResolution
+    {
+        public string OwnerId;
+        public string Role;
+        public Vector2Int Start;
+        public Vector2Int End;
+        public string StyleId;
+        public bool UsedFallback;
+    }
+
     [Serializable]
     public sealed class RoomGenerationResult
     {
         public RoomGenerationStatus Status;
         public RoomGenerationIssue[] Issues = Array.Empty<RoomGenerationIssue>();
+        public RoomStyleResolution[] StyleResolutions = Array.Empty<RoomStyleResolution>();
         public string InputFingerprint;
         public string OutputFingerprint;
         public bool IsSuccessful => Status == RoomGenerationStatus.Complete || Status == RoomGenerationStatus.Empty;

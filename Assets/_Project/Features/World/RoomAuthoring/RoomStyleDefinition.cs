@@ -55,6 +55,12 @@ namespace SOLITUDE.World.RoomAuthoring
 
         [SerializeField] private string styleId = Guid.NewGuid().ToString("N");
         [SerializeField] private string displayName = "Room Style";
+        [Tooltip("Seed for automatic structural variants. Selection uses the layout-relative address, role and stable style identity.")]
+        [SerializeField] private int structuralSeed;
+        [Tooltip("Explicitly qualify this style's existing corner/junction treatments to meet these other styles. Same-style joints need no entry. The selected treatment must still pass footprint, aperture and reserved-coverage checks. Layout fallback roles also require this compatibility declaration.")]
+        [SerializeField] private RoomStyleDefinition[] compatibleTransitions = Array.Empty<RoomStyleDefinition>();
+        public int StructuralSeed { get => structuralSeed; set => structuralSeed = value; }
+        public RoomStyleDefinition[] CompatibleTransitions { get => compatibleTransitions; set => compatibleTransitions = value; }
         [SerializeField] private TileBase floorTile;
         [SerializeField] private Vector2Int floorCanvasPixels = new Vector2Int(32, 32);
         [Min(1), SerializeField] private int floorPixelsPerUnit = 32;

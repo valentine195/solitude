@@ -137,7 +137,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsTrue(RoomAuthoringOperations.AddConnection(layout, connection, out _));
             var geometry = LayoutBoundaryResolver.Resolve(RoomAuthoringValidator.TopologyOf(layout), layout.Connections);
             var style = negative.Style;
-            var module = horizontal ? style.SouthCap : style.EastCap;
+            var module = horizontal ? style.NorthWalls[0] : style.EastCap;
             module.OffsetPixels += horizontal ? Vector2.right * 16 : Vector2.up * 16;
             var placement = RoomPlacementBuilder.BuildLayout(geometry, layout.Spaces.ToDictionary(r => r.RoomId, r => r.Style));
             Assert.That(placement.Issues.Any(i => i.Reason.Contains("intrudes into connection " + connection.Id)));

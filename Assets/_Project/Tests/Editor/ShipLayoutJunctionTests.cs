@@ -132,7 +132,11 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var center = layout.GetComponentsInChildren<SpriteRenderer>().Where(r => r.name == role.ToString() &&
                 r.transform.position - (Vector3)((binding.Artwork.Sprite.pivot - binding.Artwork.AnchorPixels + binding.Artwork.OffsetPixels) / 32f) == new Vector3(1, 1, 0)).ToArray();
             Assert.AreEqual(1, center.Length);
-            Assert.AreEqual(junction.Owners[0], center[0].GetComponentInParent<RoomGeneratedOutput>().Owner.RoomId);
+            var visibleOwners = geometry.Edges.Where(e => (e.Kind == LayoutEdgeKind.Exterior || e.Kind == LayoutEdgeKind.Partition) &&
+                (e.Address.Start == Vector2Int.one || e.Address.End == Vector2Int.one))
+                .Select(e => e.Kind == LayoutEdgeKind.Partition && e.Address.Horizontal ? e.NegativeOwner : e.VisualOwner)
+                .OrderBy(id => id, StringComparer.Ordinal);
+            Assert.AreEqual(visibleOwners.First(), center[0].GetComponentInParent<RoomGeneratedOutput>().Owner.RoomId);
             var before = Snapshot(layout);
             var data = new SerializedObject(layout); data.FindProperty("spaces").MoveArrayElement(0, layout.Spaces.Count - 1); data.ApplyModifiedPropertiesWithoutUndo();
             Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout.Spaces[0]));
@@ -229,7 +233,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             binding.Artwork = Art(f, 32, new RectInt(0, 0, 32, 1), new Vector2(0, 0.5f));
             binding.HorizontalReservationsPixels = new Vector2Int(0, 32);
             Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout), layout.GenerationResult?.Summary);
-            Assert.IsFalse(layout.GetComponentsInChildren<SpriteRenderer>().Any(r => r.name == "PartitionSouth" &&
+            Assert.IsFalse(layout.GetComponentsInChildren<SpriteRenderer>().Any(r => r.name == "PartitionNorth" &&
                 r.transform.position == new Vector3(1, 1 - 0.5f / 32, 0)));
             Assert.AreEqual(1, layout.GetComponentsInChildren<SpriteRenderer>().Count(r => r.name == "TeeEast"));
             AssertClearFloorCores(layout, f.Style);
