@@ -12,14 +12,17 @@ namespace SOLITUDE.World.RoomAuthoring
         public readonly Sprite Sprite;
         public readonly Vector3 Position;
         public readonly string OwnerId;
-        public RoomSpritePlacement(string role, Sprite sprite, Vector3 position, string ownerId = null)
-        { Role = role; Sprite = sprite; Position = position; OwnerId = ownerId; }
+        public readonly RoomStyleDefinition.RenderingConfiguration Rendering;
+        public RoomSpritePlacement(string role, Sprite sprite, Vector3 position, string ownerId = null, RoomStyleDefinition.RenderingConfiguration rendering = null)
+        { Role = role; Sprite = sprite; Position = position; OwnerId = ownerId; Rendering = rendering; }
     }
 
     public sealed class RoomPlacement
     {
         public RoomGeometry Geometry;
         public Tile Floor;
+        public Vector3 FloorAnchor;
+        public RoomStyleDefinition.RenderingConfiguration Rendering;
         public readonly List<RoomGenerationIssue> Issues = new List<RoomGenerationIssue>();
         public readonly List<RoomSpritePlacement> Sprites = new List<RoomSpritePlacement>();
     }
@@ -34,7 +37,7 @@ namespace SOLITUDE.World.RoomAuthoring
             var unresolvedJoins = new HashSet<RoomJunction>();
             foreach (var join in geometry.Junctions)
             {
-                var joinIssue = CheckModule(JoinModule(style, join), join.Role + " corner", false);
+                var joinIssue = CheckModule(JoinModule(style, join), join.Role + " corner", false, RoomStyleDefinition.ModuleOrientation.Corner) ?? CheckRendering(style.Rendering);
                 if (joinIssue == null) joinIssue = CheckFootprint(JoinModule(style, join), join.Position, geometry.Cells, style.FloorEdgeInsetPixels);
                 if (!style.SupportsDiagonalContact && geometry.DiagonalContacts.Contains(join.Position))
                     joinIssue = "Configured artwork cannot resolve separate diagonal branches at this junction.";
@@ -44,7 +47,7 @@ namespace SOLITUDE.World.RoomAuthoring
             }
             foreach (var run in geometry.Runs) AddRun(result, run, style, unresolvedJoins);
             foreach (var join in geometry.Junctions)
-                if (!unresolvedJoins.Contains(join)) Add(result, join.Role, JoinModule(style, join), join.Position);
+                if (!unresolvedJoins.Contains(join)) Add(result, join.Role, JoinModule(style, join), join.Position, rendering: style.Rendering);
             issue = result.Issues.Count == 0 ? null : string.Join("\n", result.Issues.ConvertAll(i => i.Reason));
             return issue == null;
         }
@@ -57,8 +60,13 @@ namespace SOLITUDE.World.RoomAuthoring
                 result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.Style, "style", "Assign a room style."));
             else
             {
-                var issue = CheckFloor(style.FloorTile);
-                if (issue == null) result.Floor = (Tile)style.FloorTile;
+                var issue = CheckFloor(style);
+                if (issue == null)
+                {
+                    result.Floor = (Tile)style.FloorTile;
+                    result.FloorAnchor = result.Floor.sprite.pivot / style.FloorPixelsPerUnit;
+                    result.Rendering = style.Rendering;
+                }
                 else result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.Floor, "floorTile", issue));
             }
             return result;
@@ -78,7 +86,7 @@ namespace SOLITUDE.World.RoomAuthoring
                 var owner = JoinOwner(geometry, join);
                 var style = styles[owner];
                 var module = style == null ? null : JoinModule(style, join);
-                var issue = style == null ? "Assign a style for this corner." : CheckModule(module, join.Role, false);
+                var issue = style == null ? "Assign a style for this corner." : CheckModule(module, join.Role, false, RoomStyleDefinition.ModuleOrientation.Corner) ?? CheckRendering(style.Rendering);
                 if (issue == null) issue = CheckFootprint(module, join.Position, result.Geometry.Cells, inset, geometry.Edges);
                 if (style != null && !style.SupportsDiagonalContact && geometry.Exterior.DiagonalContacts.Contains(join.Position))
                     issue = "Configured artwork cannot resolve separate diagonal branches at this junction.";
@@ -88,7 +96,7 @@ namespace SOLITUDE.World.RoomAuthoring
                     var located = new RoomGenerationIssue(RoomIssueKind.Join, join.Role, issue, true, join.Position, join.Position);
                     located.LocateInRoom(owner); result.Issues.Add(located);
                 }
-                else Add(result, join.Role, module, join.Position, owner);
+                else Add(result, join.Role, module, join.Position, owner, style.Rendering);
             }
             foreach (var junction in geometry.Junctions.Where(j => j.Role.HasValue))
             {
@@ -99,7 +107,7 @@ namespace SOLITUDE.World.RoomAuthoring
                 RoomStyleDefinition.JunctionModule binding = configured.Length == 1 ? configured[0] : null;
                 if (binding != null) bindings.Add(junction.Position, binding);
                 var issue = binding == null ? "Configure exactly one artwork binding for " + junction.Role.Value + "." :
-                    CheckModule(binding.Artwork, junction.Role.Value.ToString(), false);
+                    CheckModule(binding.Artwork, junction.Role.Value.ToString(), false, RoomStyleDefinition.ModuleOrientation.Junction) ?? CheckRendering(style.Rendering);
                 if (issue == null && !binding.Artwork.HasFootprint) issue = "Declare the junction artwork's visual footprint.";
                 if (issue == null) issue = CheckFootprint(binding.Artwork, junction.Position, result.Geometry.Cells, inset, geometry.Edges);
                 if (issue == null) issue = CheckJunctionCoverage(binding, junction.Directions);
@@ -110,7 +118,7 @@ namespace SOLITUDE.World.RoomAuthoring
                         true, junction.Position, junction.Position);
                     located.LocateInRoom(owner); result.Issues.Add(located);
                 }
-                else Add(result, junction.Role.Value.ToString(), binding.Artwork, junction.Position, owner);
+                else Add(result, junction.Role.Value.ToString(), binding.Artwork, junction.Position, owner, style.Rendering);
             }
             foreach (var span in geometry.Spans)
             {
@@ -169,15 +177,15 @@ namespace SOLITUDE.World.RoomAuthoring
             var modules = run.Side == RoomSide.North ? style.NorthWalls : new[] { run.Side == RoomSide.West ? style.WestCap : style.EastCap };
             if (run.Side == RoomSide.South) modules = new[] { style.SouthCap };
             var reservations = endpointReservations ?? RunReservations(style, run, partition);
-            var repeat = modules == null || modules.Length == 0 ? 0 : modules[0]?.RepeatPixels ?? 0;
+            var repeat = modules == null || modules.Length == 0 || modules[0] == null ? 0 : LogicalRepeat(modules[0]);
             var end = run.End;
             string runIssue = null;
             if (modules == null || modules.Length == 0) runIssue = run.Side + " wall modules are missing.";
             else foreach (var module in modules)
             {
-                runIssue = CheckModule(module, run.Side.ToString(), run.Side == RoomSide.North);
+                runIssue = CheckModule(module, run.Side.ToString(), run.Side == RoomSide.North, (RoomStyleDefinition.ModuleOrientation)Enum.Parse(typeof(RoomStyleDefinition.ModuleOrientation), run.Side.ToString())) ?? CheckRendering(style.Rendering);
                 if (runIssue != null) break;
-                if (module.RepeatPixels != repeat) { runIssue = run.Side + " requires sprites with one structural repeat width."; break; }
+                if (LogicalRepeat(module) != repeat) { runIssue = run.Side + " requires sprites with one structural repeat width."; break; }
             }
             if (runIssue == null && partition && repeat != 32) runIssue = "Placeholder partitions require a one-cell cap repeat.";
             if (runIssue != null)
@@ -216,7 +224,7 @@ namespace SOLITUDE.World.RoomAuthoring
                     result.Issues.Add(new RoomGenerationIssue(RoomIssueKind.VisualFit, run.Side.ToString(), fit, true, location, location));
                     continue;
                 }
-                Add(result, partition ? "Partition" + run.Side : run.Side.ToString(), modules[n % modules.Length], origin, ownerId);
+                Add(result, partition ? "Partition" + run.Side : run.Side.ToString(), modules[n % modules.Length], origin, ownerId, style.Rendering);
             }
         }
 
@@ -226,8 +234,8 @@ namespace SOLITUDE.World.RoomAuthoring
             foreach (var rect in module.HasFootprint ? module.FootprintsPixels ?? Array.Empty<RectInt>() :
                 new[] { new RectInt(Vector2Int.zero, module.CanvasPixels) })
             {
-                var min = origin + ((Vector2)rect.position - module.AnchorPixels + module.OffsetPixels) / 32f;
-                var max = min + (Vector2)rect.size / 32f;
+                var min = origin + ((Vector2)rect.position - module.AnchorPixels + module.OffsetPixels) / module.PixelsPerUnit;
+                var max = min + (Vector2)rect.size / module.PixelsPerUnit;
                 foreach (var aperture in apertures ?? Array.Empty<LayoutBoundaryEdge>())
                 {
                     if (aperture.Kind != LayoutEdgeKind.Opening) continue;
@@ -245,8 +253,8 @@ namespace SOLITUDE.World.RoomAuthoring
                 if (rect.width <= 0 || rect.height <= 0 || rect.x < 0 || rect.y < 0 ||
                     (long)rect.x + rect.width > module.CanvasPixels.x || (long)rect.y + rect.height > module.CanvasPixels.y)
                     return "Visual footprint rectangles must be positive and inside the sprite canvas.";
-                var min = origin + ((Vector2)rect.position - module.AnchorPixels + module.OffsetPixels) / 32f;
-                var max = min + (Vector2)rect.size / 32f;
+                var min = origin + ((Vector2)rect.position - module.AnchorPixels + module.OffsetPixels) / module.PixelsPerUnit;
+                var max = min + (Vector2)rect.size / module.PixelsPerUnit;
                 var band = inset / 32f;
                 foreach (var cell in cells)
                     if (min.x < cell.x + 1 - band - 0.000001f && max.x > cell.x + band + 0.000001f &&
@@ -269,8 +277,8 @@ namespace SOLITUDE.World.RoomAuthoring
                 var intervals = new List<Vector2>();
                 foreach (var rect in binding.Artwork.FootprintsPixels)
                 {
-                    var min = (Vector2)rect.position - binding.Artwork.AnchorPixels + binding.Artwork.OffsetPixels;
-                    var max = min + (Vector2)rect.size;
+                    var min = ((Vector2)rect.position - binding.Artwork.AnchorPixels + binding.Artwork.OffsetPixels) * (32f / binding.Artwork.PixelsPerUnit);
+                    var max = min + (Vector2)rect.size * (32f / binding.Artwork.PixelsPerUnit);
                     var crossMin = horizontal ? min.y : min.x; var crossMax = horizontal ? max.y : max.x;
                     if (crossMin > 0 || crossMax < 0) continue;
                     var a = horizontal ? min.x : min.y; var b = horizontal ? max.x : max.y;
@@ -307,40 +315,68 @@ namespace SOLITUDE.World.RoomAuthoring
 
         private static bool Finite(Vector2 v) => !float.IsNaN(v.x) && !float.IsNaN(v.y) && !float.IsInfinity(v.x) && !float.IsInfinity(v.y);
 
-        private static string CheckFloor(TileBase floor)
+        private static int LogicalRepeat(RoomStyleDefinition.Module module) => module.PixelsPerUnit <= 0 ? 0 :
+            (int)((long)module.RepeatPixels * 32 / module.PixelsPerUnit);
+
+        private static string CheckFloor(RoomStyleDefinition style)
         {
-            if (!(floor is Tile tile) || tile.sprite == null) return "Floor requires a native sprite Tile.";
-            var issue = CheckSprite(tile.sprite, new Vector2Int(32, 32), "Floor");
-            return issue ?? (tile.transform != Matrix4x4.identity ? "Floor tile transform must be identity." : null);
+            if (!(style.FloorTile is Tile tile) || tile.sprite == null) return "Floor requires a native sprite Tile.";
+            var issue = CheckSprite(tile.sprite, style.FloorCanvasPixels, style.FloorPixelsPerUnit, "Floor");
+            if (issue != null) return issue;
+            if (style.FloorCanvasPixels != new Vector2Int(style.FloorPixelsPerUnit, style.FloorPixelsPerUnit))
+                return "Floor canvas and declared PPU must cover exactly one logical cell.";
+            return CheckRendering(style.Rendering) ?? (tile.transform != Matrix4x4.identity ? "Floor tile transform must be identity." : null);
         }
 
-        private static string CheckModule(RoomStyleDefinition.Module module, string role, bool north)
+        private static string CheckModule(RoomStyleDefinition.Module module, string role, bool north,
+            RoomStyleDefinition.ModuleOrientation orientation)
         {
             if (module == null) return role + " module is missing.";
-            if (north ? module.CanvasPixels != new Vector2Int(32, 64) && module.CanvasPixels != new Vector2Int(64, 64)
-                : module.CanvasPixels != new Vector2Int(32, 32))
-                return role + (north ? " requires 32x64 or 64x64 canvases." : " requires a 32x32 canvas.");
-            var issue = CheckSprite(module.Sprite, module.CanvasPixels, role);
+            var issue = CheckSprite(module.Sprite, module.CanvasPixels, module.PixelsPerUnit, role);
             if (issue != null) return issue;
+            if (!Enum.IsDefined(typeof(RoomStyleDefinition.ModuleOrientation), module.Orientation) ||
+                module.Orientation != RoomStyleDefinition.ModuleOrientation.Any && module.Orientation != orientation)
+                return role + " module orientation is incompatible with its role.";
             if (!Finite(module.AnchorPixels) || !Finite(module.OffsetPixels)) return role + " alignment must be finite.";
-            if (north && module.RepeatPixels != 32 && module.RepeatPixels != 64) return "North structural repeat must be 32 or 64 pixels.";
+            var alignment = (module.Sprite.pivot - module.AnchorPixels + module.OffsetPixels) * (64f / module.PixelsPerUnit);
+            if (!Mathf.Approximately(alignment.x, Mathf.Round(alignment.x)) || !Mathf.Approximately(alignment.y, Mathf.Round(alignment.y)))
+                return role + " alignment must lie on the logical half-pixel grid.";
+            if (module.RepeatPixels <= 0 || (long)module.RepeatPixels * 32 / module.PixelsPerUnit > int.MaxValue || (long)module.RepeatPixels * 32 % module.PixelsPerUnit != 0)
+                return role + " repeat must be a positive integral logical-pixel distance.";
+            var axis = orientation == RoomStyleDefinition.ModuleOrientation.West || orientation == RoomStyleDefinition.ModuleOrientation.East
+                ? module.CanvasPixels.y : module.CanvasPixels.x;
+            if (module.RepeatPixels > axis) return role + " repeat exceeds its oriented canvas.";
             if (north && module.AnchorPixels.y != module.OffsetPixels.y) return "North wall bottom must align with its north boundary and extend northward.";
             return null;
         }
 
-        private static string CheckSprite(Sprite sprite, Vector2Int dimensions, string role)
+        private static string CheckSprite(Sprite sprite, Vector2Int dimensions, int ppu, string role)
         {
             if (sprite == null) return role + " sprite is missing.";
-            if (sprite.rect.size != (Vector2)dimensions) return role + " sprite dimensions do not match its canvas.";
-            if (!Mathf.Approximately(sprite.pixelsPerUnit, 32)) return role + " requires 32 PPU.";
+            if (dimensions.x <= 0 || dimensions.y <= 0 || sprite.rect.size != (Vector2)dimensions)
+                return role + " sprite dimensions do not match its declared canvas (including any trim/padding).";
+            if (ppu <= 0 || !Mathf.Approximately(sprite.pixelsPerUnit, ppu)) return role + " requires " + ppu + " PPU matching its declared PPU.";
             if (sprite.texture.filterMode != FilterMode.Point) return role + " requires Point filtering.";
             return null;
         }
 
-        private static void Add(RoomPlacement result, string role, RoomStyleDefinition.Module module, Vector2 origin, string ownerId = null)
+        private static string CheckRendering(RoomStyleDefinition.RenderingConfiguration rendering)
         {
-            var position = origin + (module.Sprite.pivot - module.AnchorPixels + module.OffsetPixels) / 32f;
-            result.Sprites.Add(new RoomSpritePlacement(role, module.Sprite, position, ownerId));
+            if (rendering == null) return null;
+            if (!SortingLayer.layers.Any(layer => layer.name == rendering.SortingLayerName)) return "Configure an existing sorting layer.";
+            if (rendering.FloorOrder < short.MinValue || rendering.ArchitectureOrder > short.MaxValue ||
+                rendering.FloorOrder >= rendering.DetailOrder || rendering.DetailOrder >= rendering.ArchitectureOrder)
+                return "Sorting must reserve distinct floor < detail < architecture orders within signed 16-bit limits.";
+            foreach (var material in new[] { rendering.FloorMaterial, rendering.ArchitectureMaterial })
+                if (material != null && (material.shader == null || !material.HasProperty("_MainTex")))
+                    return "Configured renderer material must support sprite textures (_MainTex).";
+            return null;
+        }
+
+        private static void Add(RoomPlacement result, string role, RoomStyleDefinition.Module module, Vector2 origin, string ownerId = null, RoomStyleDefinition.RenderingConfiguration rendering = null)
+        {
+            var position = origin + (module.Sprite.pivot - module.AnchorPixels + module.OffsetPixels) / module.PixelsPerUnit;
+            result.Sprites.Add(new RoomSpritePlacement(role, module.Sprite, position, ownerId, rendering));
         }
     }
 }

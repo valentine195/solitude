@@ -45,9 +45,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 var floor = new GameObject("Generated Floor", typeof(Tilemap), typeof(TilemapRenderer));
                 floor.transform.SetParent(room.GeneratedOutput.transform, false);
                 var map = floor.GetComponent<Tilemap>();
-                map.tileAnchor = placement.Floor.sprite.pivot / 32f;
+                map.tileAnchor = placement.FloorAnchor;
                 foreach (var cell in placement.Geometry.Cells) map.SetTile(new Vector3Int(cell.x, cell.y, 0), placement.Floor);
-                floor.GetComponent<TilemapRenderer>().sortingOrder = 0;
+                var renderer = floor.GetComponent<TilemapRenderer>();
+                renderer.sortingOrder = placement.Rendering?.FloorOrder ?? 0;
+                if (placement.Rendering != null)
+                {
+                    renderer.sortingLayerName = placement.Rendering.SortingLayerName;
+                    if (placement.Rendering.FloorMaterial != null) renderer.sharedMaterial = placement.Rendering.FloorMaterial;
+                }
                 Undo.RegisterCreatedObjectUndo(floor, "Rebuild Room");
             }
             foreach (var item in placement.Sprites)
@@ -57,7 +63,12 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 go.transform.localPosition = item.Position;
                 var renderer = go.GetComponent<SpriteRenderer>();
                 renderer.sprite = item.Sprite;
-                renderer.sortingOrder = 1;
+                renderer.sortingOrder = item.Rendering?.ArchitectureOrder ?? 1;
+                if (item.Rendering != null)
+                {
+                    renderer.sortingLayerName = item.Rendering.SortingLayerName;
+                    if (item.Rendering.ArchitectureMaterial != null) renderer.sharedMaterial = item.Rendering.ArchitectureMaterial;
+                }
                 Undo.RegisterCreatedObjectUndo(go, "Rebuild Room");
             }
         }

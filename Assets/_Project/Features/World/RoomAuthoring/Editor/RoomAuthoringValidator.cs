@@ -184,7 +184,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     if (copy.HasRegion) { copy.Start += offset; copy.End += offset; copy.LocateInRoom(room.RoomId); }
                     issues.Add(copy);
                 }
-                if (placement != null) placements.Add(room, new RoomPlacement { Geometry = placement.Geometry, Floor = placement.Floor });
+                if (placement != null) placements.Add(room, new RoomPlacement { Geometry = placement.Geometry, Floor = placement.Floor, FloorAnchor = placement.FloorAnchor, Rendering = placement.Rendering });
             }
             LayoutBoundaryGeometry boundaries;
             try { boundaries = LayoutBoundaryResolver.Resolve(topology, layout.Connections); }
@@ -212,7 +212,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     var room = owners[item.OwnerId];
                     var offset = LayoutOffset(layout, room);
                     placements[room].Sprites.Add(new RoomSpritePlacement(item.Role, item.Sprite,
-                        item.Position - new Vector3(offset.x, offset.y, 0), item.OwnerId));
+                        item.Position - new Vector3(offset.x, offset.y, 0), item.OwnerId, item.Rendering));
                 }
             }
             return new RoomGenerationResult
