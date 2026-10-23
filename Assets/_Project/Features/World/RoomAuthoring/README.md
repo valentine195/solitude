@@ -1,9 +1,10 @@
 # Ship layout and room authoring
 
 Paint **Authored Occupancy** with **ShipRoomBrush**. Painted cells are authoritative;
-generated floors and architecture are replaceable. This checkpoint supports one
-logical space per ShipLayout. Shared multi-space partitions, connections and the
-full Medbay workflow are later migration phases.
+generated floors and architecture are replaceable. A ShipLayout coordinates multiple
+Room/Corridor spaces on one aligned grid and generates each shared partition once.
+Connections open explicit gaps without merging space identities. Production artwork
+integration and artistic overrides remain later migration phases.
 
 ## Create or adopt
 
@@ -43,6 +44,43 @@ full Medbay workflow are later migration phases.
    command if saving deactivated its authoring mask. Reopen/selection does not
    rebuild automatically.
 
+## Corridors, connections and recovery
+
+Use **New Room Space** or **New Corridor Space** in the layout Inspector. Select
+its type/style, then edit that space's occupancy through Tile Palette. Each space
+keeps one ID and one authoritative painted map. Overlapping ownership is rejected.
+
+For Corridor Paint/Erase, set a positive **Corridor width**. Drag the same corridor
+through bends and existing branches. The exact full-stroke preview commits once
+on release; cancellation leaves no partial edit. Even widths extend the extra
+cell east/north from their anchor, so reversing a route keeps its footprint.
+Box Fill/Erase remains available for deliberate rectangular edits.
+
+In **Boundary connections**, enable **Select boundary in Scene**, click a shared
+edge, inspect its canonical start/orientation, choose width and type, then
+**Place connection**. Horizontal spans run east, vertical spans north. Distinct
+spaces retain a partition until explicitly connected, including adjacent Corridor
+spaces. All span edges must retain the same expected negative/positive owners.
+Overlap, exterior spans and unresolved junction endpoints are rejected before
+mutation. Escape exits boundary selection.
+
+Open passage, Doorway and Airlock opening cut exact structural gaps. Doorway and
+airlock frames are currently unconfigured and report local Frame artwork warnings;
+the aperture stays clear. Runtime doors, locks and interactions are separate.
+
+**Correct** loads an existing record for an explicit address/type/width update
+while retaining its ID. **Apply connection correction** validates the new span;
+**Remove** explicitly deletes it. Both support Undo/Redo. Several external invalid
+records can be corrected one at a time; geometry stays stale until all structural
+connection errors are resolved.
+
+Erasing a boundary never silently relocates/deletes its connection. A nonempty
+layout with invalid connectivity retains previous geometry and marks it stale.
+A wholly unoccupied layout clears only verified disposable output and retains
+its connections as inactive, located Incomplete diagnostics. Removing those
+records yields Empty. Unsafe coordinates/ownership or modified/unrecognized
+output prevent cleanup. Undo restores cells, records, visuals and result state.
+
 ## Diagnostics and dimensions
 
 A logical cell is 32×32 pixels at 32 PPU and one Unity unit. Floors cover one
@@ -55,7 +93,7 @@ Orthogonal irregular shapes use their actual occupied boundaries. Valid floor
 remains visible when a local art/span/join cannot resolve; only affected visuals
 are withheld. Missing floor/style still leaves editor-only cell guides. Unsafe
 ownership, overlaps or coordinates refuse destructive writes and clearly mark
-retained output as not updated. Safe empty occupancy clears owned output.
+retained output as not updated. Safe empty occupancy clears only verified disposable output; dangling connections remain inactive.
 
 **Validate** is read-only. Select a reported issue and use its **Focus/Locate**
 button to frame/highlight a region or identify its configuration field. Correct
@@ -84,7 +122,17 @@ left. North faces start at the top boundary and extend upward.
 Review evidence lives outside Assets in
 `work/Reviews/RoomAuthoring/UnifiedSingleSpace.md` and its JSON companion. Automated
 checks and native visual checks are reported separately. Production perspective,
-source-art alignment, seams and the complete interconnected Medbay wing require
-later acceptance and are not established by synthetic fixtures. Earlier Phase 2a
+source-art alignment and seams require later artwork acceptance. The structural
+interconnected Medbay workflow is qualified separately with synthetic fixtures. Earlier Phase 2a
 failed/inconclusive walkthrough evidence remains historical; it is not replaced
 by this checkpoint.
+
+The **Create Structural Medbay Walkthrough** command prepares three empty spaces
+and synthetic thin boundary/junction art, with the same isolated-project,
+fresh-destination and saved-baseline guards. Author its geometry through the
+intended painting and boundary controls. The procedure and separately reported
+automated/native evidence are in
+`work/Reviews/RoomAuthoring/MedbayStructuralWorkflow.md`. Its structural native
+checkpoint passed with 176 painted cells, three explicit connections, Undo/Redo,
+and save/reopen/rebuild recovery. Production artwork qualification remains pending;
+the scaffold itself does not establish a painted Medbay.
