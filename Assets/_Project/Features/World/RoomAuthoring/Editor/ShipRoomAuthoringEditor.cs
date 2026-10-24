@@ -14,13 +14,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             var root = new VisualElement();
             root.Add(new Label("Painted occupancy is authoritative. Generated architecture is replaceable."));
-            foreach (var name in new[] { "roomId", "style", "occupancy", "generatedOutput", "generationDiagnostic" })
+            foreach (var name in new[] { "roomId", "occupancy", "generatedOutput", "generationDiagnostic" })
             {
                 var field = new PropertyField(serializedObject.FindProperty(name));
                 field.SetEnabled(name == "style");
                 root.Add(field);
             }
             var room = (ShipRoomAuthoring)target;
+            root.Add(RoomAuthoringStyleControls.ForSpace(room));
             var adoptionFeedback = new HelpBox("", HelpBoxMessageType.Info);
             var adopt = new Button(() =>
             {

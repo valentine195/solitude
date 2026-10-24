@@ -135,13 +135,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             var root = new VisualElement();
             root.Add(new Label("Painted space occupancy is authoritative. This layout owns generated architecture."));
-            foreach (var name in new[] { "layoutId", "defaultStyle", "spaces", "generatedOutput" })
+            foreach (var name in new[] { "layoutId", "spaces", "generatedOutput" })
             {
                 var field = new PropertyField(serializedObject.FindProperty(name));
                 field.SetEnabled(name == "defaultStyle");
                 root.Add(field);
             }
             var layout = (ShipLayoutAuthoring)target;
+            root.Add(RoomAuthoringStyleControls.ForLayout(layout));
             var feedback = new HelpBox("", HelpBoxMessageType.Info);
             var issues = new VisualElement();
             var focused = new Label();
@@ -183,6 +184,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     field.Bind(data);
                     spaceControls.Add(field);
                 }
+                spaceControls.Add(RoomAuthoringStyleControls.ForSpace(room));
                 spaceControls.Add(new Button(() => Selection.activeGameObject = room.gameObject) { text = "Select Space" });
                 spaceControls.Add(new Button(() => RoomAuthoringPaletteSetup.EditRoom(room)) { text = "Edit Space in Tile Palette" });
                 if (room.SpaceType == LogicalSpaceType.Corridor)

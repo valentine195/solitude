@@ -1,4 +1,7 @@
 using System;
+using System.Linq;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
 using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
 using UnityEditor.Tilemaps;
@@ -68,6 +71,39 @@ namespace SOLITUDE.Editor.RoomAuthoring
             AssetDatabase.SaveAssets();
         }
 
+        public static GameObject PrepareStylePalette(RoomStyleDefinition style, string folder)
+        {
+            if (style == null || string.IsNullOrEmpty(folder) || !folder.StartsWith("Assets/_Project/", StringComparison.Ordinal))
+                throw new ArgumentException("Choose a style and a first-party palette folder.");
+            var path = folder + "/ArchitecturePalette.prefab";
+            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (existing != null) return existing; // Preserve a designer's palette arrangement and asset GUIDs.
+            if (System.IO.Directory.Exists(folder) || System.IO.File.Exists(folder) || AssetDatabase.IsValidFolder(folder))
+                throw new InvalidOperationException("Use a fresh palette folder; existing content is preserved.");
+            EnsureFolder(folder);
+            GridPaletteUtility.CreateNewPalette(folder, "ArchitecturePalette", GridLayout.CellLayout.Rectangle,
+                GridPalette.CellSizing.Manual, Vector3.one, GridLayout.CellSwizzle.XYZ);
+            var contents = PrefabUtility.LoadPrefabContents(path);
+            try
+            {
+                var map = contents.GetComponentInChildren<Tilemap>();
+                if (style.FloorTile != null) map.SetTile(Vector3Int.zero, style.FloorTile);
+                var modules = (style.NorthWalls ?? Array.Empty<RoomStyleDefinition.Module>())
+                    .Concat(new[] { style.WestCap, style.EastCap, style.SouthCap }).ToArray();
+                for (var i = 0; i < modules.Length; i++)
+                {
+                    if (modules[i]?.Sprite == null) continue;
+                    var tile = ScriptableObject.CreateInstance<Tile>(); tile.sprite = modules[i].Sprite;
+                    AssetDatabase.CreateAsset(tile, folder + "/Artwork" + i + ".asset");
+                    map.SetTile(new Vector3Int(i * 4, 4, 0), tile);
+                }
+                PrefabUtility.SaveAsPrefabAsset(contents, path);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(contents); }
+            AssetDatabase.SaveAssets();
+            return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        }
+
         public static void EditRoom(ShipRoomAuthoring room)
         {
             var issue = RoomAuthoringOperations.GetSafetyIssue(room, allowMissingOutput: true);
@@ -106,4 +142,127 @@ namespace SOLITUDE.Editor.RoomAuthoring
             AssetDatabase.CreateFolder(parent, System.IO.Path.GetFileName(path));
         }
     }
+
+    public static class RoomAuthoringStyleControls
+    {
+        public static bool AssignSpaceStyle(ShipRoomAuthoring room, RoomStyleDefinition selected, out string issue) =>
+            Assign(room, room, () => room.Style = selected, out issue);
+
+        public static bool AssignLayoutStyle(ShipLayoutAuthoring layout, RoomStyleDefinition selected, out string issue) =>
+            Assign(layout, layout.Spaces.FirstOrDefault(), () => layout.DefaultStyle = selected, out issue);
+
+        private static bool Assign(Object owner, ShipRoomAuthoring room, Action change, out string issue)
+        {
+            issue = room == null ? "Create a space first." : room.Layout == null ? RoomAuthoringOperations.GetSafetyIssue(room, true) :
+                RoomAuthoringOperations.GetSafetyIssue(room.Layout, true);
+            if (issue != null) return false;
+            if (RoomAuthoringOperations.HasActiveEdit) { issue = "Finish or cancel the active paint stroke first."; return false; }
+            using var edit = RoomAuthoringOperations.BeginEdit(room, "Change Architectural Style");
+            var group = Undo.GetCurrentGroup();
+            try
+            {
+                Undo.RegisterCompleteObjectUndo(owner, "Change Architectural Style");
+                change(); EditorUtility.SetDirty(owner);
+                RoomAuthoringOperations.Rebuild(room);
+                return true;
+            }
+            catch { edit.CloseAfterUndo(); Undo.RevertAllDownToGroup(group); throw; }
+        }
+
+        public static VisualElement ForSpace(ShipRoomAuthoring room) => Create(room, room.Layout);
+        public static VisualElement ForLayout(ShipLayoutAuthoring layout) => Create(null, layout);
+
+        private static VisualElement Create(ShipRoomAuthoring room, ShipLayoutAuthoring layout)
+        {
+            var root = new VisualElement { name = "architecturalStyleControls" };
+            var selected = new ObjectField(room == null ? "Layout style / fallback" : "Space style (None = inherit)")
+                { objectType = typeof(RoomStyleDefinition), allowSceneObjects = false, name = "assignedStyle" };
+            var source = new Label { name = "styleSource" };
+            var feedback = new HelpBox("", HelpBoxMessageType.Info) { name = "artworkRefreshState" };
+            var fallbacks = new Label { name = "fallbackRoles" };
+            var bindings = new Foldout { text = "Artwork bindings", value = false, name = "artworkBindings" };
+            root.Add(selected); root.Add(source); root.Add(feedback); root.Add(fallbacks); root.Add(bindings);
+            root.Add(new HelpBox("Painted cells define the layout. Bound Tile/Sprite edits update its artwork. Rearranging this palette or replacing a palette entry does not reassign architectural roles.", HelpBoxMessageType.Info));
+            string key = null;
+            void Refresh()
+            {
+                if (room == null && layout == null || room != null && !room.gameObject.scene.IsValid()) return;
+                var data = new SerializedObject(room == null ? (Object)layout : room); data.Update();
+                var assigned = (RoomStyleDefinition)data.FindProperty(room == null ? "defaultStyle" : "style").objectReferenceValue;
+                selected.SetValueWithoutNotify(assigned);
+                var effective = room == null ? layout.DefaultStyle : room.Style;
+                source.text = effective == null ? "No effective style. Choose one or set the layout default." :
+                    (room == null ? "Layout default and compatible fallback: " : assigned == null ? "Inherited from layout: " : "Space override: ") + effective.DisplayName;
+                var pending = layout != null && RoomAuthoringAssetRefresh.IsPending(layout);
+                var blocked = layout == null ? null : RoomAuthoringAssetRefresh.GetIssue(layout);
+                feedback.text = blocked ?? (pending ? "Artwork update queued. Active painting finishes or cancels before refresh." :
+                    layout == null ? "Adopt into a layout for automatic artwork refresh. Independent rooms use Rebuild Room after asset edits." :
+                    "Bound artwork refresh is automatic for loaded layouts. External source files are not restored by scene Undo.");
+                feedback.messageType = blocked == null ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
+                var result = layout == null ? room.GenerationResult : layout.GenerationResult;
+                var used = (result?.StyleResolutions ?? Array.Empty<RoomStyleResolution>()).Where(r => r.UsedFallback &&
+                    (room == null || r.OwnerId == room.RoomId)).ToArray();
+                fallbacks.text = used.Length == 0 ? "No fallback roles used by the last build." : "Fallback used: " +
+                    string.Join("\n", used.Take(4).Select(r => r.Role + " at " + r.Start)) + (used.Length > 4 ? " (+" + (used.Length - 4) + " more)" : "");
+                var next = effective == null ? "" : EditorJsonUtility.ToJson(effective);
+                if (next == key) return;
+                key = next; bindings.Clear();
+                if (effective == null) return;
+                var style = effective;
+                bindings.Add(new Button(() => Selection.activeObject = style) { text = "Select Style Asset" });
+                var floor = new ObjectField("Bound floor Tile") { objectType = typeof(TileBase), allowSceneObjects = false, value = style.FloorTile, name = "boundFloorTile" };
+                floor.RegisterValueChangedCallback(e =>
+                {
+                    RoomAuthoringOperations.EditStyleBindings(style, value => value.FloorTile = (TileBase)e.newValue, out var issue);
+                    if (issue != null) { feedback.text = issue; floor.SetValueWithoutNotify(style.FloorTile); }
+                    key = null; Refresh();
+                });
+                bindings.Add(floor);
+                void Artwork(string label, RoomStyleDefinition.Module module, string name)
+                {
+                    if (module == null) return;
+                    var field = new ObjectField(label) { objectType = typeof(Sprite), allowSceneObjects = false, value = module.Sprite, name = name };
+                    field.RegisterValueChangedCallback(e =>
+                    {
+                        RoomAuthoringOperations.EditStyleBindings(style, value => module.Sprite = (Sprite)e.newValue, out var issue);
+                        if (issue != null) { feedback.text = issue; field.SetValueWithoutNotify(module.Sprite); }
+                        key = null; Refresh();
+                    });
+                    bindings.Add(field);
+                }
+                for (var i = 0; i < (style.NorthWalls?.Length ?? 0); i++) Artwork("North wall " + (i + 1), style.NorthWalls[i], "northArtwork" + i);
+                Artwork("West cap", style.WestCap, "westArtwork"); Artwork("East cap", style.EastCap, "eastArtwork"); Artwork("South cap", style.SouthCap, "southArtwork");
+                bindings.Add(new HelpBox("Replacements use the style's declared canvas, PPU, anchor and repeat. Select the style asset to configure different footprints, corners, junctions or sorting.", HelpBoxMessageType.Info));
+                var transitions = new Foldout { text = "Compatible transition styles", value = false, name = "compatibleTransitions" };
+                foreach (var compatible in (style.CompatibleTransitions ?? Array.Empty<RoomStyleDefinition>()).Where(s => s != null).Distinct())
+                {
+                    var partner = compatible;
+                    transitions.Add(new Button(() =>
+                    {
+                        RoomAuthoringOperations.EditStyleBindings(style, value => value.CompatibleTransitions = (value.CompatibleTransitions ?? Array.Empty<RoomStyleDefinition>()).Where(s => s != partner).ToArray(), out _);
+                        key = null; Refresh();
+                    }) { text = "Remove compatibility: " + partner.DisplayName });
+                }
+                var add = new ObjectField("Add compatible style") { objectType = typeof(RoomStyleDefinition), allowSceneObjects = false, name = "addCompatibleStyle" };
+                add.RegisterValueChangedCallback(e =>
+                {
+                    if (e.newValue is RoomStyleDefinition partner && partner != style)
+                        RoomAuthoringOperations.EditStyleBindings(style, value => value.CompatibleTransitions = (value.CompatibleTransitions ?? Array.Empty<RoomStyleDefinition>()).Append(partner).Distinct().ToArray(), out _);
+                    key = null; Refresh();
+                });
+                transitions.Add(add); bindings.Add(transitions);
+            }
+            selected.RegisterValueChangedCallback(e =>
+            {
+                string issue;
+                var success = room == null ? AssignLayoutStyle(layout, (RoomStyleDefinition)e.newValue, out issue) :
+                    AssignSpaceStyle(room, (RoomStyleDefinition)e.newValue, out issue);
+                if (!success) feedback.text = issue;
+                key = null; Refresh();
+            });
+            root.schedule.Execute(Refresh).Every(300); Refresh();
+            return root;
+        }
+    }
+
 }

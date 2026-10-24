@@ -92,5 +92,31 @@ namespace SOLITUDE.Tests.RoomAuthoring
             }
             finally { Object.DestroyImmediate(brush); }
         }
+        [Test] public void StyleAssignmentPreservesPaintedMedbayAndWritesConfiguredSortingThroughUndo()
+        {
+            SyntheticBrushAndConnectionWorkflowHasExactGeometryUndoAndReopen();
+            var original = layout.DefaultStyle;
+            var alternate = Object.Instantiate(original); alternate.DisplayName = "Compatible Medbay alternate";
+            var identity = new SerializedObject(alternate); identity.FindProperty("styleId").stringValue = Guid.NewGuid().ToString("N"); identity.ApplyModifiedPropertiesWithoutUndo();
+            alternate.Rendering = new RoomStyleDefinition.RenderingConfiguration { SortingLayerName = "Wall_Panels", FloorOrder = -4, DetailOrder = -2, ArchitectureOrder = 3 };
+            alternate.CompatibleTransitions = new[] { original }; original.CompatibleTransitions = new[] { alternate };
+            AssetDatabase.CreateAsset(alternate, folder + "/AlternateStyle.asset");
+            EditorUtility.SetDirty(original); AssetDatabase.SaveAssets(); RoomAuthoringOperations.Rebuild(layout);
+            var before = ShipLayoutDiagnosticTests.Snapshot(layout); var cells = RoomAuthoringValidator.TopologyOf(layout).Cells.ToArray();
+            var connections = layout.Connections.Select(JsonUtility.ToJson).ToArray();
+            Assert.IsTrue(RoomAuthoringStyleControls.AssignLayoutStyle(layout, alternate, out var issue), issue);
+            foreach (var room in layout.Spaces)
+            {
+                var rendering = room.Style.Rendering;
+                Assert.AreEqual(rendering?.FloorOrder ?? 0, room.GeneratedOutput.GetComponentInChildren<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder);
+                Assert.IsTrue(room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().All(r => r.sortingOrder == (rendering?.ArchitectureOrder ?? 1)));
+            }
+            CollectionAssert.AreEqual(cells, RoomAuthoringValidator.TopologyOf(layout).Cells);
+            CollectionAssert.AreEqual(connections, layout.Connections.Select(JsonUtility.ToJson));
+            Assert.AreEqual(176, layout.Spaces.Sum(RoomAuthoringTestFixtures.FloorCount));
+            Undo.PerformUndo(); Assert.AreSame(original, layout.DefaultStyle); CollectionAssert.AreEqual(before, ShipLayoutDiagnosticTests.Snapshot(layout));
+            Undo.PerformRedo(); Assert.AreSame(alternate, layout.DefaultStyle); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+        }
+
     }
 }

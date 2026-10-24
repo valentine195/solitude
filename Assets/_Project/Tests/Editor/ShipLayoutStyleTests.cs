@@ -4,12 +4,18 @@ using NUnit.Framework;
 using SOLITUDE.Editor.RoomAuthoring;
 using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEditor.SceneManagement;
+using UnityEngine.UIElements;
+using UnityEngine.Tilemaps;
 using UnityEngine;
 
 namespace SOLITUDE.Tests.RoomAuthoring
 {
     public sealed class ShipLayoutStyleTests
     {
+        private sealed class StyleControlsTestWindow : EditorWindow { }
+
         internal static void Configure(RoomAuthoringTestFixtures f)
         {
             RoomStyleDefinition.Module Art(int width, int height, RectInt ink, Vector2 anchor)
@@ -191,5 +197,111 @@ namespace SOLITUDE.Tests.RoomAuthoring
             }
             finally { UnityEngine.Object.DestroyImmediate(native); }
         }
+        [Test] public void InspectorStyleAssignmentAndInheritanceUndoRestoreActualOutput()
+        {
+            using var a = new RoomAuthoringTestFixtures(32); using var b = new RoomAuthoringTestFixtures(32);
+            Configure(a); Configure(b);
+            var layout = RoomAuthoringCreation.CreateLayout(a.Scene, a.Style); var room = layout.Spaces[0];
+            Fill(room, RoomAuthoringTestFixtures.Cells());
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+            var cells = RoomAuthoringOperations.ReadCells(room); var id = room.RoomId; var before = Snapshot(layout);
+            var editor = UnityEditor.Editor.CreateEditor(room);
+            var window = ScriptableObject.CreateInstance<StyleControlsTestWindow>();
+            try
+            {
+                var root = editor.CreateInspectorGUI(); var field = root.Q<ObjectField>("assignedStyle"); Assert.IsNotNull(field);
+                window.ShowUtility(); window.rootVisualElement.Add(root);
+                Assert.IsNotNull(field.panel, "The Inspector must be attached before changing a UI Toolkit field.");
+                field.value = b.Style;
+                Assert.AreSame(b.Style, room.Style);
+                Assert.AreSame(b.Style.FloorTile, room.GeneratedOutput.GetComponentInChildren<Tilemap>().GetTile(Vector3Int.zero));
+                Undo.PerformUndo(); Assert.AreSame(a.Style, room.Style); CollectionAssert.AreEqual(before, Snapshot(layout));
+                Undo.PerformRedo(); Assert.AreSame(b.Style, room.Style);
+                Assert.IsTrue(RoomAuthoringStyleControls.AssignSpaceStyle(room, null, out var issue), issue);
+                Assert.AreSame(a.Style, room.Style);
+                var inherited = RoomAuthoringStyleControls.ForSpace(room);
+                Assert.That(inherited.Q<Label>("styleSource").text, Does.Contain("Inherited from layout"));
+                Assert.IsTrue(RoomAuthoringStyleControls.AssignLayoutStyle(layout, b.Style, out issue), issue);
+                Assert.AreSame(b.Style, room.Style);
+                Undo.PerformUndo(); Assert.AreSame(a.Style, layout.DefaultStyle); Assert.AreSame(a.Style, room.Style);
+                CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room)); Assert.AreEqual(id, room.RoomId);
+            }
+            finally { window.Close(); UnityEngine.Object.DestroyImmediate(editor); }
+        }
+
+        [Test] public void InspectorBoundArtworkControlUsesOneUndoActionAndReportsFallback()
+        {
+            Assert.IsTrue(Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification"));
+            var folder = RoomPersistenceTests.CreateAssets(); var otherFolder = RoomPersistenceTests.CreateAssets();
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var window = ScriptableObject.CreateInstance<StyleControlsTestWindow>();
+            try
+            {
+                var room = RoomPersistenceTests.CreateRoom(scene, folder); var style = room.Style;
+                var alternate = AssetDatabase.LoadAssetAtPath<RoomStyleDefinition>(otherFolder + "/Style.asset");
+                alternate.CompatibleTransitions = new[] { style };
+                var layout = RoomAuthoringCreation.AdoptIntoNewLayout(room);
+                RoomAuthoringCreation.CreateSpace(layout); layout.DefaultStyle = alternate;
+                Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+                var before = Snapshot(layout); var root = RoomAuthoringStyleControls.ForSpace(room);
+                window.ShowUtility(); window.rootVisualElement.Add(root);
+                var field = root.Q<ObjectField>("northArtwork0"); Assert.IsNotNull(field);
+                Assert.IsNotNull(field.panel, "The Inspector must be attached before changing a UI Toolkit field.");
+                Assert.AreSame(style, room.Style);
+                var replacement = alternate.NorthWalls[0].Sprite;
+                Assert.IsTrue(AssetDatabase.Contains(replacement)); Assert.IsTrue(AssetDatabase.Contains(field.value));
+                Assert.AreNotSame(replacement, field.value, "The binding edit must change the effective style artwork.");
+                field.value = replacement;
+                var north = room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Where(r => r.name == "North").ToArray();
+                Assert.IsNotEmpty(north); Assert.IsTrue(north.All(r => r.sprite == replacement));
+                Undo.PerformUndo(); CollectionAssert.AreEqual(before, Snapshot(layout));
+                Undo.PerformRedo(); Assert.IsTrue(room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>()
+                    .Where(r => r.name == "North").All(r => r.sprite == replacement));
+                Undo.PerformUndo(); CollectionAssert.AreEqual(before, Snapshot(layout));
+                Assert.IsTrue(RoomAuthoringOperations.EditStyleBindings(style, value => value.EastCap.Sprite = null, out var issue), issue);
+                root = RoomAuthoringStyleControls.ForSpace(room);
+                Assert.That(root.Q<Label>("fallbackRoles").text, Does.Contain("Fallback used:").And.Contain("East"));
+                Assert.AreEqual(RoomGenerationStatus.Complete, layout.GenerationResult.Status);
+                using var pending = RoomAuthoringOperations.BeginEdit(room, "Pending style fixture");
+                Assert.IsFalse(RoomAuthoringStyleControls.AssignSpaceStyle(room, alternate, out issue));
+                Assert.That(issue, Does.Contain("paint stroke")); pending.Cancel();
+            }
+            finally
+            {
+                window.Close(); EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                AssetDatabase.DeleteAsset(folder); AssetDatabase.DeleteAsset(otherFolder);
+            }
+        }
+
+        [Test] public void StylePaletteRearrangementPreservesBindingsOutputAndExistingPaletteGuid()
+        {
+            Assert.IsTrue(Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification"));
+            var folder = RoomPersistenceTests.CreateAssets();
+            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            try
+            {
+                var room = RoomPersistenceTests.CreateRoom(scene, folder); var layout = RoomAuthoringCreation.AdoptIntoNewLayout(room);
+                var palette = RoomAuthoringPaletteSetup.PrepareStylePalette(room.Style, folder + "/Palette");
+                var path = AssetDatabase.GetAssetPath(palette); var guid = AssetDatabase.AssetPathToGUID(path);
+                var before = Snapshot(layout); var style = EditorJsonUtility.ToJson(room.Style);
+                var contents = PrefabUtility.LoadPrefabContents(path);
+                try
+                {
+                    Assert.AreEqual(Vector3.one, contents.GetComponent<Grid>().cellSize);
+                    var map = contents.GetComponentInChildren<Tilemap>(); var tile = map.GetTile(Vector3Int.zero);
+                    map.SetTile(Vector3Int.zero, null); map.SetTile(Vector3Int.right, tile);
+                    PrefabUtility.SaveAsPrefabAsset(contents, path);
+                }
+                finally { PrefabUtility.UnloadPrefabContents(contents); }
+                palette = RoomAuthoringPaletteSetup.PrepareStylePalette(room.Style, folder + "/Palette");
+                Assert.AreEqual(path, AssetDatabase.GetAssetPath(palette));
+                Assert.AreEqual(guid, AssetDatabase.AssetPathToGUID(path)); Assert.AreEqual(style, EditorJsonUtility.ToJson(room.Style));
+                CollectionAssert.AreEqual(before, Snapshot(layout)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+                Assert.IsNull(palette.GetComponentInChildren<Tilemap>().GetTile(Vector3Int.zero));
+                Assert.AreSame(room.Style.FloorTile, palette.GetComponentInChildren<Tilemap>().GetTile(Vector3Int.right));
+            }
+            finally { EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single); AssetDatabase.DeleteAsset(folder); }
+        }
+
     }
 }

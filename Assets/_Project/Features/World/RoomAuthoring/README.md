@@ -3,8 +3,10 @@
 Paint **Authored Occupancy** with **ShipRoomBrush**. Painted cells are authoritative;
 generated floors and architecture are replaceable. A ShipLayout coordinates multiple
 Room/Corridor spaces on one aligned grid and generates each shared partition once.
-Connections open explicit gaps without merging space identities. Production artwork
-integration and artistic overrides remain later migration phases.
+Connections open explicit gaps without merging space identities. Reusable temporary
+art is sufficient; final production artwork is not an acceptance gate. Procedural
+floor panel detailing is a later phase. Damage and decorative overlays are outside
+the amended scope.
 
 ## Create or adopt
 
@@ -86,8 +88,13 @@ output prevent cleanup. Undo restores cells, records, visuals and result state.
 A logical cell is 32×32 pixels at 32 PPU and one Unity unit. Floors cover one
 logical cell. Prepared styles describe wall canvases, structural repeats, pivots,
 anchors and corner reservations; imported artwork is not resized to force a fit.
-The current checkpoint validates prepared 32-PPU modules; broader source-art
-placement compatibility is addressed in the later artwork integration phase.
+Styles declare each imported canvas, native PPU, repetition width, structural
+anchor and conservative visual footprint independently. For example, a compatible
+128×256 canvas at 128 PPU can repeat every one logical cell; at 64 PPU the
+same canvas covers two cells in width. The declaration and actual sprite must
+agree. No importer or authoring operation rescales source artwork automatically.
+Configured rendering reserves separate floor, detail and architecture orders.
+The legacy unconfigured floor/architecture orders remain 0/1.
 
 Orthogonal irregular shapes use their actual occupied boundaries. Valid floor
 remains visible when a local art/span/join cannot resolve; only affected visuals
@@ -99,8 +106,9 @@ retained output as not updated. Safe empty occupancy clears only verified dispos
 button to frame/highlight a region or identify its configuration field. Correct
 its style/asset configuration, then **Rebuild Layout** (or Rebuild Room). Rebuild
 uses the current authored cells and replaces verified owned architecture. Other
-paint tools/style changes require this explicit rebuild; Validate alone does not
-synchronize output. Resolve ambiguous references before replacing missing roots.
+paint tools require this explicit rebuild; Validate alone does not synchronize
+output. Supported style controls and bound-asset changes follow the refresh
+workflow below. Resolve ambiguous references before replacing missing roots.
 
 Authoring masks/guides are excluded from Play Mode/build floor queries. Generated
 floor Tilemaps provide runtime walkability; runtime procedural generation is not
@@ -121,8 +129,8 @@ left. North faces start at the top boundary and extend upward.
 
 Review evidence lives outside Assets in
 `work/Reviews/RoomAuthoring/UnifiedSingleSpace.md` and its JSON companion. Automated
-checks and native visual checks are reported separately. Production perspective,
-source-art alignment and seams require later artwork acceptance. The structural
+checks and native visual checks are reported separately. Final production perspective and art quality require separate artwork review.
+Temporary compatible assets qualify alignment and tool behavior. The structural
 interconnected Medbay workflow is qualified separately with synthetic fixtures. Earlier Phase 2a
 failed/inconclusive walkthrough evidence remains historical; it is not replaced
 by this checkpoint.
@@ -134,5 +142,47 @@ intended painting and boundary controls. The procedure and separately reported
 automated/native evidence are in
 `work/Reviews/RoomAuthoring/MedbayStructuralWorkflow.md`. Its structural native
 checkpoint passed with 176 painted cells, three explicit connections, Undo/Redo,
-and save/reopen/rebuild recovery. Production artwork qualification remains pending;
+and save/reopen/rebuild recovery. Final production artwork is not required;
 the scaffold itself does not establish a painted Medbay.
+
+## Replace artwork without repainting
+
+The layout Inspector's **Layout style / fallback** selects its default family.
+A space's **Space style (None = inherit)** can override that family or inherit it.
+The adjacent label identifies the effective source. Changing these controls
+rebuilds the affected layout in the same Undo action, retaining occupancy,
+space/connection identities and unrelated gameplay content.
+
+Expand **Artwork bindings** to replace the bound floor **Tile asset** or a north,
+west, east or south **Sprite asset**. These controls edit the effective shared
+style: other loaded layouts that use it also update. Import and save replacement
+assets before binding them. Their dimensions, PPU and declared footprint must
+match the style; use **Select Style Asset** to configure other module declarations,
+corners, junctions, repetitions and rendering settings. A saved compatible large
+canvas is supported; an incompatible replacement produces a located diagnostic.
+
+Artwork palettes contain ordinary Tiles that reference reusable artwork. Editing
+a bound floor Tile's Sprite or reimporting its referenced texture updates loaded
+consumers. Structural palette Tiles preview the style's Sprite assets; to replace
+a structural role, use its style binding. Moving palette entries or replacing an
+unbound entry does not reassign floor/wall roles. Preparing an existing style
+palette preserves its GUID and manual arrangement.
+
+**Compatible transition styles** is an explicit qualification for existing
+transition art. It does not invent a missing treatment. Shared north faces use
+the visible side's family; cap/junction ownership and structural variants are
+deterministic. An explicitly compatible layout default can supply a missing role
+only after placement/clearance checks. **Fallback used** identifies the role and
+address; missing or incompatible joins remain located issues while useful floors
+and independent geometry remain visible.
+
+Loaded layouts coalesce effective asset changes and defer updates during a paint
+stroke. Closed scenes are not rewritten. Selection, Validate, Undo and reopening
+do not regenerate. Modified/unrecognized generated output blocks automatic
+replacement; inspect it, preserve authored content, then use **Rebuild Layout**.
+Source-file pixel edits remain the actual current bytes and are not restored by
+scene Undo. Supported binding edits restore references and generated output
+through Undo/Redo together.
+
+The temporary-art replacement procedure and separately reported automated/native
+results are in `work/Reviews/RoomAuthoring/UnifiedStyleCompatibility.md`.
