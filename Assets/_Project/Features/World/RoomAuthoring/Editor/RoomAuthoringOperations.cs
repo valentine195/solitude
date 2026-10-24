@@ -317,6 +317,34 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
         }
 
+        // Association establishes which root we own; the recorded build establishes which contents may be replaced.
+        public static string GetStyleReplacementIssue(ShipRoomAuthoring room)
+        {
+            var issue = GetSafetyIssue(room, allowMissingOutput: true);
+            if (issue != null) return issue;
+            var output = room.GeneratedOutput;
+            if (output == null) return null;
+            var recorded = room.GenerationResult?.OutputFingerprint;
+            if (!string.IsNullOrEmpty(recorded) && recorded == RoomAuthoringValidator.OutputFingerprint(room)) return null;
+            if (string.IsNullOrEmpty(recorded) && output.transform.childCount == 0 &&
+                output.GetComponents<Component>().All(component => component != null &&
+                    (component.GetType() == typeof(Transform) || component.GetType() == typeof(RoomGeneratedOutput)))) return null;
+            return "Space " + room.RoomId + " at " + room.name + "/" + output.name +
+                ": generated output is modified or unverified. Move authored content outside this root and review the output before an explicit rebuild; style change refused.";
+        }
+
+        public static string GetStyleReplacementIssue(ShipLayoutAuthoring layout)
+        {
+            var issue = GetSafetyIssue(layout, allowMissingOutput: true);
+            if (issue != null) return issue;
+            foreach (var room in layout.Spaces)
+            {
+                issue = GetStyleReplacementIssue(room);
+                if (issue != null) return "Layout " + layout.LayoutId + ": " + issue;
+            }
+            return null;
+        }
+
         // Supported role/renderer binding edits include every loaded consumer's derived output in one Undo action.
         // External source-file imports use the asynchronous refresh path and do not promise historical file bytes.
         public static bool EditStyleBindings(RoomStyleDefinition style, System.Action<RoomStyleDefinition> change, out string issue)
@@ -328,7 +356,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var consumers = RoomAuthoringAssetRefresh.LoadedLayouts().Where(layout => RoomAuthoringValidator.StyleDependencies(layout).Contains(style)).ToArray();
             foreach (var layout in consumers)
             {
-                issue = GetSafetyIssue(layout, allowMissingOutput: true);
+                issue = GetStyleReplacementIssue(layout);
                 if (issue != null) return false;
             }
             using var edit = new RoomEdit(null, "Edit Architectural Style Bindings");

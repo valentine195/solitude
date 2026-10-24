@@ -165,12 +165,6 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 }
                 return new RoomGenerationResult { Status = RoomGenerationStatus.Refused, Issues = connectionIssues };
             }
-            if (layout.Spaces.Count == 1)
-            {
-                var single = AssessSpace(layout.Spaces[0], out var placement);
-                if (placement != null) placements.Add(layout.Spaces[0], placement);
-                return single;
-            }
             var issues = new List<RoomGenerationIssue>();
             var styleResolutions = new List<RoomStyleResolution>();
             var refused = false;
@@ -232,22 +226,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             if (layout == null || layout.Spaces.Count == 0 || layout.Spaces.Any(room => room == null)) return false;
             var saved = layout.GenerationResult;
-            if (layout.Spaces.Count > 1)
-            {
-                if (saved == null || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint)) return false;
-                var assessment = AssessSpaces(layout, out _);
-                return assessment.Status != RoomGenerationStatus.Refused && saved.InputFingerprint == assessment.InputFingerprint &&
-                    saved.OutputFingerprint == OutputFingerprint(layout);
-            }
-            var roomResult = layout.Spaces[0].GenerationResult;
-            return saved != null && roomResult != null && saved.Status == roomResult.Status &&
-                saved.InputFingerprint == roomResult.InputFingerprint && saved.OutputFingerprint == roomResult.OutputFingerprint &&
-                IsCurrent(layout.Spaces[0]);
+            if (saved == null || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint)) return false;
+            var assessment = AssessSpaces(layout, out _);
+            return assessment.Status != RoomGenerationStatus.Refused && saved.InputFingerprint == assessment.InputFingerprint &&
+                saved.OutputFingerprint == OutputFingerprint(layout);
         }
 
         public static bool IsCurrent(ShipRoomAuthoring room)
         {
-            if (room != null && room.Layout != null && room.Layout.Spaces.Count > 1) return IsCurrent(room.Layout);
+            if (room != null && room.Layout != null) return IsCurrent(room.Layout);
             var saved = room == null ? null : room.GenerationResult;
             if (saved == null || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint) ||
                 string.IsNullOrEmpty(saved.OutputFingerprint)) return false;

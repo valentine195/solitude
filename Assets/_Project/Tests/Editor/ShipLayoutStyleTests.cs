@@ -138,6 +138,107 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsFalse(layout.GetComponentsInChildren<SpriteRenderer>().Any(r => r.name == "PartitionEast"));
         }
 
+        [Test] public void SingleSpaceUsesCompatibleFallbackAndTracksItsArtwork()
+        {
+            using var a = new RoomAuthoringTestFixtures(32); using var fallback = new RoomAuthoringTestFixtures(32);
+            Configure(a); Configure(fallback);
+            var layout = RoomAuthoringCreation.CreateLayout(a.Scene, fallback.Style);
+            var room = layout.Spaces.Single(); room.Style = a.Style;
+            fallback.Style.CompatibleTransitions = new[] { a.Style }; a.Style.EastCap.Sprite = null;
+            Fill(room, RoomAuthoringTestFixtures.Cells());
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout), layout.GenerationResult?.Summary);
+            Assert.AreEqual(RoomGenerationStatus.Complete, layout.GenerationResult.Status);
+            Assert.IsTrue(layout.GenerationResult.StyleResolutions.Any(r => r.UsedFallback && r.Role == "East" && r.StyleId == fallback.Style.StyleId));
+            var east = room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Where(r => r.name == "East").ToArray();
+            Assert.IsNotEmpty(east); Assert.IsTrue(east.All(r => r.sprite == fallback.Style.EastCap.Sprite));
+            Assert.IsTrue(RoomAuthoringValidator.IsCurrent(room)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+            var replacement = fallback.Sprite(32, 32); fallback.Style.EastCap.Sprite = replacement;
+            Assert.IsFalse(RoomAuthoringValidator.IsCurrent(room)); Assert.IsFalse(RoomAuthoringValidator.IsCurrent(layout));
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout), layout.GenerationResult.Summary);
+            Assert.IsTrue(room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Where(r => r.name == "East").All(r => r.sprite == replacement));
+            Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room)); Assert.AreEqual(1, layout.Spaces.Count);
+            Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+        }
+
+        [TestCase(false)] [TestCase(true)]
+        public void BindingEditPreflightsEveryConsumerBeforeMutation(bool modifyRenderer)
+        {
+            using var a = new RoomAuthoringTestFixtures(32); using var b = new RoomAuthoringTestFixtures(32);
+            Configure(a);
+            var first = RoomAuthoringCreation.CreateLayout(a.Scene, a.Style);
+            var second = RoomAuthoringCreation.CreateLayout(b.Scene, a.Style);
+            foreach (var layout in new[] { first, second })
+            {
+                Fill(layout.Spaces[0], RoomAuthoringTestFixtures.Cells()); Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+            }
+            var ordered = new[] { first, second }.OrderBy(l => l.LayoutId, StringComparer.Ordinal).ToArray();
+            var unsafeRoom = ordered[1].Spaces[0]; GameObject authored = null;
+            if (modifyRenderer) unsafeRoom.GeneratedOutput.GetComponentInChildren<SpriteRenderer>().color = Color.magenta;
+            else
+            {
+                authored = new GameObject("Hand authored equipment", typeof(BoxCollider2D));
+                authored.transform.SetParent(unsafeRoom.GeneratedOutput.transform, false);
+            }
+            var outputs = ordered.Select(RoomAuthoringValidator.OutputFingerprint).ToArray();
+            var results = ordered.Select(l => JsonUtility.ToJson(l.GenerationResult)).ToArray();
+            var style = EditorJsonUtility.ToJson(a.Style); var styleDirty = EditorUtility.IsDirty(a.Style);
+            var dirty = ordered.Select(l => l.gameObject.scene.isDirty).ToArray(); var group = Undo.GetCurrentGroup(); var invoked = false;
+            Assert.IsFalse(RoomAuthoringOperations.EditStyleBindings(a.Style, value => { invoked = true; value.EastCap.Sprite = null; }, out var issue));
+            Assert.IsFalse(invoked); Assert.That(issue, Does.Contain(unsafeRoom.RoomId).And.Contain(ordered[1].LayoutId).And.Contain("generated output"));
+            Assert.AreEqual(style, EditorJsonUtility.ToJson(a.Style)); Assert.AreEqual(styleDirty, EditorUtility.IsDirty(a.Style));
+            CollectionAssert.AreEqual(outputs, ordered.Select(RoomAuthoringValidator.OutputFingerprint));
+            CollectionAssert.AreEqual(results, ordered.Select(l => JsonUtility.ToJson(l.GenerationResult)));
+            CollectionAssert.AreEqual(dirty, ordered.Select(l => l.gameObject.scene.isDirty)); Assert.AreEqual(group, Undo.GetCurrentGroup());
+            if (!modifyRenderer) Assert.IsTrue(authored != null && authored.GetComponent<BoxCollider2D>() != null);
+        }
+
+        [TestCase(false, false)] [TestCase(true, false)] [TestCase(false, true)]
+        public void StyleAssignmentRefusesUnverifiedOutputWithoutUndoOrMutation(bool layoutStyle, bool independent)
+        {
+            using var a = new RoomAuthoringTestFixtures(32); using var b = new RoomAuthoringTestFixtures(32);
+            Configure(a); Configure(b);
+            var layout = independent ? null : RoomAuthoringCreation.CreateLayout(a.Scene, a.Style);
+            var room = independent ? a.Room() : layout.Spaces[0];
+            if (!independent) Fill(room, RoomAuthoringTestFixtures.Cells());
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
+            var authored = new GameObject("Equipment", typeof(BoxCollider2D)); authored.transform.SetParent(room.GeneratedOutput.transform, false);
+            var output = RoomAuthoringValidator.OutputFingerprint(room); var result = JsonUtility.ToJson(room.GenerationResult);
+            var group = Undo.GetCurrentGroup(); var dirty = room.gameObject.scene.isDirty;
+            var roomDirty = EditorUtility.IsDirty(room); var layoutDirty = layout != null && EditorUtility.IsDirty(layout);
+            string issue;
+            Assert.IsFalse(layoutStyle ? RoomAuthoringStyleControls.AssignLayoutStyle(layout, b.Style, out issue) :
+                RoomAuthoringStyleControls.AssignSpaceStyle(room, b.Style, out issue));
+            Assert.That(issue, Does.Contain(room.RoomId).And.Contain("generated output"));
+            Assert.AreSame(a.Style, room.Style); if (layout != null) Assert.AreSame(a.Style, layout.DefaultStyle);
+            Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(room)); Assert.AreEqual(result, JsonUtility.ToJson(room.GenerationResult));
+            Assert.IsNotNull(authored.GetComponent<BoxCollider2D>()); Assert.AreEqual(group, Undo.GetCurrentGroup());
+            Assert.AreEqual(dirty, room.gameObject.scene.isDirty); Assert.AreEqual(roomDirty, EditorUtility.IsDirty(room));
+            if (layout != null) Assert.AreEqual(layoutDirty, EditorUtility.IsDirty(layout));
+        }
+
+        [Test] public void InspectorRetainsLocatedRefusalAndRestoresRejectedBinding()
+        {
+            using var a = new RoomAuthoringTestFixtures(32); using var b = new RoomAuthoringTestFixtures(32);
+            Configure(a); Configure(b);
+            var layout = RoomAuthoringCreation.CreateLayout(a.Scene, a.Style); var room = layout.Spaces[0];
+            Fill(room, RoomAuthoringTestFixtures.Cells()); Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+            var authored = new GameObject("Equipment", typeof(BoxCollider2D)); authored.transform.SetParent(room.GeneratedOutput.transform, false);
+            var window = ScriptableObject.CreateInstance<StyleControlsTestWindow>();
+            try
+            {
+                var root = RoomAuthoringStyleControls.ForSpace(room); window.ShowUtility(); window.rootVisualElement.Add(root);
+                root.Q<ObjectField>("northArtwork0").value = b.Style.NorthWalls[0].Sprite;
+                Assert.AreSame(a.Style.NorthWalls[0].Sprite, root.Q<ObjectField>("northArtwork0").value);
+                Assert.That(root.Q<HelpBox>("artworkRefreshState").text, Does.Contain(room.RoomId).And.Contain("style change refused"));
+                root.Q<ObjectField>("assignedStyle").value = b.Style;
+                Assert.IsNull(root.Q<ObjectField>("assignedStyle").value, "A rejected assignment must restore None (inherit).");
+                Assert.AreSame(a.Style, room.Style, "The effective inherited style must remain unchanged.");
+                Assert.That(root.Q<HelpBox>("artworkRefreshState").text, Does.Contain(room.RoomId).And.Contain("style change refused"));
+                Assert.IsNotNull(authored.GetComponent<BoxCollider2D>());
+            }
+            finally { window.Close(); }
+        }
+
         [Test] public void ThreeOwnerTeeChoosesOnlyVisibleIncidentOwnersEvenWhenHiddenOwnerSortsFirst()
         {
             using var a = new RoomAuthoringTestFixtures(32); using var b = new RoomAuthoringTestFixtures(32);

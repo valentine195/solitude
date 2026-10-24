@@ -153,8 +153,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         private static bool Assign(Object owner, ShipRoomAuthoring room, Action change, out string issue)
         {
-            issue = room == null ? "Create a space first." : room.Layout == null ? RoomAuthoringOperations.GetSafetyIssue(room, true) :
-                RoomAuthoringOperations.GetSafetyIssue(room.Layout, true);
+            issue = room == null ? "Create a space first." : room.Layout == null ? RoomAuthoringOperations.GetStyleReplacementIssue(room) :
+                RoomAuthoringOperations.GetStyleReplacementIssue(room.Layout);
             if (issue != null) return false;
             if (RoomAuthoringOperations.HasActiveEdit) { issue = "Finish or cancel the active paint stroke first."; return false; }
             using var edit = RoomAuthoringOperations.BeginEdit(room, "Change Architectural Style");
@@ -184,6 +184,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             root.Add(selected); root.Add(source); root.Add(feedback); root.Add(fallbacks); root.Add(bindings);
             root.Add(new HelpBox("Painted cells define the layout. Bound Tile/Sprite edits update its artwork. Rearranging this palette or replacing a palette entry does not reassign architectural roles.", HelpBoxMessageType.Info));
             string key = null;
+            string editIssue = null;
             void Refresh()
             {
                 if (room == null && layout == null || room != null && !room.gameObject.scene.IsValid()) return;
@@ -195,10 +196,10 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     (room == null ? "Layout default and compatible fallback: " : assigned == null ? "Inherited from layout: " : "Space override: ") + effective.DisplayName;
                 var pending = layout != null && RoomAuthoringAssetRefresh.IsPending(layout);
                 var blocked = layout == null ? null : RoomAuthoringAssetRefresh.GetIssue(layout);
-                feedback.text = blocked ?? (pending ? "Artwork update queued. Active painting finishes or cancels before refresh." :
+                feedback.text = editIssue ?? blocked ?? (pending ? "Artwork update queued. Active painting finishes or cancels before refresh." :
                     layout == null ? "Adopt into a layout for automatic artwork refresh. Independent rooms use Rebuild Room after asset edits." :
                     "Bound artwork refresh is automatic for loaded layouts. External source files are not restored by scene Undo.");
-                feedback.messageType = blocked == null ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
+                feedback.messageType = editIssue == null && blocked == null ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
                 var result = layout == null ? room.GenerationResult : layout.GenerationResult;
                 var used = (result?.StyleResolutions ?? Array.Empty<RoomStyleResolution>()).Where(r => r.UsedFallback &&
                     (room == null || r.OwnerId == room.RoomId)).ToArray();
@@ -214,7 +215,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 floor.RegisterValueChangedCallback(e =>
                 {
                     RoomAuthoringOperations.EditStyleBindings(style, value => value.FloorTile = (TileBase)e.newValue, out var issue);
-                    if (issue != null) { feedback.text = issue; floor.SetValueWithoutNotify(style.FloorTile); }
+                    editIssue = issue;
+                    if (issue != null) { floor.SetValueWithoutNotify(style.FloorTile); }
                     key = null; Refresh();
                 });
                 bindings.Add(floor);
@@ -225,7 +227,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     field.RegisterValueChangedCallback(e =>
                     {
                         RoomAuthoringOperations.EditStyleBindings(style, value => module.Sprite = (Sprite)e.newValue, out var issue);
-                        if (issue != null) { feedback.text = issue; field.SetValueWithoutNotify(module.Sprite); }
+                        editIssue = issue;
+                        if (issue != null) { field.SetValueWithoutNotify(module.Sprite); }
                         key = null; Refresh();
                     });
                     bindings.Add(field);
@@ -239,7 +242,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     var partner = compatible;
                     transitions.Add(new Button(() =>
                     {
-                        RoomAuthoringOperations.EditStyleBindings(style, value => value.CompatibleTransitions = (value.CompatibleTransitions ?? Array.Empty<RoomStyleDefinition>()).Where(s => s != partner).ToArray(), out _);
+                        RoomAuthoringOperations.EditStyleBindings(style, value => value.CompatibleTransitions = (value.CompatibleTransitions ?? Array.Empty<RoomStyleDefinition>()).Where(s => s != partner).ToArray(), out editIssue);
                         key = null; Refresh();
                     }) { text = "Remove compatibility: " + partner.DisplayName });
                 }
@@ -247,7 +250,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 add.RegisterValueChangedCallback(e =>
                 {
                     if (e.newValue is RoomStyleDefinition partner && partner != style)
-                        RoomAuthoringOperations.EditStyleBindings(style, value => value.CompatibleTransitions = (value.CompatibleTransitions ?? Array.Empty<RoomStyleDefinition>()).Append(partner).Distinct().ToArray(), out _);
+                        RoomAuthoringOperations.EditStyleBindings(style, value => value.CompatibleTransitions = (value.CompatibleTransitions ?? Array.Empty<RoomStyleDefinition>()).Append(partner).Distinct().ToArray(), out editIssue);
                     key = null; Refresh();
                 });
                 transitions.Add(add); bindings.Add(transitions);
@@ -257,7 +260,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 string issue;
                 var success = room == null ? AssignLayoutStyle(layout, (RoomStyleDefinition)e.newValue, out issue) :
                     AssignSpaceStyle(room, (RoomStyleDefinition)e.newValue, out issue);
-                if (!success) feedback.text = issue;
+                editIssue = success ? null : issue;
                 key = null; Refresh();
             });
             root.schedule.Execute(Refresh).Every(300); Refresh();
