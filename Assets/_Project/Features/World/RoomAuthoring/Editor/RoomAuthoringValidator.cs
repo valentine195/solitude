@@ -295,7 +295,43 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             text.Append(Reference(sprite));
             if (sprite != null) text.Append(JsonUtility.ToJson(sprite.rect)).Append(JsonUtility.ToJson(sprite.pivot))
-                .Append(sprite.pixelsPerUnit.ToString("R", System.Globalization.CultureInfo.InvariantCulture)).Append(sprite.texture.filterMode);
+                .Append(sprite.pixelsPerUnit.ToString("R", System.Globalization.CultureInfo.InvariantCulture)).Append(sprite.texture.filterMode)
+                .Append(AssetContentFingerprint(sprite.texture));
+        }
+
+        private static string AssetContentFingerprint(UnityEngine.Object asset)
+        {
+            var path = AssetDatabase.GetAssetPath(asset);
+            return string.IsNullOrEmpty(path) ? "" : AssetDatabase.GetAssetDependencyHash(path).ToString();
+        }
+
+        public static IEnumerable<UnityEngine.Object> StyleDependencies(ShipLayoutAuthoring layout)
+        {
+            foreach (var style in layout.Spaces.Select(room => room.Style).Append(layout.DefaultStyle).Where(style => style != null).Distinct())
+            {
+                yield return style;
+                if (style.FloorTile != null) yield return style.FloorTile;
+                var modules = (style.NorthWalls ?? System.Array.Empty<RoomStyleDefinition.Module>()).Concat(new[]
+                    { style.WestCap, style.EastCap, style.SouthCap, style.Northwest, style.Northeast, style.Southwest, style.Southeast,
+                        style.ConcaveNorthwest, style.ConcaveNortheast, style.ConcaveSouthwest, style.ConcaveSoutheast })
+                    .Concat((style.JunctionModules ?? System.Array.Empty<RoomStyleDefinition.JunctionModule>())
+                        .Where(binding => binding != null).Select(binding => binding.Artwork));
+                foreach (var sprite in modules.Where(module => module != null).Select(module => module.Sprite)
+                    .Append((style.FloorTile as Tile)?.sprite).Where(sprite => sprite != null).Distinct())
+                { yield return sprite; yield return sprite.texture; }
+                if (style.Rendering?.FloorMaterial != null) yield return style.Rendering.FloorMaterial;
+                if (style.Rendering?.ArchitectureMaterial != null) yield return style.Rendering.ArchitectureMaterial;
+            }
+        }
+
+        // No occupancy or generated state: observing an opened scene must not trigger regeneration.
+        public static string StyleAssetsFingerprint(ShipLayoutAuthoring layout)
+        {
+            var text = new StringBuilder();
+            foreach (var style in layout.Spaces.OrderBy(room => room.RoomId, System.StringComparer.Ordinal).Select(room => room.Style))
+                StyleFingerprint(text, style);
+            StyleFingerprint(text, layout.DefaultStyle);
+            return Hash(text);
         }
 
         private static string InputFingerprint(ShipRoomAuthoring room)
@@ -320,9 +356,13 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 .Concat((style.JunctionModules ?? System.Array.Empty<RoomStyleDefinition.JunctionModule>())
                     .Where(binding => binding != null).Select(binding => binding.Artwork));
             foreach (var module in modules) if (module != null) SpriteFingerprint(text, module.Sprite);
+            foreach (var material in new[] { style.Rendering?.FloorMaterial, style.Rendering?.ArchitectureMaterial })
+                if (material != null) text.Append(EditorJsonUtility.ToJson(material)).Append(AssetContentFingerprint(material));
         }
 
-        public static string OutputFingerprint(ShipRoomAuthoring room)
+        public static string OutputFingerprint(ShipRoomAuthoring room) => OutputFingerprint(room, true);
+
+        public static string OutputFingerprint(ShipRoomAuthoring room, bool includeAssetProperties)
         {
             if (room.GeneratedOutput == null) return "missing";
             var text = new StringBuilder();
@@ -336,7 +376,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 var renderer = child.GetComponent<SpriteRenderer>();
                 if (renderer != null)
                 {
-                    RendererFingerprint(text, renderer);
+                    RendererFingerprint(text, renderer, includeAssetProperties);
                     text.Append(Reference(renderer.sprite)).Append(JsonUtility.ToJson(renderer.color))
                         .Append(renderer.flipX).Append(renderer.flipY).Append(renderer.drawMode)
                         .Append(JsonUtility.ToJson(renderer.size)).Append(renderer.tileMode)
@@ -353,7 +393,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     text.Append(floorRenderer == null ? "FloorRenderer:missing" : "FloorRenderer:present");
                     if (floorRenderer != null)
                     {
-                        RendererFingerprint(text, floorRenderer);
+                        RendererFingerprint(text, floorRenderer, includeAssetProperties);
                         text.Append(floorRenderer.mode).Append(floorRenderer.sortOrder).Append(floorRenderer.maskInteraction)
                             .Append(floorRenderer.detectChunkCullingBounds).Append(JsonUtility.ToJson(floorRenderer.chunkCullingBounds))
                             .Append(floorRenderer.maxChunkCount).Append(floorRenderer.maxFrameAge);
@@ -363,8 +403,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                         if (map.HasTile(cell))
                         {
                             GridCoordinateFingerprint(text, cell);
-                            text.Append(Reference(map.GetTile(cell)))
-                                .Append(JsonUtility.ToJson(map.GetColor(cell)))
+                            text.Append(Reference(map.GetTile(cell)));
+                            if (includeAssetProperties) text.Append(JsonUtility.ToJson(map.GetColor(cell)))
                                 .Append(JsonUtility.ToJson(map.GetTransformMatrix(cell)))
                                 .Append((int)map.GetTileFlags(cell));
                         }
@@ -373,14 +413,17 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return Hash(text);
         }
 
-        private static void RendererFingerprint(StringBuilder text, Renderer renderer)
+        private static void RendererFingerprint(StringBuilder text, Renderer renderer, bool includeAssetProperties)
         {
             text.Append(renderer.enabled).Append(renderer.forceRenderingOff).Append(renderer.sortingLayerID).Append(renderer.sortingOrder)
                 .Append(renderer.renderingLayerMask).Append(renderer.rendererPriority).Append(renderer.allowOcclusionWhenDynamic)
                 // The writer never installs property blocks. Any block requires an explicit rebuild, regardless of its values.
                 .Append(renderer.HasPropertyBlock());
-            BoundsFingerprint(text, renderer.localBounds);
-            BoundsFingerprint(text, renderer.bounds);
+            if (includeAssetProperties)
+            {
+                BoundsFingerprint(text, renderer.localBounds);
+                BoundsFingerprint(text, renderer.bounds);
+            }
             var materials = renderer.sharedMaterials;
             text.Append("materials:").Append(materials.Length);
             foreach (var material in materials) text.Append(Reference(material));

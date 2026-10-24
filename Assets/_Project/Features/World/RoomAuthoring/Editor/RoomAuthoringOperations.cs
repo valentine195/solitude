@@ -19,6 +19,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             Undo.undoRedoPerformed += () => activeEdit?.CloseAfterUndo();
         }
 
+        public static bool HasActiveEdit => activeEdit != null;
         public static bool IsEditing(ShipRoomAuthoring room) => activeEdit != null && activeEdit.Room == room;
         public static void CancelActiveEdit() => activeEdit?.Cancel();
         public static void CancelActiveEdit(UnityEngine.SceneManagement.Scene scene)
@@ -314,6 +315,35 @@ namespace SOLITUDE.Editor.RoomAuthoring
             {
                 edit.CloseAfterUndo(); Undo.RevertAllDownToGroup(group); throw;
             }
+        }
+
+        // Supported role/renderer binding edits include every loaded consumer's derived output in one Undo action.
+        // External source-file imports use the asynchronous refresh path and do not promise historical file bytes.
+        public static bool EditStyleBindings(RoomStyleDefinition style, System.Action<RoomStyleDefinition> change, out string issue)
+        {
+            issue = null;
+            if (style == null || change == null) { issue = "Choose a style and binding edit."; return false; }
+            if (EditorApplication.isPlayingOrWillChangePlaymode || HasActiveEdit)
+            { issue = "Finish or cancel painting and return to Edit Mode before changing style bindings."; return false; }
+            var consumers = RoomAuthoringAssetRefresh.LoadedLayouts().Where(layout => RoomAuthoringValidator.StyleDependencies(layout).Contains(style)).ToArray();
+            foreach (var layout in consumers)
+            {
+                issue = GetSafetyIssue(layout, allowMissingOutput: true);
+                if (issue != null) return false;
+            }
+            using var edit = new RoomEdit(null, "Edit Architectural Style Bindings");
+            var group = Undo.GetCurrentGroup();
+            try
+            {
+                var before = EditorJsonUtility.ToJson(style);
+                Undo.RegisterCompleteObjectUndo(style, "Edit Architectural Style Bindings");
+                change(style);
+                if (before == EditorJsonUtility.ToJson(style)) return true;
+                EditorUtility.SetDirty(style);
+                foreach (var layout in consumers) RebuildLayoutCore(layout);
+                return true;
+            }
+            catch { edit.CloseAfterUndo(); Undo.RevertAllDownToGroup(group); throw; }
         }
 
         public static bool Rebuild(ShipLayoutAuthoring layout)
