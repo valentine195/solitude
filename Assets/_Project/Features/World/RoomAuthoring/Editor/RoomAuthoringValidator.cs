@@ -51,11 +51,20 @@ namespace SOLITUDE.Editor.RoomAuthoring
             else placement = RoomPlacementBuilder.BuildFloor(geometry, room.Style);
             var topology = ShipLayoutTopology.Build(new[] { new ShipSpaceCells(room.RoomId, geometry.Cells, Vector2Int.zero) });
             AddDisconnectedIssues(topology, room.RoomId, placement.Issues);
+            if (RoomFloorPanelDomain.HasAuthoredInputs(room))
+            {
+                var offset = room.Layout == null ? Vector2Int.zero : LayoutOffset(room.Layout, room);
+                foreach (var issue in RoomFloorPanelDomain.Build(room).Issues)
+                {
+                    if (issue.HasRegion) { issue.Start -= offset; issue.End -= offset; }
+                    placement.Issues.Add(issue);
+                }
+            }
             foreach (var issue in placement.Issues) issue.LocateInRoom(room.RoomId);
             return new RoomGenerationResult
             {
-                Status = geometry.Cells.Length == 0 ? RoomGenerationStatus.Empty : placement.Issues.Count == 0
-                    ? RoomGenerationStatus.Complete : RoomGenerationStatus.IncompletePreview,
+                Status = placement.Issues.Count != 0 ? RoomGenerationStatus.IncompletePreview :
+                    geometry.Cells.Length == 0 ? RoomGenerationStatus.Empty : RoomGenerationStatus.Complete,
                 Issues = placement.Issues.OrderBy(i => i.Id, System.StringComparer.Ordinal).ToArray(),
                 InputFingerprint = InputFingerprint(room)
             };
@@ -138,12 +147,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     issue.Reason = "Inactive connection retained: layout has no occupied cells. " + issue.Reason;
                     issue.LocateInRoom(string.IsNullOrEmpty(issue.RoomId) ? layout.LayoutId : issue.RoomId);
                 }
+                var retained = inactive.Concat(layout.Spaces.Where(RoomFloorPanelDomain.HasAuthoredInputs)
+                    .SelectMany(room => RoomFloorPanelDomain.Build(room).Issues)).OrderBy(i => i.Id, System.StringComparer.Ordinal).ToArray();
                 foreach (var room in layout.Spaces)
                     placements.Add(room, RoomPlacementBuilder.BuildFloor(RoomBoundaryExtractor.Extract(System.Array.Empty<Vector2Int>()), room.Style));
                 return new RoomGenerationResult
                 {
-                    Status = inactive.Length == 0 ? RoomGenerationStatus.Empty : RoomGenerationStatus.IncompletePreview,
-                    Issues = inactive, InputFingerprint = LayoutInputFingerprint(layout)
+                    Status = retained.Length == 0 ? RoomGenerationStatus.Empty : RoomGenerationStatus.IncompletePreview,
+                    Issues = retained, InputFingerprint = LayoutInputFingerprint(layout)
                 };
             }
             // Connections participate in the same assessment/publication path as shared boundaries.
@@ -328,6 +339,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             foreach (var cell in RoomAuthoringOperations.ReadCells(room).OrderBy(c => c.y).ThenBy(c => c.x))
                 GridCoordinateFingerprint(text, new Vector3Int(cell.x, cell.y, 0));
             StyleFingerprint(text, room.Style);
+            if (RoomFloorPanelDomain.HasAuthoredInputs(room))
+                text.Append("FloorPanels:").Append(RoomFloorPanelDomain.InputKey(room.FloorPanels, room.FloorReservations));
             return Hash(text);
         }
 

@@ -17,6 +17,8 @@ namespace SOLITUDE.World.RoomAuthoring
         [SerializeField] private RoomGeneratedOutput generatedOutput;
         [SerializeField, TextArea] private string generationDiagnostic;
         [SerializeField] private RoomGenerationResult generationResult;
+        [SerializeField] private RoomFloorPanelSettings floorPanels = new RoomFloorPanelSettings();
+        [SerializeField] private RoomFloorReservation[] floorReservations = Array.Empty<RoomFloorReservation>();
 
         public string RoomId => roomId;
         public ShipLayoutAuthoring Layout => layout;
@@ -35,6 +37,20 @@ namespace SOLITUDE.World.RoomAuthoring
         public RoomGeneratedOutput GeneratedOutput => generatedOutput;
         public string GenerationDiagnostic => generationDiagnostic;
         public RoomGenerationResult GenerationResult => generationResult;
+        public RoomFloorPanelSettings FloorPanels => floorPanels ?? new RoomFloorPanelSettings();
+        public System.Collections.Generic.IReadOnlyList<RoomFloorReservation> FloorReservations =>
+            Array.AsReadOnly(floorReservations ?? Array.Empty<RoomFloorReservation>());
+
+        // Raw serialization boundary; supported editor operations validate before calling this.
+        // Copy without pruning or correcting invalid external records.
+        public void SetFloorPanelAuthoring(RoomFloorPanelSettings settings, System.Collections.Generic.IEnumerable<RoomFloorReservation> reservations)
+        {
+            if (settings == null || reservations == null) throw new ArgumentNullException();
+            floorPanels = settings.Copy();
+            var records = new System.Collections.Generic.List<RoomFloorReservation>();
+            foreach (var record in reservations) records.Add(record?.Copy());
+            floorReservations = records.ToArray();
+        }
 
         public void SetGenerationResult(RoomGenerationResult result)
         { generationResult = result; SetGenerationDiagnostic(result?.Summary); }

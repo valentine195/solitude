@@ -317,6 +317,50 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
         }
 
+        public static bool SetFloorPanelSettings(ShipRoomAuthoring room, RoomFloorPanelSettings settings, out string issue) =>
+            EditFloorPanelAuthoring(room, settings, room == null ? null : room.FloorReservations, out issue);
+
+        public static bool UpsertFloorReservation(ShipRoomAuthoring room, RoomFloorReservation reservation, out string issue)
+        {
+            if (room == null || reservation == null) { issue = "Choose a space and reservation."; return false; }
+            var records = room.FloorReservations.ToList();
+            var index = records.FindIndex(r => r != null && r.Id == reservation.Id);
+            if (index < 0) records.Add(reservation); else records[index] = reservation;
+            return EditFloorPanelAuthoring(room, room.FloorPanels, records, out issue);
+        }
+
+        public static bool RemoveFloorReservation(ShipRoomAuthoring room, string identity, out string issue)
+        {
+            if (room == null || string.IsNullOrWhiteSpace(identity)) { issue = "Choose a space and reservation identity."; return false; }
+            return EditFloorPanelAuthoring(room, room.FloorPanels, room.FloorReservations.Where(r => r == null || r.Id != identity), out issue);
+        }
+
+        public static bool EditFloorPanelAuthoring(ShipRoomAuthoring room, RoomFloorPanelSettings settings,
+            IEnumerable<RoomFloorReservation> reservations, out string issue)
+        {
+            issue = room == null || settings == null || reservations == null ? "Choose a space, panel settings and reservation records." :
+                room.Layout == null ? GetStyleReplacementIssue(room) : GetStyleReplacementIssue(room.Layout);
+            if (issue != null) return false;
+            if (HasActiveEdit) { issue = "Finish or cancel the active paint stroke before editing panel inputs."; return false; }
+            var settingsIssue = settings.ValidationIssue();
+            if (settingsIssue != null) { issue = "Space " + room.RoomId + ": FloorPanels/Settings: " + settingsIssue; return false; }
+            var proposed = reservations.Select(r => r?.Copy()).ToArray();
+            var candidate = RoomFloorPanelDomain.Build(room, settings, proposed, retainInactiveRecords: false);
+            var invalid = candidate.Issues.FirstOrDefault(i => !i.Inactive);
+            if (invalid != null) { issue = "Space " + invalid.RoomId + ": " + invalid.Field + ": " + invalid.Reason; return false; }
+            if (RoomFloorPanelDomain.InputKey(room.FloorPanels, room.FloorReservations) == RoomFloorPanelDomain.InputKey(settings, proposed)) return true;
+            using var edit = BeginEdit(room, "Edit Floor Panel Inputs");
+            var group = Undo.GetCurrentGroup();
+            try
+            {
+                Undo.RegisterCompleteObjectUndo(room, "Edit Floor Panel Inputs");
+                room.SetFloorPanelAuthoring(settings, proposed); EditorUtility.SetDirty(room);
+                RebuildCore(room);
+                return true;
+            }
+            catch { edit.CloseAfterUndo(); Undo.RevertAllDownToGroup(group); throw; }
+        }
+
         // Association establishes which root we own; the recorded build establishes which contents may be replaced.
         public static string GetStyleReplacementIssue(ShipRoomAuthoring room)
         {
