@@ -235,6 +235,8 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsFalse(RoomAuthoringOperations.Rebuild(layout)); Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
             var located = layout.GenerationResult.Issues.Single(i => i.Field == "FloorPanels/Reservation/orphan");
             Assert.AreEqual(new Vector2Int(-8, -6), located.Start); Assert.AreEqual(new Vector2Int(-7, -5), located.End);
+            Assert.AreEqual(new Vector3(-7.5f, -5.5f, 0), RoomAuthoringPreview.IssueBounds(room, located).center);
+            Assert.AreEqual(new Vector3(-7.5f, -5.5f, 0), RoomAuthoringPreview.IssueBounds(layout, located).center);
             var roomState = EditorJsonUtility.ToJson(room); var layoutState = EditorJsonUtility.ToJson(layout);
             var output = RoomAuthoringValidator.OutputFingerprint(layout); var group = Undo.GetCurrentGroup(); var dirty = f.Scene.isDirty;
             var domain = RoomFloorPanelDomain.Build(room); domain.Settings.Seed = 77; domain.Settings.SeamPalette[0] = Color.red;

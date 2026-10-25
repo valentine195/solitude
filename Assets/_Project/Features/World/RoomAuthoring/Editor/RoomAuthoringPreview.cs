@@ -234,25 +234,20 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static string IssueLabel(RoomGenerationIssue issue) => (issue.Inactive ? "[inactive] " : "") + issue.RoomId + " — " + FieldLabel(issue) +
             (issue.HasRegion ? " at " + issue.Start + " → " + issue.End : "");
 
-        private static Vector3 IssueWorld(ShipRoomAuthoring room, Vector2Int cell) =>
-            room.Layout != null && room.Layout.Spaces.Count > 1 ? room.Layout.transform.position + (Vector3)(Vector2)cell :
-            room.Occupancy.CellToWorld(new Vector3Int(cell.x, cell.y, 0));
-
-        private static Vector3 IssueWorld(ShipLayoutAuthoring layout, Vector2Int cell) => layout.Spaces.Count == 1 ?
-            IssueWorld(layout.Spaces[0], cell) : layout.transform.position + (Vector3)(Vector2)cell;
-
         private static Bounds RegionBounds(Vector3 a, Vector3 b) => new Bounds((a + b) * .5f,
             Vector3.Max(new Vector3(.75f, .75f, .1f), new Vector3(Mathf.Abs(b.x - a.x), Mathf.Abs(b.y - a.y), .1f)));
 
-        private static Vector3 IssuePosition(ShipRoomAuthoring room, ShipLayoutAuthoring layout, RoomGenerationIssue issue, Vector2Int cell) =>
-            layout != null && issue.Field != null && issue.Field.StartsWith("Connection/", StringComparison.Ordinal)
-                ? layout.transform.position + (Vector3)(Vector2)cell : room != null ? IssueWorld(room, cell) : IssueWorld(layout, cell);
+        // AssessSpaces and saved panel diagnostics use layout cells, even with one member.
+        // Only independent rooms produce occupancy-local diagnostic addresses.
+        private static Vector3 IssuePosition(ShipRoomAuthoring room, ShipLayoutAuthoring layout, Vector2Int cell) =>
+            layout != null ? layout.transform.position + (Vector3)(Vector2)cell :
+            room.Occupancy.CellToWorld(new Vector3Int(cell.x, cell.y, 0));
 
         public static Bounds IssueBounds(ShipRoomAuthoring room, RoomGenerationIssue issue) =>
-            RegionBounds(IssuePosition(room, room.Layout, issue, issue.Start), IssuePosition(room, room.Layout, issue, issue.End));
+            RegionBounds(IssuePosition(room, room.Layout, issue.Start), IssuePosition(room, room.Layout, issue.End));
 
         public static Bounds IssueBounds(ShipLayoutAuthoring layout, RoomGenerationIssue issue) =>
-            RegionBounds(IssuePosition(null, layout, issue, issue.Start), IssuePosition(null, layout, issue, issue.End));
+            RegionBounds(IssuePosition(null, layout, issue.Start), IssuePosition(null, layout, issue.End));
 
         public static bool SelectIssue(ShipRoomAuthoring room, string id, bool frame = true)
         {
@@ -336,8 +331,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 }
                 foreach (var issue in result.Diagnostics.Where(i => i.HasRegion))
                 {
-                    var a = IssuePosition(room, layout, issue, issue.Start);
-                    var b = IssuePosition(room, layout, issue, issue.End);
+                    var a = IssuePosition(room, layout, issue.Start);
+                    var b = IssuePosition(room, layout, issue.End);
                     var selected = selectedIssueId == issue.Id;
                     var bounds = room != null ? IssueBounds(room, issue) : IssueBounds(layout, issue);
                     Handles.color = selected ? Color.yellow : result.Advisories.Contains(issue) ? Color.cyan : Color.red;

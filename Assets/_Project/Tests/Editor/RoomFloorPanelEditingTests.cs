@@ -265,6 +265,79 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Undo.PerformRedo(); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(room));
         }
 
+        private void AssertOffsetDiagnosticBounds(RoomGenerationIssue diagnostic, Vector2Int start, Vector2Int size)
+        {
+            Assert.AreEqual(start, diagnostic.Start); Assert.AreEqual(start + size, diagnostic.End);
+            var expected = new Bounds(layout.transform.position + new Vector3(start.x + size.x * .5f, start.y + size.y * .5f, 0),
+                new Vector3(size.x, size.y, .1f));
+            Assert.AreEqual(expected, RoomAuthoringPreview.IssueBounds(room, diagnostic));
+            Assert.AreEqual(expected, RoomAuthoringPreview.IssueBounds(layout, diagnostic));
+        }
+
+        [TestCase(false, -9, -7, 0, 0)] [TestCase(true, -9, -7, 0, 0)]
+        [TestCase(false, 7, 9, -13, 11)] [TestCase(true, 7, 9, -13, 11)]
+        public void OffsetSingleSpaceReservationFocusUsesLayoutCells(bool erase, int x, int y, int originX, int originY)
+        {
+            layout.transform.position = new Vector3(originX, originY, 0);
+            room.transform.localPosition = new Vector3(x, y, 0);
+            Selection.activeGameObject = room.gameObject;
+            var reservation = new RoomFloorReservation("offset", erase ? room.RoomId : "wrong-owner", Vector2.one, Vector2.one);
+            if (erase)
+            {
+                Assert.IsTrue(RoomAuthoringOperations.UpsertFloorReservation(room, reservation, out var issue), issue);
+                Assert.IsFalse(RoomAuthoringOperations.PaintCell(room, new Vector3Int(1, 1, 0), null));
+            }
+            else
+            {
+                room.SetFloorPanelAuthoring(room.FloorPanels, new[] { reservation });
+                Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
+            }
+            RoomGenerationIssue Located() => RoomAuthoringPreview.GetFeedback(layout).Assessment.Issues
+                .Single(i => i.RoomId == room.RoomId && i.Field == "FloorPanels/Reservation/offset");
+            var diagnostic = Located(); var start = new Vector2Int(x + 1, y + 1);
+            AssertOffsetDiagnosticBounds(diagnostic, start, Vector2Int.one);
+            if (erase)
+            {
+                Undo.PerformUndo(); Assert.AreEqual(48, RoomAuthoringOperations.ReadCells(room).Length);
+                Assert.IsFalse(RoomAuthoringPreview.GetFeedback(layout).Assessment.Issues.Any(i => i.Id == diagnostic.Id));
+                Undo.PerformRedo(); Assert.AreEqual(47, RoomAuthoringOperations.ReadCells(room).Length);
+                AssertOffsetDiagnosticBounds(Located(), start, Vector2Int.one);
+            }
+            foreach (var selectLayout in new[] { false, true })
+            {
+                Selection.activeGameObject = selectLayout ? layout.gameObject : room.gameObject;
+                var before = EditorJsonUtility.ToJson(room); var owner = EditorJsonUtility.ToJson(layout);
+                var output = RoomAuthoringValidator.OutputFingerprint(layout); var assets = AssetBytes();
+                var group = Undo.GetCurrentGroup(); var dirty = room.gameObject.scene.isDirty;
+                var publications = RoomFloorPanelAssetStore.PublicationCount;
+                Assert.IsTrue(selectLayout ? RoomAuthoringPreview.SelectIssue(layout, diagnostic.Id, false) :
+                    RoomAuthoringPreview.SelectIssue(room, diagnostic.Id, false));
+                Assert.AreEqual(diagnostic.Id, RoomAuthoringPreview.SelectedIssueId);
+                Assert.AreEqual(before, EditorJsonUtility.ToJson(room)); Assert.AreEqual(owner, EditorJsonUtility.ToJson(layout));
+                Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(layout)); CollectionAssert.AreEqual(assets, AssetBytes());
+                Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.AreEqual(dirty, room.gameObject.scene.isDirty);
+                Assert.AreEqual(publications, RoomFloorPanelAssetStore.PublicationCount);
+            }
+            ReopenDiagnosticScene(); AssertOffsetDiagnosticBounds(Located(), start, Vector2Int.one);
+        }
+
+        [TestCase(-9, -7, 0, 0)] [TestCase(7, 9, -13, 11)]
+        public void OffsetSingleSpaceCommittedAdvisoriesUseSameLayoutFrame(int x, int y, int originX, int originY)
+        {
+            layout.transform.position = new Vector3(originX, originY, 0);
+            room.transform.localPosition = new Vector3(x, y, 0);
+            Selection.activeGameObject = layout.gameObject;
+            var config = room.FloorPanels.Copy(); config.PreferredMinPixels = config.PreferredMaxPixels = new Vector2Int(256, 256);
+            Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, config, out var issue), issue);
+            RoomGenerationIssue Advisory() => room.GenerationResult.Advisories.Single(i => i.Field.Contains("/Residual/"));
+            var diagnostic = Advisory(); var start = new Vector2Int(x, y); var size = new Vector2Int(8, 6);
+            AssertOffsetDiagnosticBounds(diagnostic, start, size);
+            AssertDiagnosticReadOnly(diagnostic, true, selectionPrepared: true);
+            ReopenDiagnosticScene();
+            AssertOffsetDiagnosticBounds(Advisory(), start, size);
+            AssertDiagnosticReadOnly(Advisory(), true);
+        }
+
         [Test] public void InspectorDraftFieldsDoNotWriteAuthoringOrPublishUntilApply()
         {
             var before = RoomUndoRedoTests.Snapshot(room); var count = RoomFloorPanelAssetStore.RetainedRevisionCount; var group = Undo.GetCurrentGroup();
