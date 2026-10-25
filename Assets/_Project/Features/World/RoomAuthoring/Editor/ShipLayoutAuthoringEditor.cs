@@ -199,7 +199,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             root.Add(focused);
             root.Add(new Button(Refresh) { text = "Validate Layout" });
             root.Add(new Button(() => { RoomAuthoringOperations.Rebuild(layout); serializedObject.Update(); Refresh(); }) { text = "Rebuild Layout" });
-            root.schedule.Execute(Refresh).Every(300);
+            RoomAuthoringPreview.TrackInspectorFeedback(root, Refresh);
             Refresh();
             return root;
         }

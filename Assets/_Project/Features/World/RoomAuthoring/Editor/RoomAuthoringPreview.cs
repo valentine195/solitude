@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEditor.Tilemaps;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 namespace SOLITUDE.Editor.RoomAuthoring
 {
@@ -71,6 +72,42 @@ namespace SOLITUDE.Editor.RoomAuthoring
             AssemblyReloadEvents.beforeAssemblyReload += Detach;
         }
 
+        public static void TrackInspectorFeedback(VisualElement root, Action refresh)
+        {
+            IVisualElementScheduledItem pending = null;
+            var attached = false;
+            void Queue()
+            {
+                if (!attached || pending != null) return;
+                pending = root.schedule.Execute(() =>
+                {
+                    pending = null;
+                    if (attached) refresh();
+                });
+            }
+            void Changed(ref ObjectChangeEventStream stream) { if (stream.length != 0) Queue(); }
+            void Generated(ShipRoomAuthoring _) => Queue();
+            root.RegisterCallback<AttachToPanelEvent>(_ =>
+            {
+                if (attached) return;
+                attached = true;
+                ObjectChangeEvents.changesPublished += Changed;
+                Undo.undoRedoPerformed += Queue;
+                EditorApplication.projectChanged += Queue;
+                RoomAuthoringOperations.GenerationCompleted += Generated;
+                Queue();
+            });
+            root.RegisterCallback<DetachFromPanelEvent>(_ =>
+            {
+                attached = false;
+                ObjectChangeEvents.changesPublished -= Changed;
+                Undo.undoRedoPerformed -= Queue;
+                EditorApplication.projectChanged -= Queue;
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                pending?.Pause(); pending = null;
+            });
+        }
+
         public static bool CanShow => !EditorApplication.isPlayingOrWillChangePlaymode && !BuildPipeline.isBuildingPlayer;
         public static ShipRoomAuthoring CurrentRoom
         {
@@ -107,13 +144,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static RoomPreviewFeedback GetFeedback(ShipRoomAuthoring room)
         {
             if (!CanShow || room == null) return new RoomPreviewFeedback();
-            var result = RoomAuthoringValidator.Assess(room, out var placement);
-            var missing = placement != null && placement.Floor == null ? placement.Geometry.Cells : Array.Empty<Vector2Int>();
-            if (room.Layout != null && room.Layout.Spaces.Count > 1)
+            RoomGenerationResult result;
+            RoomPlacement placement = null;
+            if (room.Layout != null && RoomAuthoringOperations.GetSafetyIssue(room, allowMissingOutput: true) == null)
             {
-                RoomAuthoringValidator.AssessSpaces(room.Layout, out var placements);
-                if (placements.TryGetValue(room, out var own) && own.Floor == null) missing = own.Geometry.Cells;
+                result = RoomAuthoringValidator.AssessSpaces(room.Layout, out var placements);
+                placements.TryGetValue(room, out placement);
             }
+            else result = RoomAuthoringValidator.Assess(room, out placement);
+            var missing = placement != null && placement.Floor == null ? placement.Geometry.Cells : Array.Empty<Vector2Int>();
             var editing = room.Layout == null ? RoomAuthoringOperations.IsEditing(room) : room.Layout.Spaces.Any(RoomAuthoringOperations.IsEditing);
             return new RoomPreviewFeedback
             {
@@ -122,7 +161,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 PendingAddedCells = RoomAuthoringOperations.PendingCells(room, false),
                 PendingRemovedCells = RoomAuthoringOperations.PendingCells(room, true),
                 MissingFloorCells = missing,
-                IsCurrent = !editing && RoomAuthoringValidator.IsCurrent(room)
+                IsCurrent = !editing && RoomAuthoringValidator.IsCurrent(room, result)
             };
         }
 
@@ -134,7 +173,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             {
                 Assessment = result,
                 IsEditing = layout.Spaces.Any(RoomAuthoringOperations.IsEditing),
-                IsCurrent = !layout.Spaces.Any(RoomAuthoringOperations.IsEditing) && RoomAuthoringValidator.IsCurrent(layout),
+                IsCurrent = !layout.Spaces.Any(RoomAuthoringOperations.IsEditing) && RoomAuthoringValidator.IsCurrent(layout, result),
                 MissingFloorCells = placements.Where(p => p.Value.Floor == null)
                     .SelectMany(p => p.Value.Geometry.Cells.Select(c => c + RoomAuthoringValidator.LayoutOffset(layout, p.Key))).ToArray()
             };
@@ -252,6 +291,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         private static void Draw(SceneView view)
         {
+            if (Event.current == null || Event.current.type != EventType.Repaint) return;
             var room = CurrentRoom;
             var layout = CurrentLayout;
             if (room == null && layout == null) return;

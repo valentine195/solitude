@@ -85,7 +85,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             root.Add(new Button(() => RefreshFeedback()) { text = "Validate Room" });
             root.Add(new Button(() => { RoomAuthoringOperations.Rebuild(room); serializedObject.Update(); RefreshFeedback(); }) { text = "Rebuild Room" });
             root.TrackSerializedObjectValue(serializedObject, _ => RefreshFeedback());
-            root.schedule.Execute(RefreshFeedback).Every(300);
+            RoomAuthoringPreview.TrackInspectorFeedback(root, RefreshFeedback);
             RefreshFeedback();
             return root;
         }

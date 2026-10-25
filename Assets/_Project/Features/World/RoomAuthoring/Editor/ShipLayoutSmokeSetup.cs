@@ -29,6 +29,46 @@ namespace SOLITUDE.Editor.RoomAuthoring
         [MenuItem("SOLITUDE/Room Authoring/Create Structural Medbay Walkthrough")]
         private static void CreateMedbayFromMenu() => CreateMedbay(FolderPrefix + Guid.NewGuid().ToString("N"));
 
+        [MenuItem("SOLITUDE/Room Authoring/Create Empty Floor Panel Walkthrough")]
+        private static void CreatePanelingFromMenu()
+        {
+            var structuralFolder = FolderPrefix + Guid.NewGuid().ToString("N");
+            var path = CreateMedbay(structuralFolder);
+            var scene = SceneManager.GetSceneByPath(path);
+            var layout = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ShipLayoutAuthoring>())
+                .Single(l => l.name == "Structural Medbay Layout");
+            var style = CreateFloorPanelStyle(layout.DefaultStyle, FolderPrefix + Guid.NewGuid().ToString("N"));
+            foreach (var room in layout.Spaces) room.Style = style;
+            layout.DefaultStyle = style; RoomAuthoringOperations.Rebuild(layout);
+            EditorSceneManager.SaveScene(scene);
+        }
+
+        // Creates art only. No occupancy, connections, panel settings or existing scene data are modified.
+        public static RoomStyleDefinition CreateFloorPanelStyle(RoomStyleDefinition source, string folder)
+        {
+            if (!Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification") || EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new InvalidOperationException("Prepare temporary panel art only in an isolated Edit Mode verification project.");
+            if (source == null || !EditorUtility.IsPersistent(source) || folder == null || !folder.StartsWith(FolderPrefix, StringComparison.Ordinal) ||
+                !Guid.TryParseExact(folder.Substring(FolderPrefix.Length), "N", out _))
+                throw new ArgumentException("Choose a structural style and a fresh GUID-suffixed walkthrough folder.");
+            if (Directory.Exists(folder) || File.Exists(folder) || File.Exists(folder + ".meta") || AssetDatabase.IsValidFolder(folder))
+                throw new InvalidOperationException("Temporary art destination already exists; no assets were changed.");
+            AssetDatabase.CreateFolder("Assets/_Project/Tests", Path.GetFileName(folder));
+            var texture = new Texture2D(32, 32); texture.SetPixels(Enumerable.Repeat(new Color(.42f, .56f, .66f), 1024).ToArray()); texture.Apply();
+            var path = folder + "/FlatFloor.png"; File.WriteAllBytes(path, texture.EncodeToPNG()); Object.DestroyImmediate(texture);
+            AssetDatabase.ImportAsset(path); var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+            importer.textureType = TextureImporterType.Sprite; importer.spriteImportMode = SpriteImportMode.Single;
+            importer.spritePixelsPerUnit = 32; importer.filterMode = FilterMode.Point; importer.mipmapEnabled = false;
+            importer.textureCompression = TextureImporterCompression.Uncompressed; importer.SaveAndReimport();
+            var tile = ScriptableObject.CreateInstance<Tile>(); tile.sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            AssetDatabase.CreateAsset(tile, folder + "/FlatFloor.asset");
+            var style = Object.Instantiate(source); style.name = "Temporary floor panel style";
+            var data = new SerializedObject(style); data.FindProperty("styleId").stringValue = Guid.NewGuid().ToString("N"); data.ApplyModifiedPropertiesWithoutUndo();
+            style.DisplayName = "Flat floor / panel walkthrough — temporary art"; style.FloorTile = tile;
+            style.Rendering = new RoomStyleDefinition.RenderingConfiguration();
+            AssetDatabase.CreateAsset(style, folder + "/PanelStyle.asset"); AssetDatabase.SaveAssets(); return style;
+        }
+
         public static string CreateMedbay(string folder)
         {
             // Create enforces fresh destination, isolated runner and preservation of existing scenes.

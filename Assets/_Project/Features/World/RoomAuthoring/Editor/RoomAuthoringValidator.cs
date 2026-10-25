@@ -246,9 +246,16 @@ namespace SOLITUDE.Editor.RoomAuthoring
             if (layout == null || layout.Spaces.Count == 0 || layout.Spaces.Any(room => room == null)) return false;
             var saved = layout.GenerationResult;
             if (saved == null || HasPanelPublicationFailure(saved) || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint)) return false;
-            var assessment = AssessSpaces(layout, out _);
-            return assessment.Status != RoomGenerationStatus.Refused && saved.InputFingerprint == assessment.InputFingerprint &&
-                saved.OutputFingerprint == OutputFingerprint(layout);
+            return IsCurrent(layout, AssessSpaces(layout, out _));
+        }
+
+        // The caller just assessed this same input synchronously. This is not a cross-frame cache.
+        internal static bool IsCurrent(ShipLayoutAuthoring layout, RoomGenerationResult assessment)
+        {
+            var saved = layout == null ? null : layout.GenerationResult;
+            return saved != null && !HasPanelPublicationFailure(saved) && saved.Status != RoomGenerationStatus.Refused &&
+                !string.IsNullOrEmpty(saved.InputFingerprint) && assessment.Status != RoomGenerationStatus.Refused &&
+                saved.InputFingerprint == assessment.InputFingerprint && saved.OutputFingerprint == OutputFingerprint(layout);
         }
 
         public static bool IsCurrent(ShipRoomAuthoring room)
@@ -257,8 +264,16 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var saved = room == null ? null : room.GenerationResult;
             if (saved == null || HasPanelPublicationFailure(saved) || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint) ||
                 string.IsNullOrEmpty(saved.OutputFingerprint)) return false;
-            var assessment = Assess(room, out _);
-            return assessment.Status != RoomGenerationStatus.Refused && saved.InputFingerprint == assessment.InputFingerprint &&
+            return IsCurrent(room, Assess(room, out _));
+        }
+
+        internal static bool IsCurrent(ShipRoomAuthoring room, RoomGenerationResult assessment)
+        {
+            if (room != null && room.Layout != null) return IsCurrent(room.Layout, assessment);
+            var saved = room == null ? null : room.GenerationResult;
+            return saved != null && !HasPanelPublicationFailure(saved) && saved.Status != RoomGenerationStatus.Refused &&
+                !string.IsNullOrEmpty(saved.InputFingerprint) && !string.IsNullOrEmpty(saved.OutputFingerprint) &&
+                assessment.Status != RoomGenerationStatus.Refused && saved.InputFingerprint == assessment.InputFingerprint &&
                 saved.OutputFingerprint == OutputFingerprint(room);
         }
 
@@ -373,6 +388,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static string OutputFingerprint(ShipRoomAuthoring room, bool includeAssetProperties)
         {
             if (room.GeneratedOutput == null) return "missing";
+            // All chunk renderers share one immutable container. Read its pixels once per assessment,
+            // while still appending the same fingerprint at every renderer position as before.
+            var panelFingerprints = new Dictionary<RoomFloorPanelOutput, string>();
             var text = new StringBuilder();
             foreach (var child in room.GeneratedOutput.GetComponentsInChildren<Transform>(true))
             {
@@ -391,10 +409,19 @@ namespace SOLITUDE.Editor.RoomAuthoring
                         var panels = AssetDatabase.LoadAssetAtPath<RoomFloorPanelOutput>(path);
                         if (panels != null)
                         {
-                            text.Append(panels.OwnerId).Append(panels.Version).Append(panels.ContentId)
-                                .Append(AssetContentFingerprint(panels));
-                            try { text.Append(RoomFloorPanelAssetStore.ContentHash(panels)).Append(RoomFloorPanelAssetStore.IsVerified(panels)); }
-                            catch { text.Append("invalid-panel-resources"); }
+                            if (!panelFingerprints.TryGetValue(panels, out var fingerprint))
+                            {
+                                var detail = new StringBuilder().Append(panels.OwnerId).Append(panels.Version)
+                                    .Append(panels.ContentId).Append(AssetContentFingerprint(panels));
+                                try
+                                {
+                                    var contentHash = RoomFloorPanelAssetStore.ContentHash(panels);
+                                    detail.Append(contentHash).Append(RoomFloorPanelAssetStore.IsVerified(panels, contentHash));
+                                }
+                                catch { detail.Append("invalid-panel-resources"); }
+                                fingerprint = detail.ToString(); panelFingerprints.Add(panels, fingerprint);
+                            }
+                            text.Append(fingerprint);
                         }
                     }
                     text.Append(Reference(renderer.sprite)).Append(JsonUtility.ToJson(renderer.color))

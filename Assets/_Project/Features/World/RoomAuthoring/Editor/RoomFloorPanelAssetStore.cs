@@ -30,11 +30,20 @@ namespace SOLITUDE.Editor.RoomAuthoring
             using var bytes = new MemoryStream();
             using (var writer = new BinaryWriter(bytes, System.Text.Encoding.UTF8, true)) write(writer);
             using var hash = SHA256.Create();
-            return BitConverter.ToString(hash.ComputeHash(bytes.ToArray())).Replace("-", "").ToLowerInvariant();
+            bytes.Position = 0;
+            return BitConverter.ToString(hash.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant();
         }
         private static void Pixels(BinaryWriter writer, Color32[] pixels)
         {
-            foreach (var p in pixels) { writer.Write(p.r); writer.Write(p.g); writer.Write(p.b); writer.Write(p.a); }
+            // Preserve the persisted RGBA byte stream without four BinaryWriter calls per pixel.
+            var rgba = new byte[checked(pixels.Length * 4)];
+            for (var i = 0; i < pixels.Length; i++)
+            {
+                var offset = i * 4; var pixel = pixels[i];
+                rgba[offset] = pixel.r; rgba[offset + 1] = pixel.g;
+                rgba[offset + 2] = pixel.b; rgba[offset + 3] = pixel.a;
+            }
+            writer.Write(rgba);
         }
         public static string ContentHash(RoomFloorPanelOutput output) => Digest(w =>
         {
@@ -60,7 +69,10 @@ namespace SOLITUDE.Editor.RoomAuthoring
             if (string.IsNullOrEmpty(AssetDatabase.CreateFolder(parent, Path.GetFileName(path))))
                 throw new IOException("Could not create managed panel folder.");
         }
-        public static bool IsVerified(RoomFloorPanelOutput output)
+        public static bool IsVerified(RoomFloorPanelOutput output) => IsVerified(output, null);
+
+        // Only call with a hash computed in this same assessment; never cache texture bytes across edits.
+        internal static bool IsVerified(RoomFloorPanelOutput output, string currentContentHash)
         {
             if (output == null || string.IsNullOrEmpty(output.OwnerId) || output.Version != RoomFloorPanelSettings.CurrentVersion) return false;
             try
@@ -75,7 +87,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                         c.Sprite.pixelsPerUnit != 32 || c.Sprite.pivot != Vector2.zero ||
                         c.Sprite.rect != new Rect(0, 0, c.Texture.width, c.Texture.height) ||
                         AssetDatabase.GetAssetPath(c.Sprite) != path || AssetDatabase.GetAssetPath(c.Texture) != path) return false;
-                return output.ContentId == ContentHash(output);
+                return output.ContentId == (currentContentHash ?? ContentHash(output));
             }
             catch { return false; }
         }

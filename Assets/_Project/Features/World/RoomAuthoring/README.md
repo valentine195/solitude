@@ -186,3 +186,48 @@ through Undo/Redo together.
 
 The temporary-art replacement procedure and separately reported automated/native
 results are in `work/Reviews/RoomAuthoring/UnifiedStyleCompatibility.md`.
+
+## Procedural floor panels
+
+Expand **Procedural floor panels** in either the space Inspector or its layout's
+space section. Settings are a draft until **Apply panel inputs**; one Apply is
+one Undo action. Set Enabled, seed, generator version (currently 1), preferred
+minimum/maximum pixel dimensions (multiples of eight), density 0–1, seam
+thickness 1–3 and seam colors. Use a style whose detail sorting order lies
+strictly between floor and architecture, for example 0 / 1 / 2.
+
+**Preview** draws cyan proposed rectangular boundaries and yellow excluded cells
+in Scene view. It does not replace existing visuals or publish assets. Clear
+preview, Apply, Undo, save, play or reload cancels it. **Regenerate** keeps the
+seed; **New Seed** advances it explicitly and is Undoable. **Disable** removes
+owned seam visuals while retaining settings and reservation records, including
+externally invalid records that still need correction. Changes to occupancy can
+repartition that space; palette and thickness changes preserve panel rectangles.
+
+Add equipment reservations as positive integral cell rectangles. Their IDs remain
+stable while editing position/size; remove a record explicitly when it is no
+longer needed. Doorway and airlock connections automatically exclude one cell of
+depth on each side of their full opening width; open passages do not. No base
+floor cell or collider is removed by these exclusions. Invalid input is reported
+without silently moving or deleting authored data.
+
+Inspector validation refreshes after object edits, Undo/Redo, asset changes and
+generation events rather than polling the full layout while idle. Explicit
+Validate remains a fresh assessment. Scene guides assess only repaint events.
+Panel content is checked once per shared container within each output assessment;
+no integrity result is cached across later edits.
+
+Prepared sprites/textures live in immutable content revisions under this
+feature's `GeneratedFloorPanels` directory. Same-content regeneration reuses
+resources. Old revisions remain available to Undo and saved scenes; the Inspector
+shows the managed store's retained count. Cleanup is explicit and conservative;
+there is no automatic historical-resource deletion. Original artwork, painted
+occupancy and unrelated gameplay objects remain separate.
+
+The isolated **Create Empty Floor Panel Walkthrough** command prepares empty
+spaces and temporary uniform floor art. It never paints an acceptance layout.
+For the native paneling checkpoint, restore the archived natively painted Medbay
+into a disposable project and preserve its baseline. The procedure and current
+Passed/Failed/NotRun evidence are in
+`work/Reviews/RoomAuthoring/FloorPanelingWorkflow.md`. Production artwork is not a
+gate; standalone prepared-pixel player proof remains mandatory in Phase 4.
