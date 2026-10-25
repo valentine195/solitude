@@ -130,6 +130,69 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsFalse(RoomAuthoringOperations.Rebuild(room)); Assert.IsTrue(sentinel != null); Assert.AreSame(old, Revision());
             Assert.AreEqual(RoomGenerationStatus.Refused, room.GenerationResult.Status);
         }
+        [TestCase(false, "Generated Floor")]
+        [TestCase(false, "Generated Floor Panels")]
+        [TestCase(true, "Generated Floor")]
+        [TestCase(true, "Generated Floor Panels")]
+        public void MissingGeneratedChildRecoversWithPanelsAndUndo(bool layoutOwned, string childName)
+        {
+            if (layoutOwned) Assert.IsNotNull(RoomAuthoringCreation.AdoptIntoNewLayout(room));
+            Enable(); var old = Revision(); var pixels = PixelHash(old);
+            var input = RoomAuthoringOperations.ReadCells(room);
+            Object.DestroyImmediate(room.GeneratedOutput.transform.Find(childName).gameObject);
+            var path = folder + "/MissingChild.unity";
+            Assert.IsTrue(EditorSceneManager.SaveScene(room.gameObject.scene, path));
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var scene = EditorSceneManager.OpenScene(path);
+            room = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ShipRoomAuthoring>()).Single();
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room), room.GenerationDiagnostic);
+            Assert.IsNotNull(room.GeneratedOutput.transform.Find(childName));
+            Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            Assert.AreSame(old, Revision()); Assert.AreEqual(pixels, PixelHash(old));
+            CollectionAssert.AreEqual(input, RoomAuthoringOperations.ReadCells(room));
+            Assert.IsTrue(RoomAuthoringValidator.IsCurrent(room));
+            Undo.PerformUndo(); Assert.IsNull(room.GeneratedOutput.transform.Find(childName));
+            Undo.PerformRedo(); Assert.IsNotNull(room.GeneratedOutput.transform.Find(childName));
+            Assert.IsTrue(RoomAuthoringValidator.IsCurrent(room));
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room), room.GenerationDiagnostic);
+        }
+
+        [Test] public void MissingAllChildrenCanBeRestoredWithoutChangingPreparedResources()
+        {
+            Enable(); var old = Revision(); var count = RoomFloorPanelAssetStore.RetainedRevisionCount;
+            foreach (var child in room.GeneratedOutput.transform.Cast<Transform>().ToArray()) Object.DestroyImmediate(child.gameObject);
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room), room.GenerationDiagnostic);
+            Assert.AreSame(old, Revision()); Assert.AreEqual(count, RoomFloorPanelAssetStore.RetainedRevisionCount);
+            Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+        }
+
+        [TestCase("component")] [TestCase("nested")] [TestCase("position")] [TestCase("root")]
+        public void MissingChildDoesNotAuthorizeDiscardingOtherModifiedContent(string modification)
+        {
+            Enable(); var floor = room.GeneratedOutput.transform.Find("Generated Floor");
+            Object.DestroyImmediate(room.GeneratedOutput.transform.Find("Generated Floor Panels").gameObject);
+            Object sentinel = floor;
+            if (modification == "component") sentinel = floor.gameObject.AddComponent<BoxCollider2D>();
+            if (modification == "nested")
+            {
+                var go = new GameObject("Nested authored sentinel"); go.transform.SetParent(floor, false); sentinel = go;
+            }
+            if (modification == "position") floor.localPosition = Vector3.right;
+            if (modification == "root") sentinel = room.GeneratedOutput.gameObject.AddComponent<BoxCollider2D>();
+            Assert.IsFalse(RoomAuthoringOperations.Rebuild(room)); Assert.IsTrue(sentinel != null);
+            Assert.AreEqual(RoomGenerationStatus.Refused, room.GenerationResult.Status);
+            Assert.IsNull(room.GeneratedOutput.transform.Find("Generated Floor Panels"));
+        }
+
+        [Test] public void DeletedRendererDoesNotHideModifiedHistoricalPixels()
+        {
+            Enable(); var old = Revision(); var texture = old.Chunks[0].Texture;
+            texture.SetPixel(0, 0, Color.magenta); texture.Apply(); EditorUtility.SetDirty(texture);
+            Object.DestroyImmediate(room.GeneratedOutput.transform.Find("Generated Floor Panels").gameObject);
+            Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
+            Assert.AreEqual((Color32)Color.magenta, texture.GetPixels32()[0]);
+        }
+
         [Test] public void CleanupRequiresExplicitUndoBoundaryAndRejectsSavedOrLoadedReferences()
         {
             Enable(); var old = Revision(); Enable(45); var current = Revision();

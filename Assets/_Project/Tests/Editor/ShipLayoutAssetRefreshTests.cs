@@ -44,6 +44,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             RoomAuthoringOperations.CancelActiveEdit(); Selection.activeObject = null;
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             AssetDatabase.DeleteAsset(folder); AssetDatabase.DeleteAsset(otherFolder);
+            RoomFloorPanelAssetStore.VerificationRoot = null;
         }
 
         private ShipLayoutAuthoring Layout(RoomStyleDefinition selected, int x)
@@ -106,6 +107,52 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.AreSame(replacement, Floor(first).GetSprite(Vector3Int.zero));
             Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(first.Spaces[0]));
             Assert.AreEqual(0, Count(unrelated)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(first));
+        }
+
+        private void EnablePanels()
+        {
+            RoomFloorPanelAssetStore.VerificationRoot = folder + "/Panels";
+            style.Rendering = new RoomStyleDefinition.RenderingConfiguration();
+            EditorUtility.SetDirty(style); AssetDatabase.SaveAssets();
+            foreach (var layout in new[] { first, second })
+            {
+                var config = layout.Spaces[0].FloorPanels.Copy(); config.Enabled = true;
+                Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(layout.Spaces[0], config, out var issue), issue);
+                Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+            }
+            generations.Clear(); total = 0;
+        }
+
+        private void ImportIntegralPivot()
+        {
+            var importer = (TextureImporter)AssetImporter.GetAtPath(folder + "/wall.png");
+            var settings = new TextureImporterSettings(); importer.ReadTextureSettings(settings);
+            settings.spriteAlignment = (int)SpriteAlignment.Custom; settings.spritePivot = Vector2.zero;
+            importer.SetTextureSettings(settings); importer.SaveAndReimport();
+        }
+
+        [UnityTest] public IEnumerator CompatiblePivotImportRefreshesPanelEnabledConsumers()
+        {
+            EnablePanels(); var room = first.Spaces[0]; var cells = RoomAuthoringOperations.ReadCells(room);
+            var panel = room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Single(r => r.name == "Generated Floor Panels").sprite;
+            ImportIntegralPivot();
+            yield return Until(() => Count(first) == 1 && Count(second) == 1);
+            Assert.AreEqual(RoomGenerationStatus.Complete, first.GenerationResult.Status);
+            Assert.IsTrue(RoomAuthoringValidator.IsCurrent(first)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(second));
+            Assert.AreEqual(0, Count(unrelated)); CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
+            Assert.AreSame(panel, room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Single(r => r.name == "Generated Floor Panels").sprite);
+            var north = room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Where(r => r.name == "North").OrderBy(r => r.transform.localPosition.x).First();
+            Assert.AreEqual(Vector2.zero, north.sprite.pivot);
+            Assert.AreEqual(0, north.transform.localPosition.x);
+            yield return Settle(); Assert.AreEqual(2, total);
+        }
+
+        [Test] public void ExplicitRebuildRecoversCompatiblePivotImportWithPanels()
+        {
+            EnablePanels(); ImportIntegralPivot();
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(first), first.GenerationResult.Summary);
+            Assert.IsTrue(RoomAuthoringValidator.IsCurrent(first));
+            Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(first.Spaces[0]));
         }
 
         [UnityTest] public IEnumerator MetadataAndReferenceBurstPublishesFinalStateOnce()

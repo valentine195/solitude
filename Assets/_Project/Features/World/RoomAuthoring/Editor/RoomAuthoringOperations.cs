@@ -400,6 +400,21 @@ namespace SOLITUDE.Editor.RoomAuthoring
             if (issue != null) return issue;
             var output = room.GeneratedOutput;
             if (output == null) return null;
+            // A surviving generated object must match its recorded scene structure. Imported Sprite
+            // bounds may change independently; missing recorded children may be reconstructed.
+            if (!string.IsNullOrEmpty(output.RootFingerprint))
+            {
+                var children = output.GeneratedChildren;
+                var unchanged = output.RootFingerprint == RoomAuthoringValidator.GeneratedObjectFingerprint(output.transform, false) &&
+                    children != null && children.All(child => child != null &&
+                        (child.Transform == null || (child.Transform.parent == output.transform &&
+                         child.Fingerprint == RoomAuthoringValidator.GeneratedObjectFingerprint(child.Transform, true)))) &&
+                    output.transform.Cast<Transform>().All(child => children.Any(record => record.Transform == child));
+                // Check the recorded container even when all its renderers were deleted. Never adopt
+                // altered historical pixels merely because the visible scene no longer references them.
+                if (unchanged && (output.PreparedPanels == null || RoomFloorPanelAssetStore.IsVerified(output.PreparedPanels))) return null;
+                return "Space " + room.RoomId + ": generated output contains modified or unrecognized content, or modified prepared panel resources. Preserve that content before rebuilding; style change refused.";
+            }
             var recorded = room.GenerationResult?.OutputFingerprint;
             if (!string.IsNullOrEmpty(recorded) && recorded == RoomAuthoringValidator.OutputFingerprint(room)) return null;
             if (string.IsNullOrEmpty(recorded) && output.transform.childCount == 0 &&

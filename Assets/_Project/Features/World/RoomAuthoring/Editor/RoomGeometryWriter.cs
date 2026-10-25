@@ -39,7 +39,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 if (sprite.OwnerId != null && sprite.OwnerId != room.RoomId)
                     throw new System.InvalidOperationException("Resolved architecture belongs to a different space; output was not changed.");
             Clear(room);
-            if (placement.Geometry.Cells.Length == 0) return;
+            if (placement.Geometry.Cells.Length == 0) { RecordContents(room, null); return; }
             if (placement.Floor != null)
             {
                 var floor = new GameObject("Generated Floor", typeof(Tilemap), typeof(TilemapRenderer));
@@ -87,6 +87,20 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 }
                 Undo.RegisterCreatedObjectUndo(go, "Rebuild Room");
             }
+            RecordContents(room, panels);
+        }
+
+        private static void RecordContents(ShipRoomAuthoring room, RoomFloorPanelOutput panels)
+        {
+            var output = room.GeneratedOutput;
+            Undo.RegisterCompleteObjectUndo(output, "Room Generated Ownership");
+            output.RecordGeneratedChildren(RoomAuthoringValidator.GeneratedObjectFingerprint(output.transform, false),
+                output.transform.Cast<Transform>().Select(child => new RoomGeneratedOutput.GeneratedChild
+                {
+                    Transform = child,
+                    Fingerprint = RoomAuthoringValidator.GeneratedObjectFingerprint(child, true)
+                }).ToArray(), panels);
+            EditorUtility.SetDirty(output);
         }
     }
 }

@@ -388,11 +388,20 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static string OutputFingerprint(ShipRoomAuthoring room, bool includeAssetProperties)
         {
             if (room.GeneratedOutput == null) return "missing";
+            return OutputFingerprint(room.GeneratedOutput.GetComponentsInChildren<Transform>(true), includeAssetProperties);
+        }
+
+        // Uses the same structural serialization as currentness, excluding imported bounds/pixels.
+        internal static string GeneratedObjectFingerprint(Transform root, bool descendants) =>
+            OutputFingerprint(descendants ? root.GetComponentsInChildren<Transform>(true) : new[] { root }, false);
+
+        private static string OutputFingerprint(Transform[] transforms, bool includeAssetProperties)
+        {
             // All chunk renderers share one immutable container. Read its pixels once per assessment,
             // while still appending the same fingerprint at every renderer position as before.
             var panelFingerprints = new Dictionary<RoomFloorPanelOutput, string>();
             var text = new StringBuilder();
-            foreach (var child in room.GeneratedOutput.GetComponentsInChildren<Transform>(true))
+            foreach (var child in transforms)
             {
                 text.Append(child.name).Append(child.gameObject.activeSelf).Append(child.gameObject.layer)
                     .Append(JsonUtility.ToJson(child.localPosition))

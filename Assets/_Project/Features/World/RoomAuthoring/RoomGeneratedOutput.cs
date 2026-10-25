@@ -9,6 +9,28 @@ namespace SOLITUDE.World.RoomAuthoring
         [SerializeField] private ShipRoomAuthoring owner;
         [SerializeField] private ShipLayoutAuthoring layoutOwner;
         [SerializeField, TextArea] private string adoptionRecord;
+        // Scene-local ownership proof, recorded by the editor writer in the same Undo transaction.
+        // Missing references are disposable deletions; surviving references must still match.
+        [Serializable]
+        public sealed class GeneratedChild
+        {
+            public Transform Transform;
+            public string Fingerprint;
+        }
+        [SerializeField, HideInInspector] private string rootFingerprint;
+        [SerializeField, HideInInspector] private GeneratedChild[] generatedChildren = Array.Empty<GeneratedChild>();
+        [SerializeField, HideInInspector] private RoomFloorPanelOutput preparedPanels;
+        public string RootFingerprint => rootFingerprint;
+        public System.Collections.Generic.IReadOnlyList<GeneratedChild> GeneratedChildren => generatedChildren;
+        public RoomFloorPanelOutput PreparedPanels => preparedPanels;
+
+        public void RecordGeneratedChildren(string root, GeneratedChild[] children, RoomFloorPanelOutput panels)
+        {
+            rootFingerprint = root;
+            generatedChildren = children;
+            preparedPanels = panels;
+        }
+
         public ShipRoomAuthoring Owner => owner;
         public ShipLayoutAuthoring LayoutOwner => layoutOwner;
         public string AdoptionRecord => adoptionRecord;
