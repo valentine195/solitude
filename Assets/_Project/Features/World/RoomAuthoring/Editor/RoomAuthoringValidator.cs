@@ -40,6 +40,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             placement = null;
             var safety = RoomAuthoringOperations.GetSafetyIssue(room, allowMissingOutput: true);
             if (safety == null) safety = GetOverlapIssue(room, includeLayoutMembers);
+            if (safety == null && (room.FloorPanels.Enabled || HasPreparedPanels(room)))
+                safety = RoomAuthoringOperations.GetStyleReplacementIssue(room);
             if (safety != null)
             {
                 var refusal = new RoomGenerationIssue(RoomIssueKind.Safety, "room", safety + " Retained output was not updated.");
@@ -233,11 +235,17 @@ namespace SOLITUDE.Editor.RoomAuthoring
             };
         }
 
+        private static bool HasPreparedPanels(ShipRoomAuthoring room) => room.GeneratedOutput != null &&
+            room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>(true).Any(r => r.sprite != null &&
+                AssetDatabase.LoadAssetAtPath<RoomFloorPanelOutput>(AssetDatabase.GetAssetPath(r.sprite)) != null);
+        private static bool HasPanelPublicationFailure(RoomGenerationResult result) => result.Issues.Any(i =>
+            i.Field == "FloorPanels/Publication" || (i.Field?.StartsWith("FloorPanels/Raster/") ?? false) || (i.Field?.StartsWith("FloorPanels/Partition/") ?? false));
+
         public static bool IsCurrent(ShipLayoutAuthoring layout)
         {
             if (layout == null || layout.Spaces.Count == 0 || layout.Spaces.Any(room => room == null)) return false;
             var saved = layout.GenerationResult;
-            if (saved == null || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint)) return false;
+            if (saved == null || HasPanelPublicationFailure(saved) || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint)) return false;
             var assessment = AssessSpaces(layout, out _);
             return assessment.Status != RoomGenerationStatus.Refused && saved.InputFingerprint == assessment.InputFingerprint &&
                 saved.OutputFingerprint == OutputFingerprint(layout);
@@ -247,7 +255,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             if (room != null && room.Layout != null) return IsCurrent(room.Layout);
             var saved = room == null ? null : room.GenerationResult;
-            if (saved == null || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint) ||
+            if (saved == null || HasPanelPublicationFailure(saved) || saved.Status == RoomGenerationStatus.Refused || string.IsNullOrEmpty(saved.InputFingerprint) ||
                 string.IsNullOrEmpty(saved.OutputFingerprint)) return false;
             var assessment = Assess(room, out _);
             return assessment.Status != RoomGenerationStatus.Refused && saved.InputFingerprint == assessment.InputFingerprint &&
@@ -377,6 +385,18 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 if (renderer != null)
                 {
                     RendererFingerprint(text, renderer, includeAssetProperties);
+                    if (includeAssetProperties && renderer.sprite != null)
+                    {
+                        var path = AssetDatabase.GetAssetPath(renderer.sprite);
+                        var panels = AssetDatabase.LoadAssetAtPath<RoomFloorPanelOutput>(path);
+                        if (panels != null)
+                        {
+                            text.Append(panels.OwnerId).Append(panels.Version).Append(panels.ContentId)
+                                .Append(AssetContentFingerprint(panels));
+                            try { text.Append(RoomFloorPanelAssetStore.ContentHash(panels)).Append(RoomFloorPanelAssetStore.IsVerified(panels)); }
+                            catch { text.Append("invalid-panel-resources"); }
+                        }
+                    }
                     text.Append(Reference(renderer.sprite)).Append(JsonUtility.ToJson(renderer.color))
                         .Append(renderer.flipX).Append(renderer.flipY).Append(renderer.drawMode)
                         .Append(JsonUtility.ToJson(renderer.size)).Append(renderer.tileMode)

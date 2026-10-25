@@ -28,7 +28,10 @@ namespace SOLITUDE.Tests.RoomAuthoring
         [UnityTest] public IEnumerator LayoutNormalReloadPreservesPartialResult() => Verify(false, true, true);
         [UnityTest] public IEnumerator LayoutDisabledReloadPreservesPartialResult() => Verify(true, true, true);
 
-        private static IEnumerator Verify(bool disableReload, bool partial = false, bool layoutMember = false)
+        [UnityTest] public IEnumerator PreparedPanelsSurviveSaveReopenAndNormalPlayReload() => Verify(false, false, false, true);
+        [UnityTest] public IEnumerator PreparedPanelsSurviveDisabledPlayReload() => Verify(true, false, true, true);
+
+        private static IEnumerator Verify(bool disableReload, bool partial = false, bool layoutMember = false, bool panels = false)
         {
             RequireIsolatedRunner();
             SessionState.SetBool(Key + "enabled", EditorSettings.enterPlayModeOptionsEnabled);
@@ -40,6 +43,18 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var folder = RoomPersistenceTests.CreateAssets(); SessionState.SetString(Key + "folder", folder);
             var room = RoomPersistenceTests.CreateRoom(scene, folder);
             if (layoutMember) RoomAuthoringCreation.AdoptIntoNewLayout(room);
+            SessionState.SetBool(Key + "panels", panels);
+            if (panels)
+            {
+                RoomFloorPanelAssetStore.VerificationRoot = folder + "/Panels";
+                room.Style.Rendering = new RoomStyleDefinition.RenderingConfiguration();
+                EditorUtility.SetDirty(room.Style); AssetDatabase.SaveAssets();
+                var config = room.FloorPanels.Copy(); config.Enabled = true; config.Seed = 19;
+                Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, config, out var issue), issue);
+                var revision = PanelRevision(room);
+                SessionState.SetString(Key + "pixels", RoomFloorPanelAssetStore.ContentHash(revision));
+                SessionState.SetInt(Key + "revisions", RoomFloorPanelAssetStore.RetainedRevisionCount);
+            }
             if (partial)
             {
                 room.Style.Northwest.Sprite = null; EditorUtility.SetDirty(room.Style); AssetDatabase.SaveAssets();
@@ -55,6 +70,14 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 SessionState.SetString(Key + "layoutResult", JsonUtility.ToJson(room.Layout.GenerationResult));
             }
             Assert.IsTrue(EditorSceneManager.SaveScene(scene, folder + "/Room.unity"));
+            if (panels)
+            {
+                var savedPath = folder + "/Room.unity";
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                scene = EditorSceneManager.OpenScene(savedPath);
+                room = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ShipRoomAuthoring>()).Single();
+                Assert.AreEqual(SessionState.GetString(Key + "pixels", ""), RoomFloorPanelAssetStore.ContentHash(PanelRevision(room)));
+            }
             room.Occupancy.gameObject.SetActive(true);
             Selection.activeGameObject = room.Occupancy.gameObject;
             if (layoutMember)
@@ -71,7 +94,15 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.AreEqual(SessionState.GetString(Key + "identity", ""), playingRoom.RoomId);
             Assert.AreEqual(48, RoomAuthoringOperations.ReadCells(playingRoom).Length);
             var sprites = playingRoom.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>();
-            Assert.AreEqual(SessionState.GetBool(Key + "partial", false) ? 27 : 28, sprites.Length);
+            Assert.AreEqual((SessionState.GetBool(Key + "partial", false) ? 27 : 28) + (SessionState.GetBool(Key + "panels", false) ? 1 : 0), sprites.Length);
+            if (SessionState.GetBool(Key + "panels", false))
+            {
+                Assert.AreEqual(SessionState.GetString(Key + "pixels", ""), RoomFloorPanelAssetStore.ContentHash(PanelRevision(playingRoom)));
+                Assert.AreEqual(SessionState.GetInt(Key + "revisions", 0), RoomFloorPanelAssetStore.RetainedRevisionCount);
+                var diagnostic = JsonUtility.ToJson(playingRoom.GenerationResult);
+                Assert.IsFalse(RoomAuthoringOperations.Rebuild(playingRoom), "Editor generation must refuse during Play Mode.");
+                Assert.AreEqual(diagnostic, JsonUtility.ToJson(playingRoom.GenerationResult));
+            }
             Assert.AreEqual(SessionState.GetString(Key + "result", ""), JsonUtility.ToJson(playingRoom.GenerationResult));
             if (SessionState.GetBool(Key + "layout", false))
             {
@@ -99,6 +130,10 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.AreEqual(!SessionState.GetBool(Key + "partial", false), RoomAuthoringOperations.Rebuild(restored), restored.GenerationDiagnostic);
         }
 
+        private static RoomFloorPanelOutput PanelRevision(ShipRoomAuthoring room) =>
+            AssetDatabase.LoadAssetAtPath<RoomFloorPanelOutput>(AssetDatabase.GetAssetPath(
+                room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Single(r => r.name == "Generated Floor Panels").sprite));
+
         [UnityTearDown] public IEnumerator Cleanup()
         {
             if (!SessionState.GetBool(Key + "running", false)) yield break;
@@ -109,6 +144,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var folder = SessionState.GetString(Key + "folder", "");
             if (!string.IsNullOrEmpty(folder)) AssetDatabase.DeleteAsset(folder);
+            RoomFloorPanelAssetStore.VerificationRoot = null;
             SessionState.SetBool(Key + "running", false);
         }
 

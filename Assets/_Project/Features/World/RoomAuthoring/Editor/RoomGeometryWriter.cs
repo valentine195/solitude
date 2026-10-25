@@ -33,7 +33,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             for (var i = root.childCount - 1; i >= 0; i--) Undo.DestroyObjectImmediate(root.GetChild(i).gameObject);
         }
 
-        public static void Apply(ShipRoomAuthoring room, RoomPlacement placement)
+        public static void Apply(ShipRoomAuthoring room, RoomPlacement placement, RoomFloorPanelOutput panels = null)
         {
             foreach (var sprite in placement.Sprites)
                 if (sprite.OwnerId != null && sprite.OwnerId != room.RoomId)
@@ -55,6 +55,22 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     if (placement.Rendering.FloorMaterial != null) renderer.sharedMaterial = placement.Rendering.FloorMaterial;
                 }
                 Undo.RegisterCreatedObjectUndo(floor, "Rebuild Room");
+            }
+            if (panels != null)
+            {
+                var offset = room.Layout == null ? Vector2Int.zero : RoomAuthoringValidator.LayoutOffset(room.Layout, room);
+                foreach (var chunk in panels.Chunks)
+                {
+                    var go = new GameObject("Generated Floor Panels", typeof(SpriteRenderer));
+                    go.transform.SetParent(room.GeneratedOutput.transform, false);
+                    // Chunk coordinates are layout pixels; children use the owning space's local frame.
+                    go.transform.localPosition = new Vector3(chunk.Origin.x / 32f - offset.x, chunk.Origin.y / 32f - offset.y, 0);
+                    var renderer = go.GetComponent<SpriteRenderer>(); renderer.sprite = chunk.Sprite;
+                    renderer.sortingOrder = placement.Rendering?.DetailOrder ?? 1;
+                    renderer.sortingLayerName = placement.Rendering?.SortingLayerName ?? "Default";
+                    if (placement.Rendering?.FloorMaterial != null) renderer.sharedMaterial = placement.Rendering.FloorMaterial;
+                    Undo.RegisterCreatedObjectUndo(go, "Rebuild Room");
+                }
             }
             foreach (var item in placement.Sprites)
             {

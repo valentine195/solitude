@@ -72,6 +72,9 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var missingLayout = layoutMember ? Attach(missingRoom) : null;
             var architecture = new GameObject("North", typeof(SpriteRenderer)); architecture.transform.SetParent(output.transform, false);
             architecture.transform.localPosition = new Vector3(8.5f, 6.5f, 0); architecture.GetComponent<SpriteRenderer>().sprite = sprite;
+            var panels = new GameObject("Prepared transparent panel seams", typeof(SpriteRenderer));
+            panels.transform.SetParent(output.transform, false); panels.transform.localPosition = new Vector3(9.5f, .5f, 0);
+            panels.GetComponent<SpriteRenderer>().sprite = sprite; panels.GetComponent<SpriteRenderer>().sortingOrder = 1;
             var player = new GameObject("RoomFloorPlayer", typeof(PlayerMovement), typeof(PlayerInteractor), typeof(PlayerVitalsController), typeof(SurvivorAvatarAdapter));
             SceneManager.MoveGameObjectToScene(player, scene);
             player.GetComponent<MovementBehavior>().enabled = false;
@@ -108,6 +111,8 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 point.transform.position = new Vector3(9.5f, .5f, 0);
                 Assert.Throws<InvalidOperationException>(() => adapter.ValidateResumePoint(point));
                 Assert.IsFalse(CanLand(point.transform.position), "Inactive mask-only cells cannot count as floor.");
+                Assert.IsEmpty(panels.GetComponents<Collider2D>());
+                Assert.IsFalse(CanLand(panels.transform.position), "Prepared seam sprites cannot supply runtime floor candidates.");
                 point.transform.position = architecture.transform.position;
                 Assert.Throws<InvalidOperationException>(() => adapter.ValidateResumePoint(point));
                 Assert.IsFalse(CanLand(point.transform.position), "Sprite architecture cannot count as floor.");

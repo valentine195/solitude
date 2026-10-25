@@ -15,9 +15,30 @@ namespace SOLITUDE.Tests.RoomAuthoring
 {
     public sealed class RoomFloorPanelAuthoringTests
     {
+        private string panelFolder;
+        [SetUp] public void BeginPanelResourceScope()
+        {
+            Assert.IsTrue(Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification"));
+            panelFolder = "Assets/_Project/Tests/PanelAuthoringFixture" + Guid.NewGuid().ToString("N");
+            AssetDatabase.CreateFolder("Assets/_Project/Tests", Path.GetFileName(panelFolder));
+            RoomFloorPanelAssetStore.VerificationRoot = panelFolder + "/Panels";
+        }
+        [TearDown] public void EndPanelResourceScope()
+        {
+            RoomAuthoringOperations.CancelActiveEdit(); Undo.ClearAll();
+            if (panelFolder != null) AssetDatabase.DeleteAsset(panelFolder);
+            RoomFloorPanelAssetStore.VerificationRoot = null;
+        }
+        private static string[] StructuralSprites(ShipRoomAuthoring room) => room.GeneratedOutput
+            .GetComponentsInChildren<SpriteRenderer>().Where(r => r.name != "Generated Floor Panels")
+            .Select(r => r.name + ":" + r.sprite.GetEntityId() + ":" + JsonUtility.ToJson(r.transform.localPosition) +
+                ":" + JsonUtility.ToJson(r.transform.localRotation) + ":" + JsonUtility.ToJson(r.transform.localScale) +
+                ":" + r.sortingLayerID + ":" + r.sortingOrder + ":" + r.sharedMaterial.GetEntityId()).OrderBy(s => s).ToArray();
+
         private static ShipRoomAuthoring Room(RoomAuthoringTestFixtures fixture)
         {
             ShipLayoutStyleTests.Configure(fixture);
+            fixture.Style.Rendering = new RoomStyleDefinition.RenderingConfiguration();
             var room = fixture.Room(); Assert.IsTrue(RoomAuthoringOperations.Rebuild(room)); return room;
         }
 
@@ -30,11 +51,17 @@ namespace SOLITUDE.Tests.RoomAuthoring
         [Test] public void SettingsAreCopiedAndUndoRestoresExactAuthoredAndStructuralState()
         {
             using var f = new RoomAuthoringTestFixtures(32); var room = Room(f);
-            var before = RoomUndoRedoTests.Snapshot(room); var output = RoomAuthoringValidator.OutputFingerprint(room);
+            var before = RoomUndoRedoTests.Snapshot(room); var structure = StructuralSprites(room);
+            var floor = room.GeneratedOutput.GetComponentInChildren<Tilemap>();
+            var floorBounds = floor.cellBounds; var floorTiles = floor.GetTilesBlock(floorBounds);
             var settings = new RoomFloorPanelSettings { Enabled = true, Seed = -8123, Density = .75f, SeamThickness = 3 };
             Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, settings, out var issue), issue);
             var authored = Inputs(room); var after = RoomUndoRedoTests.Snapshot(room);
-            Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(room)); Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            CollectionAssert.AreEqual(structure, StructuralSprites(room)); Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            var afterFloor = room.GeneratedOutput.GetComponentInChildren<Tilemap>();
+            Assert.AreEqual(floorBounds, afterFloor.cellBounds); CollectionAssert.AreEqual(floorTiles, afterFloor.GetTilesBlock(floorBounds));
+            Assert.IsTrue(room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Any(r => r.name == "Generated Floor Panels"));
+            Assert.IsTrue(room.GenerationResult.IsSuccessful, room.GenerationDiagnostic);
             settings.Seed = 8; settings.SeamPalette[0] = Color.magenta;
             Assert.AreEqual(authored, Inputs(room), "Caller-owned inputs cannot mutate persisted authoring after commit.");
             Undo.PerformUndo(); Assert.IsFalse(room.FloorPanels.Enabled); Assert.AreEqual(0, room.FloorPanels.Seed);
@@ -243,6 +270,8 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 var room = RoomPersistenceTests.CreateRoom(scene, folder); var id = room.RoomId;
                 if (!legacy)
                 {
+                    room.Style.Rendering = new RoomStyleDefinition.RenderingConfiguration();
+                    EditorUtility.SetDirty(room.Style); AssetDatabase.SaveAssets();
                     var settings = new RoomFloorPanelSettings { Enabled = true, Seed = -91, Density = .75f, SeamThickness = 3,
                         PreferredMinPixels = new Vector2Int(16, 24), PreferredMaxPixels = new Vector2Int(64, 96), SeamPalette = new[] { Color.cyan, Color.gray } };
                     Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, settings, out var issue), issue);
