@@ -157,6 +157,75 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsTrue(RoomAuthoringOperations.Rebuild(room), room.GenerationDiagnostic);
         }
 
+        [TestCase("Generated Floor")]
+        [TestCase("Generated Floor Panels")]
+        public void MissingChildAndBoxEraseToEmptyPreserveUndoAndReopen(string childName)
+        {
+            var layout = RoomAuthoringCreation.AdoptIntoNewLayout(room); Enable();
+            var old = Revision(); var pixels = PixelHash(old); var count = RoomFloorPanelAssetStore.RetainedRevisionCount;
+            Object.DestroyImmediate(room.GeneratedOutput.transform.Find(childName).gameObject);
+            var survivors = room.GeneratedOutput.transform.childCount;
+            // Enabled settings remain as inactive authored diagnostics; cleanup must still complete.
+            Assert.IsFalse(RoomAuthoringOperations.PaintBox(room, new BoundsInt(0, 0, 0, 8, 6, 1), null));
+            Assert.IsEmpty(RoomAuthoringOperations.ReadCells(room));
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, layout.GenerationResult.Status);
+            Assert.IsTrue(layout.GenerationResult.Issues.All(i => i.Inactive));
+            Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+            Undo.PerformUndo(); Assert.AreEqual(48, RoomAuthoringOperations.ReadCells(room).Length);
+            Assert.AreEqual(survivors, room.GeneratedOutput.transform.childCount);
+            Assert.IsNull(room.GeneratedOutput.transform.Find(childName));
+            Undo.PerformRedo(); Assert.IsEmpty(RoomAuthoringOperations.ReadCells(room));
+            Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+            var path = folder + "/RecoveredEmpty.unity";
+            Assert.IsTrue(EditorSceneManager.SaveScene(room.gameObject.scene, path));
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var scene = EditorSceneManager.OpenScene(path);
+            room = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ShipRoomAuthoring>()).Single();
+            Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+            Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.Layout.GenerationResult.Status);
+            Assert.IsTrue(room.Layout.GenerationResult.Issues.All(i => i.Inactive));
+            Assert.IsTrue(RoomAuthoringValidator.IsCurrent(room));
+            Assert.AreEqual(pixels, PixelHash(old)); Assert.AreEqual(count, RoomFloorPanelAssetStore.RetainedRevisionCount);
+        }
+
+        [Test] public void ExternalClearAndMissingChildCanRebuildEmptyLayout()
+        {
+            RoomAuthoringCreation.AdoptIntoNewLayout(room); Enable();
+            Object.DestroyImmediate(room.GeneratedOutput.transform.Find("Generated Floor Panels").gameObject);
+            room.Occupancy.ClearAllTiles();
+            Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
+            Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.Layout.GenerationResult.Status);
+            Assert.IsTrue(room.Layout.GenerationResult.Issues.All(i => i.Inactive));
+        }
+
+        [TestCase("added")] [TestCase("modified")] [TestCase("reparented")] [TestCase("pixels")]
+        public void EmptyCleanupWithMissingChildrenPreservesUnsafeContent(string modification)
+        {
+            RoomAuthoringCreation.AdoptIntoNewLayout(room); Enable(); var old = Revision();
+            var floor = room.GeneratedOutput.transform.Find("Generated Floor");
+            Object.DestroyImmediate(room.GeneratedOutput.transform.Find("Generated Floor Panels").gameObject);
+            Object sentinel = floor;
+            if (modification == "added")
+            {
+                var go = new GameObject("Authored sentinel"); go.transform.SetParent(room.GeneratedOutput.transform, false); sentinel = go;
+            }
+            if (modification == "modified") floor.localPosition = Vector3.right;
+            if (modification == "reparented") floor.SetParent(room.transform, false);
+            if (modification == "pixels")
+            {
+                old.Chunks[0].Texture.SetPixel(0, 0, Color.magenta); old.Chunks[0].Texture.Apply();
+                // Even removal of every renderer must not hide altered historical resources.
+                foreach (var child in room.GeneratedOutput.transform.Cast<Transform>().ToArray()) Object.DestroyImmediate(child.gameObject);
+                sentinel = old;
+            }
+            room.Occupancy.ClearAllTiles();
+            Assert.IsFalse(RoomAuthoringOperations.Rebuild(room)); Assert.IsTrue(sentinel != null);
+            Assert.AreEqual(RoomGenerationStatus.Refused, room.Layout.GenerationResult.Status);
+            if (modification == "pixels") Assert.AreEqual((Color32)Color.magenta, old.Chunks[0].Texture.GetPixels32()[0]);
+        }
+
         [Test] public void MissingAllChildrenCanBeRestoredWithoutChangingPreparedResources()
         {
             Enable(); var old = Revision(); var count = RoomFloorPanelAssetStore.RetainedRevisionCount;

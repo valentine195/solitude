@@ -17,6 +17,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 if (output.GetComponents<Component>().Any(c => c == null ||
                     (c.GetType() != typeof(Transform) && c.GetType() != typeof(RoomGeneratedOutput))))
                     return "Output root for " + room.RoomId + " contains unrecognized components; move authored content outside generated output before cleanup.";
+                // Emptiness changes authored input, not the ownership proof. Missing recorded
+                // children are just as disposable here as during a nonempty recovery rebuild.
+                if (!string.IsNullOrEmpty(output.RootFingerprint))
+                {
+                    var issue = RoomAuthoringOperations.GetStyleReplacementIssue(room);
+                    if (issue != null) return issue;
+                    continue;
+                }
+                // Legacy output has no per-child inventory; retain its conservative fallback.
                 // Compare output independently from authored input: erasure legitimately makes the input stale.
                 if (output.transform.childCount != 0 && (string.IsNullOrEmpty(room.GenerationResult?.OutputFingerprint) ||
                     room.GenerationResult.OutputFingerprint != RoomAuthoringValidator.OutputFingerprint(room)))
