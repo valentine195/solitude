@@ -48,6 +48,9 @@ namespace SOLITUDE.World.RoomAuthoring
     {
         public RoomGenerationStatus Status;
         public RoomGenerationIssue[] Issues = Array.Empty<RoomGenerationIssue>();
+        public RoomGenerationIssue[] Advisories = Array.Empty<RoomGenerationIssue>();
+        public System.Collections.Generic.IEnumerable<RoomGenerationIssue> Diagnostics =>
+            Issues.Concat(Advisories ?? Array.Empty<RoomGenerationIssue>());
         public RoomStyleResolution[] StyleResolutions = Array.Empty<RoomStyleResolution>();
         public string InputFingerprint;
         public string OutputFingerprint;

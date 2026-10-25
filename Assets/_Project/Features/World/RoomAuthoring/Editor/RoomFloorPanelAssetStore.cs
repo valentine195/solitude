@@ -94,8 +94,13 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public static RoomFloorPanelOutput Prepare(ShipRoomAuthoring room, RoomPlacement placement,
             out RoomGenerationIssue[] issues)
+            => Prepare(room, placement, out issues, out _);
+
+        public static RoomFloorPanelOutput Prepare(ShipRoomAuthoring room, RoomPlacement placement,
+            out RoomGenerationIssue[] issues, out RoomGenerationIssue[] advisories)
         {
             issues = Array.Empty<RoomGenerationIssue>();
+            advisories = Array.Empty<RoomGenerationIssue>();
             if (!room.FloorPanels.Enabled || placement.Floor == null || placement.Geometry.Cells.Length == 0) return null;
             var rendering = placement.Rendering;
             if (rendering == null || rendering.DetailOrder <= rendering.FloorOrder || rendering.DetailOrder >= rendering.ArchitectureOrder)
@@ -105,7 +110,9 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
             var domain = RoomFloorPanelDomain.Build(room);
             if (!domain.CanGenerate) return null; // Domain diagnostics already belong to assessment.
-            var seams = RoomFloorPanelSeams.Extract(room.RoomId, RoomFloorPanelPartitioner.Partition(domain));
+            var partition = RoomFloorPanelPartitioner.Partition(domain);
+            advisories = partition.Advisories.ToArray();
+            var seams = RoomFloorPanelSeams.Extract(room.RoomId, partition);
             var raster = RoomFloorPanelRasterizer.Rasterize(room.RoomId, seams, domain.PixelRegions, domain.Settings);
             if (!raster.Success) { issues = raster.Issues.ToArray(); return null; }
             var settings = domain.Settings;

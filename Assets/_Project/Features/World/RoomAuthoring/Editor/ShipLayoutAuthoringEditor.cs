@@ -157,12 +157,13 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     (result.Issues.Length == 0 ? "" : "\n" + result.Summary);
                 feedback.messageType = result.Status == RoomGenerationStatus.Refused ? HelpBoxMessageType.Error :
                     result.Issues.Length == 0 ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
-                var key = feedback.text + string.Join("|", result.Issues.Select(i => i.Id + ":" + i.Reason));
+                var key = feedback.text + string.Join("|", result.Diagnostics.Select(i => i.Id + ":" + i.Reason));
                 if (key == previous) return;
                 previous = key; issues.Clear(); focused.text = "";
-                foreach (var issue in result.Issues)
+                foreach (var issue in result.Diagnostics)
                 {
                     issues.Add(new HelpBox(RoomAuthoringPreview.IssueLabel(issue) + "\n" + issue.Reason,
+                        result.Advisories.Contains(issue) ? HelpBoxMessageType.Info :
                         result.Status == RoomGenerationStatus.Refused ? HelpBoxMessageType.Error : HelpBoxMessageType.Warning));
                     issues.Add(new Button(() =>
                     {

@@ -238,8 +238,10 @@ namespace SOLITUDE.Editor.RoomAuthoring
         private static bool HasPreparedPanels(ShipRoomAuthoring room) => room.GeneratedOutput != null &&
             room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>(true).Any(r => r.sprite != null &&
                 AssetDatabase.LoadAssetAtPath<RoomFloorPanelOutput>(AssetDatabase.GetAssetPath(r.sprite)) != null);
-        private static bool HasPanelPublicationFailure(RoomGenerationResult result) => result.Issues.Any(i =>
-            i.Field == "FloorPanels/Publication" || (i.Field?.StartsWith("FloorPanels/Raster/") ?? false) || (i.Field?.StartsWith("FloorPanels/Partition/") ?? false));
+        internal static bool IsPanelGenerationIssue(RoomGenerationIssue issue) =>
+            issue.Field == "FloorPanels/Publication" || (issue.Field?.StartsWith("FloorPanels/Raster/", System.StringComparison.Ordinal) ?? false) ||
+            (issue.Field?.StartsWith("FloorPanels/Partition/", System.StringComparison.Ordinal) ?? false);
+        private static bool HasPanelPublicationFailure(RoomGenerationResult result) => result.Issues.Any(IsPanelGenerationIssue);
 
         public static bool IsCurrent(ShipLayoutAuthoring layout)
         {

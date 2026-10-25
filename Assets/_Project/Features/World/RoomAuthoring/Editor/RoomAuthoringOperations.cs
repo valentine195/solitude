@@ -550,7 +550,18 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         private static RoomFloorPanelOutput PreparePanels(ShipRoomAuthoring room, RoomPlacement placement, RoomGenerationResult result)
         {
-            var output = RoomFloorPanelAssetStore.Prepare(room, placement, out var issues);
+            var output = RoomFloorPanelAssetStore.Prepare(room, placement, out var issues, out var advisories);
+            // Panel diagnostics use layout cell addresses; single-space assessment uses local cells.
+            if (room.Layout != null && room.Layout.Spaces.Count == 1)
+            {
+                var offset = RoomAuthoringValidator.LayoutOffset(room.Layout, room);
+                foreach (var diagnostic in issues.Concat(advisories).Where(i => i.HasRegion))
+                {
+                    diagnostic.Start -= offset; diagnostic.End -= offset;
+                    diagnostic.LocateInRoom(room.RoomId);
+                }
+            }
+            result.Advisories = result.Advisories.Concat(advisories).OrderBy(i => i.Id, System.StringComparer.Ordinal).ToArray();
             if (issues.Length != 0)
             {
                 result.Issues = result.Issues.Concat(issues).OrderBy(i => i.Id, System.StringComparer.Ordinal).ToArray();

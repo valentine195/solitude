@@ -58,7 +58,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 if (result == null) { outcome.text = "Editor preview is hidden in Play Mode and builds."; issues.Clear(); return; }
                 var title = result.Status == RoomGenerationStatus.IncompletePreview ? "Incomplete preview" : result.Status.ToString();
                 var summary = title + (feedback.IsCurrent ? " — current." : " — output not updated; Rebuild Room.");
-                var key = summary + string.Join("|", result.Issues.Select(i => i.Id + ":" + i.Reason));
+                var key = summary + string.Join("|", result.Diagnostics.Select(i => i.Id + ":" + i.Reason));
                 outcome.text = summary;
                 outcome.messageType = result.Status == RoomGenerationStatus.Refused ? HelpBoxMessageType.Error :
                     result.Issues.Length == 0 ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
@@ -66,10 +66,10 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 previousFeedback = key;
                 focusedField.text = "";
                 issues.Clear();
-                foreach (var issue in result.Issues)
+                foreach (var issue in result.Diagnostics)
                 {
                     var item = new VisualElement();
-                    item.Add(new HelpBox(RoomAuthoringPreview.IssueLabel(issue) + "\n" + issue.Kind + ": " + issue.Reason, HelpBoxMessageType.Warning));
+                    item.Add(new HelpBox(RoomAuthoringPreview.IssueLabel(issue) + "\n" + issue.Kind + ": " + issue.Reason, result.Advisories.Contains(issue) ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning));
                     var field = RoomAuthoringPreview.FieldLabel(issue);
                     item.Add(new Button(() =>
                     {

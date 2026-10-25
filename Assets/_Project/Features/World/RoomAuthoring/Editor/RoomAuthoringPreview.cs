@@ -134,11 +134,11 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             RoomGenerationResult result;
             if (issueLayout != null && issueLayout == CurrentLayout)
-                result = RoomAuthoringValidator.Assess(issueLayout, out _);
+                result = GetFeedback(issueLayout).Assessment;
             else if (issueRoom != null && issueRoom == CurrentRoom)
-                result = RoomAuthoringValidator.Assess(issueRoom, out _);
+                result = GetFeedback(issueRoom).Assessment;
             else { issueRoom = null; issueLayout = null; selectedIssueId = null; return; }
-            if (!result.Issues.Any(i => i.Id == selectedIssueId)) selectedIssueId = null;
+            if (result == null || !result.Diagnostics.Any(i => i.Id == selectedIssueId)) selectedIssueId = null;
         }
 
         public static RoomPreviewFeedback GetFeedback(ShipRoomAuthoring room)
@@ -152,6 +152,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 placements.TryGetValue(room, out placement);
             }
             else result = RoomAuthoringValidator.Assess(room, out placement);
+            IncludeSavedPanelDiagnostics(result, room.Layout == null ? room.GenerationResult : room.Layout.GenerationResult);
             var missing = placement != null && placement.Floor == null ? placement.Geometry.Cells : Array.Empty<Vector2Int>();
             var editing = room.Layout == null ? RoomAuthoringOperations.IsEditing(room) : room.Layout.Spaces.Any(RoomAuthoringOperations.IsEditing);
             return new RoomPreviewFeedback
@@ -169,6 +170,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
         {
             if (!CanShow || layout == null) return new RoomPreviewFeedback();
             var result = RoomAuthoringValidator.AssessSpaces(layout, out var placements);
+            IncludeSavedPanelDiagnostics(result, layout.GenerationResult);
             return new RoomPreviewFeedback
             {
                 Assessment = result,
@@ -177,6 +179,18 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 MissingFloorCells = placements.Where(p => p.Value.Floor == null)
                     .SelectMany(p => p.Value.Geometry.Cells.Select(c => c + RoomAuthoringValidator.LayoutOffset(layout, p.Key))).ToArray()
             };
+        }
+
+        private static void IncludeSavedPanelDiagnostics(RoomGenerationResult assessment, RoomGenerationResult saved)
+        {
+            if (saved == null || assessment.Status == RoomGenerationStatus.Refused ||
+                string.IsNullOrEmpty(assessment.InputFingerprint) || saved.InputFingerprint != assessment.InputFingerprint) return;
+            assessment.Issues = assessment.Issues.Concat(saved.Issues.Where(RoomAuthoringValidator.IsPanelGenerationIssue))
+                .GroupBy(i => i.Id, StringComparer.Ordinal).Select(g => g.First()).OrderBy(i => i.Id, StringComparer.Ordinal).ToArray();
+            assessment.Advisories = (saved.Advisories ?? Array.Empty<RoomGenerationIssue>())
+                .Where(RoomAuthoringValidator.IsPanelGenerationIssue).OrderBy(i => i.Id, StringComparer.Ordinal).ToArray();
+            if (assessment.Issues.Length != 0 && assessment.Status != RoomGenerationStatus.IncompletePreview)
+                assessment.Status = RoomGenerationStatus.IncompletePreview;
         }
 
         public static string FieldLabel(RoomGenerationIssue issue) => issue.Field != null && (issue.Field.StartsWith("Connection/", StringComparison.Ordinal) || issue.Field.StartsWith("FloorPanels/", StringComparison.Ordinal)) ?
@@ -243,7 +257,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static bool SelectIssue(ShipRoomAuthoring room, string id, bool frame = true)
         {
             if (!CanShow || room == null || CurrentRoom != room) return false;
-            var issue = RoomAuthoringValidator.Assess(room, out _).Issues.FirstOrDefault(i => i.Id == id);
+            var issue = GetFeedback(room).Assessment?.Diagnostics.FirstOrDefault(i => i.Id == id);
             if (issue == null) return false;
             issueRoom = room; issueLayout = room.Layout; selectedIssueId = id;
             Focus(issue, issue.HasRegion ? IssueBounds(room, issue) : default, room.Style == null ? (UnityEngine.Object)room.gameObject : room.Style, frame);
@@ -253,7 +267,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static bool SelectIssue(ShipLayoutAuthoring layout, string id, bool frame = true)
         {
             if (!CanShow || layout == null || CurrentLayout != layout) return false;
-            var issue = RoomAuthoringValidator.Assess(layout, out _).Issues.FirstOrDefault(i => i.Id == id);
+            var issue = GetFeedback(layout).Assessment?.Diagnostics.FirstOrDefault(i => i.Id == id);
             if (issue == null) return false;
             issueRoom = null; issueLayout = layout; selectedIssueId = id;
             var owner = layout.Spaces.FirstOrDefault(r => r != null && r.RoomId == issue.RoomId);
@@ -320,13 +334,13 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     Handles.DrawSolidRectangleWithOutline(new[] { origin, origin + Vector3.right, origin + Vector3.right + Vector3.up, origin + Vector3.up },
                         new Color(1f, .3f, .15f, .12f), new Color(1f, .4f, .15f, .8f));
                 }
-                foreach (var issue in result.Issues.Where(i => i.HasRegion))
+                foreach (var issue in result.Diagnostics.Where(i => i.HasRegion))
                 {
                     var a = IssuePosition(room, layout, issue, issue.Start);
                     var b = IssuePosition(room, layout, issue, issue.End);
                     var selected = selectedIssueId == issue.Id;
                     var bounds = room != null ? IssueBounds(room, issue) : IssueBounds(layout, issue);
-                    Handles.color = selected ? Color.yellow : Color.red;
+                    Handles.color = selected ? Color.yellow : result.Advisories.Contains(issue) ? Color.cyan : Color.red;
                     if (a != b) Handles.DrawAAPolyLine(4, a, b);
                     var center = (a + b) * .5f;
                     Handles.DrawWireDisc(center, Vector3.forward, selected ? .22f : .14f);
