@@ -1,5 +1,8 @@
 using System;
 using System.Linq;
+using System.Collections.Generic;
+using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
 using UnityEditor.Tilemaps;
@@ -18,6 +21,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public Vector2Int[] PendingRemovedCells = Array.Empty<Vector2Int>();
     }
 
+    public sealed class RoomFloorPanelPreview
+    {
+        public RoomFloorPanelDomain Domain { get; }
+        public RoomFloorPanelPartition Partition { get; }
+        public RoomFloorPanelPreview(RoomFloorPanelDomain domain)
+        { Domain = domain; Partition = RoomFloorPanelPartitioner.Partition(domain); }
+    }
+
     [InitializeOnLoad]
     public static class RoomAuthoringPreview
     {
@@ -25,6 +36,27 @@ namespace SOLITUDE.Editor.RoomAuthoring
         private static ShipRoomAuthoring issueRoom;
         private static ShipLayoutAuthoring issueLayout;
         private static string selectedIssueId;
+        private static ShipRoomAuthoring panelRoom;
+        private static RoomFloorPanelPreview panelPreview;
+        private static string panelSourceKey;
+        public static void ClearFloorPanelPreview() { panelRoom = null; panelPreview = null; panelSourceKey = null; SceneView.RepaintAll(); }
+        private static string PanelSourceKey(ShipRoomAuthoring room) => JsonUtility.ToJson(RoomAuthoringValidator.Assess(room, out _));
+        public static RoomFloorPanelPreview BuildFloorPanelPreview(ShipRoomAuthoring room, RoomFloorPanelSettings settings,
+            IReadOnlyList<RoomFloorReservation> reservations) => new RoomFloorPanelPreview(RoomFloorPanelDomain.Build(room, settings, reservations));
+        public static bool ShowFloorPanelPreview(ShipRoomAuthoring room, RoomFloorPanelSettings settings,
+            IReadOnlyList<RoomFloorReservation> reservations)
+        {
+            if (!CanShow || room == null || RoomAuthoringOperations.HasActiveEdit) return false;
+            panelPreview = BuildFloorPanelPreview(room, settings, reservations); panelRoom = room;
+            panelSourceKey = PanelSourceKey(room); SceneView.RepaintAll(); return true;
+        }
+        public static RoomFloorPanelPreview GetFloorPanelPreview(ShipRoomAuthoring room)
+        {
+            if (!CanShow || room == null || panelRoom != room) return null;
+            if (panelSourceKey != PanelSourceKey(room)) { ClearFloorPanelPreview(); return null; }
+            return panelPreview;
+        }
+        private static void OnSceneSaving(Scene scene, string path) => ClearFloorPanelPreview();
         public static string SelectedIssueId { get { PruneSelection(); return selectedIssueId; } }
 
         static RoomAuthoringPreview()
@@ -32,6 +64,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             SceneView.duringSceneGui += Draw;
             Selection.selectionChanged += Repaint;
             Undo.undoRedoPerformed += Repaint;
+            Undo.undoRedoPerformed += ClearFloorPanelPreview;
+            EditorSceneManager.sceneSaving += OnSceneSaving;
             RoomAuthoringOperations.GenerationCompleted += OnGenerated;
             EditorApplication.playModeStateChanged += OnPlayMode;
             AssemblyReloadEvents.beforeAssemblyReload += Detach;
@@ -55,8 +89,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             Selection.activeGameObject == null ? null : Selection.activeGameObject.GetComponentInParent<ShipLayoutAuthoring>(true);
 
         public static void SetEditedRoom(ShipRoomAuthoring room) { if (editedRoom == room) return; editedRoom = room; Repaint(); }
-        public static void ClearSelection() { editedRoom = null; issueRoom = null; issueLayout = null; selectedIssueId = null; SceneView.RepaintAll(); }
-        private static void OnGenerated(ShipRoomAuthoring room) => Repaint();
+        public static void ClearSelection() { ClearFloorPanelPreview(); editedRoom = null; issueRoom = null; issueLayout = null; selectedIssueId = null; SceneView.RepaintAll(); }
+        private static void OnGenerated(ShipRoomAuthoring room) { ClearFloorPanelPreview(); Repaint(); }
         private static void OnPlayMode(PlayModeStateChange state) => ClearSelection();
         private static void Repaint() { PruneSelection(); SceneView.RepaintAll(); }
         private static void PruneSelection()
@@ -106,7 +140,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             };
         }
 
-        public static string FieldLabel(RoomGenerationIssue issue) => issue.Field != null && issue.Field.StartsWith("Connection/", StringComparison.Ordinal) ?
+        public static string FieldLabel(RoomGenerationIssue issue) => issue.Field != null && (issue.Field.StartsWith("Connection/", StringComparison.Ordinal) || issue.Field.StartsWith("FloorPanels/", StringComparison.Ordinal)) ?
             issue.Field : issue.HasRegion ? issue.Field :
             issue.Kind == RoomIssueKind.Floor ? "style.floorTile" : issue.Kind == RoomIssueKind.Style ? "style" : "room ownership / coordinates";
 
@@ -198,6 +232,24 @@ namespace SOLITUDE.Editor.RoomAuthoring
             SceneView.RepaintAll();
         }
 
+        private static void DrawFloorPanelPreview()
+        {
+            if (panelRoom == null || (CurrentRoom != panelRoom && (panelRoom.Layout == null || CurrentLayout != panelRoom.Layout))) return;
+            var preview = GetFloorPanelPreview(panelRoom); if (preview == null) return;
+            var origin = panelRoom.Layout == null ? panelRoom.Occupancy.CellToWorld(Vector3Int.zero) : panelRoom.Layout.transform.position;
+            Vector3 World(Vector2 pixel) => origin + new Vector3(pixel.x / 32f, pixel.y / 32f, 0);
+            foreach (var rect in preview.Partition.Rectangles)
+                Handles.DrawSolidRectangleWithOutline(new[] { World(rect.min), World(new Vector2(rect.xMax, rect.y)), World(rect.max), World(new Vector2(rect.x, rect.yMax)) },
+                    new Color(0, .8f, 1, .06f), Color.cyan);
+            foreach (var cell in preview.Domain.ExcludedCells)
+            {
+                var a = World(cell * 32);
+                Handles.color = Color.yellow; Handles.DrawLine(a, a + Vector3.right + Vector3.up);
+                Handles.DrawLine(a + Vector3.up, a + Vector3.right);
+                Handles.Label(a, "excluded");
+            }
+        }
+
         private static void Draw(SceneView view)
         {
             var room = CurrentRoom;
@@ -212,6 +264,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             try
             {
                 Handles.zTest = CompareFunction.Always;
+                DrawFloorPanelPreview();
                 foreach (var cell in feedback.PendingAddedCells.Concat(feedback.PendingRemovedCells))
                 {
                     var origin = room.Occupancy.CellToWorld(new Vector3Int(cell.x, cell.y, 0));
@@ -249,6 +302,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             SceneView.duringSceneGui -= Draw;
             Selection.selectionChanged -= Repaint;
             Undo.undoRedoPerformed -= Repaint;
+            Undo.undoRedoPerformed -= ClearFloorPanelPreview;
+            EditorSceneManager.sceneSaving -= OnSceneSaving;
             RoomAuthoringOperations.GenerationCompleted -= OnGenerated;
             EditorApplication.playModeStateChanged -= OnPlayMode;
             ClearSelection();

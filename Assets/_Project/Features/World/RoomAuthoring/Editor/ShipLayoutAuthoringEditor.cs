@@ -185,6 +185,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     spaceControls.Add(field);
                 }
                 spaceControls.Add(RoomAuthoringStyleControls.ForSpace(room));
+                spaceControls.Add(RoomFloorPanelControls.ForSpace(room));
                 spaceControls.Add(new Button(() => Selection.activeGameObject = room.gameObject) { text = "Select Space" });
                 spaceControls.Add(new Button(() => RoomAuthoringPaletteSetup.EditRoom(room)) { text = "Edit Space in Tile Palette" });
                 if (room.SpaceType == LogicalSpaceType.Corridor)

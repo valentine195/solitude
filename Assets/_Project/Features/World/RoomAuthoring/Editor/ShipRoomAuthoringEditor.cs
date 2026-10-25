@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using System.Collections.Generic;
 using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -22,6 +24,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
             var room = (ShipRoomAuthoring)target;
             root.Add(RoomAuthoringStyleControls.ForSpace(room));
+            root.Add(RoomFloorPanelControls.ForSpace(room));
             var adoptionFeedback = new HelpBox("", HelpBoxMessageType.Info);
             var adopt = new Button(() =>
             {
@@ -87,4 +90,112 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return root;
         }
     }
+    public static class RoomFloorPanelControls
+    {
+        public static VisualElement ForSpace(ShipRoomAuthoring room)
+        {
+            var root = new Foldout { text = "Procedural floor panels", name = "floorPanelControls", value = room.FloorPanels.Enabled };
+            root.Add(new HelpBox("Draft changes apply together as one Undo action. Footprint changes may repanel this space. Palette and thickness preserve the partition. Configure style sorting above floors and below structure (for example 0 / 1 / 2).", HelpBoxMessageType.Info));
+            var inputs = new VisualElement(); var rows = new VisualElement();
+            var feedback = new HelpBox("", HelpBoxMessageType.Info) { name = "panelFeedback" };
+            var counts = new Label { name = "panelRetainedCounts" };
+            var settings = room.FloorPanels.Copy();
+            var records = room.FloorReservations.Select(r => r?.Copy()).ToList();
+            var baseline = ""; var dirty = false;
+            string CurrentKey() => RoomFloorPanelDomain.InputKey(room.FloorPanels, room.FloorReservations);
+            void Changed() { dirty = true; RoomAuthoringPreview.ClearFloorPanelPreview(); }
+            void DrawReservations()
+            {
+                rows.Clear();
+                for (var n = 0; n < records.Count; n++)
+                {
+                    var index = n; var record = records[index]; var row = new VisualElement();
+                    row.Add(new Label(record == null ? "Missing reservation record" : record.Id + " — owner " + record.SpaceId));
+                    if (record != null)
+                    {
+                        var position = new Vector2Field("Cell position (integers)") { value = record.Position };
+                        var size = new Vector2Field("Cell size (positive integers)") { value = record.Size };
+                        position.RegisterValueChangedCallback(e => { var old = records[index]; records[index] = new RoomFloorReservation(old.Id, old.SpaceId, e.newValue, old.Size); Changed(); });
+                        size.RegisterValueChangedCallback(e => { var old = records[index]; records[index] = new RoomFloorReservation(old.Id, old.SpaceId, old.Position, e.newValue); Changed(); });
+                        row.Add(position); row.Add(size);
+                        if (record.SpaceId != room.RoomId)
+                            row.Add(new Button(() => { var old = records[index]; records[index] = new RoomFloorReservation(old.Id, room.RoomId, old.Position, old.Size); Changed(); DrawReservations(); }) { text = "Associate with this space" });
+                    }
+                    row.Add(new Button(() => { records.RemoveAt(index); Changed(); DrawReservations(); }) { text = "Remove reservation" });
+                    rows.Add(row);
+                }
+            }
+            void DrawSettings()
+            {
+                inputs.Clear();
+                var enabled = new Toggle("Enabled") { name = "panelEnabled", value = settings.Enabled };
+                enabled.RegisterValueChangedCallback(e => { settings.Enabled = e.newValue; Changed(); }); inputs.Add(enabled);
+                var seed = new IntegerField("Seed") { name = "panelSeed", value = settings.Seed, isDelayed = true };
+                seed.RegisterValueChangedCallback(e => { settings.Seed = e.newValue; Changed(); }); inputs.Add(seed);
+                var version = new IntegerField("Generator version (supported: 1)") { value = settings.Version, isDelayed = true };
+                version.RegisterValueChangedCallback(e => { settings.Version = e.newValue; Changed(); }); inputs.Add(version);
+                var min = new Vector2IntField("Preferred minimum (pixels)") { value = settings.PreferredMinPixels };
+                var max = new Vector2IntField("Preferred maximum (pixels)") { value = settings.PreferredMaxPixels };
+                min.RegisterValueChangedCallback(e => { settings.PreferredMinPixels = e.newValue; Changed(); });
+                max.RegisterValueChangedCallback(e => { settings.PreferredMaxPixels = e.newValue; Changed(); }); inputs.Add(min); inputs.Add(max);
+                var density = new FloatField("Seam density (0–1)") { value = settings.Density, isDelayed = true };
+                density.RegisterValueChangedCallback(e => { settings.Density = e.newValue; Changed(); }); inputs.Add(density);
+                var thickness = new IntegerField("Seam thickness (1–3 pixels)") { value = settings.SeamThickness, isDelayed = true };
+                thickness.RegisterValueChangedCallback(e => { settings.SeamThickness = e.newValue; Changed(); }); inputs.Add(thickness);
+                var palette = new VisualElement();
+                void DrawPalette()
+                {
+                    palette.Clear();
+                    for (var i = 0; i < (settings.SeamPalette?.Length ?? 0); i++)
+                    {
+                        var index = i; var color = new ColorField("Seam color " + (i + 1)) { value = settings.SeamPalette[i] };
+                        color.RegisterValueChangedCallback(e => { settings.SeamPalette[index] = e.newValue; Changed(); }); palette.Add(color);
+                        palette.Add(new Button(() => { settings.SeamPalette = settings.SeamPalette.Where((c, n) => n != index).ToArray(); Changed(); DrawPalette(); }) { text = "Remove color" });
+                    }
+                }
+                DrawPalette(); inputs.Add(palette);
+                inputs.Add(new Button(() => { settings.SeamPalette = (settings.SeamPalette ?? Array.Empty<Color>()).Append(Color.gray).ToArray(); Changed(); DrawPalette(); }) { text = "Add seam color" });
+            }
+            void Reload()
+            {
+                settings = room.FloorPanels.Copy(); records = room.FloorReservations.Select(r => r?.Copy()).ToList();
+                baseline = CurrentKey(); dirty = false; DrawSettings(); DrawReservations();
+            }
+            bool Ready()
+            {
+                if (!dirty) return true;
+                feedback.text = "Apply or reload the draft before this action."; return false;
+            }
+            root.Add(inputs); root.Add(rows);
+            root.Add(new Button(() => { records.Add(new RoomFloorReservation(Guid.NewGuid().ToString("N"), room.RoomId, Vector2.zero, Vector2.one)); Changed(); DrawReservations(); }) { text = "Add equipment reservation", name = "panelAddReservation" });
+            root.Add(new Button(() =>
+            {
+                if (!RoomAuthoringPreview.ShowFloorPanelPreview(room, settings, records)) { feedback.text = "Finish the active stroke; preview is available in Edit Mode."; return; }
+                var preview = RoomAuthoringPreview.GetFloorPanelPreview(room);
+                feedback.text = preview.Partition.Rectangles.Count + " proposed panels; " + preview.Domain.ExcludedCells.Count + " excluded cells. " +
+                    string.Join("\n", preview.Partition.Issues.Concat(preview.Partition.Advisories).Select(i => i.Field + ": " + i.Reason));
+                feedback.messageType = preview.Partition.Success ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning;
+            }) { text = "Preview", name = "panelPreview" });
+            root.Add(new Button(RoomAuthoringPreview.ClearFloorPanelPreview) { text = "Clear preview" });
+            root.Add(new Button(() =>
+            {
+                if (baseline != CurrentKey()) { feedback.text = "Panel inputs changed elsewhere. Reload the draft before applying."; return; }
+                if (!RoomAuthoringOperations.EditFloorPanelAuthoring(room, settings, records, out var issue)) { feedback.text = issue; feedback.messageType = HelpBoxMessageType.Warning; return; }
+                Reload(); feedback.text = room.GenerationResult.IsSuccessful ? "Panel inputs applied." : room.GenerationDiagnostic;
+            }) { text = "Apply panel inputs", name = "panelApply" });
+            root.Add(new Button(() => { Reload(); RoomAuthoringPreview.ClearFloorPanelPreview(); feedback.text = "Draft reloaded."; }) { text = "Reload / cancel draft", name = "panelReload" });
+            root.Add(new Button(() => { if (!Ready()) return; RoomAuthoringOperations.RegenerateFloorPanels(room, out var issue); feedback.text = issue ?? "Regenerated with the same seed."; }) { text = "Regenerate", name = "panelRegenerate" });
+            root.Add(new Button(() => { if (!Ready()) return; RoomAuthoringOperations.NewFloorPanelSeed(room, out var issue); feedback.text = issue ?? "New seed applied."; if (issue == null) Reload(); }) { text = "New Seed", name = "panelNewSeed" });
+            root.Add(new Button(() => { if (!Ready()) return; RoomAuthoringOperations.DisableFloorPanels(room, out var issue); feedback.text = issue ?? "Paneling disabled; settings retained."; if (issue == null) Reload(); }) { text = "Disable", name = "panelDisable" });
+            root.Add(counts); root.Add(feedback);
+            root.schedule.Execute(() =>
+            {
+                if (room == null) return;
+                counts.text = "Retained panel revisions (managed store): " + RoomFloorPanelAssetStore.RetainedRevisionCount;
+                if (!dirty && baseline != CurrentKey()) Reload();
+            }).Every(300);
+            Reload(); return root;
+        }
+    }
+
 }

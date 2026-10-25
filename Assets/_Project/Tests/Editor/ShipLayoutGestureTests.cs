@@ -11,6 +11,56 @@ namespace SOLITUDE.Tests.RoomAuthoring
 {
     public sealed class ShipLayoutGestureTests
     {
+        [TestCase("commit")] [TestCase("cancel")] [TestCase("no-change")] [TestCase("net-zero")]
+        public void PanelResourcesPublishOncePerCompletedGestureAndNeverForCancelledOrUnchangedWork(string mode)
+        {
+            Assert.IsTrue(System.Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification"));
+            using var fixture = new RoomAuthoringTestFixtures(32); ShipLayoutStyleTests.Configure(fixture);
+            fixture.Style.Rendering = new RoomStyleDefinition.RenderingConfiguration();
+            var name = "PanelGestureFixture" + System.Guid.NewGuid().ToString("N");
+            AssetDatabase.CreateFolder("Assets/_Project/Tests", name); var folder = "Assets/_Project/Tests/" + name;
+            RoomFloorPanelAssetStore.VerificationRoot = folder + "/Panels";
+            var layout = RoomAuthoringCreation.CreateLayout(fixture.Scene, fixture.Style); var room = layout.Spaces[0];
+            ShipLayoutStyleTests.Fill(room, RoomAuthoringTestFixtures.Cells()); Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+            Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, new RoomFloorPanelSettings { Enabled = true, Seed = 19 }, out var issue), issue);
+            var before = RoomUndoRedoTests.Snapshot(room); var count = RoomFloorPanelAssetStore.RetainedRevisionCount;
+            var calls = 0; void Generated(ShipRoomAuthoring _) => calls++;
+            RoomAuthoringOperations.GenerationCompleted += Generated;
+            try
+            {
+                using (var edit = RoomAuthoringOperations.BeginEdit(room, "Panel gesture"))
+                {
+                    if (mode == "no-change") RoomAuthoringOperations.PaintCell(room, Vector3Int.zero, fixture.Style.FloorTile, edit);
+                    else
+                    {
+                        RoomAuthoringOperations.PaintBox(room, new BoundsInt(8, 0, 0, 1, 6, 1), fixture.Style.FloorTile, edit);
+                        RoomAuthoringOperations.PaintBox(room, new BoundsInt(9, 0, 0, 1, 6, 1), fixture.Style.FloorTile, edit);
+                        if (mode == "net-zero") RoomAuthoringOperations.PaintBox(room, new BoundsInt(8, 0, 0, 2, 6, 1), null, edit);
+                    }
+                    Assert.AreEqual(0, calls); Assert.AreEqual(count, RoomFloorPanelAssetStore.RetainedRevisionCount);
+                    if (mode == "cancel") edit.Cancel();
+                }
+                Assert.AreEqual(mode == "commit" ? 1 : 0, calls);
+                Assert.AreEqual(count + (mode == "commit" ? 1 : 0), RoomFloorPanelAssetStore.RetainedRevisionCount);
+                if (mode == "commit")
+                {
+                    Assert.AreEqual(60, RoomAuthoringTestFixtures.FloorCount(room)); Undo.PerformUndo();
+                    CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+                }
+                else
+                {
+                    CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+                    Undo.PerformUndo(); Assert.IsFalse(room.FloorPanels.Enabled, "Undo reaches the preceding committed panel enable.");
+                }
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                RoomAuthoringOperations.CancelActiveEdit(); Undo.ClearAll();
+                Object.DestroyImmediate(layout.gameObject); AssetDatabase.DeleteAsset(folder); RoomFloorPanelAssetStore.VerificationRoot = null;
+            }
+        }
+
         [TestCase("stroke")]
         [TestCase("box")]
         [TestCase("erase")]

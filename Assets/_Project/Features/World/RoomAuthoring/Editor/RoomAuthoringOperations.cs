@@ -317,6 +317,30 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
         }
 
+        public static bool RegenerateFloorPanels(ShipRoomAuthoring room, out string issue)
+        {
+            issue = room == null ? "Choose a space." : room.Layout == null ? GetStyleReplacementIssue(room) : GetStyleReplacementIssue(room.Layout);
+            if (issue != null) return false;
+            if (HasActiveEdit) { issue = "Finish or cancel the active paint stroke before regenerating panels."; return false; }
+            var success = Rebuild(room);
+            if (!success) issue = room.GenerationDiagnostic;
+            return success;
+        }
+
+        public static bool NewFloorPanelSeed(ShipRoomAuthoring room, out string issue)
+        {
+            if (room == null) { issue = "Choose a space."; return false; }
+            var settings = room.FloorPanels.Copy(); settings.Seed = unchecked(settings.Seed + 1);
+            return SetFloorPanelSettings(room, settings, out issue);
+        }
+
+        public static bool DisableFloorPanels(ShipRoomAuthoring room, out string issue)
+        {
+            if (room == null) { issue = "Choose a space."; return false; }
+            var settings = room.FloorPanels.Copy(); settings.Enabled = false;
+            return SetFloorPanelSettings(room, settings, out issue);
+        }
+
         public static bool SetFloorPanelSettings(ShipRoomAuthoring room, RoomFloorPanelSettings settings, out string issue) =>
             EditFloorPanelAuthoring(room, settings, room == null ? null : room.FloorReservations, out issue);
 
@@ -342,13 +366,21 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 room.Layout == null ? GetStyleReplacementIssue(room) : GetStyleReplacementIssue(room.Layout);
             if (issue != null) return false;
             if (HasActiveEdit) { issue = "Finish or cancel the active paint stroke before editing panel inputs."; return false; }
-            var settingsIssue = settings.ValidationIssue();
-            if (settingsIssue != null) { issue = "Space " + room.RoomId + ": FloorPanels/Settings: " + settingsIssue; return false; }
             var proposed = reservations.Select(r => r?.Copy()).ToArray();
-            var candidate = RoomFloorPanelDomain.Build(room, settings, proposed, retainInactiveRecords: false);
-            var invalid = candidate.Issues.FirstOrDefault(i => !i.Inactive);
-            if (invalid != null) { issue = "Space " + invalid.RoomId + ": " + invalid.Field + ": " + invalid.Reason; return false; }
-            if (RoomFloorPanelDomain.InputKey(room.FloorPanels, room.FloorReservations) == RoomFloorPanelDomain.InputKey(settings, proposed)) return true;
+            var currentKey = RoomFloorPanelDomain.InputKey(room.FloorPanels, room.FloorReservations);
+            if (currentKey == RoomFloorPanelDomain.InputKey(settings, proposed)) return true;
+            var restoredEnabled = settings.Copy(); restoredEnabled.Enabled = room.FloorPanels.Enabled;
+            var disableOnly = room.FloorPanels.Enabled && !settings.Enabled &&
+                currentKey == RoomFloorPanelDomain.InputKey(restoredEnabled, proposed);
+            // Disable can retain externally malformed inputs verbatim; it never repairs or prunes authored records.
+            if (!disableOnly)
+            {
+                var settingsIssue = settings.ValidationIssue();
+                if (settingsIssue != null) { issue = "Space " + room.RoomId + ": FloorPanels/Settings: " + settingsIssue; return false; }
+                var candidate = RoomFloorPanelDomain.Build(room, settings, proposed, retainInactiveRecords: false);
+                var invalid = candidate.Issues.FirstOrDefault(i => !i.Inactive);
+                if (invalid != null) { issue = "Space " + invalid.RoomId + ": " + invalid.Field + ": " + invalid.Reason; return false; }
+            }
             using var edit = BeginEdit(room, "Edit Floor Panel Inputs");
             var group = Undo.GetCurrentGroup();
             try
