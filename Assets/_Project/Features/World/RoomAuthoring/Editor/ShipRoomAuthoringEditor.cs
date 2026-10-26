@@ -12,8 +12,11 @@ namespace SOLITUDE.Editor.RoomAuthoring
     [CustomEditor(typeof(ShipRoomAuthoring))]
     public sealed class ShipRoomAuthoringEditor : UnityEditor.Editor
     {
+        private void OnDisable() => RoomAuthoringAssetRefresh.CancelPanelDrafts(this);
+
         public override VisualElement CreateInspectorGUI()
         {
+            RoomAuthoringAssetRefresh.CancelPanelDrafts(this);
             var root = new VisualElement();
             root.Add(new Label("Painted occupancy is authoritative. Generated architecture is replaceable."));
             foreach (var name in new[] { "roomId", "occupancy", "generatedOutput", "generationDiagnostic" })
@@ -24,7 +27,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
             var room = (ShipRoomAuthoring)target;
             root.Add(RoomAuthoringStyleControls.ForSpace(room));
-            root.Add(RoomFloorPanelControls.ForSpace(room));
+            root.Add(RoomFloorPanelControls.ForSpace(room, this));
             var adoptionFeedback = new HelpBox("", HelpBoxMessageType.Info);
             var adopt = new Button(() =>
             {
@@ -92,7 +95,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
     }
     public static class RoomFloorPanelControls
     {
-        public static VisualElement ForSpace(ShipRoomAuthoring room)
+        public static VisualElement ForSpace(ShipRoomAuthoring room, UnityEditor.Editor owner = null)
         {
             var root = new Foldout { text = "Procedural floor panels", name = "floorPanelControls", value = room.FloorPanels.Enabled };
             root.Add(new HelpBox("Draft changes apply together as one Undo action. Footprint changes may repanel this space. Palette and thickness preserve the partition. Configure style sorting above floors and below structure (for example 0 / 1 / 2).", HelpBoxMessageType.Info));
@@ -101,9 +104,19 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var counts = new Label { name = "panelRetainedCounts" };
             var settings = room.FloorPanels.Copy();
             var records = room.FloorReservations.Select(r => r?.Copy()).ToList();
-            var baseline = ""; var dirty = false;
+            var baseline = ""; var dirty = false; var detached = false;
             string CurrentKey() => RoomFloorPanelDomain.InputKey(room.FloorPanels, room.FloorReservations);
-            void Changed() { dirty = true; RoomAuthoringPreview.ClearFloorPanelPreview(); }
+            void CancelDraft()
+            {
+                if (room != null) Reload(); else RoomAuthoringAssetRefresh.EndPanelDraft(root);
+                RoomAuthoringPreview.ClearFloorPanelPreview();
+            }
+            void Changed()
+            {
+                dirty = true;
+                RoomAuthoringAssetRefresh.SetPanelDraft(root, room, owner, CancelDraft);
+                RoomAuthoringPreview.ClearFloorPanelPreview();
+            }
             void DrawReservations()
             {
                 rows.Clear();
@@ -159,7 +172,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             void Reload()
             {
                 settings = room.FloorPanels.Copy(); records = room.FloorReservations.Select(r => r?.Copy()).ToList();
-                baseline = CurrentKey(); dirty = false; DrawSettings(); DrawReservations();
+                baseline = CurrentKey(); dirty = false; RoomAuthoringAssetRefresh.EndPanelDraft(root);
+                if (!detached) { DrawSettings(); DrawReservations(); }
             }
             bool Ready()
             {
@@ -183,7 +197,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 if (!RoomAuthoringOperations.EditFloorPanelAuthoring(room, settings, records, out var issue)) { feedback.text = issue; feedback.messageType = HelpBoxMessageType.Warning; return; }
                 Reload(); feedback.text = room.GenerationResult.IsSuccessful ? "Panel inputs applied." : room.GenerationDiagnostic;
             }) { text = "Apply panel inputs", name = "panelApply" });
-            root.Add(new Button(() => { Reload(); RoomAuthoringPreview.ClearFloorPanelPreview(); feedback.text = "Draft reloaded."; }) { text = "Reload / cancel draft", name = "panelReload" });
+            root.Add(new Button(() => { CancelDraft(); feedback.text = "Draft reloaded."; }) { text = "Reload / cancel draft", name = "panelReload" });
             root.Add(new Button(() => { if (!Ready()) return; RoomAuthoringOperations.RegenerateFloorPanels(room, out var issue); feedback.text = issue ?? "Regenerated with the same seed."; }) { text = "Regenerate", name = "panelRegenerate" });
             root.Add(new Button(() => { if (!Ready()) return; RoomAuthoringOperations.NewFloorPanelSeed(room, out var issue); feedback.text = issue ?? "New seed applied."; if (issue == null) Reload(); }) { text = "New Seed", name = "panelNewSeed" });
             root.Add(new Button(() => { if (!Ready()) return; RoomAuthoringOperations.DisableFloorPanels(room, out var issue); feedback.text = issue ?? "Paneling disabled; settings retained."; if (issue == null) Reload(); }) { text = "Disable", name = "panelDisable" });
@@ -194,6 +208,17 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 counts.text = "Retained panel revisions (managed store): " + RoomFloorPanelAssetStore.RetainedRevisionCount;
                 if (!dirty && baseline != CurrentKey()) Reload();
             }).Every(300);
+            root.RegisterCallback<DetachFromPanelEvent>(e =>
+            {
+                if (!ReferenceEquals(e.target, root)) return;
+                detached = true; CancelDraft();
+            });
+            root.RegisterCallback<AttachToPanelEvent>(e =>
+            {
+                if (!ReferenceEquals(e.target, root) || !detached) return;
+                detached = false;
+                if (room != null) Reload();
+            });
             Reload(); return root;
         }
     }

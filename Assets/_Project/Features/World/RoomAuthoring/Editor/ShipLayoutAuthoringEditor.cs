@@ -131,8 +131,11 @@ namespace SOLITUDE.Editor.RoomAuthoring
             refreshConnection(); return controls;
         }
 
+        private void OnDisable() => RoomAuthoringAssetRefresh.CancelPanelDrafts(this);
+
         public override VisualElement CreateInspectorGUI()
         {
+            RoomAuthoringAssetRefresh.CancelPanelDrafts(this);
             var root = new VisualElement();
             root.Add(new Label("Painted space occupancy is authoritative. This layout owns generated architecture."));
             foreach (var name in new[] { "layoutId", "spaces", "generatedOutput" })
@@ -186,7 +189,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     spaceControls.Add(field);
                 }
                 spaceControls.Add(RoomAuthoringStyleControls.ForSpace(room));
-                spaceControls.Add(RoomFloorPanelControls.ForSpace(room));
+                spaceControls.Add(RoomFloorPanelControls.ForSpace(room, this));
                 spaceControls.Add(new Button(() => Selection.activeGameObject = room.gameObject) { text = "Select Space" });
                 spaceControls.Add(new Button(() => RoomAuthoringPaletteSetup.EditRoom(room)) { text = "Edit Space in Tile Palette" });
                 if (room.SpaceType == LogicalSpaceType.Corridor)

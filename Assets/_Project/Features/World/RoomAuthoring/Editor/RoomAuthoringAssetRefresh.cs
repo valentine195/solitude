@@ -25,6 +25,31 @@ namespace SOLITUDE.Editor.RoomAuthoring
             public string Issue;
         }
 
+        private sealed class PanelDraft
+        {
+            public ShipRoomAuthoring Room;
+            public UnityEditor.Editor Owner;
+            public bool HasOwner;
+            public Action Cancel;
+        }
+        private static readonly Dictionary<object, PanelDraft> panelDrafts = new Dictionary<object, PanelDraft>();
+
+        internal static void SetPanelDraft(object token, ShipRoomAuthoring room, UnityEditor.Editor owner, Action cancel) =>
+            panelDrafts[token] = new PanelDraft { Room = room, Owner = owner, HasOwner = !ReferenceEquals(owner, null), Cancel = cancel };
+        internal static void EndPanelDraft(object token) => panelDrafts.Remove(token);
+        internal static void CancelPanelDrafts(UnityEditor.Editor owner) =>
+            CancelPanelDraftsWhere(draft => ReferenceEquals(draft.Owner, owner));
+        public static bool HasPendingPanelDraft(ShipLayoutAuthoring layout) => layout != null &&
+            panelDrafts.Values.Any(draft => draft.Room != null && draft.Room.Layout == layout);
+        private static void CancelPanelDraftsWhere(Func<PanelDraft, bool> predicate)
+        {
+            foreach (var pair in panelDrafts.Where(pair => predicate(pair.Value)).ToArray())
+            {
+                panelDrafts.Remove(pair.Key);
+                pair.Value.Cancel();
+            }
+        }
+
         private const double ScanInterval = .25;
         private const double SettleInterval = .15;
         private const int WritesPerUpdate = 2;
@@ -38,8 +63,10 @@ namespace SOLITUDE.Editor.RoomAuthoring
             RoomAuthoringOperations.GenerationCompleted += room => { if (room != null && room.Layout != null) Observe(room.Layout); };
             EditorSceneManager.sceneOpened += (scene, mode) => ObserveScene(scene);
             EditorSceneManager.sceneClosed += scene => Prune();
+            EditorApplication.playModeStateChanged += state =>
+            { if (state == PlayModeStateChange.ExitingEditMode) CancelPanelDraftsWhere(_ => true); };
             Undo.undoRedoPerformed += ObserveLoaded;
-            AssemblyReloadEvents.beforeAssemblyReload += () => watches.Clear();
+            AssemblyReloadEvents.beforeAssemblyReload += () => { CancelPanelDraftsWhere(_ => true); watches.Clear(); };
         }
 
         public static ShipLayoutAuthoring[] LoadedLayouts() => Resources.FindObjectsOfTypeAll<ShipLayoutAuthoring>()
@@ -91,6 +118,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         private static void Prune()
         {
+            CancelPanelDraftsWhere(draft => draft.Room == null || !draft.Room.gameObject.scene.IsValid() ||
+                !draft.Room.gameObject.scene.isLoaded || (draft.HasOwner && draft.Owner == null));
             foreach (var layout in watches.Keys.Where(layout => layout == null || !layout.gameObject.scene.IsValid() || !layout.gameObject.scene.isLoaded).ToArray())
                 watches.Remove(layout);
         }
@@ -123,7 +152,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     watch.Assets = assets; watch.Pending = true; watch.Due = now + SettleInterval;
                 }
                 watch.ImportPending = false;
-                if (!watch.Pending || now < watch.Due || writes >= WritesPerUpdate || RoomAuthoringOperations.HasActiveEdit) continue;
+                if (!watch.Pending || now < watch.Due || writes >= WritesPerUpdate || RoomAuthoringOperations.HasActiveEdit || HasPendingPanelDraft(layout)) continue;
                 watch.Pending = false;
                 if (RoomAuthoringValidator.IsCurrent(layout)) { Observe(layout); continue; }
                 var safety = RoomAuthoringOperations.GetSafetyIssue(layout, allowMissingOutput: true);

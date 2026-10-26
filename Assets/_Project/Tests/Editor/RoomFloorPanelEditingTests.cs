@@ -16,6 +16,8 @@ using Object = UnityEngine.Object;
 
 namespace SOLITUDE.Tests.RoomAuthoring
 {
+    public sealed class RoomFloorPanelDraftTestWindow : EditorWindow { }
+
     public sealed class RoomFloorPanelEditingTests
     {
         private string folder;
@@ -348,6 +350,129 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var inspector = UnityEditor.Editor.CreateEditor(layout);
             try { Assert.IsNotNull(inspector.CreateInspectorGUI().Q<VisualElement>("floorPanelControls")); }
             finally { Object.DestroyImmediate(inspector); }
+        }
+        private static void Submit(Button button)
+        {
+            Assert.IsNotNull(button); Assert.IsNotNull(button.panel);
+            using var submit = NavigationSubmitEvent.GetPooled();
+            submit.target = button; button.SendEvent(submit);
+        }
+        private void ImportFloorPixels()
+        {
+            var texture = new Texture2D(2, 2); var path = folder + "/square.png";
+            texture.LoadImage(File.ReadAllBytes(path)); texture.SetPixel(0, 0, Color.green);
+            File.WriteAllBytes(path, texture.EncodeToPNG()); Object.DestroyImmediate(texture);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+        }
+        [UnityTest] public IEnumerator InspectorDraftImportWaitsForApply() { yield return DraftImport("apply"); }
+        [UnityTest] public IEnumerator InspectorDraftImportWaitsForCancel() { yield return DraftImport("cancel"); }
+        [UnityTest] public IEnumerator FailedDraftApplyKeepsImportDeferred() { yield return DraftImport("invalid"); }
+        [UnityTest] public IEnumerator DetachedDraftReleasesQueuedImport() { yield return DraftImport("detach"); }
+        [UnityTest] public IEnumerator DestroyedInspectorReleasesQueuedImport() { yield return DraftImport("destroy"); }
+
+        private IEnumerator DraftImport(string finish)
+        {
+            var other = RoomAuthoringCreation.CreateLayout(room.gameObject.scene, room.Style);
+            other.transform.position = Vector3.right * 32;
+            Assert.IsTrue(RoomAuthoringOperations.PaintBox(other.Spaces[0], new BoundsInt(0, 0, 0, 8, 6, 1), room.Style.FloorTile));
+            var old = Revision(); var cells = RoomAuthoringOperations.ReadCells(room);
+            var objects = room.GeneratedOutput.GetComponentsInChildren<Transform>(true);
+            var roomId = room.RoomId; var layoutId = layout.LayoutId;
+            var calls = 0; var otherCalls = 0;
+            void Generated(ShipRoomAuthoring generated)
+            { if (generated.Layout == layout) calls++; if (generated.Layout == other) otherCalls++; }
+            var inspector = UnityEditor.Editor.CreateEditor(finish == "cancel" ? (Object)room : layout);
+            var window = ScriptableObject.CreateInstance<RoomFloorPanelDraftTestWindow>();
+            RoomAuthoringOperations.GenerationCompleted += Generated;
+            try
+            {
+                var root = inspector.CreateInspectorGUI(); window.rootVisualElement.Add(root); window.Show();
+                yield return null;
+                var controls = root.Q<VisualElement>("floorPanelControls");
+                Assert.IsNotNull(controls.panel);
+                controls.Q<IntegerField>("panelSeed").value = 991;
+                Submit(controls.Q<Button>("panelAddReservation"));
+                if (finish == "invalid") controls.Query<IntegerField>().ToList().Single(f => f.label == "Seam thickness (1–3 pixels)").value = 0;
+                Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                Submit(controls.Q<Button>("panelPreview"));
+                RoomAuthoringAssetRefresh.Observe(layout); RoomAuthoringAssetRefresh.Observe(other);
+                ImportFloorPixels();
+                var wait = EditorApplication.timeSinceStartup + 1.1;
+                while (EditorApplication.timeSinceStartup < wait) yield return null;
+                Assert.AreEqual(0, calls); Assert.AreEqual(1, otherCalls, "A different layout must not inherit this draft's deferral.");
+                Assert.AreEqual(17, room.FloorPanels.Seed); Assert.IsEmpty(room.FloorReservations);
+                Assert.AreEqual(991, controls.Q<IntegerField>("panelSeed").value);
+                Assert.AreSame(old, Revision()); CollectionAssert.AreEqual(objects, room.GeneratedOutput.GetComponentsInChildren<Transform>(true));
+                Assert.IsTrue(RoomAuthoringAssetRefresh.IsPending(layout));
+                if (finish == "invalid")
+                {
+                    Submit(controls.Q<Button>("panelApply"));
+                    Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                    wait = EditorApplication.timeSinceStartup + .8;
+                    while (EditorApplication.timeSinceStartup < wait) yield return null;
+                    Assert.AreEqual(0, calls); Assert.AreEqual(17, room.FloorPanels.Seed);
+                }
+                if (finish == "destroy") { Object.DestroyImmediate(inspector); inspector = null; }
+                else if (finish == "detach") root.RemoveFromHierarchy();
+                else Submit(controls.Q<Button>(finish == "apply" ? "panelApply" : "panelReload"));
+                Assert.IsFalse(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                var deadline = EditorApplication.timeSinceStartup + 10;
+                while (calls == 0 && EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.AreEqual(1, calls, RoomAuthoringAssetRefresh.GetIssue(layout));
+                if (finish == "detach")
+                {
+                    window.rootVisualElement.Add(root); yield return null;
+                    Assert.AreEqual(17, controls.Q<IntegerField>("panelSeed").value);
+                    Assert.IsFalse(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                }
+                Assert.AreEqual(finish == "apply" ? 991 : 17, room.FloorPanels.Seed);
+                Assert.AreEqual(finish == "apply" ? 1 : 0, room.FloorReservations.Count);
+                if (finish != "apply") Assert.AreSame(old, Revision());
+                CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
+                Assert.AreEqual(roomId, room.RoomId); Assert.AreEqual(layoutId, layout.LayoutId); Assert.IsEmpty(layout.Connections);
+                wait = EditorApplication.timeSinceStartup + .8;
+                while (EditorApplication.timeSinceStartup < wait) yield return null;
+                Assert.AreEqual(1, calls, "Apply/cancel and generated imports must not add another publication.");
+                Assert.AreEqual(1, otherCalls); Assert.IsFalse(RoomAuthoringAssetRefresh.IsPending(layout));
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                if (inspector != null) Object.DestroyImmediate(inspector);
+                window.Close(); Object.DestroyImmediate(window);
+            }
+        }
+        [UnityTest] public IEnumerator MultipleInspectorDraftsReleaseIndependently()
+        {
+            var first = UnityEditor.Editor.CreateEditor(layout); var second = UnityEditor.Editor.CreateEditor(room);
+            var window = ScriptableObject.CreateInstance<RoomFloorPanelDraftTestWindow>(); var calls = 0;
+            void Generated(ShipRoomAuthoring generated) { if (generated.Layout == layout) calls++; }
+            RoomAuthoringOperations.GenerationCompleted += Generated;
+            try
+            {
+                var a = first.CreateInspectorGUI(); var b = second.CreateInspectorGUI();
+                window.rootVisualElement.Add(a); window.rootVisualElement.Add(b); window.Show(); yield return null;
+                a.Q<IntegerField>("panelSeed").value = 991; b.Q<IntegerField>("panelSeed").value = 992;
+                RoomAuthoringAssetRefresh.Observe(layout); ImportFloorPixels();
+                var wait = EditorApplication.timeSinceStartup + .8;
+                while (EditorApplication.timeSinceStartup < wait) yield return null;
+                Assert.AreEqual(0, calls);
+                Object.DestroyImmediate(first); first = null;
+                Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                wait = EditorApplication.timeSinceStartup + .8;
+                while (EditorApplication.timeSinceStartup < wait) yield return null;
+                Assert.AreEqual(0, calls); Submit(b.Q<Button>("panelReload"));
+                Assert.IsFalse(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                var deadline = EditorApplication.timeSinceStartup + 10;
+                while (calls == 0 && EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.AreEqual(1, calls); Assert.AreEqual(17, room.FloorPanels.Seed);
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                if (first != null) Object.DestroyImmediate(first); Object.DestroyImmediate(second);
+                window.Close(); Object.DestroyImmediate(window);
+            }
         }
         [UnityTest] public IEnumerator ReferencedAssetBurstWaitsForStrokeAndReusesIdenticalPanelResources()
         {
