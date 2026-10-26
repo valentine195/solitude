@@ -16,6 +16,7 @@ namespace SOLITUDE.World.RoomAuthoring
         {
             public Transform Transform;
             public string Fingerprint;
+            public Component[] Components;
         }
         [SerializeField, HideInInspector] private string rootFingerprint;
         [SerializeField, HideInInspector] private GeneratedChild[] generatedChildren = Array.Empty<GeneratedChild>();

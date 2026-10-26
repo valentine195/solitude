@@ -394,7 +394,24 @@ namespace SOLITUDE.Editor.RoomAuthoring
         }
 
         // Association establishes which root we own; the recorded build establishes which contents may be replaced.
-        public static string GetStyleReplacementIssue(ShipRoomAuthoring room)
+        public static string GetStyleReplacementIssue(ShipRoomAuthoring room) => GetReplacementIssue(room, false);
+
+        internal static string GetOutputReplacementIssue(ShipRoomAuthoring room) => GetReplacementIssue(room,
+            room != null && !room.FloorPanels.Enabled && room.GeneratedOutput?.PreparedPanels == null &&
+            !RoomAuthoringValidator.HasPreparedPanels(room));
+
+        // Disabled legacy rendering supports resetting visual edits, but never adopts added objects
+        // or components. Panel/style replacement retains the stricter recorded structural check.
+        private static bool IsRecordedVisual(RoomGeneratedOutput.GeneratedChild child)
+        {
+            if (child.Components == null || child.Transform.childCount != 0) return false;
+            return child.Transform.GetComponents<Component>().All(component => component != null &&
+                child.Components.Contains(component) && (component.GetType() == typeof(Transform) ||
+                component.GetType() == typeof(SpriteRenderer) || component.GetType() == typeof(Tilemap) ||
+                component.GetType() == typeof(TilemapRenderer)));
+        }
+
+        private static string GetReplacementIssue(ShipRoomAuthoring room, bool allowGeneratedVisualChanges)
         {
             var issue = GetSafetyIssue(room, allowMissingOutput: true);
             if (issue != null) return issue;
@@ -408,7 +425,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 var unchanged = output.RootFingerprint == RoomAuthoringValidator.GeneratedObjectFingerprint(output.transform, false) &&
                     children != null && children.All(child => child != null &&
                         (child.Transform == null || (child.Transform.parent == output.transform &&
-                         child.Fingerprint == RoomAuthoringValidator.GeneratedObjectFingerprint(child.Transform, true)))) &&
+                         (child.Fingerprint == RoomAuthoringValidator.GeneratedObjectFingerprint(child.Transform, true) ||
+                         (allowGeneratedVisualChanges && IsRecordedVisual(child)))))) &&
                     output.transform.Cast<Transform>().All(child => children.Any(record => record.Transform == child));
                 // Check the recorded container even when all its renderers were deleted. Never adopt
                 // altered historical pixels merely because the visible scene no longer references them.
@@ -568,6 +586,10 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 generated.transform.SetParent(room.transform, false);
                 var output = generated.GetComponent<RoomGeneratedOutput>();
                 output.Initialize(room, layout);
+                // This root was created here and is empty; the prior result describes the deleted
+                // root, so establish its new ownership proof before the writer checks disposal.
+                output.RecordGeneratedChildren(RoomAuthoringValidator.GeneratedObjectFingerprint(output.transform, false),
+                    System.Array.Empty<RoomGeneratedOutput.GeneratedChild>(), null);
                 Undo.RegisterCreatedObjectUndo(generated, "Rebuild Room");
                 var serialized = new SerializedObject(room);
                 serialized.FindProperty("generatedOutput").objectReferenceValue = output;

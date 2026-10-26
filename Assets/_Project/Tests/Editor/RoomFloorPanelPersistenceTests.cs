@@ -130,6 +130,55 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsFalse(RoomAuthoringOperations.Rebuild(room)); Assert.IsTrue(sentinel != null); Assert.AreSame(old, Revision());
             Assert.AreEqual(RoomGenerationStatus.Refused, room.GenerationResult.Status);
         }
+        [Test]
+        public void DisabledOutputRefusesUnknownContentAcrossRebuildAndPaint(
+            [Values(false, true)] bool layoutOwned, [Values(false, true)] bool previouslyEnabled,
+            [Values(false, true)] bool paint, [Values("child", "nested", "component", "root")] string added)
+        {
+            if (layoutOwned) Assert.IsNotNull(RoomAuthoringCreation.AdoptIntoNewLayout(room));
+            if (previouslyEnabled)
+            {
+                Enable(); var settings = room.FloorPanels.Copy(); settings.Enabled = false;
+                Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, settings, out var issue), issue);
+            }
+            Assert.IsFalse(room.FloorPanels.Enabled);
+            Assert.IsNull(room.GeneratedOutput.PreparedPanels);
+            var floor = room.GeneratedOutput.transform.Find("Generated Floor");
+            var target = added == "root" ? room.GeneratedOutput.gameObject : floor.gameObject;
+            if (added == "child" || added == "nested")
+            {
+                target = new GameObject("Equipment");
+                target.transform.SetParent(added == "child" ? room.GeneratedOutput.transform : floor, false);
+            }
+            var collider = target.AddComponent<BoxCollider2D>(); collider.size = new Vector2(3, 7);
+            var path = folder + "/DisabledSentinel.unity";
+            Assert.IsTrue(EditorSceneManager.SaveScene(room.gameObject.scene, path));
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var scene = EditorSceneManager.OpenScene(path);
+            room = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ShipRoomAuthoring>()).Single();
+            collider = room.GeneratedOutput.GetComponentInChildren<BoxCollider2D>();
+            var objects = room.GeneratedOutput.GetComponentsInChildren<Transform>(true);
+            var output = RoomAuthoringValidator.OutputFingerprint(room);
+            var cells = RoomAuthoringOperations.ReadCells(room);
+            Assert.AreEqual(RoomGenerationStatus.Refused, RoomAuthoringPreview.GetFeedback(room).Assessment.Status);
+            Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(room), "Feedback must be read-only.");
+            Assert.Throws<InvalidOperationException>(() => RoomGeometryWriter.Clear(room));
+            bool Changed() => paint ? RoomAuthoringOperations.PaintBox(room, new BoundsInt(8, 0, 0, 2, 6, 1), room.Style.FloorTile) :
+                layoutOwned ? RoomAuthoringOperations.Rebuild(room.Layout) : RoomAuthoringOperations.Rebuild(room);
+            Assert.IsFalse(Changed());
+            Assert.AreEqual(RoomGenerationStatus.Refused, (layoutOwned ? room.Layout.GenerationResult : room.GenerationResult).Status);
+            Assert.IsNotNull(collider); Assert.AreEqual(new Vector2(3, 7), collider.size);
+            CollectionAssert.AreEqual(objects, room.GeneratedOutput.GetComponentsInChildren<Transform>(true));
+            Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(room));
+            Assert.AreEqual(paint ? 60 : 48, RoomAuthoringOperations.ReadCells(room).Length);
+            Undo.PerformUndo();
+            CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
+            Assert.IsNotNull(collider); Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(room));
+            Undo.PerformRedo();
+            Assert.AreEqual(paint ? 60 : 48, RoomAuthoringOperations.ReadCells(room).Length);
+            Assert.IsNotNull(collider); Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(room));
+        }
+
         [TestCase(false, "Generated Floor")]
         [TestCase(false, "Generated Floor Panels")]
         [TestCase(true, "Generated Floor")]

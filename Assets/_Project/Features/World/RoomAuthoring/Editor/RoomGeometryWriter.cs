@@ -36,7 +36,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public static void Clear(ShipRoomAuthoring room)
         {
-            var issue = RoomAuthoringOperations.GetSafetyIssue(room);
+            var issue = RoomAuthoringOperations.GetOutputReplacementIssue(room);
             if (issue != null) throw new System.InvalidOperationException("Cannot clear room output: " + issue);
             var root = room.GeneratedOutput.transform;
             for (var i = root.childCount - 1; i >= 0; i--) Undo.DestroyObjectImmediate(root.GetChild(i).gameObject);
@@ -107,7 +107,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 output.transform.Cast<Transform>().Select(child => new RoomGeneratedOutput.GeneratedChild
                 {
                     Transform = child,
-                    Fingerprint = RoomAuthoringValidator.GeneratedObjectFingerprint(child, true)
+                    Fingerprint = RoomAuthoringValidator.GeneratedObjectFingerprint(child, true),
+                    Components = child.GetComponents<Component>()
                 }).ToArray(), panels);
             EditorUtility.SetDirty(output);
         }

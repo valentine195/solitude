@@ -99,7 +99,15 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 CollectionAssert.AreEqual(firstOutput, first.GeneratedOutput.GetComponentsInChildren<Transform>(true));
                 CollectionAssert.AreEqual(secondOutput, second.GeneratedOutput.GetComponentsInChildren<Transform>(true));
                 authored.transform.SetParent(second.transform, false);
+                if (nested)
+                {
+                    var retained = first.GeneratedOutput.GetComponentsInChildren<Transform>(true);
+                    Assert.IsFalse(RoomAuthoringOperations.Rebuild(first), "The unrecorded container remains protected even when empty.");
+                    CollectionAssert.AreEqual(retained, first.GeneratedOutput.GetComponentsInChildren<Transform>(true));
+                    parent.SetParent(first.transform, false);
+                }
                 Assert.IsTrue(RoomAuthoringOperations.Rebuild(first), first.GenerationDiagnostic);
+                if (nested) Assert.AreEqual(first.transform, parent.parent, "Recovery must preserve the relocated container.");
                 Assert.IsTrue(RoomAuthoringOperations.Rebuild(second), second.GenerationDiagnostic);
             }
             finally

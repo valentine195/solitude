@@ -40,8 +40,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             placement = null;
             var safety = RoomAuthoringOperations.GetSafetyIssue(room, allowMissingOutput: true);
             if (safety == null) safety = GetOverlapIssue(room, includeLayoutMembers);
-            if (safety == null && (room.FloorPanels.Enabled || HasPreparedPanels(room)))
-                safety = RoomAuthoringOperations.GetStyleReplacementIssue(room);
+            if (safety == null) safety = RoomAuthoringOperations.GetOutputReplacementIssue(room);
             if (safety != null)
             {
                 var refusal = new RoomGenerationIssue(RoomIssueKind.Safety, "room", safety + " Retained output was not updated.");
@@ -235,7 +234,7 @@ namespace SOLITUDE.Editor.RoomAuthoring
             };
         }
 
-        private static bool HasPreparedPanels(ShipRoomAuthoring room) => room.GeneratedOutput != null &&
+        internal static bool HasPreparedPanels(ShipRoomAuthoring room) => room.GeneratedOutput != null &&
             room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>(true).Any(r => r.sprite != null &&
                 AssetDatabase.LoadAssetAtPath<RoomFloorPanelOutput>(AssetDatabase.GetAssetPath(r.sprite)) != null);
         internal static bool IsPanelGenerationIssue(RoomGenerationIssue issue) =>

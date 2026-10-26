@@ -398,7 +398,8 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 var snapshot = Snapshot(layout); var fingerprint = RoomAuthoringValidator.OutputFingerprint(layout);
                 Selection.activeGameObject = member.gameObject; var group = Undo.GetCurrentGroup();
                 RoomAuthoringOperations.GenerationCompleted += Generated;
-                Assert.AreEqual(RoomGenerationStatus.Complete, RoomAuthoringPreview.GetFeedback(layout).Assessment.Status);
+                Assert.AreEqual(change == "sprite-component" ? RoomGenerationStatus.Refused : RoomGenerationStatus.Complete,
+                    RoomAuthoringPreview.GetFeedback(layout).Assessment.Status);
                 Assert.IsFalse(RoomAuthoringValidator.IsCurrent(layout)); Assert.IsFalse(RoomAuthoringValidator.IsCurrent(member));
                 Assert.IsFalse(RoomAuthoringPreview.GetFeedback(layout).IsCurrent); Assert.IsFalse(RoomAuthoringPreview.GetFeedback(member).IsCurrent);
                 foreach (var selected in new Object[] { layout, member })
@@ -409,7 +410,29 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 CollectionAssert.AreEqual(serialized, layout.Spaces.Select(r => EditorJsonUtility.ToJson(r)).ToArray());
                 CollectionAssert.AreEqual(snapshot, Snapshot(layout)); Assert.AreEqual(fingerprint, RoomAuthoringValidator.OutputFingerprint(layout));
                 Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.IsFalse(scene.isDirty); Assert.AreEqual(0, calls);
+                var addedGroup = change == "sprite-component" ? target.GetComponent<SortingGroup>() : null;
+                if (addedGroup != null)
+                {
+                    var retainedObjects = member.GeneratedOutput.GetComponentsInChildren<Transform>(true);
+                    Assert.IsFalse(RoomAuthoringOperations.Rebuild(layout), "An added component is not disposable generated content.");
+                    Assert.AreEqual(RoomGenerationStatus.Refused, layout.GenerationResult.Status);
+                    Assert.IsNotNull(addedGroup); Assert.AreEqual(fingerprint, RoomAuthoringValidator.OutputFingerprint(layout));
+                    CollectionAssert.AreEqual(retainedObjects, member.GeneratedOutput.GetComponentsInChildren<Transform>(true));
+                    for (var i = 0; i < layout.Spaces.Count; i++) CollectionAssert.AreEqual(cells[i], RoomAuthoringOperations.ReadCells(layout.Spaces[i]));
+                    Assert.AreEqual(0, calls);
+                    // Explicit fixture recovery preserves a complete copy first, then removes the
+                    // original. Moving a surviving recorded object would correctly remain refused.
+                    var preserved = Object.Instantiate(target.gameObject, member.transform);
+                    addedGroup = preserved.GetComponent<SortingGroup>();
+                    Assert.IsNotNull(addedGroup);
+                    Object.DestroyImmediate(target.gameObject);
+                }
                 Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+                if (change == "sprite-component")
+                {
+                    Assert.IsNotNull(addedGroup); Assert.AreEqual(member.transform, addedGroup.transform.parent);
+                    Assert.IsEmpty(member.GeneratedOutput.GetComponentsInChildren<SortingGroup>(true));
+                }
                 var restoredFloor = member.GeneratedOutput.GetComponentInChildren<Tilemap>();
                 var restoredPartition = member.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>()
                     .Single(r => r.name == role && r.transform.localPosition == position);
