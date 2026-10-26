@@ -465,6 +465,11 @@ namespace SOLITUDE.Editor.RoomAuthoring
             var consumers = RoomAuthoringAssetRefresh.LoadedLayouts().Where(layout => RoomAuthoringValidator.StyleDependencies(layout).Contains(style)).ToArray();
             foreach (var layout in consumers)
             {
+                if (RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout))
+                {
+                    issue = "Layout " + layout.LayoutId + ": Apply or cancel its floor panel draft before changing shared artwork bindings.";
+                    return false;
+                }
                 issue = GetStyleReplacementIssue(layout);
                 if (issue != null) return false;
             }
