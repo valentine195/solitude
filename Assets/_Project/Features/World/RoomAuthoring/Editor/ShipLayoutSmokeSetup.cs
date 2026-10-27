@@ -1,5 +1,9 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Linq;
 using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
@@ -67,6 +71,134 @@ namespace SOLITUDE.Editor.RoomAuthoring
             style.DisplayName = "Flat floor / panel walkthrough — temporary art"; style.FloorTile = tile;
             style.Rendering = new RoomStyleDefinition.RenderingConfiguration();
             AssetDatabase.CreateAsset(style, folder + "/PanelStyle.asset"); AssetDatabase.SaveAssets(); return style;
+        }
+
+        public const string CryobaySource = "Assets/_Project/Scenes/Wakeup.unity";
+        public const string CryobaySourceDigest = "69961c0bd0d984539e7c3ef9184b5aa93b74e4f459f81502721675620fda2455";
+        private static string Hash(byte[] bytes)
+        { using var sha = SHA256.Create(); return BitConverter.ToString(sha.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant(); }
+
+        // Read serialized cells only: never open, modify or instantiate the production scene.
+        public static Vector2Int[] ReadCryobayFloor()
+        {
+            var bytes = File.ReadAllBytes(CryobaySource);
+            if (Hash(bytes) != CryobaySourceDigest) throw new InvalidOperationException("Wakeup source digest changed; reassess the approved Cryobay fixture.");
+            var blocks = Regex.Split(Encoding.UTF8.GetString(bytes), @"(?m)^--- ");
+            var floor = blocks.Single(b => b.StartsWith("!u!1 ", StringComparison.Ordinal) && Regex.IsMatch(b, @"(?m)^  m_Name: Floor\r?$"));
+            var identity = Regex.Match(floor, @"^!u!1 &(\d+)").Groups[1].Value;
+            var map = blocks.Single(b => b.StartsWith("!u!1839735485 ", StringComparison.Ordinal) &&
+                b.Contains("m_GameObject: {fileID: " + identity + "}"));
+            var tiles = map.Split(new[] { "  m_Tiles:" }, StringSplitOptions.None)[1].Split(new[] { "  m_AnimatedTiles:" }, StringSplitOptions.None)[0];
+            var cells = Regex.Matches(tiles, @"(?m)^  - first: \{x: (-?\d+), y: (-?\d+), z: 0\}")
+                .Cast<Match>().Select(m => new Vector2Int(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value))).ToArray();
+            if (cells.Length != 83 || cells.Distinct().Count() != 83) throw new InvalidOperationException("Expected exactly 83 unique Floor cells.");
+            return cells.OrderBy(c => c.y).ThenBy(c => c.x).ToArray();
+        }
+
+        public static string CreateCryobay(string folder)
+        {
+            var cells = ReadCryobayFloor(); // Digest failure precedes any scaffold mutation.
+            var initial = CreateMedbay(folder);
+            var scene = SceneManager.GetSceneByPath(initial);
+            var layout = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ShipLayoutAuthoring>())
+                .Single(l => l.name == "Structural Medbay Layout");
+            layout.name = "Cryobay source-copy fixture";
+            layout.DefaultStyle.Rendering = new RoomStyleDefinition.RenderingConfiguration();
+            EditorUtility.SetDirty(layout.DefaultStyle); AssetDatabase.SaveAssets();
+            var room = layout.Spaces[0]; room.name = "Cryobay83"; room.SpaceType = LogicalSpaceType.Room;
+            room.AuthoringMetadata = "S61 isolated Floor-only copy. No inferred equipment reservations; empty scaffold members are not authored rooms.";
+            var path = folder + "/Floor.png"; var texture = new Texture2D(32, 32);
+            try { texture.SetPixels(Enumerable.Repeat(new Color(.42f, .56f, .66f), 1024).ToArray()); texture.Apply(); File.WriteAllBytes(path, texture.EncodeToPNG()); }
+            finally { Object.DestroyImmediate(texture); }
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+            var positions = cells.Select(c => new Vector3Int(c.x, c.y, 0)).ToArray();
+            room.Occupancy.SetTiles(positions, Enumerable.Repeat(layout.DefaultStyle.FloorTile, positions.Length).ToArray());
+            if (!RoomAuthoringOperations.SetFloorPanelSettings(room, new RoomFloorPanelSettings { Enabled = true, Seed = 0 }, out var issue))
+                throw new InvalidOperationException(issue);
+            var result = folder + "/Cryobay83.unity";
+            if (!EditorSceneManager.SaveScene(scene, result)) throw new InvalidOperationException("Could not save Cryobay fixture.");
+            return result;
+        }
+
+        [Serializable] public sealed class CryobaySeedRecord
+        {
+            public int seed, panels, seamPixels;
+            public RoomFloorPanelSettings settings;
+            public RectInt[] rectangles;
+            public string rectangleSha256, pixelSha256, image, transparentImage;
+        }
+        [Serializable] public sealed class CryobayGallery
+        {
+            public string source = CryobaySource, sourceSha256 = CryobaySourceDigest;
+            public string fixtureScene, spaceId;
+            public string note = "Isolated S61 source-copy fixture, temporary flat art; prepared pixel export, not native camera-motion qualification. No inferred equipment reservations.";
+            public Vector2Int[] cells;
+            public CryobaySeedRecord[] seeds;
+        }
+
+        public static CryobayGallery ExportCryobayGallery(ShipRoomAuthoring room, string destination)
+        {
+            if (!Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification") || EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new InvalidOperationException("Export in isolated Edit Mode verification only.");
+            var expected = ReadCryobayFloor();
+            if (room == null || !new HashSet<Vector2Int>(RoomAuthoringOperations.ReadCells(room)).SetEquals(expected) ||
+                room.FloorReservations.Count != 0 || room.Layout == null || room.Layout.Connections.Count != 0 ||
+                RoomAuthoringValidator.LayoutOffset(room.Layout, room) != Vector2Int.zero)
+                throw new InvalidOperationException("Use the exact unreserved zero-offset Cryobay fixture.");
+            var directory = Path.GetFullPath(destination); var assets = Path.GetFullPath(UnityEngine.Application.dataPath);
+            if (directory == assets || directory.StartsWith(assets + Path.DirectorySeparatorChar, StringComparison.Ordinal) ||
+                Directory.Exists(directory) || File.Exists(directory)) throw new InvalidOperationException("Choose a fresh gallery directory outside Assets.");
+            if (RoomAuthoringAssetRefresh.HasPendingPanelDraft(room.Layout) || RoomAuthoringOperations.HasActiveEdit)
+                throw new InvalidOperationException("Finish or cancel authoring before exporting the gallery.");
+            Directory.CreateDirectory(directory);
+            var result = new CryobayGallery { fixtureScene = room.gameObject.scene.path, spaceId = room.RoomId, cells = expected };
+            var records = new List<CryobaySeedRecord>();
+            for (var seed = 0; seed < 10; seed++)
+            {
+                var settings = new RoomFloorPanelSettings { Enabled = true, Seed = seed };
+                if (!RoomAuthoringOperations.SetFloorPanelSettings(room, settings, out var issue)) throw new InvalidOperationException(issue);
+                var partition = RoomFloorPanelPartitioner.Partition(RoomFloorPanelDomain.Build(room));
+                if (!partition.Success) throw new InvalidOperationException("Cryobay partition failed.");
+                var canonical = string.Join(";", partition.Rectangles.Select(b => b.x + "," + b.y + "," + b.width + "," + b.height));
+                var renderer = room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().FirstOrDefault(r => r.name == "Generated Floor Panels");
+                if (renderer == null) throw new InvalidOperationException("Cryobay prepared panels are missing: " + room.GenerationDiagnostic);
+                var prepared = AssetDatabase.LoadAssetAtPath<RoomFloorPanelOutput>(AssetDatabase.GetAssetPath(renderer.sprite));
+                if (!RoomFloorPanelAssetStore.IsVerified(prepared)) throw new InvalidOperationException("Unverified prepared Cryobay output.");
+                const int width = 352, height = 288; var pixels = new Color32[width * height];
+                foreach (var chunk in prepared.Chunks)
+                {
+                    var buffer = chunk.Texture.GetPixels32();
+                    for (var y = 0; y < chunk.Texture.height; y++) for (var x = 0; x < chunk.Texture.width; x++)
+                    {
+                        var c = buffer[y * chunk.Texture.width + x]; if (c.a == 0) continue;
+                        var px = chunk.Origin.x + x + 224; var py = chunk.Origin.y + y + 160;
+                        if (px < 0 || px >= width || py < 0 || py >= height) throw new InvalidOperationException("Prepared pixel outside fixture bounds.");
+                        var index = py * width + px;
+                        if (pixels[index].a != 0) throw new InvalidOperationException("Overlapping prepared chunks.");
+                        pixels[index] = c;
+                    }
+                }
+                var rgba = pixels.SelectMany(c => new[] { c.r, c.g, c.b, c.a }).ToArray();
+                var record = new CryobaySeedRecord { seed = seed, panels = partition.Rectangles.Count, settings = settings,
+                    rectangles = partition.Rectangles.ToArray(), rectangleSha256 = Hash(Encoding.UTF8.GetBytes(canonical)), pixelSha256 = Hash(rgba),
+                    seamPixels = pixels.Count(c => c.a != 0), image = "Seed-" + seed + ".png", transparentImage = "Seed-" + seed + "-seams.png" };
+                var image = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                try
+                {
+                    image.SetPixels32(pixels); image.Apply(); File.WriteAllBytes(Path.Combine(directory, record.transparentImage), image.EncodeToPNG());
+                    var floor = new Color32[width * height];
+                    foreach (var cell in expected)
+                        for (var y = 0; y < 32; y++) for (var x = 0; x < 32; x++)
+                        { var index = (cell.y * 32 + y + 160) * width + cell.x * 32 + x + 224; floor[index] = pixels[index].a == 0 ? (Color32)new Color(.42f, .56f, .66f) : pixels[index]; }
+                    image.SetPixels32(floor); image.Apply(); File.WriteAllBytes(Path.Combine(directory, record.image), image.EncodeToPNG());
+                }
+                finally { Object.DestroyImmediate(image); }
+                records.Add(record);
+            }
+            result.seeds = records.ToArray();
+            File.WriteAllText(Path.Combine(directory, "CryobayPaneling.json"), JsonUtility.ToJson(result, true));
+            if (!EditorSceneManager.SaveScene(room.gameObject.scene)) throw new InvalidOperationException("Could not save gallery fixture final seed.");
+            return result;
         }
 
         public static string CreateMedbay(string folder)
