@@ -156,6 +156,11 @@ namespace SOLITUDE.Editor.RoomAuthoring
             issue = room == null ? "Create a space first." : room.Layout == null ? RoomAuthoringOperations.GetStyleReplacementIssue(room) :
                 RoomAuthoringOperations.GetStyleReplacementIssue(room.Layout);
             if (issue != null) return false;
+            if (room.Layout != null && RoomAuthoringAssetRefresh.HasPendingPanelDraft(room.Layout))
+            {
+                issue = "Layout " + room.Layout.LayoutId + ": Apply or cancel its floor panel draft before changing architectural style.";
+                return false;
+            }
             if (RoomAuthoringOperations.HasActiveEdit) { issue = "Finish or cancel the active paint stroke first."; return false; }
             using var edit = RoomAuthoringOperations.BeginEdit(room, "Change Architectural Style");
             var group = Undo.GetCurrentGroup();
