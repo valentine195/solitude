@@ -202,6 +202,37 @@ namespace SOLITUDE.Tests.RoomAuthoring
             EqualPixels(Oracle(partition.Rectangles, partition.Rectangles, settings), Assemble(changed, partition.Rectangles));
         }
 
+        [TestCase(1)] [TestCase(2)] [TestCase(3)]
+        public void NativeReviewShapesMatchIndependentPixelsAcrossTextureBorders(int thickness)
+        {
+            // Native-pixel fixtures, independent of chunk boundaries. The final two masks
+            // represent already excluded doorway/reservation regions, not missing base floor.
+            var shapes = new[]
+            {
+                new[] { new RectInt(-32, 0, 576, 32) },
+                new[] { new RectInt(-32, -32, 64, 96), new RectInt(32, -32, 64, 32) },
+                new[] { new RectInt(-32, 0, 576, 32), new RectInt(224, 32, 64, 64) },
+                new[] { new RectInt(-32, 0, 576, 32), new RectInt(224, -64, 64, 64), new RectInt(224, 32, 64, 64) },
+                new[] { new RectInt(-32, 0, 288, 32), new RectInt(256, -32, 288, 96) },
+                new[] { new RectInt(0, 0, 256, 8), new RectInt(256, 0, 8, 8) },
+                new[] { new RectInt(0, -32, 96, 32), new RectInt(0, 32, 96, 32) },
+                new[] { new RectInt(-32, 0, 32, 96), new RectInt(32, 0, 32, 96) }
+            };
+            foreach (var floor in shapes)
+            {
+                var settings = Settings(thickness); settings.Seed = 18;
+                var partition = RoomFloorPanelPartitioner.Partition("native-review", floor, settings);
+                Assert.IsTrue(partition.Success, string.Join("\n", partition.Issues.Select(i => i.Reason)));
+                var network = RoomFloorPanelSeams.Extract("native-review", partition);
+                var expected = Oracle(partition.Rectangles, floor, settings);
+                foreach (var origin in new[] { Vector2Int.zero, new Vector2Int(-8, 8) })
+                    EqualPixels(expected, Assemble(RoomFloorPanelRasterizer.Rasterize("native-review", network,
+                        floor, settings, 256, origin), floor));
+                if (floor.Sum(r => r.width * r.height) == 264 * 8)
+                    Assert.IsTrue(partition.Rectangles.All(r => r.height == 8), "Eight-pixel remnants remain native-sized.");
+            }
+        }
+
         [TestCase("overlap")] [TestCase("coordinates")] [TestCase("area")]
         public void InvalidPartitionCannotProducePartialSeamsOrPixels(string invalid)
         {

@@ -13,6 +13,30 @@ namespace SOLITUDE.Tests.RoomAuthoring
 {
     public sealed class RoomFloorPanelWorkflowTests
     {
+        [Test] public void IncompatibleWallPpuReportsItsFieldAndCorrectionPreservesPaintedFloor()
+        {
+            using var fixture = new RoomAuthoringTestFixtures(32);
+            ShipLayoutStyleTests.Configure(fixture);
+            fixture.Style.Rendering = new RoomStyleDefinition.RenderingConfiguration();
+            var room = fixture.Room();
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room), room.GenerationDiagnostic);
+            var cells = RoomAuthoringOperations.ReadCells(room);
+            var sprite = fixture.Style.NorthWalls[0].Sprite;
+            fixture.Style.NorthWalls[0].PixelsPerUnit = 16;
+            Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+            Assert.IsTrue(room.GenerationResult.Issues.Any(i => i.Reason.Contains("PPU")), room.GenerationDiagnostic);
+            Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
+            fixture.Style.NorthWalls[0].PixelsPerUnit = 32;
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room), room.GenerationDiagnostic);
+            Assert.IsEmpty(room.GenerationResult.Issues);
+            Assert.AreSame(sprite, fixture.Style.NorthWalls[0].Sprite);
+            Assert.AreEqual(32, sprite.pixelsPerUnit, "Correct the declaration; never stretch the source art.");
+            Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
+        }
+
         [Test] public void TemporaryPanelStyleCreatesFlatNativeFloorWithoutRewritingSourceOrSceneAndRefusesOverwrite()
         {
             Assert.IsTrue(Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification"));

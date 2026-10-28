@@ -4,8 +4,8 @@ Paint **Authored Occupancy** with **ShipRoomBrush**. Painted cells are authorita
 generated floors and architecture are replaceable. A ShipLayout coordinates multiple
 Room/Corridor spaces on one aligned grid and generates each shared partition once.
 Connections open explicit gaps without merging space identities. Reusable temporary
-art is sufficient; final production artwork is not an acceptance gate. Procedural
-floor panel detailing is a later phase. Damage and decorative overlays are outside
+art is sufficient; final production artwork is not an acceptance gate. Optional
+procedural floor panel detailing sits above the base floor. Damage and decorative overlays are outside
 the amended scope.
 
 ## Create or adopt
@@ -109,6 +109,10 @@ uses the current authored cells and replaces verified owned architecture. Other
 paint tools require this explicit rebuild; Validate alone does not synchronize
 output. Supported style controls and bound-asset changes follow the refresh
 workflow below. Resolve ambiguous references before replacing missing roots.
+
+Scene view keeps compact severity/region markers without printing internal IDs.
+Focus displays one readable category and grid-location label. The Inspector
+retains full diagnostic identities, field paths and reasons for troubleshooting.
 
 Authoring masks/guides are excluded from Play Mode/build floor queries. Generated
 floor Tilemaps provide runtime walkability; runtime procedural generation is not
@@ -231,3 +235,36 @@ into a disposable project and preserve its baseline. The procedure and current
 Passed/Failed/NotRun evidence are in
 `work/Reviews/RoomAuthoring/FloorPanelingWorkflow.md`. Production artwork is not a
 gate; standalone prepared-pixel player proof remains mandatory in Phase 4.
+
+### Recommended paneling workflow
+
+Start with a uniform floor Tile covering one cell and a compatible style. Select
+the corridor or room itself: paneling is enabled per space, so enabling a room
+does not enable its corridor. Use seed 0, preferred 32–128 pixel widths/heights,
+density 0.5, thickness 1 and one dark seam color as a starting point. Preview,
+then Apply. Increase density for smaller/more numerous panels; preferred minima
+are not promises at narrow edges. Located advisories identify remnants down to
+8 pixels. Keep the seed to preserve a result; New Seed deliberately changes it.
+
+Color and thickness affect appearance without changing panel rectangles. Editing
+a space's footprint, exclusions, size range or density can repartition that
+space. Equipment reservations hide detailing only; place gameplay collision and
+props separately. Finish or cancel other pending panel drafts before Apply or
+artwork import, and use one panel-editing Inspector per layout until RA-TD-001
+is resolved. See the [designer walkthrough](../../../../../work/Reviews/RoomAuthoring/FloorPanelingWorkflow.md).
+
+### Pixel-perfect review
+
+Prepared detailing uses transparent RGBA32 textures, Point filtering, no mipmaps,
+32 PPU and integer native-pixel positions. Keep its sorting above floors and below
+architecture; player/prop sorting layers must also place those objects above
+detailing. Compare Game output at native size and integer zoom, including motion.
+Scene-view zoom by itself does not establish pixel-perfect Game output.
+
+Phase 3 Step 3 checks use a disposable URP PixelPerfectCamera at 32 PPU, with
+pixel snapping, no HDR/MSAA/dynamic resolution and no post-processing. The
+production camera and project quality settings are unchanged. Both the native
+Medbay and exact 83-cell Cryobay copy passed fractional camera-motion and integer
+zoom comparisons. These checks qualify the recorded temporary assets and review
+camera, not every camera configuration or a standalone player build. See
+[visual evidence](../../../../../work/Reviews/RoomAuthoring/VisualAlignment.md).

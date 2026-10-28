@@ -75,6 +75,11 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var panels = new GameObject("Prepared transparent panel seams", typeof(SpriteRenderer));
             panels.transform.SetParent(output.transform, false); panels.transform.localPosition = new Vector3(9.5f, .5f, 0);
             panels.GetComponent<SpriteRenderer>().sprite = sprite; panels.GetComponent<SpriteRenderer>().sortingOrder = 1;
+            var floorDetail = new GameObject("Prepared detail over walkable floor", typeof(SpriteRenderer));
+            floorDetail.transform.SetParent(output.transform, false); floorDetail.transform.localPosition = new Vector3(2.5f, 2.5f, 0);
+            floorDetail.GetComponent<SpriteRenderer>().sprite = sprite;
+            floorDetail.GetComponent<SpriteRenderer>().color = new Color(1, 1, 1, .5f);
+            floorDetail.GetComponent<SpriteRenderer>().sortingOrder = 1;
             var player = new GameObject("RoomFloorPlayer", typeof(PlayerMovement), typeof(PlayerInteractor), typeof(PlayerVitalsController), typeof(SurvivorAvatarAdapter));
             SceneManager.MoveGameObjectToScene(player, scene);
             player.GetComponent<MovementBehavior>().enabled = false;
@@ -113,6 +118,11 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 Assert.IsFalse(CanLand(point.transform.position), "Inactive mask-only cells cannot count as floor.");
                 Assert.IsEmpty(panels.GetComponents<Collider2D>());
                 Assert.IsFalse(CanLand(panels.transform.position), "Prepared seam sprites cannot supply runtime floor candidates.");
+                Assert.IsEmpty(floorDetail.GetComponents<Collider2D>());
+                Assert.IsTrue(CanLand(floorDetail.transform.position), "Prepared detailing leaves its base floor walkable.");
+                floorDetail.SetActive(false);
+                Assert.IsTrue(CanLand(floorDetail.transform.position), "Hiding detailing cannot change floor-query results.");
+                floorDetail.SetActive(true);
                 point.transform.position = architecture.transform.position;
                 Assert.Throws<InvalidOperationException>(() => adapter.ValidateResumePoint(point));
                 Assert.IsFalse(CanLand(point.transform.position), "Sprite architecture cannot count as floor.");
@@ -120,6 +130,9 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 blocker.transform.position = new Vector3(2.5f, 2.5f, 0);
                 Physics2D.SyncTransforms();
                 Assert.IsFalse(CanLand(blocker.transform.position), "Same-scene solid geometry blocks otherwise valid floor.");
+                floorDetail.SetActive(false);
+                Assert.IsFalse(CanLand(blocker.transform.position), "Hiding detailing cannot remove a solid blocker.");
+                floorDetail.SetActive(true);
                 blocker.GetComponent<BoxCollider2D>().isTrigger = true;
                 Assert.IsTrue(CanLand(blocker.transform.position), "Trigger geometry retains existing landing semantics.");
                 Assert.AreEqual(48, room.Occupancy.GetTilesBlock(new BoundsInt(0, 0, 0, 10, 6, 1)).CountNonNull());

@@ -47,7 +47,7 @@ seeds/settings, counts, canonical partition/pixel hashes, native screenshots,
 read-only queries and per-check Passed/Failed/NotRun outcomes under verification/.
 Do not create or repair occupancy through scripts to satisfy this procedure.
 
-## Current evidence
+## Historical Phase 2f evidence
 
 - Final Step6 repair source: Passed 480/480 RoomAuthoring EditMode tests, including
   three focused multi-chunk hash compatibility, unsaved texture tampering and
@@ -97,3 +97,72 @@ Do not create or repair occupancy through scripts to satisfy this procedure.
   historical. Standalone player loading remains Not Run and mandatory at the
   Phase4 shipping-build gate. Phase3 visual refinement and Phase4 final
   integration acceptance remain outstanding.
+
+## Designer guide — current Phase 3 workflow
+
+Start in Edit Mode. Create/adopt a ShipLayout, add Room/Corridor spaces, choose
+compatible temporary styles, and paint each space through Edit Space in Tile
+Palette. Confirm the selected target is Authored Occupancy. Use Box action Fill
+or Erase without Shift; corridor strokes use their configured width and one
+continuous corridor space through bends/branches. Adjacent distinct spaces need
+explicit connections. Leave gameplay props outside Generated Architecture.
+
+To enable Medbay Corridor paneling, select **Medbay Corridor**, expand
+**Procedural floor panels**, tick **Enabled**, then **Preview** and **Apply panel
+inputs**. The same section is available for the selected space in the layout
+Inspector. Each space has independent settings; enabling Treatment does not
+enable its corridor. Confirm the effective style has a uniform floor Tile and
+sorting floor 0 / detail 1 / architecture 2 (or another strictly increasing set).
+
+A useful starting point is version 1, seed 0, preferred widths/heights 32–128
+pixels, density 0.5, thickness 1 and one dark seam color. Sizes are multiples of
+eight pixels. Increase density for more/smaller panels, reduce it for fewer/larger
+panels. Preferred minima can be constrained by narrow edges, thresholds and
+reservations: eight-pixel remnants are valid and reported. Rectangular seams
+provide asymmetric/staggered paneling; this prototype does not create chamfers,
+grilles, damage, wear, decals or equipment docking artwork.
+
+Preview shows proposed rectangles/exclusions without publishing resources. Apply
+commits one Undoable edit. Regenerate retains the seed; New Seed explicitly
+changes it. Palette and thickness preserve panel rectangles. Footprint,
+exclusions, preferred sizes and density may repartition the edited space. Disable
+removes seams only and retains seed/settings/reservations. Save prepared output
+with the scene; use Undo/Redo for authored edits rather than painting generated
+floor or seam objects.
+
+Reserve equipment areas using positive whole-cell rectangles entirely inside the
+space. Reservations and doorway/airlock strips remove detail only: floor remains
+walkable and gameplay blockers must be authored separately. Doorway strips are
+one cell deep on both sides of the full opening; Open passage adds no exclusion.
+Invalid reservations/connections remain located records for explicit correction.
+
+### Replace temporary art
+
+Keep reusable Tile/Sprite assets and their metadata. For a bound floor Tile,
+change its Sprite or reimport its source pixels to refresh loaded consumers. For
+walls, caps and junctions, replace the style's Artwork binding and ensure the
+sprite matches its canvas, PPU, repeat, anchor and footprint declaration. Editing
+palette arrangement or dropping an unbound Tile into a palette does not reassign
+a structural role. Preparing an existing palette preserves manual arrangement.
+Closed scenes are not rewritten; reopen, validate and explicitly rebuild as needed.
+
+Finish or cancel other pending panel drafts before applying/importing, and keep
+one panel-editing Inspector per layout. RA-TD-001 remains a known, human-deferred
+multi-Inspector refresh limitation. Source-file art edits are not scene Undo;
+supported binding edits are. Modified/unrecognized generated output requires
+inspection before explicit rebuilding, rather than automatic replacement.
+
+### Diagnose and review
+
+Validate is read-only. Read the Inspector reason/field/location and use Focus to
+highlight it: Scene view shows compact markers and one concise focused label.
+Correct configuration instead of stretching sprites or moving generated output.
+Safe local art/panel failures retain useful floors and independent architecture;
+unsafe ownership or invalid structural connections can retain stale output.
+
+Compare Game output at native size and integer zoom, including camera movement,
+concave edges, intersections, thresholds and texture borders. Seams should stay
+below architecture, props and the player; exclusions should reveal uniform base
+floor. Current evidence and precise test-camera limits are in
+[VisualAlignment](VisualAlignment.md). No shipping camera was modified. The
+standalone player proof and final performance/integration review remain Phase 4.
