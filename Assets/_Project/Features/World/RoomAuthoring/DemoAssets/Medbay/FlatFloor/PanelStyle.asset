@@ -1,0 +1,431 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a62ef4984492f41c989c77ba984f2ea5, type: 3}
+  m_Name: PanelStyle
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.World.RoomAuthoring.RoomStyleDefinition
+  styleId: 21f00c51de7b4f5eadc5cffb4f38eeb0
+  displayName: "Flat floor / panel walkthrough \u2014 temporary art"
+  structuralSeed: 0
+  compatibleTransitions:
+  - {fileID: 11400000, guid: 428cd1c28f8544a0a8dd0756bdc582d4, type: 2}
+  floorTile: {fileID: 11400000, guid: 492a3ebf085ac4bb6a320ee8b58c8b34, type: 2}
+  floorCanvasPixels: {x: 32, y: 32}
+  floorPixelsPerUnit: 32
+  rendering:
+    SortingLayerName: Default
+    FloorOrder: 0
+    DetailOrder: 1
+    ArchitectureOrder: 2
+    FloorMaterial: {fileID: 0}
+    ArchitectureMaterial: {fileID: 0}
+  useConfiguredRendering: 1
+  northWalls:
+  - Sprite: {fileID: 21300000, guid: 8b0b4d31b0eaf4d7380e654fcdd0d076, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 64}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 32
+      height: 1
+  westCap:
+    Sprite: {fileID: 21300000, guid: d18ecafec9f064a78bff30d7ec07d07d, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0.5, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 1
+      height: 32
+  eastCap:
+    Sprite: {fileID: 21300000, guid: d18ecafec9f064a78bff30d7ec07d07d, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0.5, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 1
+      height: 32
+  southCap:
+    Sprite: {fileID: 21300000, guid: 8e19905d9fe8a4e7fa6fae84240a8b9b, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 0.5}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 32
+      height: 1
+  northwest:
+    Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 1, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 1
+      height: 1
+  northeast:
+    Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 1
+      height: 1
+  southwest:
+    Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 1, y: 1}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 1
+      height: 1
+  southeast:
+    Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 1}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 1
+      height: 1
+  northReservationsPixels: {x: 0, y: 0}
+  westReservationsPixels: {x: 0, y: 0}
+  eastReservationsPixels: {x: 0, y: 0}
+  southReservationsPixels: {x: 0, y: 0}
+  concaveSouthwest:
+    Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 1, y: 1}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 1
+      height: 1
+  concaveSoutheast:
+    Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 1}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 1
+      height: 1
+  concaveNorthwest:
+    Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 1, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 1
+      height: 1
+  concaveNortheast:
+    Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+    PixelsPerUnit: 32
+    Orientation: 0
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 1
+    FootprintsPixels:
+    - x: 0
+      y: 0
+      width: 1
+      height: 1
+  concaveNorthReservationsPixels: {x: 0, y: 0}
+  concaveWestReservationsPixels: {x: 0, y: 0}
+  concaveEastReservationsPixels: {x: 0, y: 0}
+  concaveSouthReservationsPixels: {x: 0, y: 0}
+  northWallClearanceCells: 0
+  supportsDiagonalContact: 1
+  junctionModules:
+  - Role: 0
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 1
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 2
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 3
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 4
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 5
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 6
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 7
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 8
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 9
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 10
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 11
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  - Role: 12
+    Artwork:
+      Sprite: {fileID: 21300000, guid: 617e697fa91034342bdb5437547bd28d, type: 3}
+      PixelsPerUnit: 32
+      Orientation: 0
+      CanvasPixels: {x: 32, y: 32}
+      RepeatPixels: 32
+      AnchorPixels: {x: 0.5, y: 0.5}
+      OffsetPixels: {x: 0, y: 0}
+      HasFootprint: 1
+      FootprintsPixels:
+      - x: 0
+        y: 0
+        width: 1
+        height: 1
+    HorizontalReservationsPixels: {x: 0, y: 0}
+    VerticalReservationsPixels: {x: 0, y: 0}
+  floorEdgeInsetPixels: 1

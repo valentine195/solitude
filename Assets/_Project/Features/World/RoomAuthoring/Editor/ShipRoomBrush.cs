@@ -124,12 +124,20 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         private void OnDisable() => CancelGesture();
 
+        private void RejectRoomPaint(string issue)
+        {
+            if (issue == null) return; // A valid partial preview is not a rejected paint gesture.
+            StrokeIssue = issue;
+            CancelGesture();
+        }
+
         public override void Paint(GridLayout gridLayout, GameObject brushTarget, Vector3Int position)
         {
             if (CanPaint && occupancyMarker != null && position.z == 0 && TryGetRoom(gridLayout, brushTarget, out var room))
             {
                 if (room.SpaceType == LogicalSpaceType.Corridor) PaintCorridor(room, position, occupancyMarker);
-                else RoomAuthoringOperations.PaintCell(room, position, occupancyMarker, gesture);
+                else if (!RoomAuthoringOperations.PaintCell(room, position, occupancyMarker, out var issue, gesture))
+                    RejectRoomPaint(issue);
             }
         }
 
@@ -150,7 +158,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 return;
             }
             if (CanPaint && occupancyMarker != null && TryGetRoom(gridLayout, brushTarget, out var room))
-                RoomAuthoringOperations.PaintBox(room, bounds, occupancyMarker, gesture);
+                if (!RoomAuthoringOperations.PaintBox(room, bounds, occupancyMarker, out var issue, gesture))
+                    RejectRoomPaint(issue);
         }
 
         public override void BoxErase(GridLayout gridLayout, GameObject brushTarget, BoundsInt bounds)

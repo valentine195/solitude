@@ -177,10 +177,15 @@ namespace SOLITUDE.Editor.RoomAuthoring
         }
 
         public static bool PaintCell(ShipRoomAuthoring room, Vector3Int position, TileBase marker, RoomEdit edit = null)
+            => PaintCell(room, position, marker, out _, edit);
+
+        public static bool PaintCell(ShipRoomAuthoring room, Vector3Int position, TileBase marker,
+            out string issue, RoomEdit edit = null)
         {
-            var issue = GetSafetyIssue(room, allowMissingOutput: true);
-            if (issue != null || position.z != 0) return false;
             CheckEdit(room, edit);
+            issue = position.z != 0 ? "Occupancy must be on the XY plane at z=0." :
+                GetCellPaintIssue(room, new[] { new Vector2Int(position.x, position.y) }, marker);
+            if (issue != null) { edit?.Cancel(); return false; }
             using var ownedEdit = edit == null ? BeginEdit(room, marker == null ? "Erase Room Cell" : "Paint Room Cell") : null;
             if (room.Occupancy.GetTile(position) == marker) return true;
             (edit ?? ownedEdit).PrepareMutation();
@@ -189,13 +194,19 @@ namespace SOLITUDE.Editor.RoomAuthoring
         }
 
         public static bool PaintBox(ShipRoomAuthoring room, BoundsInt bounds, TileBase marker, RoomEdit edit = null)
+            => PaintBox(room, bounds, marker, out _, edit);
+
+        public static bool PaintBox(ShipRoomAuthoring room, BoundsInt bounds, TileBase marker,
+            out string issue, RoomEdit edit = null)
         {
-            if (GetSafetyIssue(room, allowMissingOutput: true) != null || bounds.z != 0 ||
-                bounds.size.z != 1 || bounds.size.x <= 0 || bounds.size.y <= 0) return false;
+            CheckEdit(room, edit);
+            issue = bounds.z != 0 || bounds.size.z != 1 || bounds.size.x <= 0 || bounds.size.y <= 0
+                ? "Paint a nonempty box on the XY plane at z=0."
+                : GetCellPaintIssue(room, BoxCells(bounds), marker);
+            if (issue != null) { edit?.Cancel(); return false; }
             var tiles = new TileBase[checked(bounds.size.x * bounds.size.y)];
             if (marker != null)
                 for (var i = 0; i < tiles.Length; i++) tiles[i] = marker;
-            CheckEdit(room, edit);
             using var ownedEdit = edit == null ? BeginEdit(room, marker == null ? "Erase Room Box" : "Paint Room Box") : null;
             var changed = false;
             foreach (var position in bounds.allPositionsWithin)
@@ -204,6 +215,12 @@ namespace SOLITUDE.Editor.RoomAuthoring
             (edit ?? ownedEdit).PrepareMutation();
             room.Occupancy.SetTilesBlock(bounds, tiles);
             return edit != null || ownedEdit.Commit();
+        }
+
+        private static IEnumerable<Vector2Int> BoxCells(BoundsInt bounds)
+        {
+            foreach (var position in bounds.allPositionsWithin)
+                yield return new Vector2Int(position.x, position.y);
         }
 
         public static string GetCellPaintIssue(ShipRoomAuthoring room, IEnumerable<Vector2Int> cells, TileBase marker)

@@ -234,6 +234,24 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static string IssueLabel(RoomGenerationIssue issue) => (issue.Inactive ? "[inactive] " : "") + issue.RoomId + " — " + FieldLabel(issue) +
             (issue.HasRegion ? " at " + issue.Start + " → " + issue.End : "");
 
+        // Scene text is deliberately separate from the full Inspector diagnostic identity.
+        public static string SceneIssueLabel(RoomGenerationIssue issue, bool selected, bool advisory)
+        {
+            if (!selected || issue == null || !issue.HasRegion) return null;
+            var field = issue.Field ?? "";
+            var category = field.StartsWith("FloorPanels/Partition/Residual/", StringComparison.Ordinal) ? "Small floor panel" :
+                field.StartsWith("FloorPanels/Reservation/", StringComparison.Ordinal) ? "Floor reservation" :
+                field.StartsWith("FloorPanels/", StringComparison.Ordinal) ? "Floor paneling" :
+                field.StartsWith("Connection/", StringComparison.Ordinal) ?
+                    (field.EndsWith("/Frame", StringComparison.Ordinal) ? "Doorway frame" : "Connection") :
+                issue.Kind == RoomIssueKind.Join ? "Corner / junction" :
+                issue.Kind == RoomIssueKind.Span ? "Wall span" :
+                issue.Kind == RoomIssueKind.VisualFit ? "Artwork alignment" :
+                issue.Kind == RoomIssueKind.Asset ? "Artwork" : issue.Kind.ToString();
+            return (issue.Inactive ? "Inactive: " : advisory ? "Info: " : "Issue: ") + category + " at " + issue.Start +
+                (issue.Start != issue.End ? " → " + issue.End : "");
+        }
+
         private static Bounds RegionBounds(Vector3 a, Vector3 b) => new Bounds((a + b) * .5f,
             Vector3.Max(new Vector3(.75f, .75f, .1f), new Vector3(Mathf.Abs(b.x - a.x), Mathf.Abs(b.y - a.y), .1f)));
 
@@ -339,7 +357,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
                     if (a != b) Handles.DrawAAPolyLine(4, a, b);
                     var center = (a + b) * .5f;
                     Handles.DrawWireDisc(center, Vector3.forward, selected ? .22f : .14f);
-                    Handles.Label(center + Vector3.up * .18f, "! " + IssueLabel(issue));
+                    var label = SceneIssueLabel(issue, selected, result.Advisories.Contains(issue));
+                    if (label != null) Handles.Label(center + Vector3.up * .18f, label);
                     if (selected) Handles.DrawWireCube(bounds.center, bounds.size);
                 }
             }

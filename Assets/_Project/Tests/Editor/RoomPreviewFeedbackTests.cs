@@ -16,6 +16,63 @@ namespace SOLITUDE.Tests.RoomAuthoring
         [SetUp] public void Setup() { previousSelection = Selection.activeObject; RoomAuthoringPreview.ClearSelection(); }
         [TearDown] public void Cleanup() { RoomAuthoringPreview.ClearSelection(); Selection.activeObject = previousSelection; }
 
+        [TestCase("FloorPanels/Partition/Residual/352,272/32x16", "Small floor panel")]
+        [TestCase("FloorPanels/Reservation/opaque-reservation-id", "Floor reservation")]
+        [TestCase("Connection/opaque-connection-id/Frame", "Doorway frame")]
+        [TestCase("Connection/opaque-connection-id", "Connection")]
+        public void SceneLabelsOnlyExposeFocusedCategoryAndLocation(string field, string category)
+        {
+            var issue = new RoomGenerationIssue(RoomIssueKind.Geometry, field, "Full corrective reason", true,
+                new Vector2Int(11, 8), new Vector2Int(12, 9));
+            issue.LocateInRoom("454b5c2dfde841af9ac4e26842565c54");
+            var serialized = JsonUtility.ToJson(issue);
+            Assert.IsNull(RoomAuthoringPreview.SceneIssueLabel(issue, false, true));
+            Assert.AreEqual("Info: " + category + " at (11, 8) → (12, 9)", RoomAuthoringPreview.SceneIssueLabel(issue, true, true));
+            StringAssert.StartsWith("Issue: " + category, RoomAuthoringPreview.SceneIssueLabel(issue, true, false));
+            StringAssert.Contains(issue.RoomId, RoomAuthoringPreview.IssueLabel(issue));
+            StringAssert.Contains(field, RoomAuthoringPreview.IssueLabel(issue));
+            Assert.AreEqual(serialized, JsonUtility.ToJson(issue));
+            issue.Inactive = true;
+            StringAssert.StartsWith("Inactive: " + category, RoomAuthoringPreview.SceneIssueLabel(issue, true, false));
+            issue.HasRegion = false;
+            Assert.IsNull(RoomAuthoringPreview.SceneIssueLabel(issue, true, false));
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void RoomAndLayoutFocusExposeOneSceneLabelWithoutChangingDiagnosticDetails(bool inspectLayout)
+        {
+            using var f = new RoomAuthoringTestFixtures();
+            var room = f.Room(7, 6);
+            var layout = RoomAuthoringCreation.AdoptIntoNewLayout(room);
+            Assert.IsNotNull(layout);
+            RoomAuthoringOperations.Rebuild(room);
+            Selection.activeGameObject = inspectLayout ? layout.gameObject : room.gameObject;
+            var result = inspectLayout ? RoomAuthoringPreview.GetFeedback(layout).Assessment : RoomAuthoringPreview.GetFeedback(room).Assessment;
+            var issue = result.Diagnostics.First(i => i.HasRegion);
+            var roomState = EditorJsonUtility.ToJson(room);
+            var layoutState = EditorJsonUtility.ToJson(layout);
+            var output = RoomAuthoringValidator.OutputFingerprint(layout);
+            var details = JsonUtility.ToJson(result);
+            var group = Undo.GetCurrentGroup();
+            var dirty = f.Scene.isDirty;
+            string[] Labels() => result.Diagnostics.Select(i => RoomAuthoringPreview.SceneIssueLabel(i,
+                i.Id == RoomAuthoringPreview.SelectedIssueId, result.Advisories.Contains(i))).Where(s => s != null).ToArray();
+            Assert.IsEmpty(Labels());
+            Assert.IsTrue(inspectLayout ? RoomAuthoringPreview.SelectIssue(layout, issue.Id, false) :
+                RoomAuthoringPreview.SelectIssue(room, issue.Id, false));
+            Assert.AreEqual(1, Labels().Length);
+            StringAssert.DoesNotContain(issue.RoomId, Labels()[0]);
+            Assert.AreEqual(roomState, EditorJsonUtility.ToJson(room));
+            Assert.AreEqual(layoutState, EditorJsonUtility.ToJson(layout));
+            Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(layout));
+            Assert.AreEqual(details, JsonUtility.ToJson(result));
+            Assert.AreEqual(group, Undo.GetCurrentGroup());
+            Assert.AreEqual(dirty, f.Scene.isDirty);
+            RoomAuthoringPreview.ClearSelection();
+            Assert.IsEmpty(Labels());
+        }
+
         [Test] public void SelectingLocatedIssueUsesExpectedWorldBoundsWithoutEditingOrGenerating()
         {
             using var f = new RoomAuthoringTestFixtures();

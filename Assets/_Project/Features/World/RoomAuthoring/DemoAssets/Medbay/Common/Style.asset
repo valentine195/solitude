@@ -1,0 +1,125 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a62ef4984492f41c989c77ba984f2ea5, type: 3}
+  m_Name: Style
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.World.RoomAuthoring.RoomStyleDefinition
+  styleId: 6f544d358f2b44a484718faf327330a9
+  displayName: "Synthetic walkthrough \u2014 not production art"
+  floorTile: {fileID: 11400000, guid: aa25a21a6fa724c5bb23bc8361b0deea, type: 2}
+  northWalls:
+  - Sprite: {fileID: 21300000, guid: e45681eda3baa4d5b990d3ce09351cc4, type: 3}
+    CanvasPixels: {x: 32, y: 64}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  westCap:
+    Sprite: {fileID: 21300000, guid: 7752956c823be488abc50d7ea8496ec3, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 32, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  eastCap:
+    Sprite: {fileID: 21300000, guid: 7752956c823be488abc50d7ea8496ec3, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  southCap:
+    Sprite: {fileID: 21300000, guid: 7752956c823be488abc50d7ea8496ec3, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 32}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  northwest:
+    Sprite: {fileID: 21300000, guid: b4de7ee8b2510438ab28be70c076573f, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 32, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  northeast:
+    Sprite: {fileID: 21300000, guid: b4de7ee8b2510438ab28be70c076573f, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  southwest:
+    Sprite: {fileID: 21300000, guid: b4de7ee8b2510438ab28be70c076573f, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 32, y: 32}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  southeast:
+    Sprite: {fileID: 21300000, guid: b4de7ee8b2510438ab28be70c076573f, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 32}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  northReservationsPixels: {x: 0, y: 0}
+  westReservationsPixels: {x: 0, y: 0}
+  eastReservationsPixels: {x: 0, y: 0}
+  southReservationsPixels: {x: 0, y: 0}
+  concaveSouthwest:
+    Sprite: {fileID: 21300000, guid: 84763351cd4254079b1f054e383f4dd5, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 32, y: 32}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  concaveSoutheast:
+    Sprite: {fileID: 21300000, guid: 84763351cd4254079b1f054e383f4dd5, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 32}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  concaveNorthwest:
+    Sprite: {fileID: 21300000, guid: 84763351cd4254079b1f054e383f4dd5, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 32, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  concaveNortheast:
+    Sprite: {fileID: 21300000, guid: 84763351cd4254079b1f054e383f4dd5, type: 3}
+    CanvasPixels: {x: 32, y: 32}
+    RepeatPixels: 32
+    AnchorPixels: {x: 0, y: 0}
+    OffsetPixels: {x: 0, y: 0}
+    HasFootprint: 0
+    FootprintsPixels: []
+  concaveNorthReservationsPixels: {x: 0, y: 0}
+  concaveWestReservationsPixels: {x: 0, y: 0}
+  concaveEastReservationsPixels: {x: 0, y: 0}
+  concaveSouthReservationsPixels: {x: 0, y: 0}
+  northWallClearanceCells: 0
+  supportsDiagonalContact: 1
+  junctionModules: []
+  floorEdgeInsetPixels: 0

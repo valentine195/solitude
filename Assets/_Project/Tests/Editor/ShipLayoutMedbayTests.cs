@@ -92,6 +92,76 @@ namespace SOLITUDE.Tests.RoomAuthoring
             }
             finally { Object.DestroyImmediate(brush); }
         }
+        [Test] public void SyntheticTwoStylePanelingPreservesMedbayTopologyReservationsAndPreparedOutput()
+        {
+            // Synthetic integration coverage only; native authoring qualification remains separate.
+            SyntheticBrushAndConnectionWorkflowHasExactGeometryUndoAndReopen();
+            var artFolder = ShipLayoutSmokeSetup.FolderPrefix + Guid.NewGuid().ToString("N");
+            var previousStore = RoomFloorPanelAssetStore.VerificationRoot;
+            try
+            {
+                var original = layout.DefaultStyle;
+                var flat = ShipLayoutSmokeSetup.CreateFloorPanelStyle(original, artFolder);
+                var alternate = Object.Instantiate(flat); alternate.DisplayName = "Temporary treatment floor";
+                var identity = new SerializedObject(alternate); identity.FindProperty("styleId").stringValue = Guid.NewGuid().ToString("N"); identity.ApplyModifiedPropertiesWithoutUndo();
+                var tile = Object.Instantiate((UnityEngine.Tilemaps.Tile)flat.FloorTile); tile.color = new Color(.7f, 1, .85f);
+                AssetDatabase.CreateAsset(tile, artFolder + "/TreatmentFloor.asset"); alternate.FloorTile = tile;
+                alternate.CompatibleTransitions = new[] { flat }; flat.CompatibleTransitions = new[] { alternate };
+                AssetDatabase.CreateAsset(alternate, artFolder + "/TreatmentStyle.asset"); EditorUtility.SetDirty(flat); AssetDatabase.SaveAssets();
+                RoomFloorPanelAssetStore.VerificationRoot = artFolder + "/Panels";
+                var cells = layout.Spaces.Select(r => RoomAuthoringOperations.ReadCells(r)).ToArray();
+                var connections = layout.Connections.Select(JsonUtility.ToJson).ToArray();
+                var sentinels = layout.gameObject.scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ShipRoomAuthoring>()).Where(r => r.Layout != layout).ToArray();
+                var sentinelBefore = sentinels.Select(RoomUndoRedoTests.Snapshot).ToArray();
+                Assert.IsTrue(RoomAuthoringStyleControls.AssignSpaceStyle(layout.Spaces[0], null, out var issue), issue);
+                Assert.IsTrue(RoomAuthoringStyleControls.AssignLayoutStyle(layout, flat, out issue), issue);
+                Assert.IsTrue(RoomAuthoringStyleControls.AssignSpaceStyle(layout.Spaces[1], alternate, out issue), issue);
+                for (var i = 0; i < layout.Spaces.Count; i++)
+                    Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(layout.Spaces[i], new RoomFloorPanelSettings { Enabled = true, Seed = 20 + i }, out issue), issue);
+                var treatment = layout.Spaces[1];
+                Assert.IsTrue(RoomAuthoringOperations.UpsertFloorReservation(treatment,
+                    new RoomFloorReservation("test-equipment", treatment.RoomId, new Vector2(3, 4), new Vector2(2, 2)), out issue), issue);
+                Assert.AreEqual(2, layout.Spaces.Select(r => r.Style.StyleId).Distinct().Count());
+                Assert.AreEqual(176, layout.Spaces.Sum(RoomAuthoringTestFixtures.FloorCount));
+                for (var i = 0; i < layout.Spaces.Count; i++)
+                {
+                    var space = layout.Spaces[i]; CollectionAssert.AreEqual(cells[i], RoomAuthoringOperations.ReadCells(space));
+                    var domain = RoomFloorPanelDomain.Build(space); Assert.IsEmpty(domain.Issues);
+                    var panels = space.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Where(r => r.name == "Generated Floor Panels").ToArray();
+                    Assert.IsNotEmpty(panels, space.GenerationDiagnostic);
+                    Assert.IsTrue(panels.All(r => r.sortingOrder == 1 && r.sprite.pixelsPerUnit == 32 && r.sprite.texture.filterMode == FilterMode.Point));
+                    var prepared = AssetDatabase.LoadAssetAtPath<RoomFloorPanelOutput>(AssetDatabase.GetAssetPath(panels[0].sprite));
+                    Assert.IsTrue(RoomFloorPanelAssetStore.IsVerified(prepared));
+                    if (space == treatment)
+                    {
+                        foreach (var cell in new[] { new Vector2Int(3, 4), new Vector2Int(4, 4), new Vector2Int(3, 5), new Vector2Int(4, 5), new Vector2Int(2, 3) })
+                            Assert.Contains(cell, domain.ExcludedCells.ToArray());
+                    }
+                }
+                CollectionAssert.AreEqual(connections, layout.Connections.Select(JsonUtility.ToJson));
+                var before = ShipLayoutDiagnosticTests.Snapshot(layout);
+                Assert.IsTrue(RoomAuthoringOperations.NewFloorPanelSeed(treatment, out issue), issue);
+                Undo.PerformUndo(); CollectionAssert.AreEqual(before, ShipLayoutDiagnosticTests.Snapshot(layout));
+                Undo.PerformRedo(); Assert.AreEqual(22, treatment.FloorPanels.Seed);
+                var after = ShipLayoutDiagnosticTests.Snapshot(layout); var revisions = RoomFloorPanelAssetStore.RetainedRevisionCount;
+                RoomAuthoringOperations.Rebuild(layout); RoomAuthoringOperations.Rebuild(layout);
+                Assert.AreEqual(RoomGenerationStatus.IncompletePreview, layout.GenerationResult.Status);
+                Assert.AreEqual(2, layout.GenerationResult.Issues.Length);
+                Assert.IsTrue(layout.GenerationResult.Issues.All(i => i.Field.EndsWith("/Frame")));
+                CollectionAssert.AreEqual(after, ShipLayoutDiagnosticTests.Snapshot(layout)); Assert.AreEqual(revisions, RoomFloorPanelAssetStore.RetainedRevisionCount);
+                for (var i = 0; i < sentinels.Length; i++) CollectionAssert.AreEqual(sentinelBefore[i], RoomUndoRedoTests.Snapshot(sentinels[i]));
+                Assert.IsTrue(EditorSceneManager.SaveScene(layout.gameObject.scene)); var path = layout.gameObject.scene.path; var id = layout.LayoutId;
+                var reopened = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
+                layout = reopened.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ShipLayoutAuthoring>()).Single(l => l.LayoutId == id);
+                CollectionAssert.AreEqual(after, ShipLayoutDiagnosticTests.Snapshot(layout)); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(layout));
+            }
+            finally
+            {
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+                RoomFloorPanelAssetStore.VerificationRoot = previousStore; AssetDatabase.DeleteAsset(artFolder);
+            }
+        }
+
         [Test] public void StyleAssignmentPreservesPaintedMedbayAndWritesConfiguredSortingThroughUndo()
         {
             SyntheticBrushAndConnectionWorkflowHasExactGeometryUndoAndReopen();
