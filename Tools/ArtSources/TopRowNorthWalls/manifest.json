@@ -1,0 +1,212 @@
+{
+  "ppu": 32,
+  "cap_face_base": [
+    8,
+    52,
+    4
+  ],
+  "modules": [
+    {
+      "name": "north_plain",
+      "size": [
+        32,
+        64
+      ],
+      "atlas_rect": [
+        0,
+        0,
+        32,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0
+      ],
+      "source_raw_box": [
+        0,
+        210,
+        180,
+        522
+      ]
+    },
+    {
+      "name": "north_window",
+      "size": [
+        32,
+        64
+      ],
+      "atlas_rect": [
+        32,
+        0,
+        32,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0
+      ],
+      "source_raw_box": [
+        186,
+        210,
+        336,
+        522
+      ]
+    },
+    {
+      "name": "north_service",
+      "size": [
+        32,
+        64
+      ],
+      "atlas_rect": [
+        64,
+        0,
+        32,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0
+      ],
+      "source_raw_box": [
+        630,
+        210,
+        804,
+        522
+      ]
+    },
+    {
+      "name": "north_control_alert",
+      "size": [
+        64,
+        64
+      ],
+      "atlas_rect": [
+        96,
+        0,
+        64,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0
+      ],
+      "source_raw_box": [
+        810,
+        210,
+        1092,
+        522
+      ]
+    },
+    {
+      "name": "north_system",
+      "size": [
+        64,
+        64
+      ],
+      "atlas_rect": [
+        160,
+        0,
+        64,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0
+      ],
+      "source_raw_box": [
+        1098,
+        210,
+        1404,
+        522
+      ]
+    },
+    {
+      "name": "north_alert",
+      "size": [
+        64,
+        64
+      ],
+      "atlas_rect": [
+        224,
+        0,
+        64,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0
+      ],
+      "source_raw_box": [
+        1410,
+        210,
+        1716,
+        522
+      ]
+    },
+    {
+      "name": "north_door",
+      "size": [
+        64,
+        64
+      ],
+      "atlas_rect": [
+        288,
+        0,
+        64,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0
+      ],
+      "source_raw_box": [
+        1722,
+        210,
+        2004,
+        522
+      ]
+    },
+    {
+      "name": "north_switch",
+      "size": [
+        32,
+        64
+      ],
+      "atlas_rect": [
+        352,
+        0,
+        32,
+        64
+      ],
+      "pivot": [
+        0.5,
+        0
+      ],
+      "source_raw_box": [
+        2010,
+        210,
+        2172,
+        522
+      ]
+    }
+  ],
+  "method": "Built-in image edit; integer 6:1 nearest-neighbor reduction; source-derived margin extension; source colors retained without palette reduction; shared source-derived cap/base",
+  "checks": {
+    "dimensions": true,
+    "opaque": true,
+    "atlas_equivalence": true,
+    "face_pixels_unchanged": false,
+    "all_64_ordered_module_joins_match": true
+  },
+  "unity_validated": false,
+  "top_surface_revision": "Direct extraction from user cap reference (6,5,250,37), reduced exactly 4:1 nearest-neighbor. Preserve cap ends; crop/extend flat center to 32/64 widths. No generated replacement.",
+  "cleanup": {
+    "palette_colors": 48,
+    "palette_method": "Separate neutral/red/amber/green/cyan/blue families; no dithering",
+    "shared_edge_profiles": true,
+    "continuous_cap": true,
+    "device_pixels_repositioned": false,
+    "source": "BeforeCleanup/north_wall_atlas.png"
+  }
+}

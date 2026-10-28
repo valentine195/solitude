@@ -1,0 +1,37 @@
+{
+  "pure_tests": {
+    "passed": 191,
+    "failed": 0,
+    "includes_security_brain_tests": 8
+  },
+  "unity_tests": {
+    "playmode-results.xml": {
+      "result": "Passed",
+      "total": "8",
+      "passed": "8",
+      "failed": "0",
+      "duration": "7.7891247"
+    },
+    "demo-results.xml": {
+      "result": "Passed",
+      "total": "1",
+      "passed": "1",
+      "failed": "0",
+      "duration": "2.8697265"
+    }
+  },
+  "verified_copy_matches_delivered_sources": true,
+  "source_sha256": {
+    "Assets/_Project/Domain/Npcs/SecurityBotBrain.cs": "49cc433c3e230d40eee99ffbfdeebad659be549c92271c11ad9afbdc872693c4",
+    "Assets/_Project/Features/Creatures/Movement.cs": "646956edb8b0df5f101467d7fcda976c1be752ded7ded0efce4f5ef7456ea070",
+    "Assets/_Project/Features/Npcs/Sec0/Runtime/Sec0Controller.cs": "d7738e6b0a65b810726578c0e9975237aa0210b271ea4e96f92f778e40e5cfe2",
+    "Assets/_Project/Features/Npcs/Sec0/Runtime/Sec0Navigator.cs": "88a227006677399843f5a70247feb8a75a916c02f12ae34e5dc5ce4d1d633cdd",
+    "Assets/_Project/Features/Npcs/Sec0/Runtime/PlayerStunReceiver.cs": "912ef96ca69da46849500715d1d71c4996471ffbd26f2a63a63ba63651a74d31",
+    "Assets/_Project/Features/Npcs/Sec0/Runtime/Sec0Composition.cs": "f9bbbc706bd9ab8d3e78e4d84926156810e3ecba9c3246b782d495a1ad12b781",
+    "Assets/_Project/Scenes/Demos/Sec0Patrol.unity": "4ce21ff4da9d422a9e3a3ee897921b0cf98b141614214db8a6d39bf7e01526c9"
+  },
+  "shipping_scene_modified": false,
+  "shipping_build_settings_modified": false,
+  "original_unsaved_scene_preserved": "Assets/_Project/Scenes/Wakeup.unity",
+  "scope": "Patrol, sight confirmation, last-seen investigation, bounded local routing, pursuit, dodgable non-lethal stun; disposable authored demo"
+}

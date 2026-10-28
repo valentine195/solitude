@@ -1,0 +1,31 @@
+{
+  "cell_pixels": 32,
+  "atlas_columns": 4,
+  "atlas_rows": 5,
+  "order": [
+    "base_clean",
+    "base_scuff_a",
+    "base_rubbed",
+    "base_scuff_b",
+    "joint_north",
+    "joint_west",
+    "joint_corner",
+    "steel_plate",
+    "service_base_clean",
+    "service_base_scuff_a",
+    "service_base_rubbed",
+    "service_base_scuff_b",
+    "service_joint_north",
+    "service_joint_west",
+    "service_joint_corner",
+    "maintenance_hatch",
+    "grate_horizontal",
+    "perforated_plate",
+    "amber_service_hatch",
+    "door_threshold"
+  ],
+  "base_variants": "Four seamless freely interchangeable variants per palette.",
+  "joints": "Optional north/west/corner construction tiles; place by panel pattern, not randomly.",
+  "layout": "Service side strips3cells wide; main plates4x2cells with staggered vertical joints.",
+  "source": "Generated references, integer-factor point sampling, palette cleanup, assembly of generated joint and edge sheen. Not hand-pixel-authored."
+}
