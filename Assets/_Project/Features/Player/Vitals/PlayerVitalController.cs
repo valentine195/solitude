@@ -47,6 +47,8 @@ namespace SOLITUDE.Player
         public VitalsRecoveryState RecoveryState => timing;
         public long Revision { get; private set; }
         public event Action PresentationChanged;
+        private Action cachedPresentation;
+        private Delegate[] presentationObservers = Array.Empty<Delegate>();
         public event Action<Exception> ObserverError;
         public bool GameplayEligible => bindingOwner != null && policy != null && policy.Gameplay
             && isActiveAndEnabled && (bindingAvailable?.Invoke() ?? false);
@@ -302,9 +304,10 @@ namespace SOLITUDE.Player
                 Vitals.Health.Publish(healthChange);
                 Vitals.Hunger.Publish(hungerChange);
                 Vitals.Oxygen.Publish(oxygenChange);
-                if (PresentationChanged != null)
-                    foreach (Action observer in PresentationChanged.GetInvocationList())
-                        try { observer(); } catch (Exception error) { Report(error); }
+                if (!ReferenceEquals(cachedPresentation, PresentationChanged))
+                { cachedPresentation = PresentationChanged; presentationObservers = PresentationChanged?.GetInvocationList() ?? Array.Empty<Delegate>(); }
+                foreach (Action observer in presentationObservers)
+                    try { observer(); } catch (Exception error) { Report(error); }
             }
             finally
             {

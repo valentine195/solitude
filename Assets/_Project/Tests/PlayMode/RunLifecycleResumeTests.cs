@@ -111,6 +111,60 @@ namespace SOLITUDE.Tests
             yield return null;
         }
 
+        private sealed class FailingWrites : SOLITUDE.Application.Persistence.ISaveFiles
+        {
+            private readonly PhysicalSaveFiles files = new PhysicalSaveFiles();
+            public bool Fail = true;
+            public bool Exists(string path) => files.Exists(path);
+            public string Read(string path) => files.Read(path);
+            public void WriteDurable(string path, string text)
+            { if (Fail) throw new IOException("Transition write rejected"); files.WriteDurable(path, text); }
+            public void Replace(string source, string destination, string backup) => files.Replace(source, destination, backup);
+            public void Move(string source, string destination) => files.Move(source, destination);
+            public void Delete(string path) => files.Delete(path);
+        }
+        [UnityTest] public IEnumerator FailedTransitionSaveKeepsSceneIdentityAndCommittedBytesAndCanRetry()
+        {
+            var service = Field<SaveGameService>(Root, "persistence"); service.Flush();
+            var before = File.ReadAllBytes(SavePath); var scene = SceneManager.GetActiveScene();
+            var id = Feature.Coordinator.Current.Id; PlaceOffAwakeningPoint();
+            var files = new FailingWrites();
+            service.Configure(new SOLITUDE.Application.Persistence.SaveRecoveryStore(SavePath, files,
+                new SaveJsonCodec(Field<ItemCatalog>(Root, "catalog"))));
+            try
+            {
+                LogAssert.Expect(LogType.Error, "[SaveGameService] Failed to save: Transition write rejected");
+                Assert.Throws<IOException>(() => Root.TransitionTo(ScenePath));
+                Assert.AreEqual(scene, SceneManager.GetActiveScene()); Assert.IsTrue(Policy.Ready);
+                Assert.AreEqual(id, Feature.Coordinator.Current.Id); Assert.IsTrue(Session.IsDirty);
+                CollectionAssert.AreEqual(before, File.ReadAllBytes(SavePath));
+            }
+            finally { files.Fail = false; }
+            yield return Root.TransitionTo(ScenePath); yield return null;
+            Assert.AreEqual(id, Feature.Coordinator.Current.Id); Assert.AreEqual(RuntimeStartupState.Ready, Root.State);
+        }
+
+        [UnityTest] public IEnumerator FailedNewSaveDoesNotReloadAndCanBeRetriedExplicitly()
+        {
+            var service = Field<SaveGameService>(Root, "persistence"); service.Flush();
+            var before = File.ReadAllBytes(SavePath); var scene = SceneManager.GetActiveScene();
+            var files = new FailingWrites();
+            service.Configure(new SOLITUDE.Application.Persistence.SaveRecoveryStore(SavePath, files,
+                new SaveJsonCodec(Field<ItemCatalog>(Root, "catalog"))));
+            try
+            {
+                LogAssert.Expect(LogType.Error, "[SaveGameService] Failed to save: Transition write rejected");
+                LogAssert.Expect(LogType.Error, "[GameCompositionRoot] Runtime unavailable; save preserved: New save failed: Transition write rejected");
+                Root.StartNewSave();
+                Assert.AreEqual(RuntimeStartupState.Failed, Root.State); Assert.IsFalse(Policy.Ready);
+                Assert.AreEqual(scene, SceneManager.GetActiveScene());
+                CollectionAssert.AreEqual(before, File.ReadAllBytes(SavePath));
+            }
+            finally { files.Fail = false; }
+            Root.StartNewSave(); yield return null; yield return null;
+            Assert.AreEqual(RuntimeStartupState.Ready, Root.State);
+        }
+
         [UnityTest] public IEnumerator ProductionSceneReloadPreservesIdentityPreciseVitalsTimingPositionAndEquipment()
         {
             var state = PlaceOffAwakeningPoint(); var id = Feature.Coordinator.Current.Id;

@@ -13,6 +13,9 @@ namespace SOLITUDE.SaveLoad
         private Action newSave;
         private Action captureLivingState;
         private SaveRecoveryStore store;
+        private const double AutosaveDelaySeconds = .25;
+        private double autosaveAt = double.NaN;
+        public string LastSaveError { get; private set; }
         public SaveLoadResult LastLoad { get; private set; }
         public bool RecoveryNoticePending => store?.NoticePending ?? false;
         public void Configure(SaveRecoveryStore store) => this.store = store;
@@ -37,23 +40,42 @@ namespace SOLITUDE.SaveLoad
         public void RejectRestore(string diagnostic) => LastLoad = new SaveLoadResult(SaveLoadStatus.BlockedIncompatible, diagnostic: diagnostic);
         public void AcknowledgeRecoveryNotice() => store?.AcknowledgeNotice();
         public void Initialize(ContainerSaveSession session, Action newSave, bool canWrite = true)
-        { this.session = session; this.newSave = newSave; this.canWrite = canWrite; }
-        public void Flush() => Flush(true);
-        private void Flush(bool checkpoint)
+        { this.session = session; this.newSave = newSave; this.canWrite = canWrite; autosaveAt = double.NaN; retryAt = 0; LastSaveError = null; }
+        public void Flush() => TryFlush();
+        public bool TryFlush() => Flush(true);
+        private bool Flush(bool checkpoint)
         {
-            if (!canWrite || session == null || session.HasIntegrityFailure || session.IsCollecting || store == null || store.RecoveryPending) return;
-            if (!checkpoint && !session.IsDirty) return;
+            if (!canWrite || session == null || session.HasIntegrityFailure || session.IsCollecting || store == null || store.RecoveryPending)
+            { LastSaveError = "Save session is unavailable or awaiting recovery."; return false; }
+            if (!checkpoint && !session.IsDirty) return true;
             try
             {
                 captureLivingState?.Invoke();
-                if (!session.IsDirty) return;
-                store.Write(session.Capture()); session.MarkSaved();
+                if (session.IsDirty) { store.Write(session.Capture()); session.MarkSaved(); }
+                autosaveAt = double.NaN; retryAt = 0; LastSaveError = null;
+                return true;
             }
-            catch (Exception failure) { Debug.LogError("[SaveGameService] Failed to save: " + failure.Message); }
+            catch (Exception failure)
+            {
+                LastSaveError = failure.Message;
+                Debug.LogError("[SaveGameService] Failed to save: " + failure.Message);
+                return false;
+            }
         }
         public void Release() { Flush(); session = null; newSave = null; captureLivingState = null; canWrite = false; }
         [ContextMenu("Start New Save")] public void StartNewSave() => newSave?.Invoke();
-        private void LateUpdate() => Flush(false);
+        private void LateUpdate() => Autosave(Time.realtimeSinceStartupAsDouble);
+        private void Autosave(double now)
+        {
+            if (session == null || !session.IsDirty) { autosaveAt = double.NaN; return; }
+            if (double.IsNaN(autosaveAt)) autosaveAt = now + AutosaveDelaySeconds;
+            if (!session.RequiresImmediateSave && now < autosaveAt) return;
+            // Bound retries as well as normal writes; keep dirty/urgent state on failure.
+            if (now < retryAt) return;
+            if (!Flush(false)) retryAt = now + AutosaveDelaySeconds;
+            else retryAt = 0;
+        }
+        private double retryAt;
         private void OnApplicationPause(bool paused) { if (paused) Flush(); }
         private void OnApplicationQuit() => Flush();
         private void OnDestroy() => Flush();

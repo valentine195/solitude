@@ -13,6 +13,7 @@ namespace SOLITUDE.Player.UI
         [SerializeField] private Color hungryColor = new Color(.94f, .69f, .29f);
         [SerializeField] private Color unavailableColor = new Color(.9f, .39f, .36f);
         private PlayerVitalsController controller;
+        private RecoveryReason? displayedReason;
 
         private void OnEnable() => TryBind();
         private void LateUpdate()
@@ -29,12 +30,14 @@ namespace SOLITUDE.Player.UI
         private void Unbind()
         {
             if (!ReferenceEquals(controller, null)) controller.PresentationChanged -= Synchronize;
-            controller = null;
+            controller = null; displayedReason = null;
         }
         private void Synchronize()
         {
             if (statusText == null) return;
             var reason = controller == null ? RecoveryReason.Unavailable : controller.RecoveryStatus;
+            if (displayedReason == reason) return;
+            displayedReason = reason;
             if (detailText != null)
             {
                 detailText.text = reason == RecoveryReason.Hungry ? "Recovery paused" : "";

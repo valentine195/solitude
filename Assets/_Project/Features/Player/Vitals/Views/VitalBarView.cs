@@ -16,6 +16,9 @@ namespace SOLITUDE.Player.UI
 
         private PlayerVitalsController controller;
         private Vital vital;
+        private int markerCount = -1;
+        private float markerThreshold;
+        private VitalKind markerKind;
         private readonly List<RectTransform> markers = new List<RectTransform>();
 
         private void OnEnable() => TryBind();
@@ -41,7 +44,7 @@ namespace SOLITUDE.Player.UI
         {
             if (vital != null) vital.Changed -= HandleChanged;
             if (!ReferenceEquals(controller, null)) controller.PresentationChanged -= Synchronize;
-            vital = null; controller = null;
+            vital = null; controller = null; markerCount = -1;
         }
         private void HandleChanged(Vital value)
         { if (fillImage != null) fillImage.fillAmount = value.Normalized; }
@@ -52,6 +55,9 @@ namespace SOLITUDE.Player.UI
             var settings = controller.Settings;
             int count = controller.IsConfigurationValid && markerRoot != null && markerPrefab != null
                 ? kind == VitalKind.Health ? settings.SegmentCount - 1 : kind == VitalKind.Hunger ? 1 : 0 : 0;
+            float threshold = settings == null ? 0 : (float)settings.FedThresholdFraction;
+            if (markerCount == count && markerThreshold == threshold && markerKind == kind) return;
+            markerCount = count; markerThreshold = threshold; markerKind = kind;
             SetMarkerCount(count);
             for (int i = 0; i < markers.Count; i++)
             {

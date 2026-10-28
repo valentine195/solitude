@@ -1,4 +1,7 @@
 using SOLITUDE.Core.Animations;
+using System;
+using System.Collections.Generic;
+using SOLITUDE.Application;
 using UnityEngine;
 
 namespace SOLITUDE.Movement
@@ -14,6 +17,15 @@ namespace SOLITUDE.Movement
 
         private ICreatureAnimationController animationController;
         private Vector2 vector;
+        private readonly HashSet<object> movementBlocks = new();
+        public bool IsMovementBlocked => movementBlocks.Count != 0;
+        public IDisposable BlockMovement()
+        {
+            var token=new object();movementBlocks.Add(token);
+            if(body==null) body=GetComponent<Rigidbody2D>();
+            body.linearVelocity=Vector2.zero;
+            return new Lease(()=>movementBlocks.Remove(token));
+        }
 
         private void Start()
         {
@@ -40,13 +52,10 @@ namespace SOLITUDE.Movement
 
         {
 
-            body.MovePosition(
-
-                body.position +
-
-                vector * moveSpeed * Time.fixedDeltaTime);
-
-            animationController.SetMovement(vector);
+            if(body==null) body=GetComponent<Rigidbody2D>();
+            var effective=IsMovementBlocked?Vector2.zero:vector;
+            body.MovePosition(body.position + effective * moveSpeed * Time.fixedDeltaTime);
+            animationController?.SetMovement(effective);
 
         }
     }

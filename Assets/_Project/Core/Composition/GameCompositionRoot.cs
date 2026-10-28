@@ -190,9 +190,14 @@ namespace SOLITUDE.Composition
         {
             if (State != RuntimeStartupState.Ready || !UnityEngine.Application.CanStreamedLevelBeLoaded(scenePath))
                 throw new InvalidOperationException("Scene transition is unavailable: " + scenePath);
-            policy.SetTransition(true); interactive?.CloseForTransition();
-            persistence.Flush();
-            try { return SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Single); }
+            policy.SetTransition(true);
+            try
+            {
+                interactive?.CloseForTransition();
+                if (!persistence.TryFlush())
+                    throw new System.IO.IOException("Scene transition save failed: " + persistence.LastSaveError);
+                return SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Single);
+            }
             catch { policy.SetTransition(false); throw; }
         }
         [ContextMenu("Start New Save")]
@@ -206,7 +211,9 @@ namespace SOLITUDE.Composition
             tasks?.Dispose(); tasks = new TaskJournal(); tasks.ObserverError += Debug.LogException;
             if (session == null) CreateSession(new SaveGameData { worldSeed = config.worldSeed });
             persistence.BeginNewSave();
-            session.Reset(config.worldSeed, releaseOwners: true); persistence.Initialize(session, StartNewSave); persistence.Flush();
+            session.Reset(config.worldSeed, releaseOwners: true); persistence.Initialize(session, StartNewSave);
+            if (!persistence.TryFlush())
+            { Fail(new System.IO.IOException("New save failed: " + persistence.LastSaveError)); return; }
             if (!initialized) { SceneManager.sceneLoaded += Loaded; SceneManager.sceneUnloaded += Unloaded; initialized = true; }
             var path = disposableSession ? SceneManager.GetActiveScene().path : CryobayScenePath;
             if (!string.IsNullOrEmpty(path)) SceneManager.LoadScene(path);

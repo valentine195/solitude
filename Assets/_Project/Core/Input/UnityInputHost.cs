@@ -22,11 +22,12 @@ namespace SOLITUDE.Core.Input
         private InputControl lastBackControl;
         private double lastBackTime = -1;
         private readonly Dictionary<InputAction, InputControl[]> heldAtReset = new();
-        private InputControl[] heldUI = new InputControl[0];
+        private readonly List<InputAction> releasedActions = new();
+        private InputControl[] heldUI = Array.Empty<InputControl>();
         private event Action SurvivorInputChanged;
         private Action vitalUse;
         private object vitalUseOwner;
-        private InputControl[] heldUse = new InputControl[0];
+        private InputControl[] heldUse = Array.Empty<InputControl>();
 
         public IDisposable BindVitalUse(Action callback)
         {
@@ -45,9 +46,13 @@ namespace SOLITUDE.Core.Input
         }
         private void RefreshUseRelease()
         {
-            heldUse = heldUse.Where(c => c.IsActuated()).ToArray();
+            // This callback runs after every input update, including idle frames.
+            int retained = 0;
+            for (int i = 0; i < heldUse.Length; i++)
+                if (heldUse[i].IsActuated()) heldUse[retained++] = heldUse[i];
+            if (retained != heldUse.Length) Array.Resize(ref heldUse, retained);
             if (actions != null && heldAtReset.TryGetValue(actions.Gameplay.Use, out var held)
-                && !held.Any(c => c.IsActuated())) heldAtReset.Remove(actions.Gameplay.Use);
+                && !AnyActuated(held)) heldAtReset.Remove(actions.Gameplay.Use);
         }
         // Actions re-enabled by policy may observe held controls. Require their release before accepting a new survivor action.
         public void ResetSurvivorInput()
@@ -67,10 +72,17 @@ namespace SOLITUDE.Core.Input
         private bool Fresh(InputAction.CallbackContext context) => !heldAtReset.ContainsKey(context.action);
         private void Update()
         {
-            foreach (var action in heldAtReset.Keys.ToArray())
-                if (!heldAtReset[action].Any(c => c.IsActuated())) heldAtReset.Remove(action);
-            if (heldUI.Length != 0 && !heldUI.Any(c => c.IsActuated()))
-            { heldUI = new InputControl[0]; SurvivorInputChanged?.Invoke(); }
+            releasedActions.Clear();
+            foreach (var pair in heldAtReset)
+                if (!AnyActuated(pair.Value)) releasedActions.Add(pair.Key);
+            foreach (var action in releasedActions) heldAtReset.Remove(action);
+            if (heldUI.Length != 0 && !AnyActuated(heldUI))
+            { heldUI = Array.Empty<InputControl>(); SurvivorInputChanged?.Invoke(); }
+        }
+        private static bool AnyActuated(InputControl[] controls)
+        {
+            for (int i = 0; i < controls.Length; i++) if (controls[i].IsActuated()) return true;
+            return false;
         }
         private int consumedFrame = -1;
         public void ConsumeUIActivation() => consumedFrame = Time.frameCount;
@@ -178,7 +190,7 @@ namespace SOLITUDE.Core.Input
         public void Release()
         {
             InputSystem.onAfterUpdate -= RefreshUseRelease;
-            vitalUse = null; vitalUseOwner = null; heldUse = new InputControl[0];
+            vitalUse = null; vitalUseOwner = null; heldUse = Array.Empty<InputControl>();
             journal?.Close(); journal = null;
             foreach (var lease in uiLeases) lease.Dispose();
             uiLeases.Clear();
@@ -187,7 +199,7 @@ namespace SOLITUDE.Core.Input
             if (policy != null) policy.Changed -= Apply; policy = null;
             if (actions != null) { actions.Disable(); actions.Dispose(); actions = null; }
             lastBackTime = -1; lastBackControl = null;
-            consumedFrame = -1; heldAtReset.Clear(); heldUI = new InputControl[0];
+            consumedFrame = -1; heldAtReset.Clear(); heldUI = Array.Empty<InputControl>();
         }
         private void OnDestroy() => Release();
         private void OnEnable() { if (actions != null) Apply(); }

@@ -18,6 +18,8 @@ namespace SOLITUDE.SaveLoad
         public ContainerCommandService Commands { get; }
         public bool IsCollecting => Commands.IsBusy;
         public bool IsDirty { get; private set; }
+        // Transient urgency; never part of the serialized save format.
+        public bool RequiresImmediateSave { get; private set; }
         public bool HasIntegrityFailure { get; private set; }
         public int WorldSeed => data.worldSeed;
         public ContainerSaveSession(SaveGameData source, IItemCatalog catalog)
@@ -25,6 +27,7 @@ namespace SOLITUDE.SaveLoad
             this.catalog = new ItemCatalog((catalog ?? throw new ArgumentNullException(nameof(catalog))).Items);
             data = SaveGameData.Migrate(Clone(source ?? throw new ArgumentNullException(nameof(source))));
             IsDirty = source.version != SaveGameData.CurrentVersion;
+            RequiresImmediateSave = IsDirty;
             data.containers ??= new List<ContainerSaveRecord>();
             var ids = new HashSet<string>(StringComparer.Ordinal);
             foreach (var record in data.containers)
@@ -47,7 +50,7 @@ namespace SOLITUDE.SaveLoad
             if (collected.Contains(pickupId)) return CollectResult.AlreadyCollected;
             if (quantity < 1 || !catalog.TryGet(itemId, out _)) return CollectResult.InvalidPickup;
             var result = Commands.Grant(inventory.Container.Handle, itemId, quantity, () => collected.Add(pickupId));
-            if (result.Status == CommandStatus.Applied) return CollectResult.Collected;
+            if (result.Status == CommandStatus.Applied) { RequiresImmediateSave = true; return CollectResult.Collected; }
             if (result.Status == CommandStatus.InsufficientSpace) return CollectResult.InventoryFull;
             return result.Status == CommandStatus.Busy ? CollectResult.NotReady : CollectResult.InvalidPickup;
         }
@@ -103,23 +106,24 @@ namespace SOLITUDE.SaveLoad
             candidate.survivor = survivor.Clone(); candidate.expedition = expedition.Clone();
             candidate.pendingDeath = pendingDeath?.Clone();
             candidate.ValidateLifecycle();
-            data = candidate; IsDirty = true;
+            data = candidate; IsDirty = true; RequiresImmediateSave = true;
         }
         public void StoreShipState(ShipStateSnapshot ship)
         {
             if (Commands.IsBusy || HasIntegrityFailure) throw new InvalidOperationException("Session is not ready for ship changes.");
             if (ship == null) throw new ArgumentNullException(nameof(ship));
             var candidate = Capture(); candidate.ship = ship.Clone(); candidate.ValidateLifecycle();
-            data = candidate; IsDirty = true;
+            data = candidate; IsDirty = true; RequiresImmediateSave = true;
         }
         public void MarkSaved()
         {
             if (Commands.IsBusy) throw new InvalidOperationException("Cannot acknowledge a snapshot during a command.");
-            IsDirty = false;
+            IsDirty = false; RequiresImmediateSave = false;
         }
         public void Reset(int worldSeed, bool releaseOwners = false)
         {
             Commands.Reset(() => { data = new SaveGameData { worldSeed = worldSeed }; collected.Clear(); HasIntegrityFailure = false; });
+            RequiresImmediateSave = true;
             if (!releaseOwners) return;
             // A new world must not retain cleared locker records or old owner generations.
             // Owners disposed by the ensuing scene reload are now harmless no-ops.

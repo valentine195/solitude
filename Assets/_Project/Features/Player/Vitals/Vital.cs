@@ -16,6 +16,10 @@ namespace SOLITUDE.Player.Vitals
         public event Action<Vital> Depleted; // fires once, on the frame it hits 0
         public event Action<Exception> ObserverError;
 
+        private Action<Vital> cachedChanged, cachedDepleted;
+        private Delegate[] changedObservers = Array.Empty<Delegate>(), depletedObservers = Array.Empty<Delegate>();
+        private Action<Exception> cachedErrors;
+        private Delegate[] errorObservers = Array.Empty<Delegate>();
         private bool _wasDepleted;
         private int publicationDepth;
 
@@ -70,20 +74,23 @@ namespace SOLITUDE.Player.Vitals
             BeginPublication();
             try
             {
-                if (change.Changed) Invoke(Changed);
-                if (change.Depleted) Invoke(Depleted);
+                if (change.Changed) Invoke(Changed, ref cachedChanged, ref changedObservers);
+                if (change.Depleted) Invoke(Depleted, ref cachedDepleted, ref depletedObservers);
             }
             finally { EndPublication(); }
         }
-        private void Invoke(Action<Vital> observers)
+        private void Invoke(Action<Vital> observers, ref Action<Vital> cached, ref Delegate[] snapshot)
         {
-            if (observers == null) return;
-            foreach (Action<Vital> observer in observers.GetInvocationList())
+            if (!ReferenceEquals(observers, cached))
+            { cached = observers; snapshot = observers?.GetInvocationList() ?? Array.Empty<Delegate>(); }
+            foreach (Action<Vital> observer in snapshot)
                 try { observer(this); }
                 catch (Exception error)
                 {
                     if (ObserverError == null) continue;
-                    foreach (Action<Exception> diagnostic in ObserverError.GetInvocationList())
+                    if (!ReferenceEquals(cachedErrors, ObserverError))
+                    { cachedErrors = ObserverError; errorObservers = ObserverError.GetInvocationList(); }
+                    foreach (Action<Exception> diagnostic in errorObservers)
                         try { diagnostic(error); } catch { }
                 }
         }

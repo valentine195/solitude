@@ -145,6 +145,18 @@ namespace SOLITUDE.Tests
             player.Advance(5); Assert.AreEqual(30, player.Vitals.Health.Current); Assert.AreEqual("Recovering", status.text);
         }
 
+        [Test] public void CurrentValueChangesLeaveStaticBoundaryTransformsUntouched()
+        {
+            var healthMarkers = Markers("HealthRow"); var hungerMarkers = Markers("HungerRow");
+            foreach (var marker in healthMarkers) marker.hasChanged = false;
+            foreach (var marker in hungerMarkers) marker.hasChanged = false;
+            player.Vitals.Health.Set(30); player.Vitals.Hunger.Set(10); player.Vitals.Oxygen.Set(50);
+            foreach (var marker in healthMarkers) Assert.IsFalse(marker.hasChanged);
+            foreach (var marker in hungerMarkers) Assert.IsFalse(marker.hasChanged);
+            player.Configure(new VitalsRecoverySettings(segmentCount: 5, fedThresholdFraction: .3));
+            AssertMarkers("HealthRow", .2f, .4f, .6f, .8f); AssertMarkers("HungerRow", .3f);
+        }
+
         [Test] public void HungryNotificationShowsCauseAndConsequenceAndClearsOnEveryOtherReason()
         {
             player.Vitals.Health.Set(30); player.Vitals.Hunger.Set(10);
