@@ -23,7 +23,9 @@ walls. Paint is authoritative; generated architecture is replaceable.
    generated output clears. Erasing all cells leaves an empty room.
 7. Use **Edit > Undo/Redo** (macOS Cmd+Z / Cmd+Shift+Z) to restore a complete
    gesture, including authored cells, floor, walls, and diagnostic. A paint stroke
-   spanning several cells is one gesture. Undo empty deletion to restore a room.
+   spanning several cells is one gesture. Samples are queued and applied together
+   when the gesture ends; geometry is generated once from the final cells. Leaving
+   the tool or Scene view also commits the gesture. Undo empty deletion to restore a room.
 8. Press **W** to leave painting before selecting the room root for its Inspector.
    Focus the Scene view when using the gesture Undo/Redo shortcuts.
 9. Save and reopen the scene; select the room and click **Edit Room in Tile
@@ -54,8 +56,10 @@ Ownership errors refuse destructive generation so unrelated content stays intact
 **Validate Room** reports configuration errors without editing cells, output, or
 scene dirtiness. It does not synchronize generated output. After painting with a
 different tool or changing a style, click **Rebuild Room** explicitly. Rebuild
-uses current occupancy and replaces only that room's owned generated children.
-It also restores deleted generated visuals or a safely deleted output root.
+uses current occupancy and reconciles only that room's owned generated children.
+Unchanged walls retain their objects, and the floor Tilemap updates only changed
+cells. Deleted or changed modules are recreated as needed. Native Undo/Redo
+restores cells, visuals, and child order. Rebuild also restores a safely deleted output root.
 Resolve ambiguous ownership/reference errors before rebuilding.
 
 The tool needs no Play Mode loop. Its qualified authoring mask is inactive when

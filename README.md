@@ -5,6 +5,8 @@ Unity project; the required Editor version is recorded in
 `ProjectSettings/ProjectVersion.txt`.
 
 For focused source navigation, see [the codebase map](CODEBASE_MAP.md).
+For the selected floor-driven room-authoring design, see
+[Room Authoring](Docs/Architecture/RoomAuthoring.md).
 
 ## Project structure
 

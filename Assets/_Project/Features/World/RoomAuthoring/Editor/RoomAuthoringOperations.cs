@@ -17,6 +17,8 @@ namespace SOLITUDE.Editor.RoomAuthoring
             private readonly int group;
             internal readonly ShipRoomAuthoring Room;
             internal bool IsDisposed { get; private set; }
+            private readonly Dictionary<Vector3Int, TileBase> pending = new Dictionary<Vector3Int, TileBase>();
+            internal void Paint(Vector3Int position, TileBase marker) => pending[position] = marker;
 
             internal RoomEdit(ShipRoomAuthoring room, string name)
             {
@@ -29,10 +31,28 @@ namespace SOLITUDE.Editor.RoomAuthoring
             public void Dispose()
             {
                 if (IsDisposed) return;
-                Undo.FlushUndoRecordObjects();
-                Undo.CollapseUndoOperations(group);
-                Undo.IncrementCurrentGroup();
                 IsDisposed = true;
+                try
+                {
+                    // Validate at commit: no spatial cache survives a gesture, Undo, or scene edit.
+                    if (pending.Count > 0 && GetSafetyIssue(Room, allowMissingOutput: true) == null)
+                    {
+                        var positions = new Vector3Int[pending.Count];
+                        var tiles = new TileBase[pending.Count];
+                        int index = 0;
+                        foreach (var pair in pending) { positions[index] = pair.Key; tiles[index++] = pair.Value; }
+                        Undo.RegisterCompleteObjectUndo(Room.Occupancy, "Paint Room Cells");
+                        Room.Occupancy.SetTiles(positions, tiles);
+                        RebuildCore(Room);
+                    }
+                }
+                finally
+                {
+                    pending.Clear();
+                    Undo.FlushUndoRecordObjects();
+                    Undo.CollapseUndoOperations(group);
+                    Undo.IncrementCurrentGroup();
+                }
             }
         }
 
@@ -58,8 +78,11 @@ namespace SOLITUDE.Editor.RoomAuthoring
         }
 
         public static string GetSafetyIssue(ShipRoomAuthoring room, bool allowMissingOutput = false)
+            => GetSafetyIssue(room, allowMissingOutput, new RoomValidationSnapshot(room));
+
+        internal static string GetSafetyIssue(ShipRoomAuthoring room, bool allowMissingOutput, RoomValidationSnapshot snapshot)
         {
-            var issue = RoomAuthoringCreation.GetOwnershipIssue(room, allowMissingOutput);
+            var issue = RoomAuthoringCreation.GetOwnershipIssue(room, allowMissingOutput, snapshot);
             if (issue != null) return issue;
             if (EditorApplication.isPlayingOrWillChangePlaymode) return "Rebuild is available in Edit Mode only.";
             if (room.transform.rotation != Quaternion.identity || room.transform.lossyScale != Vector3.one ||
@@ -71,31 +94,29 @@ namespace SOLITUDE.Editor.RoomAuthoring
             foreach (var transform in room.GeneratedOutput == null ? new[] { room.Occupancy.transform } : new[] { room.Occupancy.transform, room.GeneratedOutput.transform })
                 if (transform.parent != room.transform || transform.localPosition != Vector3.zero || transform.localRotation != Quaternion.identity || transform.localScale != Vector3.one)
                     return "Occupancy/output must be aligned direct children of the room.";
-            if (room.GeneratedOutput != null && (room.GeneratedOutput.GetComponentsInChildren<ShipRoomAuthoring>(true).Length != 0 ||
-                room.GeneratedOutput.GetComponentsInChildren<RoomGeneratedOutput>(true).Any(o => o != room.GeneratedOutput)))
-                return "Generated hierarchy contains another ownership root; destructive writes refused.";
             if (room.GeneratedOutput != null)
-                foreach (var other in Resources.FindObjectsOfTypeAll<ShipRoomAuthoring>())
-                {
-                    if (!other.gameObject.scene.IsValid() || !other.gameObject.scene.isLoaded || other.Occupancy == null) continue;
-                    var authored = other.Occupancy.transform;
-                    var output = room.GeneratedOutput.transform;
-                    if (authored == output || authored.IsChildOf(output))
-                        return "Generated hierarchy contains referenced authored occupancy from room " + other.RoomId + "; destructive writes refused.";
-                }
-            foreach (var position in room.Occupancy.cellBounds.allPositionsWithin)
-                if (position.z != 0 && room.Occupancy.HasTile(position)) return "Occupancy must be on the XY plane at z=0.";
+            {
+                if (snapshot.NestedOwnership.Contains(room.GeneratedOutput.transform))
+                    return "Generated hierarchy contains another ownership root; destructive writes refused.";
+                if (snapshot.AuthoredDescendants.TryGetValue(room.GeneratedOutput.transform, out var authoredOwner))
+                    return "Generated hierarchy contains referenced authored occupancy from room " + authoredOwner + "; destructive writes refused.";
+            }
+            var bounds = room.Occupancy.cellBounds;
+            if (bounds.zMin != 0 || bounds.zMax > 1)
+                foreach (var position in bounds.allPositionsWithin)
+                    if (position.z != 0 && room.Occupancy.HasTile(position)) return "Occupancy must be on the XY plane at z=0.";
             return null;
         }
 
         public static bool PaintCell(ShipRoomAuthoring room, Vector3Int position, TileBase marker, RoomEdit edit = null)
         {
-            var issue = GetSafetyIssue(room, allowMissingOutput: true);
-            if (issue != null || position.z != 0) return false;
             CheckEdit(room, edit);
+            if (position.z != 0) return false;
+            if (edit != null) { edit.Paint(position, marker); return true; }
+            var issue = GetSafetyIssue(room, allowMissingOutput: true);
+            if (issue != null) return false;
             using var ownedEdit = edit == null ? BeginEdit(room, marker == null ? "Erase Room Cell" : "Paint Room Cell") : null;
-            // Generated-object Undo registrations end native recording between stroke samples.
-            // Capture each authored mutation, then collapse the samples into the gesture group.
+            // Standalone calls commit immediately; brush gestures use the batched path above.
             Undo.RegisterCompleteObjectUndo(room.Occupancy, "Paint Room Cells");
             room.Occupancy.SetTile(position, marker);
             return RebuildCore(room);
@@ -103,8 +124,14 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public static bool PaintBox(ShipRoomAuthoring room, BoundsInt bounds, TileBase marker, RoomEdit edit = null)
         {
-            if (GetSafetyIssue(room, allowMissingOutput: true) != null || bounds.z != 0 ||
-                bounds.size.z != 1 || bounds.size.x <= 0 || bounds.size.y <= 0) return false;
+            CheckEdit(room, edit);
+            if (bounds.z != 0 || bounds.size.z != 1 || bounds.size.x <= 0 || bounds.size.y <= 0) return false;
+            if (edit != null)
+            {
+                foreach (var position in bounds.allPositionsWithin) edit.Paint(position, marker);
+                return true;
+            }
+            if (GetSafetyIssue(room, allowMissingOutput: true) != null) return false;
             var tiles = new TileBase[checked(bounds.size.x * bounds.size.y)];
             if (marker != null)
                 for (var i = 0; i < tiles.Length; i++) tiles[i] = marker;

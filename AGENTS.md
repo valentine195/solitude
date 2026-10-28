@@ -7,6 +7,19 @@ Keep first-party imported assets under `Assets/_Project`; keep review outputs an
 disposable exports outside `Assets`. Preserve existing asset GUIDs and assembly
 boundaries when moving content.
 
+## Room creation and Tilemap authoring
+
+Prefer painted Unity Tilemaps for room layouts whenever possible. Provide reusable
+Tile Palettes and use RuleTiles for connected walls, boundaries, edges, and corners
+where neighbor-based selection is appropriate. Use ordinary Tiles for deliberate
+variants such as windows, consoles, and specialized wall panels.
+
+Keep the saved scene's Tilemaps editable with Unity's painting tools and preserve
+manual layout changes. Builder scripts may prepare assets, palettes, components,
+and an initial scaffold, but should not be the primary room-authoring workflow or
+overwrite painted layouts. Use programmatic layout generation when explicitly
+requested or when procedural gameplay requires it.
+
 ## QRSPI project root
 
 Run QRSPI with the Git repository root as its project root, even when the chat starts in `Assets/_Project`. Resolve the root with `git rev-parse --show-toplevel` in the caller. Pass this root explicitly to roles and use `--project <repository-root>` on helper commands. Keep workflow artifacts in `<repository-root>/.qrspi/`, outside `Assets/`. Skills are installed in `<repository-root>/.agents/skills/`.

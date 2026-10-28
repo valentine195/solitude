@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using SOLITUDE.World.RoomAuthoring;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -17,11 +16,12 @@ namespace SOLITUDE.Editor.RoomAuthoring
         public static bool TryValidate(ShipRoomAuthoring room, out RoomPlacement placement, out string issue)
         {
             placement = null;
-            issue = RoomAuthoringOperations.GetSafetyIssue(room);
+            var snapshot = new RoomValidationSnapshot(room);
+            issue = RoomAuthoringOperations.GetSafetyIssue(room, false, snapshot);
             if (issue == null)
             {
                 var geometry = RoomBoundaryExtractor.Extract(RoomAuthoringOperations.ReadCells(room));
-                issue = GetOverlapIssue(room);
+                issue = GetOverlapIssue(room, geometry.Cells, snapshot);
                 if (issue == null && geometry.Cells.Length > 0) issue = GetConfigurationIssue(room.Style);
                 if (issue == null && !RoomPlacementBuilder.TryBuild(geometry, room.Style, out placement, out issue)) { }
             }
@@ -29,19 +29,33 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return issue == null;
         }
 
-        private static string GetOverlapIssue(ShipRoomAuthoring room)
+        private static string GetOverlapIssue(ShipRoomAuthoring room, Vector2Int[] cells, RoomValidationSnapshot snapshot)
         {
             var positions = new HashSet<Vector3>();
-            foreach (var c in RoomAuthoringOperations.ReadCells(room)) positions.Add(room.Occupancy.CellToWorld(new Vector3Int(c.x, c.y, 0)));
-            foreach (var other in room.gameObject.scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<ShipRoomAuthoring>(true)))
+            foreach (var c in cells) positions.Add(room.Occupancy.CellToWorld(new Vector3Int(c.x, c.y, 0)));
+            var bounds = WorldCellBounds(room);
+            foreach (var other in snapshot.Rooms)
             {
                 if (other == room || other.Occupancy == null) continue;
-                var issue = RoomAuthoringOperations.GetSafetyIssue(other);
+                var issue = RoomAuthoringOperations.GetSafetyIssue(other, false, snapshot);
                 if (issue != null) return "Cannot qualify room overlap: " + other.RoomId + ": " + issue;
+                // Safety still covers every room. Read cell contents only where their
+                // conservative Tilemap bounds overlap (including sparse/erased bounds).
+                var otherBounds = WorldCellBounds(other);
+                if (cells.Length == 0 || bounds.xMax <= otherBounds.xMin || otherBounds.xMax <= bounds.xMin ||
+                    bounds.yMax <= otherBounds.yMin || otherBounds.yMax <= bounds.yMin) continue;
                 foreach (var c in RoomAuthoringOperations.ReadCells(other))
                     if (positions.Contains(other.Occupancy.CellToWorld(new Vector3Int(c.x, c.y, 0)))) return "Authored region overlaps room " + other.RoomId + ".";
             }
             return null;
+        }
+
+        private static BoundsInt WorldCellBounds(ShipRoomAuthoring room)
+        {
+            var bounds = room.Occupancy.cellBounds;
+            // Called only after unit-grid, direct-child and integer-alignment checks.
+            bounds.position += Vector3Int.RoundToInt(room.transform.position);
+            return bounds;
         }
 
         private static bool Finite(Vector2 value) => !float.IsNaN(value.x) && !float.IsNaN(value.y) && !float.IsInfinity(value.x) && !float.IsInfinity(value.y);

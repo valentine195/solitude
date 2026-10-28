@@ -41,20 +41,21 @@ namespace SOLITUDE.Editor.RoomAuthoring
         }
 
         public static string GetOwnershipIssue(ShipRoomAuthoring room, bool allowMissingOutput = false)
+            => GetOwnershipIssue(room, allowMissingOutput, null);
+
+        internal static string GetOwnershipIssue(ShipRoomAuthoring room, bool allowMissingOutput, RoomValidationSnapshot snapshot)
         {
             if (room == null || !room.gameObject.scene.IsValid() || !room.gameObject.scene.isLoaded)
                 return "Select a room in a loaded scene.";
             if (string.IsNullOrWhiteSpace(room.RoomId)) return "Room identity is missing.";
-            var rooms = room.gameObject.scene.GetRootGameObjects()
-                .SelectMany(root => root.GetComponentsInChildren<ShipRoomAuthoring>(true)).ToArray();
-            if (rooms.Count(other => other.RoomId == room.RoomId) != 1) return "Room identity is ambiguous in this scene.";
+            snapshot ??= new RoomValidationSnapshot(room);
+            if (!snapshot.IdentityCounts.TryGetValue(room.RoomId, out int identities) || identities != 1) return "Room identity is ambiguous in this scene.";
             if (room.Occupancy == null) return "Room occupancy reference is missing.";
             if (room.Occupancy.transform == room.transform || !room.Occupancy.transform.IsChildOf(room.transform))
                 return "Occupancy must belong to this room's hierarchy.";
-            if (rooms.Any(other => other != room && other.Occupancy == room.Occupancy))
+            if (snapshot.OccupancyReferences[room.Occupancy] > 1)
                 return "Room occupancy is referenced by another room.";
-            var outputs = Resources.FindObjectsOfTypeAll<RoomGeneratedOutput>()
-                .Where(output => output.gameObject.scene.IsValid() && output.gameObject.scene.isLoaded).ToArray();
+            var outputs = snapshot.Outputs;
             if (room.GeneratedOutput == null)
             {
                 if (!allowMissingOutput) return "Room output reference is missing.";
@@ -64,11 +65,11 @@ namespace SOLITUDE.Editor.RoomAuthoring
             }
             if (room.GeneratedOutput.Owner != room || room.GeneratedOutput.transform == room.transform ||
                 !room.GeneratedOutput.transform.IsChildOf(room.transform)) return "Generated output is not owned by this room.";
-            if (outputs.Count(output => output.Owner == room) != 1)
+            if (!snapshot.OwnedOutputs.TryGetValue(room, out int ownedOutputs) || ownedOutputs != 1)
                 return "Generated output ownership is ambiguous: this room must own exactly one output root.";
             if (room.Occupancy.transform.IsChildOf(room.GeneratedOutput.transform) ||
                 room.GeneratedOutput.transform.IsChildOf(room.Occupancy.transform)) return "Occupancy and generated output must be separate.";
-            if (rooms.Any(other => other != room && (other.Occupancy == room.Occupancy || other.GeneratedOutput == room.GeneratedOutput)))
+            if (snapshot.OutputReferences[room.GeneratedOutput] > 1)
                 return "Room occupancy or output is referenced by another room.";
             return null;
         }

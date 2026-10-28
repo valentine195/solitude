@@ -25,21 +25,36 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         public void EndGesture()
         {
-            gesture?.Dispose();
+            var edit = gesture;
             gesture = null;
+            edit?.Dispose();
         }
 
-        private void OnDisable() => EndGesture();
+        private void OnEnable()
+        {
+            UnityEditor.SceneManagement.EditorSceneManager.sceneSaving += BeforeSceneSave;
+            AssemblyReloadEvents.beforeAssemblyReload += EndGesture;
+        }
+        private void OnDisable()
+        {
+            UnityEditor.SceneManagement.EditorSceneManager.sceneSaving -= BeforeSceneSave;
+            AssemblyReloadEvents.beforeAssemblyReload -= EndGesture;
+            EndGesture();
+        }
+        private void BeforeSceneSave(UnityEngine.SceneManagement.Scene scene, string path)
+        {
+            if (gesture != null && gesture.Room != null && gesture.Room.gameObject.scene == scene) EndGesture();
+        }
 
         public override void Paint(GridLayout gridLayout, GameObject brushTarget, Vector3Int position)
         {
-            if (occupancyMarker != null && position.z == 0 && TryGetRoom(gridLayout, brushTarget, out var room))
+            if (occupancyMarker != null && position.z == 0 && TryGetTarget(gridLayout, brushTarget, out var room))
                 RoomAuthoringOperations.PaintCell(room, position, occupancyMarker, gesture);
         }
 
         public override void Erase(GridLayout gridLayout, GameObject brushTarget, Vector3Int position)
         {
-            if (position.z == 0 && TryGetRoom(gridLayout, brushTarget, out var room))
+            if (position.z == 0 && TryGetTarget(gridLayout, brushTarget, out var room))
                 RoomAuthoringOperations.PaintCell(room, position, null, gesture);
         }
 
@@ -50,14 +65,22 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 BoxErase(gridLayout, brushTarget, bounds);
                 return;
             }
-            if (occupancyMarker != null && TryGetRoom(gridLayout, brushTarget, out var room))
+            if (occupancyMarker != null && TryGetTarget(gridLayout, brushTarget, out var room))
                 RoomAuthoringOperations.PaintBox(room, bounds, occupancyMarker, gesture);
         }
 
         public override void BoxErase(GridLayout gridLayout, GameObject brushTarget, BoundsInt bounds)
         {
-            if (TryGetRoom(gridLayout, brushTarget, out var room))
+            if (TryGetTarget(gridLayout, brushTarget, out var room))
                 RoomAuthoringOperations.PaintBox(room, bounds, null, gesture);
+        }
+
+        private bool TryGetTarget(GridLayout gridLayout, GameObject brushTarget, out ShipRoomAuthoring room)
+        {
+            room = gesture?.Room;
+            if (room == null) return TryGetRoom(gridLayout, brushTarget, out room);
+            return !gesture.IsDisposed && room.gameObject.activeInHierarchy && room.Occupancy != null &&
+                room.Occupancy.gameObject == brushTarget && gridLayout == room.GetComponent<Grid>();
         }
 
         public static bool TryGetRoom(GridLayout gridLayout, GameObject brushTarget, out ShipRoomAuthoring room)
