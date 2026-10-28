@@ -117,3 +117,11 @@ limits. Step 3 still needs the documented full isolated verification gate,
 admitted standalone prepared-pixel player proof, final criterion reconciliation,
 independent final review and human integration decision. This checkpoint implies
 no push, merge, deployment, cleanup of unrelated work or final acceptance.
+
+## Phase 4 headless continuation — integration execution passed, phase incomplete
+
+The later full gate (attempt4) passed 215 pure tests, 921 EditMode tests and 116 PlayMode tests with zero failed/skipped/inconclusive cases, normal ARM64 verification/shipping builds and all documented disposable player scenarios. The complete criterion reconciliation, infrastructure corrections, source/configuration differences and retained failures are in [ImplementationReport](ImplementationReport.md). The earlier Step1 NotRun entries describe that historical checkpoint; they are not the latest headless execution status.
+
+The separate admitted instrumented shipping-resource proof passes actual saved/reopened versus runtime pixel hashes, 48 floors/1 seam chunk and absence of editor generators. It is before-scene resource loading with Null graphics; it does not replace native rendered-camera or ordinary gameplay evidence. The uninstrumented full gate remains separate.
+
+Native UI responsiveness observations and explicit human acceptance of measured latency/immutable-history limits are deferred, not accepted or waived. Final independent review and the human integration decision are NotRun. Step4.2, Step4.3 and Phase4 remain incomplete. See [Responsiveness](Responsiveness.md) for distributions and the return checklist in ImplementationReport.

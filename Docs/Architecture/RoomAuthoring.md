@@ -87,5 +87,11 @@ panel Inspector per layout and finishing/cancelling other drafts before Apply
 or asset import. This is not full S49 compliance or a final qualification waiver.
 The Medbay remains an explicitly incomplete temporary preview with two missing
 frame-art diagnostics and residual-size advisories. Final artwork is unnecessary;
-standalone prepared-pixel loading, performance/resource qualification and final
-independent review remain Phase 4 work.
+an admitted instrumented standalone checkpoint now loads saved prepared pixels
+without editor generator assemblies. This is a before-scene resource/data proof,
+not a standalone rendered-camera or gameplay result. See
+[ImplementationReport](../../work/Reviews/RoomAuthoring/ImplementationReport.md).
+Native UI responsiveness observations, explicit human acceptance of measured
+latency/immutable-retention limits and final independent review remain pending.
+Phase 4 is incomplete; no performance threshold or cleanup-policy acceptance is
+implied by passing API measurements or the headless resource proof.

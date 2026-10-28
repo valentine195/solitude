@@ -234,7 +234,10 @@ For the native paneling checkpoint, restore the archived natively painted Medbay
 into a disposable project and preserve its baseline. The procedure and current
 Passed/Failed/NotRun evidence are in
 `work/Reviews/RoomAuthoring/FloorPanelingWorkflow.md`. Production artwork is not a
-gate; standalone prepared-pixel player proof remains mandatory in Phase 4.
+gate. The Phase 4 headless checkpoint now records an admitted instrumented
+shipping build loading prepared pixels; native responsiveness and explicit
+acceptance of measured limits remain deferred. See
+`work/Reviews/RoomAuthoring/ImplementationReport.md` for exact evidence and scope.
 
 ### Recommended paneling workflow
 
@@ -268,3 +271,19 @@ Medbay and exact 83-cell Cryobay copy passed fractional camera-motion and intege
 zoom comparisons. These checks qualify the recorded temporary assets and review
 camera, not every camera configuration or a standalone player build. See
 [visual evidence](../../../../../work/Reviews/RoomAuthoring/VisualAlignment.md).
+
+### Qualification handoff
+
+The automated/API measurement checkpoint records Medbay176, exact Cryobay83
+and a disposable 32×32 layout. Same-input rebuilds reused immutable revisions;
+new seeds retained history for Undo/saved references. The native API timings are
+materially slower than batch timings; neither implies an accepted speed limit.
+No automatic historical deletion is approved. Review the distributions and
+cleanup boundaries in `work/Reviews/RoomAuthoring/Responsiveness.md`.
+
+Native UI responsiveness observations and explicit acceptance of unresolved
+latency/resource-retention limits are deferred by the human. Phase 4 remains
+incomplete, and independent final review plus a human integration decision are
+still required. The headless shipping probe establishes saved-resource loading
+and exact pixel bytes before gameplay; it does not certify native rendered
+player pixels or ordinary gameplay behavior.
