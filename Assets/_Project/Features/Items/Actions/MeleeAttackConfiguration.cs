@@ -24,6 +24,8 @@ namespace SOLITUDE.Items
         public float StartAngle = -45;
         public float EndAngle = 45;
         public float HeldDistanceTiles = .3f;
+        public LayerMask TargetLayers = Physics2D.DefaultRaycastLayers;
+        public LayerMask BlockingLayers = Physics2D.DefaultRaycastLayers;
 
         public AudioClip SwingSound;
         public AudioClip ImpactSound;
@@ -77,6 +79,8 @@ namespace SOLITUDE.Items
         public float StartAngle { get; }
         public float EndAngle { get; }
         public float HeldDistanceTiles { get; }
+        public int TargetLayers { get; }
+        public int BlockingLayers { get; }
         public AudioClip SwingSound { get; }
         public AudioClip ImpactSound { get; }
         public GameObject ImpactEffect { get; }
@@ -89,6 +93,7 @@ namespace SOLITUDE.Items
             DamageTags = damageTags; TargetEligibility = eligibility;
             RestAngle = source.RestAngle; StartAngle = source.StartAngle;
             EndAngle = source.EndAngle; HeldDistanceTiles = source.HeldDistanceTiles;
+            TargetLayers = source.TargetLayers; BlockingLayers = source.BlockingLayers;
             SwingSound = source.SwingSound; ImpactSound = source.ImpactSound; ImpactEffect = source.ImpactEffect;
         }
         public float RangeWorld(float unitsPerTile)

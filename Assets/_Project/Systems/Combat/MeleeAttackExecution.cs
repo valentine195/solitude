@@ -11,6 +11,8 @@ namespace SOLITUDE.Combat
         private bool released;
         public bool IsEvaluatingActive { get; private set; }
         public bool IsComplete => released;
+        public event Action<DamageContext, DamageResult> HitApplied;
+        internal void ReportApplied(in DamageContext context, DamageResult result) => HitApplied?.Invoke(context, result);
         public MeleeAttackExecution(ItemActionContext context, MeleeAttackSpec configuration)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
@@ -19,6 +21,7 @@ namespace SOLITUDE.Combat
             if (!context.IsValid) { Interrupt(); return; }
             try
             {
+                context.HitResolver?.Begin(this);
                 slowdown = context.Movement?.RestrictSpeed(configuration.MovementFactor);
                 facing = context.Animation?.OverrideFacing(context.Direction);
                 if (context.View != null) context.View.Begin(this);
@@ -34,7 +37,11 @@ namespace SOLITUDE.Combat
             if (active && Context.IsValid)
             {
                 IsEvaluatingActive = true;
-                try { Context.EvaluateActive?.Invoke(this); }
+                try
+                {
+                    Context.EvaluateActive?.Invoke(this);
+                    if (!released && Context.IsValid) Context.HitResolver?.Sample(this);
+                }
                 finally { IsEvaluatingActive = false; }
                 if (released || !Context.IsValid) { Interrupt(); return; }
             }
@@ -45,6 +52,7 @@ namespace SOLITUDE.Combat
         {
             if (released) return;
             released = true; Timing.Interrupt();
+            Context.HitResolver?.End(this);
             try { if (Context.View != null) Context.View.End(this); }
             finally { try { facing?.Dispose(); } finally { slowdown?.Dispose(); facing = slowdown = null; } }
         }

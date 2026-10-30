@@ -13,6 +13,7 @@ namespace SOLITUDE.Player
     public sealed class PlayerItemActionComposition : MonoBehaviour
     {
         [SerializeField] private float unitsPerTile = 1;
+        [SerializeField] private Vector2 attackOriginOffsetTiles;
         private ItemActionRunner runner;
         private EquippedItemView equipment;
         private ItemCapabilityCatalog capabilities;
@@ -21,6 +22,7 @@ namespace SOLITUDE.Player
         private PlayerVitalsController vitals;
         private PlayerStunReceiver stun;
         private MeleeSwingView view;
+        private MeleeHitResolver hitResolver;
         public event Action<MeleeAttackExecution> ActiveSample;
         public ItemActionRunner Runner => runner;
         private bool ActorAvailable => isActiveAndEnabled && vitals != null && vitals.isActiveAndEnabled &&
@@ -29,13 +31,15 @@ namespace SOLITUDE.Player
             ItemCapabilityCatalog catalog, InputPolicyCoordinator gameplay)
         {
             Release();
-            if (catalog == null || gameplay == null || float.IsNaN(unitsPerTile) || float.IsInfinity(unitsPerTile) || unitsPerTile <= 0)
+            if (catalog == null || gameplay == null || float.IsNaN(unitsPerTile) || float.IsInfinity(unitsPerTile) || unitsPerTile <= 0
+                || !float.IsFinite(attackOriginOffsetTiles.x) || !float.IsFinite(attackOriginOffsetTiles.y))
                 throw new ArgumentException("Invalid player action binding.");
             equipment = new EquippedItemView(commands, hotbar, selection); capabilities = catalog; policy = gameplay;
             movement = GetComponent<MovementBehavior>(); vitals = GetComponent<PlayerVitalsController>();
             stun = GetComponent<PlayerStunReceiver>(); view = GetComponent<MeleeSwingView>();
             if (movement == null || vitals == null) { Release(); throw new InvalidOperationException("Actions require existing movement and vitals."); }
             runner = new ItemActionRunner(); equipment.Changed += Invalidate; policy.Changed += PolicyChanged;
+            hitResolver = new MeleeHitResolver(new DamageDelivery(catalog.Registry));
             vitals.PresentationChanged += ActorChanged;
         }
         public bool Request(ItemActionSlot slot = ItemActionSlot.Primary)
@@ -45,7 +49,8 @@ namespace SOLITUDE.Player
             if (action == null) return false;
             var context = new ItemActionContext(gameObject, binding, slot, movement.FacingDirection, unitsPerTile,
                 movement, GetComponent<HumanAnimationController>(), view, item.HeldSprite,
-                () => runner != null && ActorAvailable && policy.Ready && equipment.IsCurrent(binding), EvaluateActive);
+                () => runner != null && ActorAvailable && policy.Ready && equipment.IsCurrent(binding), EvaluateActive,
+                hitResolver, action.Definition, attackOriginOffsetTiles, () => policy != null && policy.Gameplay);
             return runner.TryStart(new ConfiguredItemActionRequest(action, context));
         }
         private void EvaluateActive(MeleeAttackExecution execution) => ActiveSample?.Invoke(execution);
@@ -66,6 +71,7 @@ namespace SOLITUDE.Player
         public void Release()
         {
             runner?.Dispose(); runner = null;
+            hitResolver = null;
             if (policy != null) policy.Changed -= PolicyChanged;
             if (vitals != null) vitals.PresentationChanged -= ActorChanged;
             if (equipment != null) { equipment.Changed -= Invalidate; equipment.Dispose(); equipment = null; }
