@@ -40,12 +40,17 @@ namespace SOLITUDE.Npcs.Sec0
         public SecurityBotState State=>brain?.State??SecurityBotState.Patrol;
         public Vector2 Facing=>facing;
         public bool HasBinding=>owner!=null;
+        public bool IsDefeated { get; private set; }
+        public int ActivePulseCount=>effects.Count;
         public int ShotsFired { get; private set; }
         public int StunsLanded { get; private set; }
         public void Configure(Animator animator,GameObject effect,Transform[] route)
         { visual=animator;stunFxPrefab=effect;patrolPoints=route??Array.Empty<Transform>(); }
         public void ValidateAuthoring()
         {
+            var damage=GetComponent<Sec0DamageRecipient>();
+            if(damage==null) throw new InvalidOperationException("SEC-0 requires its damage recipient.");
+            damage.ValidateAuthoring();
             var physics=GetComponent<Rigidbody2D>();var shape=GetComponent<BoxCollider2D>();
             if(physics==null || physics.bodyType!=RigidbodyType2D.Kinematic || shape==null || shape.isTrigger
                 || !Positive(shape.size.x) || !Positive(shape.size.y) || !Finite(shape.offset.x) || !Finite(shape.offset.y)
@@ -63,6 +68,7 @@ namespace SOLITUDE.Npcs.Sec0
             if(bindingOwner==null || player==null || stun==null || gameplay==null || available==null) throw new ArgumentNullException(nameof(player));
             if(owner!=null && !ReferenceEquals(owner,bindingOwner)) throw new InvalidOperationException("SEC-0 already owned.");
             Release(bindingOwner);ValidateAuthoring();
+            if(IsDefeated) return;
             body=GetComponent<Rigidbody2D>();footprint=GetComponent<BoxCollider2D>();
             brain=new SecurityBotBrain(detectionTime,investigationTime,attackWindup,attackRecovery,attackRange);
             navigator=new Sec0Navigator(ClearTravel);owner=bindingOwner;target=player;receiver=stun;policy=gameplay;targetAvailable=available;
@@ -75,7 +81,7 @@ namespace SOLITUDE.Npcs.Sec0
             || (target!=null && collider.transform.IsChildOf(target));
         public bool CanSeeTarget()
         {
-            if(target==null || targetAvailable==null || !targetAvailable()) return false;
+            if(IsDefeated || target==null || targetAvailable==null || !targetAvailable()) return false;
             Vector2 delta=(Vector2)target.position-body.position;
             if(delta.sqrMagnitude>sightRange*sightRange) return false;
             bool tracking=State==SecurityBotState.Pursuing || State==SecurityBotState.Charging || State==SecurityBotState.Recovering;
@@ -123,7 +129,7 @@ namespace SOLITUDE.Npcs.Sec0
         private void FixedUpdate()=>Tick(Time.fixedDeltaTime);
         public void Tick(float elapsed)
         {
-            if(owner==null || !isActiveAndEnabled || !Finite(elapsed) || elapsed<=0) return;
+            if(IsDefeated || owner==null || !isActiveAndEnabled || !Finite(elapsed) || elapsed<=0) return;
 #if UNITY_EDITOR
             NavigationOverlapQueries=0;
 #endif
@@ -180,6 +186,7 @@ namespace SOLITUDE.Npcs.Sec0
         { if(delta.sqrMagnitude>.001f) facing=Mathf.Abs(delta.x)>Mathf.Abs(delta.y)?new Vector2(Mathf.Sign(delta.x),0):new Vector2(0,Mathf.Sign(delta.y)); }
         private void Fire()
         {
+            if(IsDefeated || owner==null) return;
             ShotsFired++;
             Vector2 from=body.position+new Vector2(0,.25f);
             var fx=Instantiate(stunFxPrefab,from+(chargeDirection*.35f),Quaternion.Euler(0,0,Mathf.Atan2(chargeDirection.y,chargeDirection.x)*Mathf.Rad2Deg));
@@ -211,8 +218,18 @@ namespace SOLITUDE.Npcs.Sec0
             owner=null;target=null;receiver=null;policy=null;targetAvailable=null;
             if(body!=null) body.linearVelocity=Vector2.zero;
             brain?.Reset();navigator?.Reset();animationName=null;if(visual!=null) visual.speed=1;
-            foreach(var effect in effects) if(effect!=null) Destroy(effect);effects.Clear();
+            foreach(var effect in effects) if(effect!=null) {effect.SetActive(false);Destroy(effect);}effects.Clear();
             Play(false);
+        }
+        internal void Defeat()
+        {
+            if(IsDefeated) return;
+            IsDefeated=true;
+            Release(owner);
+            body??=GetComponent<Rigidbody2D>();
+            body.linearVelocity=Vector2.zero;body.angularVelocity=0;body.simulated=false;
+            foreach(var shape in GetComponentsInChildren<Collider2D>(true)) shape.enabled=false;
+            if(visual!=null) visual.speed=0;
         }
         private void OnDisable() { if(body!=null) body.linearVelocity=Vector2.zero; }
         private void OnDestroy() { if(owner!=null) Release(owner); }

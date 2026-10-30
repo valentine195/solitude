@@ -30,7 +30,12 @@ namespace SOLITUDE.Npcs.Sec0
             try
             {
                 player.Bind(this,context.Policy,Available);
-                foreach(var bot in bots) bot.Bind(this,player.transform,player,context.Policy,Available);
+                if(player.GetComponent<PlayerDamageRecipient>()==null) player.gameObject.AddComponent<PlayerDamageRecipient>();
+                foreach(var bot in bots)
+                {
+                    bot.Bind(this,player.transform,player,context.Policy,Available);
+                    bot.GetComponent<Sec0DamageRecipient>().Bind(this,context.Policy);
+                }
             }
             catch {Release();throw;}
         }
@@ -41,7 +46,11 @@ namespace SOLITUDE.Npcs.Sec0
         public override void Release()
         {
             initialized=false;
-            if(bots!=null) foreach(var bot in bots) if(bot!=null) bot.Release(this);
+            if(bots!=null) foreach(var bot in bots) if(bot!=null)
+            {
+                bot.GetComponent<Sec0DamageRecipient>()?.Release(this);
+                bot.Release(this);
+            }
             if(player!=null) player.Release(this);
         }
         private void OnDestroy()=>Release();

@@ -55,6 +55,7 @@ namespace SOLITUDE.Editor
                 var positions=new[]{Vector2.zero,new Vector2(4,0),new Vector2(4,3),new Vector2(0,3)};
                 var points=positions.Select((p,i)=>{var g=new GameObject("Waypoint"+i);g.transform.SetParent(path.transform,false);g.transform.localPosition=p;return g.transform;}).ToArray();
                 rover.AddComponent<Sec0Controller>().Configure(visual.GetComponent<Animator>(),AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/PF_Sec0StunFx.prefab"),points);
+                rover.AddComponent<Sec0DamageRecipient>();
                 PrefabUtility.SaveAsPrefabAsset(host,PrefabPath);AssetDatabase.SaveAssets();
             }
             finally {UnityEngine.Object.DestroyImmediate(host);}

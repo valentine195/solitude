@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7915470569585910464}
   - component: {fileID: 7119922353575187664}
   - component: {fileID: 9186653037048536398}
+  - component: {fileID: 2515707831830565653}
   m_Layer: 0
   m_Name: SEC-0
   m_TagString: Untagged
@@ -141,6 +142,19 @@ MonoBehaviour:
   attackRecovery: 1.6
   stunDuration: 0.8
   patrolPause: 0.6
+--- !u!114 &2515707831830565653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 315621021835699645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e5be84e52cac40a094aa9b4a960b89f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Npcs.Sec0.Sec0DamageRecipient
+  maximumHealth: 40
 --- !u!1 &772660201735511048
 GameObject:
   m_ObjectHideFlags: 0
