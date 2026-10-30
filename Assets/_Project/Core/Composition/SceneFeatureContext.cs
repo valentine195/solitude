@@ -20,6 +20,7 @@ namespace SOLITUDE.Composition
         public Action ClosePlayerScreens { get; }
         public InteractionFeedbackService Feedback { get; }
         public ItemPresentationCatalog Presentations { get; }
+        public ItemCapabilityCatalog Capabilities { get; }
         public InputPolicyCoordinator Policy { get; }
         public UnityInputHost Input { get; }
         public TaskJournal Tasks { get; }
@@ -38,8 +39,9 @@ namespace SOLITUDE.Composition
             IContainerReader hotbar = null, HotbarSelectionState selection = null,
             Action closePlayerScreens = null, InteractionFeedbackService feedback = null,
             Func<IContainerReader, string, bool> openContainer = null, Action<ContainerHandle> closeContainer = null,
-            ContainerSaveSession lifecycleSession = null, bool isSceneArrival = false)
+            ContainerSaveSession lifecycleSession = null, bool isSceneArrival = false, ItemCapabilityCatalog capabilities = null)
         {
+            Capabilities = capabilities;
             LifecycleSession = lifecycleSession; IsSceneArrival = isSceneArrival;
             OpenContainer = openContainer; CloseContainer = closeContainer;
             Hotbar = hotbar; Selection = selection; ClosePlayerScreens = closePlayerScreens; Feedback = feedback;

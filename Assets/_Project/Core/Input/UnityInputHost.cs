@@ -29,6 +29,74 @@ namespace SOLITUDE.Core.Input
         private object vitalUseOwner;
         private InputControl[] heldUse = Array.Empty<InputControl>();
 
+        private Action primaryAction;
+        private object primaryOwner, pendingPrimaryOwner;
+        private InputControl[] heldPrimary = Array.Empty<InputControl>();
+        private InputControl pendingPrimaryControl;
+        private int pendingPrimaryFrame = -1;
+        private long uiConsumptionVersion, pendingPrimaryConsumptionVersion;
+        private Vector2 pendingPrimaryPosition;
+        private UnityEngine.EventSystems.PointerEventData primaryPointer;
+        private UnityEngine.EventSystems.EventSystem primaryPointerSystem;
+        private readonly List<UnityEngine.EventSystems.RaycastResult> primaryRaycasts = new();
+        public IDisposable BindPrimaryAction(Action callback)
+        {
+            if (actions == null || callback == null) throw new InvalidOperationException("Primary requires initialized input and a callback.");
+            if (primaryOwner != null) throw new InvalidOperationException("Primary already has a scene owner.");
+            var owner = new object(); primaryOwner = owner; primaryAction = callback; CaptureHeldPrimary(); ClearPendingPrimary();
+            return new Lease(() =>
+            {
+                if (!ReferenceEquals(primaryOwner, owner)) return;
+                CaptureHeldPrimary(); ClearPendingPrimary(); primaryAction = null; primaryOwner = null;
+            });
+        }
+        private void CaptureHeldPrimary()
+        { if (actions != null) heldPrimary = actions.Gameplay.Primary.controls.Where(c => c.IsActuated()).ToArray(); }
+        private void ClearPendingPrimary()
+        { pendingPrimaryOwner = null; pendingPrimaryControl = null; pendingPrimaryFrame = -1; }
+        private void RefreshPrimaryRelease()
+        {
+            int retained = 0;
+            for (int i = 0; i < heldPrimary.Length; i++)
+                if (heldPrimary[i].IsActuated()) heldPrimary[retained++] = heldPrimary[i];
+            if (retained != heldPrimary.Length) Array.Resize(ref heldPrimary, retained);
+            if (actions != null && heldAtReset.TryGetValue(actions.Gameplay.Primary, out var held)
+                && !AnyActuated(held)) heldAtReset.Remove(actions.Gameplay.Primary);
+        }
+        private void Primary(InputAction.CallbackContext context)
+        {
+            RefreshPrimaryRelease();
+            if (!Fresh(context) || !GameplayAllowed || !isActiveAndEnabled || heldPrimary.Length != 0 || primaryAction == null) return;
+            pendingPrimaryPosition = context.control.device is Mouse mouse ? mouse.position.ReadValue() : Vector2.zero;
+            CaptureHeldPrimary(); pendingPrimaryOwner = primaryOwner; pendingPrimaryControl = context.control; pendingPrimaryFrame = Time.frameCount; pendingPrimaryConsumptionVersion = uiConsumptionVersion;
+        }
+        private void LateUpdate()
+        {
+            if (pendingPrimaryOwner == null) return;
+            var owner = pendingPrimaryOwner; var control = pendingPrimaryControl; int frame = pendingPrimaryFrame; long consumptionVersion = pendingPrimaryConsumptionVersion;
+            var pressPosition = pendingPrimaryPosition;
+            ClearPendingPrimary();
+            if (!ReferenceEquals(owner, primaryOwner) || actions == null || !isActiveAndEnabled || !GameplayAllowed ||
+                Time.frameCount - frame > 1 || consumptionVersion != uiConsumptionVersion || control == null || !control.device.added) return;
+            // EventSystem.Update has resolved the current pointer before this dispatch.
+            if (control.device is Mouse && PrimaryPointerHitsUI(control.device.deviceId, pressPosition)) return;
+            primaryAction?.Invoke();
+        }
+
+        private bool PrimaryPointerHitsUI(int pointerId, Vector2 pressPosition)
+        {
+            var system = UnityEngine.EventSystems.EventSystem.current;
+            if (system == null) return false;
+            if (system.IsPointerOverGameObject(pointerId)) return true;
+            if (primaryPointer == null || primaryPointerSystem != system)
+            { primaryPointerSystem = system; primaryPointer = new UnityEngine.EventSystems.PointerEventData(system); }
+            primaryPointer.Reset(); primaryPointer.position = pressPosition; primaryRaycasts.Clear();
+            system.RaycastAll(primaryPointer, primaryRaycasts);
+            for (int i = 0; i < primaryRaycasts.Count; i++)
+                if (primaryRaycasts[i].module is UnityEngine.UI.GraphicRaycaster) return true;
+            return false;
+        }
+
         public IDisposable BindVitalUse(Action callback)
         {
             if (actions == null || callback == null) throw new InvalidOperationException("Use requires initialized input and a callback.");
@@ -66,7 +134,7 @@ namespace SOLITUDE.Core.Input
                 }
             heldUI = actions.asset.Where(a => a.actionMap.name == "UI" && (a.name == "Click" || a.name == "Submit"))
                 .SelectMany(a => a.controls.Where(c => c.IsActuated())).ToArray();
-            CaptureHeldUse();
+            CaptureHeldUse(); CaptureHeldPrimary(); ClearPendingPrimary();
             movement?.SetInput(Vector2.zero); ConsumeUIActivation(); SurvivorInputChanged?.Invoke();
         }
         private bool Fresh(InputAction.CallbackContext context) => !heldAtReset.ContainsKey(context.action);
@@ -85,7 +153,7 @@ namespace SOLITUDE.Core.Input
             return false;
         }
         private int consumedFrame = -1;
-        public void ConsumeUIActivation() => consumedFrame = Time.frameCount;
+        public void ConsumeUIActivation() { consumedFrame = Time.frameCount; uiConsumptionVersion++; }
         private bool GameplayAllowed => policy.Gameplay && consumedFrame != Time.frameCount;
         public event Action<float, float> Point;
         public IDisposable ConnectUI(UnityEngine.InputSystem.UI.InputSystemUIInputModule module)
@@ -120,6 +188,8 @@ namespace SOLITUDE.Core.Input
             actions.Gameplay.Pause.performed += Back; actions.Container.Cancel.performed += Back;
             actions.Gameplay.Journal.performed += ToggleJournal;
             actions.Gameplay.Use.performed += Use;
+            actions.Gameplay.Primary.performed += Primary;
+            InputSystem.onAfterUpdate += RefreshPrimaryRelease;
             InputSystem.onAfterUpdate += RefreshUseRelease;
             actions.Container.Point.performed += Pointer;
             for (int i = 0; i < 9; i++) actions.asset.FindAction("Gameplay/Hotbar" + (i + 1)).performed += Hotbar;
@@ -143,6 +213,9 @@ namespace SOLITUDE.Core.Input
             Enable(actions.Gameplay.Move, policy.Gameplay); Enable(actions.Gameplay.Interact, policy.Gameplay);
             if (!policy.Gameplay || !isActiveAndEnabled || !actions.Gameplay.Use.enabled) CaptureHeldUse();
             Enable(actions.Gameplay.Use, policy.Gameplay && isActiveAndEnabled);
+            if (!policy.Gameplay || !isActiveAndEnabled || !actions.Gameplay.Primary.enabled) CaptureHeldPrimary();
+            if (!policy.Gameplay) ClearPendingPrimary();
+            Enable(actions.Gameplay.Primary, policy.Gameplay && isActiveAndEnabled);
             for (int i = 0; i < 9; i++) Enable(actions.asset.FindAction("Gameplay/Hotbar" + (i + 1)), policy.Gameplay);
             Enable(actions.Gameplay.Inventory, policy.Inventory);
             Enable(actions.Gameplay.Pause, policy.Ready); Enable(actions.Container.Cancel, policy.Ready);
@@ -190,6 +263,9 @@ namespace SOLITUDE.Core.Input
         public void Release()
         {
             InputSystem.onAfterUpdate -= RefreshUseRelease;
+            InputSystem.onAfterUpdate -= RefreshPrimaryRelease;
+            primaryAction = null; primaryOwner = null; heldPrimary = Array.Empty<InputControl>(); ClearPendingPrimary();
+            primaryPointer = null; primaryPointerSystem = null; primaryRaycasts.Clear();
             vitalUse = null; vitalUseOwner = null; heldUse = Array.Empty<InputControl>();
             journal?.Close(); journal = null;
             foreach (var lease in uiLeases) lease.Dispose();
@@ -205,8 +281,8 @@ namespace SOLITUDE.Core.Input
         private void OnEnable() { if (actions != null) Apply(); }
         private void OnDisable()
         {
-            CaptureHeldUse();
-            if (actions != null) actions.Gameplay.Use.Disable();
+            CaptureHeldUse(); CaptureHeldPrimary(); ClearPendingPrimary();
+            if (actions != null) { actions.Gameplay.Use.Disable(); actions.Gameplay.Primary.Disable(); }
         }
     }
 }

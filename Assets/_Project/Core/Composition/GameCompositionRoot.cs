@@ -33,6 +33,7 @@ namespace SOLITUDE.Composition
         private PickupCollectionService pickups;
         private ItemCatalog catalog;
         private ItemPresentationCatalog presentations;
+        private ItemCapabilityCatalog capabilities;
         private Dictionary<LootTable, RuntimeLootTable> loot;
         private PauseCoordinator pause;
         private InputPolicyCoordinator policy;
@@ -57,6 +58,7 @@ namespace SOLITUDE.Composition
                 if (config == null || config.database == null || persistence == null || input == null || clock == null || game == null)
                     throw new InvalidOperationException("Bootstrap authoring/adapter references are incomplete.");
                 catalog = config.database.BuildRuntimeCatalog(); presentations = config.database.BuildPresentationCatalog();
+                capabilities = config.database.BuildCapabilityCatalog();
                 loot = new Dictionary<LootTable, RuntimeLootTable>();
                 foreach (var table in config.lootTables)
                 { if (table == null || loot.ContainsKey(table)) throw new InvalidOperationException("Null or duplicate configured loot table."); loot.Add(table, table.Compile(catalog)); }
@@ -172,6 +174,7 @@ namespace SOLITUDE.Composition
                 tasks?.Dispose(); tasks = new TaskJournal(); tasks.ObserverError += Debug.LogException;
             }
             entry.ConfigureLifecyclePersistence(!disposableSession);
+            entry.ConfigureCapabilities(capabilities);
             entry.Initialize(session, pickups, presentations, loot, gestures, policy, pause, this, input, game, () => ReleaseScene(scene), tasks);
             scopes.Add(scene, entry);
             if (entry.HasPlayer) interactive = entry;

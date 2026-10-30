@@ -42,8 +42,15 @@ namespace SOLITUDE.Composition
         private readonly List<WorldPickup> registeredPickups = new();
         private readonly List<SceneFeatureComposition> boundFeatures = new();
         [SerializeField] private UnityEngine.InputSystem.UI.InputSystemUIInputModule uiInput;
-        private IDisposable uiLease;
+        private IDisposable uiLease, primaryLease;
+        private PlayerItemActionComposition itemActions;
         private ItemPresentationCatalog presentations;
+        private ItemCapabilityCatalog capabilities;
+        internal void ConfigureCapabilities(ItemCapabilityCatalog value)
+        {
+            if (session != null) throw new InvalidOperationException("Capabilities must be configured before scene binding.");
+            capabilities = value;
+        }
         private ContainerSaveSession session;
         private PickupCollectionService pickups;
         private Dictionary<LootTable, RuntimeLootTable> loot;
@@ -175,11 +182,20 @@ namespace SOLITUDE.Composition
                 var featureContext = new SceneFeatureContext(session.Commands, inventory.Container, presentations,
                     policy, input, tasks, taskScope, interactor, interactions.Events,
                     hotbar.Container, selection, CloseForTransition, interactions.Feedback, Open, Close,
-                    persistentLifecycle ? session : null, savedSurvivor != null && savedSurvivor.scenePath != gameObject.scene.path);
+                    persistentLifecycle ? session : null, savedSurvivor != null && savedSurvivor.scenePath != gameObject.scene.path, capabilities);
                 foreach (var feature in features)
                 {
                     // Record before binding so a throwing initializer is also unwound.
                     boundFeatures.Add(feature); feature.Initialize(featureContext);
+                }
+                if (capabilities != null && movement.GetComponent<PlayerVitalsController>() != null)
+                {
+                    itemActions = movement.GetComponent<PlayerItemActionComposition>();
+                    if (itemActions == null) itemActions = movement.gameObject.AddComponent<PlayerItemActionComposition>();
+                    if (movement.GetComponent<SOLITUDE.Combat.MeleeSwingView>() == null)
+                        movement.gameObject.AddComponent<SOLITUDE.Combat.MeleeSwingView>();
+                    itemActions.Bind(session.Commands, hotbar.Container, selection, capabilities, policy);
+                    primaryLease = input.BindPrimaryAction(() => { if (itemActions != null) itemActions.Request(); });
                 }
                 if (journalView != null && tasks != null)
                 {
@@ -309,6 +325,8 @@ namespace SOLITUDE.Composition
         public void Release()
         {
             if (session == null) return;
+            primaryLease?.Dispose(); primaryLease = null;
+            if (itemActions != null) itemActions.Release(); itemActions = null;
             taskNotices?.Dispose(); taskNotices = null;
             if (taskNoticeView != null) taskNoticeView.Release();
             journalScreen?.Dispose(); journalScreen = null; journalPresenter?.Dispose(); journalPresenter = null;
@@ -331,7 +349,7 @@ namespace SOLITUDE.Composition
             foreach (var source in lockers) { source.Release(); if (source != null) source.GetComponent<Locker>()?.Release(); }
             foreach (var junction in restorationJunctions) if (junction != null) junction.ReleaseBinding();
             foreach (var binding in bindings) binding.Dispose(); bindings.Clear();
-            inventory?.Release(); hotbar?.Release(); session = null; gestures = null; persistentLifecycle = false;
+            inventory?.Release(); hotbar?.Release(); session = null; gestures = null; capabilities = null; persistentLifecycle = false;
         }
         private void OnDestroy() { var notify = released; released = null; notify?.Invoke(); Release(); }
     }
