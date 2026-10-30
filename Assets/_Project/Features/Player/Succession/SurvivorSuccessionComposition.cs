@@ -159,6 +159,7 @@ namespace SOLITUDE.Player.Succession
         public bool TryActivate(SurvivorTransition transition, SurvivorEquipmentReceipt receipt, out string error)
         {
             Validate();
+            avatar.Interactor.GetComponent<PlayerItemActionComposition>()?.RetireActor();
             avatar.Awaken(awakeningPoint); context.Selection.Select(-1);
             if (preparedRecovery != null && !preparedRecovery.IsPublished) preparedRecovery.Publish();
             error = null; return true;

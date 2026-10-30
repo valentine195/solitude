@@ -56,6 +56,13 @@ namespace SOLITUDE.Player
         private void Update() => Advance(Time.deltaTime);
         private void OnDisable() => Invalidate();
         private void OnDestroy() => Release();
+        internal void RetireActor()
+        {
+            if (runner == null) return;
+            // The avatar survives succession; the departed actor's commitment does not.
+            runner.Dispose();
+            runner = new ItemActionRunner();
+        }
         public void Release()
         {
             runner?.Dispose(); runner = null;

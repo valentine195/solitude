@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using SOLITUDE.Application.Survivors;
 using SOLITUDE.Combat;
 using SOLITUDE.Composition;
 using SOLITUDE.Containers;
 using SOLITUDE.Hotbar;
 using SOLITUDE.Player;
+using SOLITUDE.Player.Succession;
 using SOLITUDE.SaveLoad;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -111,6 +113,60 @@ namespace SOLITUDE.Tests
             MouseState(point, true); yield return null; yield return null; Assert.IsTrue(Actions.Runner.IsExecuting);
             WeaponSystemTestFixtures.One<SceneBindings>().Release(); Assert.IsNull(Actions.Runner);
             yield return new WaitForSecondsRealtime(.7f); Assert.IsNull(Actions.Runner); Assert.IsFalse(Actions.Request());
+        }
+        [UnityTest] public IEnumerator CommittedSuccessionDiscardsDepartedLockoutButRejectedRetirementPreservesIt()
+        {
+            // Keep frame-driven input live without letting elapsed frames hide inherited lockout.
+            Time.timeScale = 0;
+            var feature = WeaponSystemTestFixtures.One<SurvivorSuccessionComposition>();
+            var commands = WeaponSystemTestFixtures.Session.Commands;
+            var bar = WeaponSystemTestFixtures.Bar;
+            foreach (double elapsed in new[] { .05, .15, .30 })
+            {
+                var point = WorldPoint(); MouseState(point, false); MouseState(point, true);
+                yield return null; yield return null;
+                var departedRunner = Actions.Runner;
+                Assert.IsTrue(departedRunner.IsExecuting);
+                Actions.Advance(elapsed);
+                Assert.That(departedRunner.LockoutRemaining, Is.EqualTo(.55 - elapsed).Within(.000001));
+                var departed = feature.Coordinator.Current;
+
+                // A rejection before commitment leaves the same survivor and its cooldown.
+                var prefab = feature.RecoveryPrefab;
+                feature.ConfigureRecovery(null);
+                try { Assert.AreEqual(SuccessionOutcome.Failed, feature.RequestDeath(departed.Id)); }
+                finally { feature.ConfigureRecovery(prefab); }
+                Assert.AreSame(departed, feature.Coordinator.Current);
+                Assert.AreSame(departedRunner, Actions.Runner);
+                Assert.IsFalse(departedRunner.IsExecuting);
+                Assert.That(departedRunner.LockoutRemaining, Is.EqualTo(.55 - elapsed).Within(.000001));
+                Assert.IsFalse(Actions.Request());
+
+                Assert.AreEqual(SuccessionOutcome.Completed, feature.RequestDeath(departed.Id));
+                Assert.AreNotEqual(departed.Id, feature.Coordinator.Current.Id);
+                Assert.AreNotSame(departedRunner, Actions.Runner);
+                Assert.AreEqual(0, departedRunner.LockoutRemaining);
+                Assert.AreEqual(0, Actions.Runner.LockoutRemaining);
+                Assert.IsFalse(Actions.GetComponent<MeleeSwingView>().HeldRenderer.enabled);
+                Assert.AreEqual(1, Actions.GetComponent<SOLITUDE.Movement.MovementBehavior>().SpeedFactor);
+                var recovery = feature.RecoveryContainers.Single(cache => cache.SourceSurvivorId == departed.Id);
+                var wrench = recovery.Container.GetSlots().Single(slot => slot.Stack?.ItemId == WeaponSystemTestFixtures.Wrench.ItemId);
+                Assert.AreEqual(CommandStatus.Applied, commands.Transfer(wrench.Address, bar.Container.GetSlot(0).Address).Status);
+                bar.SetActive(0);
+                yield return null; yield return null;
+                Assert.IsFalse(Actions.Runner.IsExecuting, "Held Primary must not replay into the successor.");
+                Assert.IsTrue(WeaponSystemTestFixtures.Policy.Gameplay);
+                MouseState(WorldPoint(), false); MouseState(WorldPoint(), true);
+                yield return null; yield return null;
+                Assert.IsTrue(Actions.Runner.IsExecuting, "The successor must accept fresh Primary without advancing the old cooldown.");
+                Assert.That(Actions.Runner.LockoutRemaining, Is.EqualTo(.55).Within(.000001));
+                var successorRunner = Actions.Runner;
+                Assert.AreEqual(SuccessionOutcome.StaleSurvivor, feature.RequestDeath(departed.Id));
+                Assert.AreSame(successorRunner, Actions.Runner);
+                Assert.That(Actions.Runner.LockoutRemaining, Is.EqualTo(.55).Within(.000001));
+                Actions.Advance(.55);
+            }
+            Time.timeScale = 1;
         }
         [UnityTest] public IEnumerator ReloadWithHeldMouseDoesNotReplayIntoNewSceneBinding()
         {
