@@ -18,7 +18,9 @@ def tests(mode,name):
  location=output/(name+'-saves');location.mkdir(exist_ok=True)
  # PlayMode includes screenshot/render-request tests and therefore needs a real graphics device.
  graphics=[] if mode=='PlayMode' else ['-nographics']
- run([a.unity,'test',workspace,'--mode',mode,'--filter','SOLITUDE.Tests','--output',output/(name+'.xml'),'--timeout','300','--',*graphics,'-logFile',output/(name+'.log'),'-solitudeSaveDirectory',location],name)
+ # Room authoring fixtures require explicit opt-in in this disposable project.
+ isolation=['-solitudeRoomAuthoringVerification'] if mode=='EditMode' else []
+ run([a.unity,'test',workspace,'--mode',mode,'--filter','SOLITUDE.Tests','--output',output/(name+'.xml'),'--timeout','300','--',*graphics,*isolation,'-logFile',output/(name+'.log'),'-solitudeSaveDirectory',location],name)
  doc=ET.parse(output/(name+'.xml')).getroot()
  if int(doc.get('failed','0')) or int(doc.get('passed','0'))==0:raise RuntimeError(f'{name}: no passing test suite')
  results[-1]['passed']=int(doc.get('passed'));results[-1]['failed']=int(doc.get('failed','0'))

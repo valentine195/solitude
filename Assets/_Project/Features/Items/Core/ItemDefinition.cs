@@ -1,5 +1,7 @@
 using UnityEngine;
 using SOLITUDE.Vitals;
+using SOLITUDE.GameplayTags;
+using System;
 
 namespace SOLITUDE.Items
 {
@@ -20,6 +22,11 @@ namespace SOLITUDE.Items
         [Header("Inventory")]
         public bool Stackable = true;
         public int MaxStackSize = 99;
+
+        [Header("Capabilities")]
+        public GameplayTagDefinition[] GameplayTags = Array.Empty<GameplayTagDefinition>();
+        public ItemActionBinding[] Actions = Array.Empty<ItemActionBinding>();
+        public Sprite HeldSprite;
 
         [Header("Vitals")]
         public VitalConsumableKind ConsumableKind;

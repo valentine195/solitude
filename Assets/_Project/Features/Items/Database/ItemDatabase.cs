@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using SOLITUDE.Vitals;
+using SOLITUDE.GameplayTags;
 
 namespace SOLITUDE.Items
 {
@@ -9,6 +10,8 @@ namespace SOLITUDE.Items
     public class ItemDatabase : ScriptableObject
     {
         [SerializeField] private List<ItemDefinition> items = new();
+
+        public GameplayTagRegistryAsset TagRegistry;
 
         private Dictionary<string, ItemDefinition> byId;
 
@@ -66,7 +69,16 @@ namespace SOLITUDE.Items
         public ItemPresentationCatalog BuildPresentationCatalog()
         {
             BuildRuntimeCatalog(); // Never create a partial presentation map.
+            BuildCapabilityCatalog(); // Validate capabilities before exposing affected gameplay.
             return new ItemPresentationCatalog(items, BuildVitalConsumableCatalog());
+        }
+
+        public ItemCapabilityCatalog BuildCapabilityCatalog()
+        {
+            BuildRuntimeCatalog();
+            var compiled = TagRegistry != null ? TagRegistry.Compile() :
+                new GameplayTagRegistry(System.Array.Empty<GameplayTagSpec>());
+            return new ItemCapabilityCatalog(items, TagRegistry, compiled);
         }
 
         public VitalConsumableCatalog BuildVitalConsumableCatalog()

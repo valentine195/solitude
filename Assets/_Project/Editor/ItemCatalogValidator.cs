@@ -19,6 +19,7 @@ namespace SOLITUDE.Editor
                 if (database == null) throw new System.InvalidOperationException("Resources/Database.asset is missing.");
                 var catalog = database.BuildRuntimeCatalog();
                 database.BuildPresentationCatalog();
+                database.BuildCapabilityCatalog();
                 foreach (var guid in AssetDatabase.FindAssets("t:LootTable"))
                 {
                     var table = AssetDatabase.LoadAssetAtPath<LootTable>(AssetDatabase.GUIDToAssetPath(guid));
