@@ -23,6 +23,14 @@ namespace SOLITUDE.Editor
             @"^guid:\s*([0-9a-fA-F]{32})\s*$",
             RegexOptions.Compiled | RegexOptions.Multiline);
 
+        private static readonly Regex ReviewArchivePattern = new(
+            @"\AAssets/_Project(?: [0-9]+)?\.zip(?:\.meta)?\z",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+        // These root-level exports are review handoffs, not Unity assets.
+        public static bool IsReviewArchivePath(string path) =>
+            path != null && ReviewArchivePattern.IsMatch(path);
+
         [MenuItem("SOLITUDE/Validation/Validate Unity Metadata")]
         public static void ValidateFromMenu()
         {
@@ -72,6 +80,7 @@ namespace SOLITUDE.Editor
             foreach (string assetPath in AssetDatabase.GetAllAssetPaths())
             {
                 if (!assetPath.StartsWith("Assets/", StringComparison.Ordinal) ||
+                    IsReviewArchivePath(assetPath) ||
                     assetPath.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
                     continue;
 
@@ -86,6 +95,8 @@ namespace SOLITUDE.Editor
             foreach (string metaPath in Directory.EnumerateFiles(
                          UnityEngine.Application.dataPath, "*.meta", SearchOption.AllDirectories))
             {
+                if (IsReviewArchivePath(ToProjectPath(projectRoot, metaPath)))
+                    continue;
                 string assetPath = metaPath[..^".meta".Length];
                 if (!File.Exists(assetPath) && !Directory.Exists(assetPath))
                     errors.Add($"Orphan metadata: {ToProjectPath(projectRoot, metaPath)}");
@@ -120,6 +131,8 @@ namespace SOLITUDE.Editor
 
             foreach (string metaPath in tracked.Where(path => path.EndsWith(".meta", StringComparison.OrdinalIgnoreCase)))
             {
+                if (IsReviewArchivePath(metaPath))
+                    continue;
                 string assetPath = metaPath[..^".meta".Length];
                 string fullAssetPath = Path.Combine(projectRoot, assetPath);
                 if (tracked.Contains(assetPath) && !File.Exists(fullAssetPath) &&
@@ -138,9 +151,11 @@ namespace SOLITUDE.Editor
             foreach (string metaPath in Directory.EnumerateFiles(
                          UnityEngine.Application.dataPath, "*.meta", SearchOption.AllDirectories))
             {
+                string relativePath = ToProjectPath(projectRoot, metaPath);
+                if (IsReviewArchivePath(relativePath))
+                    continue;
                 string contents = File.ReadAllText(metaPath);
                 Match match = GuidPattern.Match(contents);
-                string relativePath = ToProjectPath(projectRoot, metaPath);
                 if (!match.Success)
                 {
                     errors.Add($"Metadata has no valid GUID: {relativePath}");
@@ -205,6 +220,7 @@ namespace SOLITUDE.Editor
 
         private static bool IsVersionedUnityAsset(string path) =>
             path.StartsWith("Assets/", StringComparison.Ordinal) &&
+            !IsReviewArchivePath(path) &&
             !path.EndsWith(".meta", StringComparison.OrdinalIgnoreCase) &&
             !path.EndsWith("/.DS_Store", StringComparison.Ordinal) &&
             !path.Equals("Assets/.DS_Store", StringComparison.Ordinal);
