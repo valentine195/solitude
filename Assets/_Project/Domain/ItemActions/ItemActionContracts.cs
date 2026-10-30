@@ -22,3 +22,13 @@ namespace SOLITUDE.Items
         void Interrupt();
     }
 }
+
+namespace SOLITUDE.Items
+{
+    public interface IItemActionRequest
+    {
+        bool IsValid { get; }
+        double CommittedDuration { get; }
+        IItemActionExecution Start();
+    }
+}

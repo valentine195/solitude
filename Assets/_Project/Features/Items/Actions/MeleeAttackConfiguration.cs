@@ -10,15 +10,21 @@ namespace SOLITUDE.Items
         public float BaseDamage = 10;
         public float RangeTiles = 1.25f;
         public float ArcDegrees = 90;
-        public float Windup = .12f;
-        public float ActiveDuration = .10f;
-        public float Recovery = .33f;
+        public double Windup = .12;
+        public double ActiveDuration = .10;
+        public double Recovery = .33;
         public float MovementFactor = .65f;
         public float KnockbackTiles = .10f;
         public float KnockbackDuration = .08f;
         public float FlashDuration = .08f;
         public GameplayTagAuthoring DamageTags = new GameplayTagAuthoring();
         public GameplayTagQueryAuthoring TargetEligibility = new GameplayTagQueryAuthoring();
+        [Header("Shared Swing Motion")]
+        public float RestAngle = 0;
+        public float StartAngle = -45;
+        public float EndAngle = 45;
+        public float HeldDistanceTiles = .3f;
+
         public AudioClip SwingSound;
         public AudioClip ImpactSound;
         public GameObject ImpactEffect;
@@ -34,16 +40,21 @@ namespace SOLITUDE.Items
             Nonnegative(KnockbackTiles, nameof(KnockbackTiles)); Nonnegative(KnockbackDuration, nameof(KnockbackDuration));
             if (KnockbackTiles > 0) Positive(KnockbackDuration, nameof(KnockbackDuration));
             Nonnegative(FlashDuration, nameof(FlashDuration));
+            Finite(RestAngle, nameof(RestAngle));
+            Finite(StartAngle, nameof(StartAngle)); Finite(EndAngle, nameof(EndAngle));
+            Nonnegative(HeldDistanceTiles, nameof(HeldDistanceTiles));
             if (DamageTags == null || TargetEligibility == null) throw new InvalidOperationException("Melee damage tags/query are missing.");
             return new MeleeAttackSpec(this, DamageTags.Compile(registry, compiled), TargetEligibility.Compile(registry, compiled));
         }
 
-        private static void Nonnegative(float value, string field)
+        private static void Nonnegative(double value, string field)
         {
-            if (float.IsNaN(value) || float.IsInfinity(value) || value < 0)
+            if (double.IsNaN(value) || double.IsInfinity(value) || value < 0)
                 throw new InvalidOperationException(field + " must be finite and nonnegative.");
         }
-        private static void Positive(float value, string field)
+        private static void Finite(float value, string field)
+        { if (float.IsNaN(value) || float.IsInfinity(value)) throw new InvalidOperationException(field + " must be finite."); }
+        private static void Positive(double value, string field)
         { Nonnegative(value, field); if (value == 0) throw new InvalidOperationException(field + " must be positive."); }
     }
 
@@ -62,6 +73,10 @@ namespace SOLITUDE.Items
         public float FlashDuration { get; }
         public GameplayTagSet DamageTags { get; }
         public GameplayTagQuery TargetEligibility { get; }
+        public float RestAngle { get; }
+        public float StartAngle { get; }
+        public float EndAngle { get; }
+        public float HeldDistanceTiles { get; }
         public AudioClip SwingSound { get; }
         public AudioClip ImpactSound { get; }
         public GameObject ImpactEffect { get; }
@@ -72,6 +87,8 @@ namespace SOLITUDE.Items
             MovementFactor = source.MovementFactor; KnockbackTiles = source.KnockbackTiles;
             KnockbackDuration = source.KnockbackDuration; FlashDuration = source.FlashDuration;
             DamageTags = damageTags; TargetEligibility = eligibility;
+            RestAngle = source.RestAngle; StartAngle = source.StartAngle;
+            EndAngle = source.EndAngle; HeldDistanceTiles = source.HeldDistanceTiles;
             SwingSound = source.SwingSound; ImpactSound = source.ImpactSound; ImpactEffect = source.ImpactEffect;
         }
         public float RangeWorld(float unitsPerTile)

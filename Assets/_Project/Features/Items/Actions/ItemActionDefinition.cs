@@ -6,6 +6,8 @@ namespace SOLITUDE.Items
 {
     public abstract class ItemActionDefinition : ScriptableObject
     {
+        public abstract double GetCommittedDuration(IItemActionConfiguration configuration);
+        public abstract IItemActionExecution CreateExecution(ItemActionContext context, IItemActionConfiguration configuration);
         public abstract IItemActionConfiguration Compile(GameplayTagRegistryAsset registry, GameplayTagRegistry compiled);
     }
 

@@ -18,6 +18,18 @@ namespace SOLITUDE.Movement
         private ICreatureAnimationController animationController;
         private Vector2 vector;
         private readonly HashSet<object> movementBlocks = new();
+        private readonly Dictionary<object, float> speedRestrictions = new();
+        public Vector2 FacingDirection { get; private set; } = Vector2.down;
+        public float SpeedFactor
+        {
+            get { float factor = 1; foreach (var value in speedRestrictions.Values) factor = Mathf.Min(factor, value); return factor; }
+        }
+        public IDisposable RestrictSpeed(float factor)
+        {
+            if (float.IsNaN(factor) || float.IsInfinity(factor) || factor < 0 || factor > 1) throw new ArgumentOutOfRangeException(nameof(factor));
+            var token = new object(); speedRestrictions.Add(token, factor);
+            return new Lease(() => speedRestrictions.Remove(token));
+        }
         public bool IsMovementBlocked => movementBlocks.Count != 0;
         public IDisposable BlockMovement()
         {
@@ -46,6 +58,7 @@ namespace SOLITUDE.Movement
                 vector.Normalize();
 
             this.vector = vector;
+            if (vector.sqrMagnitude > .0001f) FacingDirection = vector.normalized;
         }
 
         private void FixedUpdate()
@@ -53,7 +66,7 @@ namespace SOLITUDE.Movement
         {
 
             if(body==null) body=GetComponent<Rigidbody2D>();
-            var effective=IsMovementBlocked?Vector2.zero:vector;
+            var effective=IsMovementBlocked?Vector2.zero:vector * SpeedFactor;
             body.MovePosition(body.position + effective * moveSpeed * Time.fixedDeltaTime);
             animationController?.SetMovement(effective);
 

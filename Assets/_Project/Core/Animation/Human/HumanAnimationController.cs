@@ -1,4 +1,6 @@
 using UnityEngine;
+using System;
+using SOLITUDE.Application;
 
 namespace SOLITUDE.Core.Animations
 {
@@ -9,6 +11,14 @@ namespace SOLITUDE.Core.Animations
 
         private Vector2 moveInput;
         private bool isMoving;
+        private object facingOwner;
+        private Vector2 lockedFacing;
+        public IDisposable OverrideFacing(Vector2 direction)
+        {
+            var token = new object(); facingOwner = token; lockedFacing = direction;
+            SetMovement(moveInput);
+            return new Lease(() => { if (ReferenceEquals(facingOwner, token)) { facingOwner = null; SetMovement(moveInput); } });
+        }
 
         private void Awake()
         {
@@ -21,8 +31,10 @@ namespace SOLITUDE.Core.Animations
 
             isMoving = movement.sqrMagnitude > 0.01f;
 
-            animator.SetFloat("MoveX", movement.x);
-            animator.SetFloat("MoveY", movement.y);
+            var facing = facingOwner == null ? movement : lockedFacing;
+            if (animator == null || animator.runtimeAnimatorController == null) return;
+            animator.SetFloat("MoveX", facing.x);
+            animator.SetFloat("MoveY", facing.y);
             animator.SetBool("IsMoving", isMoving);
         }
     }
