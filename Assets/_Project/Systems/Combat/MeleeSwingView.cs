@@ -8,11 +8,14 @@ namespace SOLITUDE.Combat
         [SerializeField] private Vector2 originOffsetTiles = new Vector2(0, 1);
         private SpriteRenderer held;
         private MeleeAttackExecution owner;
+        private MeleeImpactFeedback feedback;
         public SpriteRenderer HeldRenderer => held;
         public void Begin(MeleeAttackExecution execution)
         {
             if (owner != null && owner != execution) throw new System.InvalidOperationException("Swing view is already owned.");
             owner = execution;
+            feedback ??= GetComponent<MeleeImpactFeedback>() ?? gameObject.AddComponent<MeleeImpactFeedback>();
+            feedback.Begin(execution);
             if (held == null)
             {
                 var visual = new GameObject("HeldItemSwing"); visual.transform.SetParent(transform, false);
@@ -43,9 +46,10 @@ namespace SOLITUDE.Combat
         public void End(MeleeAttackExecution execution)
         {
             if (owner != execution) return;
+            feedback?.End(execution);
             owner = null; if (held != null) held.enabled = false;
         }
-        private void OnDisable() { if (held != null) held.enabled = false; }
+        private void OnDisable() { if (owner != null) feedback?.End(owner); if (held != null) held.enabled = false; }
         private void OnDestroy() { owner = null; }
     }
 }

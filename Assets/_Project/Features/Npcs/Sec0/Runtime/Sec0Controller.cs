@@ -35,6 +35,21 @@ namespace SOLITUDE.Npcs.Sec0
         private Vector2 facing=Vector2.down,lastKnown,chargeDirection;
         private int waypoint;
         private float dwell;
+        private object knockbackOwner;
+        private Vector2 knockbackDirection;
+        private float knockbackDistance, knockbackTime;
+        public bool CanPresentFeedback => isActiveAndEnabled && !IsDefeated && owner != null && policy.Gameplay && targetAvailable();
+        public bool RequestKnockback(object source, Vector2 direction, float distance, float duration)
+        {
+            if (source == null || !CanPresentFeedback || !Positive(distance) || !Positive(duration)
+                || !Finite(direction.x) || !Finite(direction.y) || direction.sqrMagnitude < .001f) return false;
+            knockbackOwner = source; knockbackDirection = direction.normalized;
+            knockbackDistance = distance; knockbackTime = duration; return true;
+        }
+        public void CancelKnockback(object source)
+        { if (ReferenceEquals(source, knockbackOwner)) { knockbackOwner = null; knockbackDistance = knockbackTime = 0; } }
+        private void ClearHitFeedback()
+        { GetComponent<Sec0HitFeedback>()?.Clear(); CancelKnockback(knockbackOwner); }
         private string animationName;
         private readonly System.Collections.Generic.List<GameObject> effects=new();
         public SecurityBotState State=>brain?.State??SecurityBotState.Patrol;
@@ -147,6 +162,15 @@ namespace SOLITUDE.Npcs.Sec0
             if(State==SecurityBotState.Charging && previous!=State)
             {chargeDirection=(TargetPoint-(body.position+new Vector2(0,.25f))).normalized;Face(chargeDirection);}
             if(fire) Fire();
+            if(knockbackOwner != null)
+            {
+                float portion = Mathf.Min(elapsed, knockbackTime);
+                float distance = knockbackDistance * portion / knockbackTime;
+                MoveSafely(knockbackDirection * distance);
+                knockbackDistance = Mathf.Max(0, knockbackDistance - distance); knockbackTime -= portion;
+                if(knockbackTime <= 0) CancelKnockback(knockbackOwner);
+                Play(false); return;
+            }
             if(State==SecurityBotState.Investigating && visible) Face((Vector2)target.position-body.position);
             Vector2 destination=body.position;
             if(State==SecurityBotState.Patrol)
@@ -166,21 +190,26 @@ namespace SOLITUDE.Npcs.Sec0
             if(moving)
             {
                 Face(delta);Vector2 step=delta.normalized*Mathf.Min(delta.magnitude,(State==SecurityBotState.Pursuing?pursuitSpeed:patrolSpeed)*elapsed);
-                int count=body.Cast(step.normalized,Solids,hits,step.magnitude+.02f);float distance=step.magnitude;
-                for(int i=0;i<count;i++) distance=Mathf.Min(distance,Mathf.Max(0,hits[i].distance-.02f));
-                if(count==hits.Length) distance=0;
-                // Shape casts can graze a corner within physics contact tolerance.
-                // Reject an occupied endpoint as well, preserving a small skin.
-                if(!FreeAt(body.position+step.normalized*distance,false))
-                {
-                    float safe=0,blocked=distance;
-                    for(int i=0;i<8;i++) {float mid=(safe+blocked)*.5f;if(FreeAt(body.position+step.normalized*mid,false))safe=mid;else blocked=mid;}
-                    distance=safe;navigator.InvalidatePath();
-                }
-                body.MovePosition(body.position+step.normalized*distance);moving=distance>.001f;
+                moving=MoveSafely(step)>.001f;
             }
             else body.linearVelocity=Vector2.zero;
             Play(moving);
+        }
+        private float MoveSafely(Vector2 step)
+        {
+            if(step.sqrMagnitude <= 0) return 0;
+            int count=body.Cast(step.normalized,Solids,hits,step.magnitude+.02f);float distance=step.magnitude;
+            for(int i=0;i<count;i++) distance=Mathf.Min(distance,Mathf.Max(0,hits[i].distance-.02f));
+            if(count==hits.Length) distance=0;
+            // Shape casts can graze a corner within physics contact tolerance.
+            // Reject an occupied endpoint as well, preserving a small skin.
+            if(!FreeAt(body.position+step.normalized*distance,false))
+            {
+                float safe=0,blocked=distance;
+                for(int i=0;i<8;i++) {float mid=(safe+blocked)*.5f;if(FreeAt(body.position+step.normalized*mid,false))safe=mid;else blocked=mid;}
+                distance=safe;navigator.InvalidatePath();
+            }
+            body.MovePosition(body.position+step.normalized*distance);return distance;
         }
         private void Face(Vector2 delta)
         { if(delta.sqrMagnitude>.001f) facing=Mathf.Abs(delta.x)>Mathf.Abs(delta.y)?new Vector2(Mathf.Sign(delta.x),0):new Vector2(0,Mathf.Sign(delta.y)); }
@@ -215,6 +244,7 @@ namespace SOLITUDE.Npcs.Sec0
         public void Release(object bindingOwner)
         {
             if(!ReferenceEquals(owner,bindingOwner)) return;
+            ClearHitFeedback();
             owner=null;target=null;receiver=null;policy=null;targetAvailable=null;
             if(body!=null) body.linearVelocity=Vector2.zero;
             brain?.Reset();navigator?.Reset();animationName=null;if(visual!=null) visual.speed=1;
@@ -231,7 +261,7 @@ namespace SOLITUDE.Npcs.Sec0
             foreach(var shape in GetComponentsInChildren<Collider2D>(true)) shape.enabled=false;
             if(visual!=null) visual.speed=0;
         }
-        private void OnDisable() { if(body!=null) body.linearVelocity=Vector2.zero; }
+        private void OnDisable() { ClearHitFeedback(); if(body!=null) body.linearVelocity=Vector2.zero; }
         private void OnDestroy() { if(owner!=null) Release(owner); }
         private void OnDrawGizmosSelected()
         {
