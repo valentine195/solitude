@@ -44,6 +44,13 @@ namespace SOLITUDE.Editor
                 EditorUtility.SetDirty(clip);
             }
             EditorUtility.SetDirty(controller);
+            BuildPrefabAtPath(PrefabPath);
+            AssetDatabase.SaveAssets();
+        }
+        /// <summary>Save the default unit using prepared art; accepts a disposable destination for authoring validation.</summary>
+        public static void BuildPrefabAtPath(string outputPath)
+        {
+            if(EditorApplication.isPlaying) throw new InvalidOperationException("Exit Play mode before authoring SEC-0.");
             var host=new GameObject("PF_Sec0");
             try
             {
@@ -56,7 +63,8 @@ namespace SOLITUDE.Editor
                 var points=positions.Select((p,i)=>{var g=new GameObject("Waypoint"+i);g.transform.SetParent(path.transform,false);g.transform.localPosition=p;return g.transform;}).ToArray();
                 rover.AddComponent<Sec0Controller>().Configure(visual.GetComponent<Animator>(),AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/PF_Sec0StunFx.prefab"),points);
                 rover.AddComponent<Sec0DamageRecipient>();
-                PrefabUtility.SaveAsPrefabAsset(host,PrefabPath);AssetDatabase.SaveAssets();
+                rover.AddComponent<Sec0HitFeedback>();
+                PrefabUtility.SaveAsPrefabAsset(host,outputPath);
             }
             finally {UnityEngine.Object.DestroyImmediate(host);}
         }
