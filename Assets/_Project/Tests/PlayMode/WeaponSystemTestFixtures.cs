@@ -43,6 +43,17 @@ namespace SOLITUDE.Tests
             Assert.AreEqual(CommandStatus.Applied, Session.Commands.Grant(Bar.Container.Handle, Wrench.ItemId, 1).Status);
             Bar.SetActive(0); yield return null;
         }
+        public static IEnumerator LoadSec0Encounter()
+        {
+            Assert.IsTrue(Environment.GetCommandLineArgs().Contains("-solitudeSaveDirectory"), "Weapon fixture requires explicitly isolated saves.");
+            foreach (var root in Object.FindObjectsByType<GameCompositionRoot>(FindObjectsSortMode.None)) Object.Destroy(root.gameObject);
+            yield return null; Time.timeScale = 1;
+            yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/_Project/Scenes/Demos/Sec0Patrol.unity", new LoadSceneParameters(LoadSceneMode.Single));
+            yield return null;
+            Assert.AreEqual(RuntimeStartupState.Ready, Root.State); Assert.IsTrue(Root.UsesDisposableSession); Assert.IsTrue(Policy.Gameplay);
+            Assert.AreEqual(CommandStatus.Applied, Session.Commands.Grant(Bar.Container.Handle, Wrench.ItemId, 1).Status);
+            Bar.SetActive(0); yield return null;
+        }
         public static IEnumerator Unload()
         {
             foreach (var root in Object.FindObjectsByType<GameCompositionRoot>(FindObjectsSortMode.None)) Object.Destroy(root.gameObject);
