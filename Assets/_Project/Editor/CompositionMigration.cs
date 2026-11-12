@@ -39,6 +39,7 @@ namespace SOLITUDE.Editor
             var config = AssetDatabase.LoadAssetAtPath<GameRuntimeConfig>(configPath);
             if (config == null) { config = ScriptableObject.CreateInstance<GameRuntimeConfig>(); AssetDatabase.CreateAsset(config, configPath); }
             config.database = AssetDatabase.LoadAssetAtPath<ItemDatabase>("Assets/_Project/Features/Items/Resources/Database.asset");
+            if(config.startingLoadout==null) config.startingLoadout=AssetDatabase.LoadAssetAtPath<StartingLoadoutDefinition>("Assets/_Project/Features/Items/Loadouts/MaintenanceStartingLoadout.asset");
             config.lootTables = AssetDatabase.FindAssets("t:LootTable").Select(g => AssetDatabase.LoadAssetAtPath<LootTable>(AssetDatabase.GUIDToAssetPath(g))).ToArray();
             EditorUtility.SetDirty(config);
             Set(root, "config", config); Set(root, "persistence", persistence); Set(root, "input", input); Set(root, "clock", clock); Set(root, "game", game);

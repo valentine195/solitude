@@ -19,7 +19,7 @@ namespace SOLITUDE.Tests
         [SetUp] public void Setup()
         {
             pause = new PauseCoordinator(); policy = new InputPolicyCoordinator(pause); policy.SetReady(true);
-            session = new ContainerSaveSession(new SaveGameData(), new ItemCatalog(new[] { new ItemSpec("a", true, 10), new ItemSpec("b", true, 10) }));
+            session = new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, new ItemCatalog(new[] { new ItemSpec("a", true, 10), new ItemSpec("b", true, 10) }));
             inventory = session.Register("inventory", 3).Container; locker = session.Register("locker", 3).Container;
             gestures = new ContainerGestureCoordinator(new ContainerInteractionController(session.Commands), policy);
             display = new Display(); modal = new ContainerModalCoordinator(policy, pause, gestures, display, inventory);

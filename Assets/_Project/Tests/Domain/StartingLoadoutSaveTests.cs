@@ -31,23 +31,23 @@ namespace SOLITUDE.Tests
             data.ship.doors.Add(new DoorSaveRecord { id = "door", powered = true, unlocked = true, open = true });
             data.ship.permanentDiscoveryIds.Add("log");
         }
-        [Test] public void ExplicitNewCandidateIsEmptyPendingWithoutChangingProductionVersion()
+        [Test] public void NewProductionSaveIsEmptyAndPending()
         {
-            var data = SaveGameData.NewStartingLoadoutCandidate(17); var captured = new ContainerSaveSession(data, Catalog()).Capture();
+            var data = new SaveGameData { worldSeed = 17 }; var captured = new ContainerSaveSession(data, Catalog()).Capture();
             Assert.AreEqual(4, captured.version); Assert.IsFalse(captured.startingLoadoutInitialized);
             Assert.AreEqual(17, captured.worldSeed); Assert.IsEmpty(captured.containers); Assert.IsNull(captured.survivor);
-            Assert.AreEqual(3, SaveGameData.CurrentVersion); Assert.AreEqual(3, new SaveGameData().version);
+            Assert.AreEqual(4, SaveGameData.CurrentVersion); Assert.AreEqual(4, new SaveGameData().version);
         }
         [TestCase(ContainerSaveSession.PlayerInventoryId)] [TestCase(ContainerSaveSession.PlayerHotbarId)]
         public void PendingCandidateRejectsPartialOrCarriedEquipment(string id)
         {
-            var data = SaveGameData.NewStartingLoadoutCandidate(1); data.containers.Add(Contents(id));
+            var data = new SaveGameData { worldSeed = 1 }; data.containers.Add(Contents(id));
             Assert.Throws<InvalidDataException>(() => new ContainerSaveSession(data, Catalog()));
             data.startingLoadoutInitialized = true; Assert.DoesNotThrow(() => new ContainerSaveSession(data, Catalog()));
         }
         [Test] public void LifecycleAndWorldFactsCanPrecedeAnEmptyPendingLoadout()
         {
-            var data = SaveGameData.NewStartingLoadoutCandidate(12); Lifecycle(data); data.containers.Add(Contents("locker"));
+            var data = new SaveGameData { worldSeed = 12 }; Lifecycle(data); data.containers.Add(Contents("locker"));
             data.collectedPickupIds.Add("old-world-fact");
             var session = new ContainerSaveSession(data, Catalog());
             using var inventory = session.Register(ContainerSaveSession.PlayerInventoryId, 2);
@@ -63,7 +63,7 @@ namespace SOLITUDE.Tests
         {
             var data = new SaveGameData { version = version, worldSeed = 22 }; Lifecycle(data);
             data.containers.Add(Contents(ContainerSaveSession.PlayerHotbarId)); data.collectedPickupIds.Add("picked");
-            var migrated = SaveGameData.MigrateStartingLoadoutCandidate(data);
+            var migrated = SaveGameData.Migrate(data);
             Assert.AreEqual(4, migrated.version); Assert.IsTrue(migrated.startingLoadoutInitialized);
             Assert.AreEqual(22, migrated.worldSeed); Assert.AreEqual(1, migrated.containers.Count);
             Assert.AreEqual("tool", migrated.containers[0].state.slots[0].itemId);
@@ -80,7 +80,7 @@ namespace SOLITUDE.Tests
         }
         [TestCase(false)] [TestCase(true)] public void CloneAndCaptureKeepTheMarkerDetached(bool completed)
         {
-            var source = SaveGameData.NewStartingLoadoutCandidate(4); source.startingLoadoutInitialized = completed;
+            var source = new SaveGameData { worldSeed = 4 }; source.startingLoadoutInitialized = completed;
             if (completed) source.containers.Add(Contents(ContainerSaveSession.PlayerHotbarId));
             var session = new ContainerSaveSession(source, Catalog()); source.startingLoadoutInitialized = !completed; source.containers.Clear();
             var copy = session.Capture(); Assert.AreEqual(completed, copy.startingLoadoutInitialized);
@@ -90,7 +90,7 @@ namespace SOLITUDE.Tests
         }
         [TestCase(false)] [TestCase(true)] public void ExplicitVersionFourResetStartsPendingAndClearsOldFacts(bool completed)
         {
-            var source = SaveGameData.NewStartingLoadoutCandidate(3); source.startingLoadoutInitialized = completed;
+            var source = new SaveGameData { worldSeed = 3 }; source.startingLoadoutInitialized = completed;
             Lifecycle(source); if (completed) source.containers.Add(Contents(ContainerSaveSession.PlayerHotbarId));
             var session = new ContainerSaveSession(source, Catalog()); session.Reset(9, releaseOwners: true);
             var saved = session.Capture(); Assert.AreEqual(4, saved.version); Assert.IsFalse(saved.startingLoadoutInitialized);
@@ -99,7 +99,7 @@ namespace SOLITUDE.Tests
         }
         [Test] public void LivePartialGrantCannotEscapeCaptureAndResetRecoversAnEmptyPendingState()
         {
-            var session = new ContainerSaveSession(SaveGameData.NewStartingLoadoutCandidate(1), Catalog());
+            var session = new ContainerSaveSession(new SaveGameData { worldSeed = 1 }, Catalog());
             using var hotbar = session.Register(ContainerSaveSession.PlayerHotbarId, 1);
             Assert.IsTrue(session.Commands.Grant(hotbar.Container.Handle, "tool", 1).Succeeded);
             Assert.Throws<InvalidDataException>(() => session.Capture());
@@ -109,7 +109,7 @@ namespace SOLITUDE.Tests
         }
         [Test] public void PendingLoadoutDoesNotBypassExistingSuccessionValidation()
         {
-            var data = SaveGameData.NewStartingLoadoutCandidate(1); Lifecycle(data);
+            var data = new SaveGameData { worldSeed = 1 }; Lifecycle(data);
             data.pendingDeath = new SavedDeathTransition();
             Assert.Throws<InvalidDataException>(() => new ContainerSaveSession(data, Catalog()));
             data.pendingDeath = null; data.expedition = null;
@@ -117,8 +117,8 @@ namespace SOLITUDE.Tests
         }
         [TestCase(0)] [TestCase(5)] public void InvalidCandidateVersionDoesNotBecomeAUsableSave(int version)
         {
-            var data = SaveGameData.NewStartingLoadoutCandidate(1); data.version = version;
-            Assert.Throws<InvalidDataException>(() => SaveGameData.MigrateStartingLoadoutCandidate(data));
+            var data = new SaveGameData { worldSeed = 1 }; data.version = version;
+            Assert.Throws<InvalidDataException>(() => SaveGameData.Migrate(data));
         }
     }
 }

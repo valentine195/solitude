@@ -73,7 +73,7 @@ namespace SOLITUDE.Tests
         }
         [Test] public void SystemsAreIndependentAndPickupRewardCanBeInstalled()
         {
-            var session = new ContainerSaveSession(new SaveGameData(), new ItemCatalog(new[] { new ItemSpec("cell", true, 10) }));
+            var session = new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, new ItemCatalog(new[] { new ItemSpec("cell", true, 10) }));
             var player = session.Register(ContainerSaveSession.PlayerInventoryId, 2).Container;
             var pickups = new PickupCollectionService(session); pickups.Register("pickup", new PickupReward("cell", 1));
             Assert.AreEqual(CollectResult.Collected, pickups.TryCollect("pickup", ContainerSaveSession.PlayerInventoryId, "cell", 1));

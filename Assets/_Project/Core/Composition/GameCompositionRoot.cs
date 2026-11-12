@@ -34,6 +34,7 @@ namespace SOLITUDE.Composition
         private ItemCatalog catalog;
         private ItemPresentationCatalog presentations;
         private ItemCapabilityCatalog capabilities;
+        private StartingLoadoutSpec startingLoadout;
         private Dictionary<LootTable, RuntimeLootTable> loot;
         private PauseCoordinator pause;
         private InputPolicyCoordinator policy;
@@ -59,6 +60,8 @@ namespace SOLITUDE.Composition
                     throw new InvalidOperationException("Bootstrap authoring/adapter references are incomplete.");
                 catalog = config.database.BuildRuntimeCatalog(); presentations = config.database.BuildPresentationCatalog();
                 capabilities = config.database.BuildCapabilityCatalog();
+                if (config.startingLoadout == null) throw new InvalidOperationException("Starting loadout configuration is missing.");
+                startingLoadout = config.startingLoadout.Compile(catalog);
                 loot = new Dictionary<LootTable, RuntimeLootTable>();
                 foreach (var table in config.lootTables)
                 { if (table == null || loot.ContainsKey(table)) throw new InvalidOperationException("Null or duplicate configured loot table."); loot.Add(table, table.Compile(catalog)); }
@@ -89,9 +92,22 @@ namespace SOLITUDE.Composition
         private void FinishStartup()
         {
             persistence.CompleteRecovery();
+            var outcome = interactive.InitializeStartingLoadout(startingLoadout, persistence.TryFlush);
+            if (outcome != StartingLoadoutOutcome.Ready && outcome != StartingLoadoutOutcome.AlreadyInitialized)
+                throw new System.IO.IOException("Starting equipment initialization failed: " + interactive.StartingLoadoutError);
             startupDestination = null;
             State = RuntimeStartupState.Ready; policy.SetReady(true);
             if (persistence.RecoveryNoticePending) interactive.ShowRecoveryNotice(persistence.AcknowledgeRecoveryNotice);
+        }
+        public bool RetryStartingEquipment()
+        {
+            if (interactive == null || session == null || State != RuntimeStartupState.Failed) return false;
+            try
+            {
+                persistence.Initialize(session, StartNewSave); FinishStartup();
+                failedPause?.Dispose(); failedPause = null; policy.SetTransition(false); return true;
+            }
+            catch (Exception error) { Fail(error); return false; }
         }
         private void CreateSession(SaveGameData data)
         {

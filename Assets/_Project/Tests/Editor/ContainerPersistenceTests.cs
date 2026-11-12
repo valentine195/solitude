@@ -36,7 +36,7 @@ namespace SOLITUDE.Tests
             drag = new ContainerInteractionController(commands);
         }
         [TearDown] public void TearDown() => drag.Cancel();
-        private ContainerSaveSession Session(SaveGameData data = null) => new ContainerSaveSession(data ?? new SaveGameData(), catalog);
+        private ContainerSaveSession Session(SaveGameData data = null) => new ContainerSaveSession(data ?? new SaveGameData { startingLoadoutInitialized = true }, catalog);
         private void Grant(Container owner, ItemSpec item, int quantity = 1) => Assert.IsTrue(commands.Grant(owner.Handle, item.ItemId, quantity).Succeeded);
         private static ContainerSaveData Saved(params (int index, string id, int quantity)[] entries)
         {
@@ -50,14 +50,14 @@ namespace SOLITUDE.Tests
             return codec.Decode(codec.Encode(value.Capture()));
         }
 
-        [Test] public void LoadoutPreparationPreservesProductionCommandsCaptureResetAndWireVersion()
+        [Test] public void CurrentLoadoutSchemaPreservesCommandsCaptureAndResetsPending()
         {
             Grant(target, battery, 2); var captured = RoundTrip(session);
-            Assert.AreEqual(3, captured.version); Assert.IsTrue(captured.startingLoadoutInitialized);
+            Assert.AreEqual(4, captured.version); Assert.IsTrue(captured.startingLoadoutInitialized);
             Assert.AreEqual(2, captured.containers.Single(record => record.saveableId == ContainerSaveSession.PlayerInventoryId).state.slots[0].quantity);
             session.Reset(53); var reset = session.Capture();
-            Assert.AreEqual(3, reset.version); Assert.IsTrue(reset.startingLoadoutInitialized); Assert.IsTrue(target.GetSlot(0).IsEmpty);
-            StringAssert.DoesNotContain("startingLoadoutInitialized", new SaveJsonCodec(catalog).Encode(reset));
+            Assert.AreEqual(4, reset.version); Assert.IsFalse(reset.startingLoadoutInitialized); Assert.IsTrue(target.GetSlot(0).IsEmpty);
+            StringAssert.Contains("startingLoadoutInitialized", new SaveJsonCodec(catalog).Encode(reset));
         }
 
         [Test]
@@ -219,7 +219,7 @@ namespace SOLITUDE.Tests
         public void VersionOneSaveKeepsLockerRecordsWhenAddingPlayer()
         {
             Grant(source, battery, 4);
-            var data = new SaveGameData { version = 1, worldSeed = 42 };
+            var data = new SaveGameData { startingLoadoutInitialized = true, version = 1, worldSeed = 42 };
             data.containers.Add(new ContainerSaveRecord { saveableId = "locker", state = ContainerSaveSerializer.Capture(source) });
             var session = Session(data);
             using var inventory = session.Register(ContainerSaveSession.PlayerInventoryId, 2);
@@ -277,7 +277,7 @@ namespace SOLITUDE.Tests
         public void InvalidRestoreDoesNotClearLiveOrSavedContents()
         {
             Grant(source, oxygen, 2);
-            var data = new SaveGameData();
+            var data = new SaveGameData { startingLoadoutInitialized = true };
             data.containers.Add(new ContainerSaveRecord { saveableId = "locker", state = new ContainerSaveData() });
             data.containers[0].state.slots.Add(new ContainerSlotSaveData { index = 0, itemId = "unknown", quantity = 1 });
             Assert.Throws<InvalidDataException>(() => Session(data));

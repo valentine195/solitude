@@ -40,7 +40,8 @@ namespace SOLITUDE.Tests
             yield return null; Assert.AreEqual(RuntimeStartupState.Ready, Root.State);
             Root.StartNewSave(); yield return null; yield return null;
             Assert.AreEqual(RuntimeStartupState.Ready, Root.State); Assert.IsTrue(Policy.Gameplay);
-            Assert.AreEqual(CommandStatus.Applied, Session.Commands.Grant(Bar.Container.Handle, Wrench.ItemId, 1).Status);
+            Assert.AreEqual(Wrench.ItemId, Bar.Container.GetSlot(0).Stack.ItemId);
+            Assert.AreEqual(1, Bar.Container.GetSlot(0).Stack.Quantity);
             Bar.SetActive(0); yield return null;
         }
         public static IEnumerator LoadSec0Encounter()
@@ -51,8 +52,17 @@ namespace SOLITUDE.Tests
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/_Project/Scenes/Demos/Sec0Patrol.unity", new LoadSceneParameters(LoadSceneMode.Single));
             yield return null;
             Assert.AreEqual(RuntimeStartupState.Ready, Root.State); Assert.IsTrue(Root.UsesDisposableSession); Assert.IsTrue(Policy.Gameplay);
-            Assert.AreEqual(CommandStatus.Applied, Session.Commands.Grant(Bar.Container.Handle, Wrench.ItemId, 1).Status);
+            Assert.AreEqual(Wrench.ItemId, Bar.Container.GetSlot(0).Stack.ItemId);
+            Assert.AreEqual(1, Bar.Container.GetSlot(0).Stack.Quantity);
             Bar.SetActive(0); yield return null;
+        }
+        // Unrelated handoff/resume fixtures seed precise equipment sets after proving real initialization.
+        public static void ClearStartingWeaponForSeededScenario()
+        {
+            Assert.IsTrue(Session.StartingLoadoutInitialized);
+            var slot = Bar.Container.GetSlot(0); Assert.AreEqual(Wrench.ItemId, slot.Stack.ItemId); Assert.AreEqual(1, slot.Stack.Quantity);
+            Assert.AreEqual(CommandStatus.Applied, Session.Commands.Remove(slot.Address, 1).Status); Bar.SetActive(-1);
+            Assert.IsTrue(One<SaveGameService>().TryFlush());
         }
         public static IEnumerator Unload()
         {

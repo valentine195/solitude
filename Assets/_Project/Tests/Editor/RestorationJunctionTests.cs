@@ -85,7 +85,7 @@ namespace SOLITUDE.Tests
             var flags = BindingFlags.NonPublic | BindingFlags.Instance;
             typeof(SOLITUDE.Composition.SceneBindings).GetField("restorationJunctions", flags).SetValue(scope, new[] { junction });
             typeof(SOLITUDE.Composition.SceneBindings).GetField("session", flags).SetValue(scope,
-                new ContainerSaveSession(new SaveGameData(), new ItemCatalog(new[] { new ItemSpec("cell", true, 10) })));
+                new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, new ItemCatalog(new[] { new ItemSpec("cell", true, 10) })));
             commands.Grant(inventory.Handle, "cell", 1); scope.Release();
             Assert.IsFalse(junction.Interact(null).IsSuccess); Assert.IsFalse(system.IsRestored);
         }

@@ -77,7 +77,7 @@ namespace SOLITUDE.Tests
         [Test] public void AutosaveHasBoundedDelayCriticalBypassAndRetryableFailure()
         {
             var catalog = new ItemCatalog(new[] { new ItemSpec("item", true, 1000) });
-            var session = new ContainerSaveSession(new SaveGameData(), catalog);
+            var session = new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, catalog);
             var inventory = session.Register(ContainerSaveSession.PlayerInventoryId, 1); session.MarkSaved();
             var files = new PerformanceOptimizationTests.Files(); var go = new GameObject("Autosave test");
             var service = go.AddComponent<SaveGameService>();
@@ -97,6 +97,9 @@ namespace SOLITUDE.Tests
                 }
                 session.Reset(5); Assert.IsTrue(session.RequiresImmediateSave);
                 Autosave(service, .26); Assert.AreEqual(3, files.Writes); Assert.IsFalse(session.RequiresImmediateSave);
+                using var hotbar = session.Register(ContainerSaveSession.PlayerHotbarId, 1);
+                Assert.IsTrue(session.InitializeStartingLoadout(inventory.Container.Handle, hotbar.Container.Handle,
+                    new[] { new PickupReward("item", 1) }, 0).Succeeded);
                 session.Commands.Grant(inventory.Container.Handle, "item", 1); files.FailWrite = true;
                 LogAssert.Expect(LogType.Error, "[SaveGameService] Failed to save: Injected write failure");
                 Assert.IsFalse(service.TryFlush()); Assert.IsTrue(session.IsDirty); Assert.IsNotNull(service.LastSaveError);

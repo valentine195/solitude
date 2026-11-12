@@ -143,6 +143,25 @@ namespace SOLITUDE.Containers
             Commit(new Dictionary<ContainerState, ItemStack[]> { [state] = plan }, worldCommit);
             return new CommandResult(CommandStatus.Applied, quantity, addresses: lastChanges);
         }
+        internal CommandResult InitializeStartingLoadout(ContainerHandle inventory, ContainerHandle hotbar,
+            IReadOnlyList<PickupReward> grants, int selectedSlot, Action complete) => Execute(() =>
+        {
+            if (!Resolve(inventory, out var carried) || !Resolve(hotbar, out var target)) return new CommandResult(CommandStatus.Unavailable);
+            if (carried == target || grants == null || grants.Count == 0 || complete == null) return new CommandResult(CommandStatus.Invalid);
+            foreach (var stack in carried.Slots) if (stack != null) return new CommandResult(CommandStatus.Rejected);
+            foreach (var stack in target.Slots) if (stack != null) return new CommandResult(CommandStatus.Rejected);
+            var plan = new ItemStack[target.Slots.Length];
+            foreach (var reward in grants)
+            {
+                if (reward.Quantity < 1) return new CommandResult(CommandStatus.InvalidQuantity);
+                if (!catalog.TryGet(reward.ItemId, out var item)) return new CommandResult(CommandStatus.UnknownItem);
+                if (!target.Accepts(item)) return new CommandResult(CommandStatus.Rejected);
+                if (!Add(plan, item, reward.Quantity)) return new CommandResult(CommandStatus.InsufficientSpace);
+            }
+            if (selectedSlot < 0 || selectedSlot >= plan.Length || plan[selectedSlot] == null) return new CommandResult(CommandStatus.InvalidSlot);
+            Commit(new Dictionary<ContainerState, ItemStack[]> { [target] = plan }, complete);
+            return new CommandResult(CommandStatus.Applied, addresses: lastChanges);
+        });
         private static bool Add(ItemStack[] plan, ItemSpec item, int quantity)
         {
             for (int i = 0; i < plan.Length && quantity > 0; i++)

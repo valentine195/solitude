@@ -87,11 +87,7 @@ namespace SOLITUDE.SaveLoad
                 Required(pending, "stage", JTokenType.Integer);
             }
         }
-        public SaveGameData Decode(string json) => DecodeSnapshot(json, false);
-        // Test the prepared wire contract without admitting unfinished v4 initialization in production.
-        // Remove this staging entry point/flag when the real initializer activates CurrentVersion=4.
-        private SaveGameData DecodeStartingLoadoutCandidate(string json) => DecodeSnapshot(json, true);
-        private SaveGameData DecodeSnapshot(string json, bool prepareStartingLoadout)
+        public SaveGameData Decode(string json)
         {
             try
             {
@@ -99,8 +95,8 @@ namespace SOLITUDE.SaveLoad
                 var obj = JObject.Load(reader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error });
                 if (reader.Read()) throw new SaveCandidateException("Trailing save content.");
                 int version = Required(obj, "version", JTokenType.Integer).Value<int>();
-                if (version < 1 || version > (prepareStartingLoadout ? SaveGameData.StartingLoadoutVersion : SaveGameData.CurrentVersion)) throw new SaveCandidateException("Unsupported save version.", true);
-                Required(obj, "worldSeed", JTokenType.Integer).Value<int>();
+                if (version < 1 || version > SaveGameData.CurrentVersion) throw new SaveCandidateException("Unsupported save version.", true);
+                int worldSeed = Required(obj, "worldSeed", JTokenType.Integer).Value<int>();
                 var records = (JArray)Required(obj, "containers", JTokenType.Array);
                 foreach (var entry in records)
                 {
@@ -118,10 +114,13 @@ namespace SOLITUDE.SaveLoad
                 }
                 if (version >= 2) Keys(obj, "collectedPickupIds");
                 if (version >= 3) Lifecycle(obj);
-                if (version == SaveGameData.StartingLoadoutVersion) Required(obj, "startingLoadoutInitialized", JTokenType.Boolean);
-                else obj.Remove("startingLoadoutInitialized"); // Unknown extension fields in legacy wire data stay ignored.
-                var data = new ContainerSaveSession(obj.ToObject<SaveGameData>(), catalog).Capture();
-                return prepareStartingLoadout ? SaveGameData.MigrateStartingLoadoutCandidate(data) : data;
+                bool initialized = version >= 4 && Required(obj, "startingLoadoutInitialized", JTokenType.Boolean).Value<bool>();
+                // Use the validated, case-sensitive wire fact; aliases cannot override it during conversion.
+                foreach (var property in new System.Collections.Generic.List<JProperty>(obj.Properties()))
+                    if (string.Equals(property.Name, "startingLoadoutInitialized", StringComparison.OrdinalIgnoreCase)) property.Remove();
+                var source = obj.ToObject<SaveGameData>();
+                source.version = version; source.worldSeed = worldSeed; source.startingLoadoutInitialized = initialized;
+                return new ContainerSaveSession(source, catalog).Capture();
             }
             catch (SaveCandidateException) { throw; }
             catch (Exception error) when (error is JsonException || error is InvalidDataException || error is OverflowException || error is ArgumentException || error is FormatException)
@@ -131,7 +130,7 @@ namespace SOLITUDE.SaveLoad
         {
             if (data == null) return JsonConvert.SerializeObject(data, Formatting.Indented);
             var obj = JObject.FromObject(data);
-            if (data.version < SaveGameData.StartingLoadoutVersion) obj.Remove("startingLoadoutInitialized");
+            if (data.version < 4) obj.Remove("startingLoadoutInitialized");
             return obj.ToString(Formatting.Indented);
         }
     }

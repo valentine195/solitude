@@ -50,6 +50,7 @@ namespace SOLITUDE.Tests
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/_Project/Scenes/Wakeup.unity", new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
             Assert.AreEqual(RuntimeStartupState.Ready, Root.State);
             Root.StartNewSave(); yield return null; yield return null;
+            WeaponSystemTestFixtures.ClearStartingWeaponForSeededScenario();
         }
         [UnityTearDown] public IEnumerator Cleanup()
         {
@@ -272,6 +273,7 @@ namespace SOLITUDE.Tests
         {
             if (Root != null) { Object.Destroy(Root.gameObject); yield return null; }
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity", new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
+            WeaponSystemTestFixtures.ClearStartingWeaponForSeededScenario();
             var feature = Feature; feature.Validate();
             var equipment = One<SOLITUDE.World.ScrubberEncounter.ScrubberEquipment>(); var state = equipment.State;
             var fuse = SOLITUDE.World.ScrubberEncounter.ScrubberEquipment.FuseItemId;

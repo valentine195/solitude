@@ -37,7 +37,7 @@ namespace SOLITUDE.Tests
         private static IEnumerator VerifyInput()
         {
             var pause = new PauseCoordinator(); var policy = new InputPolicyCoordinator(pause);
-            var session = new ContainerSaveSession(new SaveGameData(), new ItemCatalog(new[] { new ItemSpec("a", true, 10) }));
+            var session = new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, new ItemCatalog(new[] { new ItemSpec("a", true, 10) }));
             var reader = session.Register("inventory", 3).Container; session.Commands.Grant(reader.Handle, "a", 2);
             var gestures = new ContainerGestureCoordinator(new ContainerInteractionController(session.Commands), policy);
             var modal = new ContainerModalCoordinator(policy, pause, gestures, new Display(), reader);

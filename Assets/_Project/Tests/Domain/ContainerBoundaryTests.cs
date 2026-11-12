@@ -19,7 +19,7 @@ namespace SOLITUDE.Tests
         [SetUp] public void SetUp()
         {
             catalog = new ItemCatalog(new[] { new ItemSpec("a", true, 10), new ItemSpec("b", true, 10), new ItemSpec("single", false, 999) });
-            session = new ContainerSaveSession(new SaveGameData(), catalog);
+            session = new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, catalog);
             a = session.Register("a", 4).Container; b = session.Register("b", 4).Container;
             session.MarkSaved();
         }
@@ -188,7 +188,7 @@ namespace SOLITUDE.Tests
         }
         [Test] public void FailedOwnerRestorePreservesUnloadedRecordAndBlocksAutosave()
         {
-            var data = new SaveGameData(); data.containers.Add(new ContainerSaveRecord { saveableId = "small", state = Saved((0, "a", 25)) });
+            var data = new SaveGameData { startingLoadoutInitialized = true }; data.containers.Add(new ContainerSaveRecord { saveableId = "small", state = Saved((0, "a", 25)) });
             var loaded = new ContainerSaveSession(data, catalog);
             Assert.Throws<InvalidDataException>(() => loaded.Register("small", 2));
             Assert.IsTrue(loaded.HasIntegrityFailure); Assert.IsNull(loaded.Commands.Find("small")); Assert.IsFalse(loaded.IsDirty);
@@ -199,7 +199,7 @@ namespace SOLITUDE.Tests
         }
         [Test] public void NormalizationDirtiesOnlyChangedSavedRecords()
         {
-            var data = new SaveGameData(); data.containers.Add(new ContainerSaveRecord { saveableId = "saved", state = Saved((0, "a", 14)) });
+            var data = new SaveGameData { startingLoadoutInitialized = true }; data.containers.Add(new ContainerSaveRecord { saveableId = "saved", state = Saved((0, "a", 14)) });
             var first = new ContainerSaveSession(data, catalog); first.Register("saved", 3); Assert.IsTrue(first.IsDirty);
             var second = new ContainerSaveSession(first.Capture(), catalog); second.Register("saved", 3); Assert.IsFalse(second.IsDirty);
         }
@@ -207,10 +207,10 @@ namespace SOLITUDE.Tests
         {
             foreach (var invalid in new[] { Saved((0, "unknown", 1)), Saved((0, "a", -1)), Saved((0, "a", 1), (0, "b", 1)) })
             {
-                var data = new SaveGameData(); data.containers.Add(new ContainerSaveRecord { saveableId = "absent", state = invalid });
+                var data = new SaveGameData { startingLoadoutInitialized = true }; data.containers.Add(new ContainerSaveRecord { saveableId = "absent", state = invalid });
                 Assert.Throws<InvalidDataException>(() => new ContainerSaveSession(data, catalog));
             }
-            var duplicate = new SaveGameData(); duplicate.containers.Add(new ContainerSaveRecord { saveableId = "x", state = Saved() }); duplicate.containers.Add(new ContainerSaveRecord { saveableId = "x", state = Saved() });
+            var duplicate = new SaveGameData { startingLoadoutInitialized = true }; duplicate.containers.Add(new ContainerSaveRecord { saveableId = "x", state = Saved() }); duplicate.containers.Add(new ContainerSaveRecord { saveableId = "x", state = Saved() });
             Assert.Throws<InvalidDataException>(() => new ContainerSaveSession(duplicate, catalog));
         }
         [Test] public void RejectedLootCandidateCannotPolluteLaterCandidateCapacity()

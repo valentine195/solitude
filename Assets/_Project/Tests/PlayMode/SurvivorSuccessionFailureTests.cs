@@ -102,6 +102,7 @@ namespace SOLITUDE.Tests
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/_Project/Scenes/Wakeup.unity", new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
             Assert.AreEqual(RuntimeStartupState.Ready, Root.State);
             Root.StartNewSave(); yield return null; yield return null;
+            WeaponSystemTestFixtures.ClearStartingWeaponForSeededScenario();
         }
         [UnityTearDown] public IEnumerator Cleanup()
         {
@@ -279,6 +280,7 @@ namespace SOLITUDE.Tests
         {
             Object.Destroy(Root.gameObject); yield return null;
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity", new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
+            WeaponSystemTestFixtures.ClearStartingWeaponForSeededScenario();
             Assert.AreEqual(RuntimeStartupState.Ready, Root.State); ComposeDemoSuccession();
             Grant(Inventory, 4); Grant(Hotbar, 2);
             Keys(Key.D, Key.J); yield return null;

@@ -20,6 +20,9 @@ namespace SOLITUDE.Editor
                 var catalog = database.BuildRuntimeCatalog();
                 database.BuildPresentationCatalog();
                 database.BuildCapabilityCatalog();
+                var config = AssetDatabase.LoadAssetAtPath<SOLITUDE.Composition.GameRuntimeConfig>("Assets/_Project/Core/Composition/GameRuntimeConfig.asset");
+                if (config?.startingLoadout == null) throw new System.InvalidOperationException("Starting loadout configuration is missing.");
+                config.startingLoadout.Compile(catalog);
                 foreach (var guid in AssetDatabase.FindAssets("t:LootTable"))
                 {
                     var table = AssetDatabase.LoadAssetAtPath<LootTable>(AssetDatabase.GUIDToAssetPath(guid));

@@ -104,7 +104,7 @@ namespace SOLITUDE.Tests
         [Test] public void RapidSaveMutations()
         {
             var catalog = new ItemCatalog(new[] { new ItemSpec("perf", true, 10000) });
-            var session = new ContainerSaveSession(new SaveGameData(), catalog);
+            var session = new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, catalog);
             var inventory = session.Register(ContainerSaveSession.PlayerInventoryId, 1);
             session.MarkSaved();
             var files = new Files(); var go = new GameObject("Save perf"); var service = go.AddComponent<SaveGameService>();

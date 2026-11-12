@@ -29,7 +29,7 @@ namespace SOLITUDE.Tests
             item.Stackable = true;
             item.MaxStackSize = 10;
             SetField(item, "itemId", "test.item");
-            session = new ContainerSaveSession(new SaveGameData(), Catalog());
+            session = new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, Catalog());
             var binding = session.Register(ContainerSaveSession.PlayerInventoryId, 2);
             inventory = binding.Container;
             inventoryBinding = binding;
@@ -197,6 +197,9 @@ namespace SOLITUDE.Tests
             session.Reset(456);
             Assert.IsTrue(inventory.IsEmpty(0));
             Assert.IsFalse(service.IsCollected("pickup.a"));
+            using var hotbar = session.Register(ContainerSaveSession.PlayerHotbarId, 1);
+            Assert.IsTrue(session.InitializeStartingLoadout(inventory.Handle, hotbar.Container.Handle,
+                new[] { new PickupReward("test.item", 1) }, 0).Succeeded);
             Assert.AreEqual(CollectResult.Collected, Collect("pickup.a"));
         }
 
@@ -218,12 +221,12 @@ namespace SOLITUDE.Tests
         [Test]
         public void LoadedFactsAreValidatedDeduplicatedAndSorted()
         {
-            var data = new SaveGameData();
+            var data = new SaveGameData { startingLoadoutInitialized = true };
             data.collectedPickupIds.AddRange(new[] { "z", "a", "z" });
             CollectionAssert.AreEqual(new[] { "a", "z" }, SaveGameData.Migrate(data).collectedPickupIds);
             data.collectedPickupIds.Add(" ");
             Assert.Throws<InvalidDataException>(() => SaveGameData.Migrate(data));
-            Assert.Throws<InvalidDataException>(() => SaveGameData.Migrate(new SaveGameData { version = 99 }));
+            Assert.Throws<InvalidDataException>(() => SaveGameData.Migrate(new SaveGameData { startingLoadoutInitialized = true, version = 99 }));
         }
 
         [Test]
@@ -309,7 +312,7 @@ namespace SOLITUDE.Tests
             SetField(config, "item", runtimeItem);
             SetField(config, "quantity", 1);
             var catalog = new ItemCatalog(new[] { new ItemSpec("runtime.item", true, 99) });
-            var runtimeSession = new ContainerSaveSession(new SaveGameData(), catalog);
+            var runtimeSession = new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, catalog);
             var model = runtimeSession.Register(ContainerSaveSession.PlayerInventoryId, 2).Container;
             var runtimeService = new PickupCollectionService(runtimeSession);
             var scene = SceneManager.CreateScene("PickupTestWorld");

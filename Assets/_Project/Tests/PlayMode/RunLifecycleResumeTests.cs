@@ -48,6 +48,7 @@ namespace SOLITUDE.Tests
             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(ScenePath, new LoadSceneParameters(LoadSceneMode.Single));
             yield return null; Assert.AreEqual(RuntimeStartupState.Ready, Root.State);
             Root.StartNewSave(); yield return null; yield return null;
+            WeaponSystemTestFixtures.ClearStartingWeaponForSeededScenario();
             pauseLease = Field<PauseCoordinator>(Root, "pause").Acquire();
         }
         [UnityTearDown] public IEnumerator Cleanup()

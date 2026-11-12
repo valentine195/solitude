@@ -84,7 +84,7 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
             Check(Time.timeScale == 1, "Reload retained modal pause");
             var scope = FindFirstObjectByType<SceneBindings>();
             Check(Field<ContainerModalCoordinator>(scope, "modal").Kind == ContainerModalKind.Closed, "Reload retained screen");
-            Check(Field<HotbarSelectionState>(scope, "selection").ActiveIndex == -1, "Reload retained hotbar selection");
+            Check(Field<HotbarSelectionState>(scope, "selection").ActiveIndex == 0, "New run did not select starting equipment");
             var previous=JsonUtility.FromJson<Expected>(System.IO.File.ReadAllText(manifest));
             var freshSession=Field<ContainerSaveSession>(root,"session");
             var freshPickup=FindObjectsByType<WorldPickup>(FindObjectsInactive.Include,FindObjectsSortMode.None).Single(p=>p.PickupId==previous.pickupId);
@@ -135,7 +135,7 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
         Check(actual.id == persisted.survivor.id && session.Capture().expedition.id == persisted.expeditionId, "Restart changed colonist or expedition");
         Check(actual.scenePath == persisted.survivor.scenePath, "Restart changed the saved scene");
         Check(inventory.Container.GetSlots().Where(s => !s.IsEmpty).Sum(s => s.Stack.Quantity) == 3, "Restart changed inventory");
-        Check(hotbar.Container.GetSlots().Where(s => !s.IsEmpty).Sum(s => s.Stack.Quantity) == 2, "Restart changed hotbar");
+        Check(hotbar.Container.GetSlots().Where(s => !s.IsEmpty).Sum(s => s.Stack.Quantity) == 3, "Restart changed hotbar");
         if (Flag("-lifecycleFallback"))
         {
             Check(avatar.UsedResumeFallback, "Invalid saved position did not use fallback");
@@ -181,6 +181,7 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
         }
         var pickup = FindObjectsByType<WorldPickup>(FindObjectsInactive.Include, FindObjectsSortMode.None).First(p => p.gameObject.activeSelf);
         Check(pickup.Interact(null).IsSuccess && !pickup.gameObject.activeSelf, "Pickup collection failed");
+        selection.Select(-1); // Isolate the input change counter from automatic new-run selection.
         int changes = 0; selection.Changed += _ => changes++;
         Press(Key.Digit1); Check(selection.ActiveIndex == 0 && changes == 1, "Hotbar input duplicated");
         InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.W)); InputSystem.Update();

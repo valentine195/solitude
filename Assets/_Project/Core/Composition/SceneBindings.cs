@@ -65,6 +65,14 @@ namespace SOLITUDE.Composition
         private Guid inventoryToken, transferToken;
         private string preparingTargetLabel = "Locker";
         private bool persistentLifecycle;
+        private StartingLoadoutCoordinator startingLoadout;
+        public StartingLoadoutOutcome InitializeStartingLoadout(StartingLoadoutSpec spec, Func<bool> persist)
+        {
+            if (!HasPlayer || session == null) return StartingLoadoutOutcome.Rejected;
+            startingLoadout ??= new StartingLoadoutCoordinator(session, inventory.Container, hotbar.Container, selection);
+            return startingLoadout.Initialize(spec, persist);
+        }
+        public string StartingLoadoutError => startingLoadout?.LastError;
         public bool HasPlayer => inventory != null;
         internal void ConfigureLifecyclePersistence(bool enabled)
         {
@@ -349,7 +357,7 @@ namespace SOLITUDE.Composition
             foreach (var source in lockers) { source.Release(); if (source != null) source.GetComponent<Locker>()?.Release(); }
             foreach (var junction in restorationJunctions) if (junction != null) junction.ReleaseBinding();
             foreach (var binding in bindings) binding.Dispose(); bindings.Clear();
-            inventory?.Release(); hotbar?.Release(); session = null; gestures = null; capabilities = null; persistentLifecycle = false;
+            startingLoadout = null; inventory?.Release(); hotbar?.Release(); session = null; gestures = null; capabilities = null; persistentLifecycle = false;
         }
         private void OnDestroy() { var notify = released; released = null; notify?.Invoke(); Release(); }
     }

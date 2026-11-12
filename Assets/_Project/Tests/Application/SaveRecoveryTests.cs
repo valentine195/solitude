@@ -26,7 +26,7 @@ namespace SOLITUDE.Tests
             {
                 if (json == "incompatible") throw new SaveCandidateException("Removed item", true);
                 if (!int.TryParse(json,out int seed)) throw new SaveCandidateException("Corrupt");
-                return new SaveGameData { worldSeed = seed, collectedPickupIds = new List<string> { "fact." + seed } };
+                return new SaveGameData { startingLoadoutInitialized = true, worldSeed = seed, collectedPickupIds = new List<string> { "fact." + seed } };
             }
             public string Encode(SaveGameData data) => data.worldSeed.ToString();
         }
@@ -49,7 +49,7 @@ namespace SOLITUDE.Tests
             if (corruptPrimary) files.Bytes["save"]="broken";files.Bytes["save.bak"]="9";
             var result=store.Load(0);Assert.AreEqual(SaveLoadStatus.RecoveredBackup,result.Status);
             Assert.AreEqual("fact.9",result.Data.collectedPickupIds[0]);Assert.IsTrue(store.RecoveryPending);
-            Assert.Throws<InvalidOperationException>(()=>store.Write(new SaveGameData()));
+            Assert.Throws<InvalidOperationException>(()=>store.Write(new SaveGameData { startingLoadoutInitialized = true }));
             store.CompleteRecovery();Assert.AreEqual("9",files.Bytes["save"]);Assert.AreEqual("9",files.Bytes["save.bak"]);
             if (corruptPrimary) Assert.IsTrue(files.Bytes.ContainsValue("broken"));
             Assert.IsTrue(store.NoticePending);store.AcknowledgeNotice();Assert.IsFalse(store.NoticePending);
@@ -67,18 +67,18 @@ namespace SOLITUDE.Tests
             files.FailReplace=false;var restarted=new SaveRecoveryStore("save",files,new Codec());Assert.AreEqual(SaveLoadStatus.RecoveredBackup,restarted.Load(0).Status);restarted.CompleteRecovery();Assert.IsTrue(restarted.NoticePending);
         }
         [Test] public void FailureBeforeTemporaryWriteCannotTouchPrimary()
-        { files.Bytes["save"]="10";files.FailWrite=true;Assert.Throws<IOException>(()=>store.Write(new SaveGameData {worldSeed=11}));Assert.AreEqual("10",files.Bytes["save"]); }
+        { files.Bytes["save"]="10";files.FailWrite=true;Assert.Throws<IOException>(()=>store.Write(new SaveGameData { startingLoadoutInitialized = true,worldSeed=11}));Assert.AreEqual("10",files.Bytes["save"]); }
         [Test] public void ExplicitResetPreservesValidBackupOfBlockedPrimary()
         {
             files.Bytes["save"]="incompatible";files.Bytes["save.bak"]="9";
             Assert.AreEqual(SaveLoadStatus.BlockedIncompatible,store.Load(0).Status);
-            store.CancelPendingRecovery();store.Write(new SaveGameData {worldSeed=20});
+            store.CancelPendingRecovery();store.Write(new SaveGameData { startingLoadoutInitialized = true,worldSeed=20});
             Assert.AreEqual("20",files.Bytes["save"]);Assert.AreEqual("9",files.Bytes["save.bak"]);
             Assert.IsTrue(files.Bytes.ContainsValue("incompatible"));
         }
         [Test] public void FailedCommitLeavesSessionDirtyUntilRetry()
         {
-            var session=new ContainerSaveSession(new SaveGameData(),new SOLITUDE.Items.ItemCatalog(new[] {new SOLITUDE.Items.ItemSpec("a",true,10)}));
+            var session=new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true },new SOLITUDE.Items.ItemCatalog(new[] {new SOLITUDE.Items.ItemSpec("a",true,10)}));
             session.Register("inventory",2);files.Bytes["save"]="10";files.FailReplace=true;
             Assert.Throws<IOException>(()=>{store.Write(session.Capture());session.MarkSaved();});Assert.IsTrue(session.IsDirty);Assert.AreEqual("10",files.Bytes["save"]);
             files.FailReplace=false;store.Write(session.Capture());session.MarkSaved();Assert.IsFalse(session.IsDirty);Assert.AreEqual("10",files.Bytes["save.bak"]);

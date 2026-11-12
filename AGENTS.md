@@ -35,3 +35,14 @@ Preserve human gates, exact-revision approval, provenance checks, and criterion-
 ## Existing work
 
 The caller inspects the working tree before starting a step; implementation and review inspect it within their role contracts. Query must not inspect Git state or gather repository facts. Preserve unrelated uncommitted work and never stage, discard, or commit it as part of a QRSPI feature. Surface helper dirty-tree findings; do not bypass them or clean the tree automatically. Keep the existing project skills and their supporting resources intact.
+
+## Focused verification
+
+Run only tests directly relevant to the changed behavior and its affected dependencies.
+Choose focused test filters and targeted scenarios; do not run the complete gameplay
+suite or rebuild unrelated targets by default. Reuse passing evidence for unchanged
+source, stating its snapshot and limits. Broaden checks only when a concrete failure,
+changed dependency, or explicit user request justifies them, and explain the reason.
+This applies to QRSPI plans and overrides blanket full-suite guidance in older plans
+or verification documentation. Keep corruption, recovery, and behavioral assertions
+intact; report any untested behavior honestly.

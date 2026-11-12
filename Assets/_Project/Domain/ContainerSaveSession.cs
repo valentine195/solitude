@@ -43,6 +43,19 @@ namespace SOLITUDE.SaveLoad
             Commands = new ContainerCommandService(this.catalog);
             Commands.Completed += _ => IsDirty = true;
         }
+        public bool StartingLoadoutInitialized => data.startingLoadoutInitialized;
+        public CommandResult InitializeStartingLoadout(ContainerHandle inventory, ContainerHandle hotbar,
+            IReadOnlyList<PickupReward> grants, int selectedSlot)
+        {
+            if (Commands.IsBusy) return new CommandResult(CommandStatus.Busy);
+            if (HasIntegrityFailure) return new CommandResult(CommandStatus.Unavailable);
+            if (data.startingLoadoutInitialized) return new CommandResult(CommandStatus.NoOp);
+            if (!bindings.TryGetValue(PlayerInventoryId, out var first) || !first.Container.Handle.Equals(inventory)
+                || !bindings.TryGetValue(PlayerHotbarId, out var second) || !second.Container.Handle.Equals(hotbar))
+                return new CommandResult(CommandStatus.Unavailable);
+            return Commands.InitializeStartingLoadout(inventory, hotbar, grants, selectedSlot, () =>
+            { data.startingLoadoutInitialized = true; IsDirty = true; RequiresImmediateSave = true; });
+        }
         public bool IsPickupCollected(string id) => collected.Contains(id);
         internal CollectResult Collect(string pickupId, string inventoryId, string itemId, int quantity)
         {
@@ -124,10 +137,7 @@ namespace SOLITUDE.SaveLoad
         {
             Commands.Reset(() =>
             {
-                // Keep explicit prepared-v4 candidates pending on reset; production remains v3 until activation.
-                int version = data.version;
-                data = new SaveGameData { worldSeed = worldSeed, version = version,
-                    startingLoadoutInitialized = version < SaveGameData.StartingLoadoutVersion };
+                data = new SaveGameData { worldSeed = worldSeed };
                 collected.Clear(); HasIntegrityFailure = false;
             });
             RequiresImmediateSave = true;

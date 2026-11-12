@@ -20,8 +20,7 @@ namespace SOLITUDE.Tests
             oxygen = new SavedVital { current = 70, max = 100 },
             hunger = new SavedVital { current = 80, max = 100 }
         };
-        private static SaveGameData Initialized() => new SaveGameData
-        {
+        private static SaveGameData Initialized() => new SaveGameData { startingLoadoutInitialized = true,
             survivor = Survivor(), expedition = new ExpeditionState { id = Guid.NewGuid().ToString("D") }
         };
         private static void Pending(SaveGameData data, SavedDeathStage stage = SavedDeathStage.Committed)
@@ -38,7 +37,7 @@ namespace SOLITUDE.Tests
         [TestCase(1)] [TestCase(2)]
         public void LegacyMigrationRetainsKnownFactsWithoutInventingLifecycle(int version)
         {
-            var original = new SaveGameData { version = version, worldSeed = 47 };
+            var original = new SaveGameData { startingLoadoutInitialized = true, version = version, worldSeed = 47 };
             original.collectedPickupIds.Add("pickup.fuse");
             original.containers.Add(new ContainerSaveRecord { saveableId = "locker", state = new ContainerSaveData
             {
@@ -46,8 +45,8 @@ namespace SOLITUDE.Tests
             } });
             var session = new ContainerSaveSession(original, Catalog());
             var migrated = session.Capture();
-            Assert.AreEqual(3, migrated.version); Assert.AreEqual(47, migrated.worldSeed);
-            Assert.IsTrue(migrated.startingLoadoutInitialized); Assert.IsFalse(original.startingLoadoutInitialized);
+            Assert.AreEqual(4, migrated.version); Assert.AreEqual(47, migrated.worldSeed);
+            Assert.IsTrue(migrated.startingLoadoutInitialized); Assert.IsTrue(original.startingLoadoutInitialized);
             Assert.AreEqual(2, migrated.containers[0].state.slots[0].quantity);
             Assert.AreEqual(version == 1 ? 0 : 1, migrated.collectedPickupIds.Count);
             Assert.IsNull(migrated.survivor); Assert.IsNull(migrated.expedition); Assert.IsNull(migrated.pendingDeath);
@@ -60,7 +59,7 @@ namespace SOLITUDE.Tests
         [Test]
         public void InitializationHappensOnceAndNeverDuringCaptureOrDecode()
         {
-            var session = new ContainerSaveSession(new SaveGameData(), Catalog());
+            var session = new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, Catalog());
             Assert.IsNull(session.Capture().survivor);
             var colonist = Survivor(); var expedition = new ExpeditionState { id = Guid.NewGuid().ToString("D") };
             Assert.IsTrue(session.TryInitializeLifecycle(colonist, expedition)); Assert.IsTrue(session.IsDirty);

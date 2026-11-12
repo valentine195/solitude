@@ -18,7 +18,7 @@ namespace SOLITUDE.Tests
             var snapshot = new TaskSnapshot(true, TaskOutcome.Active, "Task", "stage", nextStep: "Do it"); first.Publish("task", snapshot); second.Publish("task", snapshot);
 
             void Set(string field, object value) => typeof(SceneBindings).GetField(field, BindingFlags.NonPublic | BindingFlags.Instance).SetValue(scope, value);
-            Set("session", new ContainerSaveSession(new SaveGameData(), new ItemCatalog(new[] { new ItemSpec("item", true, 10) })));
+            Set("session", new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, new ItemCatalog(new[] { new ItemSpec("item", true, 10) })));
             Set("tasks", journal); Set("taskScope", "first");
             try
             {
@@ -37,7 +37,7 @@ namespace SOLITUDE.Tests
             {
                 original.RegisterSource("a", "scene", out var writer); writer.Publish("task", new TaskSnapshot(true, TaskOutcome.Completed, "Task", result: "Done"));
                 Assert.AreEqual(1, original.ReadSnapshot().Completed.Count); Assert.AreEqual(0, replacement.ReadSnapshot().Completed.Count);
-                var save = JsonUtility.ToJson(new SaveGameData()); Assert.IsFalse(save.Contains("TaskJournal")); Assert.IsFalse(save.Contains("Completed"));
+                var save = JsonUtility.ToJson(new SaveGameData { startingLoadoutInitialized = true }); Assert.IsFalse(save.Contains("TaskJournal")); Assert.IsFalse(save.Contains("Completed"));
             }
         }
     }

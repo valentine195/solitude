@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.ExceptionServices;
 using NUnit.Framework;
 using SOLITUDE.Application.Persistence;
 using SOLITUDE.Items;
@@ -35,6 +33,7 @@ namespace SOLITUDE.Tests
         }
         private static SaveGameData LivingSnapshot() => new SaveGameData
         {
+            startingLoadoutInitialized = true,
             survivor = new SurvivorSnapshot
             {
                 id = Guid.NewGuid().ToString(), scenePath = "Assets/_Project/Scenes/Wakeup.unity", x = 1.25, y = -7,
@@ -80,7 +79,7 @@ namespace SOLITUDE.Tests
             var json = "{\"version\":" + version + ",\"worldSeed\":0,\"containers\":[{\"saveableId\":\"locker\",\"state\":{\"slots\":[{\"index\":0,\"itemId\":\"a\",\"quantity\":2}]}}]"
                 + (version == 2 ? ",\"collectedPickupIds\":[\"picked\"]" : "") + "}";
             var migrated = codec.Decode(json);
-            Assert.AreEqual(3, migrated.version); Assert.IsNull(migrated.survivor); Assert.IsNull(migrated.expedition);
+            Assert.AreEqual(4, migrated.version); Assert.IsNull(migrated.survivor); Assert.IsNull(migrated.expedition);
             Assert.AreEqual(2, migrated.containers[0].state.slots[0].quantity);
             Assert.AreEqual(version == 1 ? 0 : 1, migrated.collectedPickupIds.Count);
             Assert.IsNull(codec.Decode(codec.Encode(migrated)).survivor);
@@ -88,7 +87,7 @@ namespace SOLITUDE.Tests
         [Test]
         public void VersionThreeRoundTripsLivingShipAndExpeditionStateTogether()
         {
-            var data = LivingSnapshot(); data.expedition.defeatedEncounterIds.Add("bot");
+            var data = LivingSnapshot(); data.version = 3; data.expedition.defeatedEncounterIds.Add("bot");
             data.expedition.collectedSupplySourceIds.Add("ration");
             data.ship.repairs.Add(new RepairSaveRecord { id = "scrubber", installed = true, running = true, recoverySeconds = 2.75 });
             data.ship.doors.Add(new DoorSaveRecord { id = "door", powered = true, unlocked = true, open = true });
@@ -124,71 +123,86 @@ namespace SOLITUDE.Tests
         [Test]
         public void VersionThreeStillRequiresTypedPermanentCollectionFacts()
         {
-            var json = codec.Encode(new SaveGameData()).Replace("\"collectedPickupIds\": []", "\"collectedPickupIds\": [42]");
+            var json = codec.Encode(new SaveGameData { version = 3 }).Replace("\"collectedPickupIds\": []", "\"collectedPickupIds\": [42]");
             Assert.Throws<SaveCandidateException>(() => codec.Decode(json));
         }
-        private SaveGameData Candidate(string json)
-        {
-            try { return (SaveGameData)typeof(SaveJsonCodec).GetMethod("DecodeStartingLoadoutCandidate", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(codec, new object[] { json }); }
-            catch (TargetInvocationException error) when (error.InnerException != null)
-            { ExceptionDispatchInfo.Capture(error.InnerException).Throw(); throw; }
-        }
         [TestCase(false)] [TestCase(true)]
-        public void PreparedVersionFourWireRetainsAnExplicitBoolean(bool completed)
+        public void VersionFourWireRetainsAnExplicitBoolean(bool completed)
         {
-            var data = SaveGameData.NewStartingLoadoutCandidate(19); data.startingLoadoutInitialized = completed;
-            string json = codec.Encode(data); var loaded = Candidate(json);
+            var data = new SaveGameData { worldSeed = 19 }; data.startingLoadoutInitialized = completed;
+            string json = codec.Encode(data); var loaded = codec.Decode(json);
             StringAssert.Contains("\"startingLoadoutInitialized\": " + (completed ? "true" : "false"), json);
             Assert.AreEqual(4, loaded.version); Assert.AreEqual(completed, loaded.startingLoadoutInitialized); Assert.AreEqual(19, loaded.worldSeed);
         }
         [TestCase("null")] [TestCase("0")] [TestCase("\"false\"")] [TestCase("[]")] [TestCase("{}")]
-        public void PreparedVersionFourRejectsWrongMarkerTypes(string value)
+        public void VersionFourRejectsWrongMarkerTypes(string value)
         {
-            string json = codec.Encode(SaveGameData.NewStartingLoadoutCandidate(1));
+            string json = codec.Encode(new SaveGameData { worldSeed = 1 });
             json = json.Replace("\"startingLoadoutInitialized\": false", "\"startingLoadoutInitialized\": " + value);
-            Assert.Throws<SaveCandidateException>(() => Candidate(json));
+            Assert.Throws<SaveCandidateException>(() => codec.Decode(json));
         }
-        [Test] public void PreparedVersionFourRequiresMarkerAndRejectsDuplicateWireFacts()
+        [Test] public void VersionFourRequiresMarkerAndRejectsDuplicateWireFacts()
         {
-            string json = codec.Encode(SaveGameData.NewStartingLoadoutCandidate(1));
-            Assert.Throws<SaveCandidateException>(() => Candidate(json.Replace("\"startingLoadoutInitialized\": false,", "")));
-            Assert.Throws<SaveCandidateException>(() => Candidate(json.Replace("\"worldSeed\":", "\"startingLoadoutInitialized\": true, \"worldSeed\":")));
+            string json = codec.Encode(new SaveGameData { worldSeed = 1 });
+            Assert.Throws<SaveCandidateException>(() => codec.Decode(json.Replace("\"startingLoadoutInitialized\": false,", "")));
+            Assert.Throws<SaveCandidateException>(() => codec.Decode(json.Replace("\"worldSeed\":", "\"startingLoadoutInitialized\": true, \"worldSeed\":")));
         }
         [TestCase(ContainerSaveSession.PlayerInventoryId)] [TestCase(ContainerSaveSession.PlayerHotbarId)]
-        public void PreparedPendingWireRejectsCarriedOrPartiallyGrantedItems(string owner)
+        public void PendingWireRejectsCarriedOrPartiallyGrantedItems(string owner)
         {
-            var data = SaveGameData.NewStartingLoadoutCandidate(7);
+            var data = new SaveGameData { worldSeed = 7 };
             data.containers.Add(new ContainerSaveRecord { saveableId = owner, state = new ContainerSaveData
             { slots = new System.Collections.Generic.List<ContainerSlotSaveData> { new ContainerSlotSaveData { index = 0, itemId = "a", quantity = 1 } } } });
-            Assert.Throws<SaveCandidateException>(() => Candidate(codec.Encode(data)));
-            data.startingLoadoutInitialized = true; Assert.AreEqual(1, Candidate(codec.Encode(data)).containers[0].state.slots[0].quantity);
+            Assert.Throws<SaveCandidateException>(() => codec.Decode(codec.Encode(data)));
+            data.startingLoadoutInitialized = true; Assert.AreEqual(1, codec.Decode(codec.Encode(data)).containers[0].state.slots[0].quantity);
         }
-        [Test] public void PreparedPendingWireAllowsExistingLivingLifecycleWithoutCarriedContents()
+        [Test] public void PendingWireAllowsExistingLivingLifecycleWithoutCarriedContents()
         {
             var data = LivingSnapshot(); data.version = 4; data.startingLoadoutInitialized = false;
-            var loaded = Candidate(codec.Encode(data)); Assert.IsFalse(loaded.startingLoadoutInitialized);
+            var loaded = codec.Decode(codec.Encode(data)); Assert.IsFalse(loaded.startingLoadoutInitialized);
             Assert.AreEqual(data.survivor.id, loaded.survivor.id); Assert.AreEqual(30, loaded.survivor.health.current);
             Assert.AreEqual(1.5, loaded.survivor.recoveryDelayRemaining); Assert.AreEqual(data.expedition.id, loaded.expedition.id);
         }
         [TestCase(1)] [TestCase(2)] [TestCase(3)]
-        public void PreparedLegacyDecodeCompletesWithoutAddingCarriedItems(int version)
+        public void LegacyDecodeCompletesWithoutAddingCarriedItems(int version)
         {
             var data = LivingSnapshot(); data.version = version; data.worldSeed = 29;
             data.collectedPickupIds.Add("picked"); data.containers.Add(new ContainerSaveRecord { saveableId = ContainerSaveSession.PlayerInventoryId,
                 state = new ContainerSaveData { slots = new System.Collections.Generic.List<ContainerSlotSaveData> { new ContainerSlotSaveData { index = 0, itemId = "a", quantity = 2 } } } });
-            var loaded = Candidate(codec.Encode(data)); Assert.AreEqual(4, loaded.version); Assert.IsTrue(loaded.startingLoadoutInitialized);
+            var loaded = codec.Decode(codec.Encode(data)); Assert.AreEqual(4, loaded.version); Assert.IsTrue(loaded.startingLoadoutInitialized);
             Assert.AreEqual(29, loaded.worldSeed); Assert.AreEqual(1, loaded.containers.Count); Assert.AreEqual(2, loaded.containers[0].state.slots[0].quantity);
             Assert.AreEqual(version == 1 ? 0 : 1, loaded.collectedPickupIds.Count);
             if (version < 3) Assert.IsNull(loaded.survivor);
             else { Assert.AreEqual(data.survivor.id, loaded.survivor.id); Assert.AreEqual(30, loaded.survivor.health.current); Assert.AreEqual(1.5, loaded.survivor.recoveryDelayRemaining); }
         }
-        [Test] public void PublicVersionThreeContractRemainsActiveUntilRealInitializerActivation()
+        [Test] public void PublicVersionFourIsPendingAndLegacyWireRemainsCompleted()
         {
-            var loaded = codec.Decode(codec.Encode(new SaveGameData())); Assert.AreEqual(3, loaded.version);
-            Assert.IsTrue(loaded.startingLoadoutInitialized); StringAssert.DoesNotContain("startingLoadoutInitialized", codec.Encode(loaded));
-            Assert.IsTrue(Assert.Throws<SaveCandidateException>(() => codec.Decode(codec.Encode(SaveGameData.NewStartingLoadoutCandidate(1)))).Incompatible);
-            string legacyExtension = codec.Encode(new SaveGameData()).Replace("\"worldSeed\":", "\"startingLoadoutInitialized\": \"ignored legacy extension\", \"worldSeed\":");
-            Assert.IsTrue(codec.Decode(legacyExtension).startingLoadoutInitialized); Assert.AreEqual("null", codec.Encode(null));
+            var fresh = codec.Decode(codec.Encode(new SaveGameData())); Assert.AreEqual(4, fresh.version);
+            Assert.IsFalse(fresh.startingLoadoutInitialized); StringAssert.Contains("startingLoadoutInitialized", codec.Encode(fresh));
+            var legacy = new SaveGameData { version = 3 };
+            string json = codec.Encode(legacy).Replace("\"worldSeed\":", "\"startingLoadoutInitialized\": \"ignored legacy extension\", \"worldSeed\":");
+            var loaded = codec.Decode(json); Assert.AreEqual(4, loaded.version); Assert.IsTrue(loaded.startingLoadoutInitialized);
+            Assert.AreEqual("null", codec.Encode(null));
+        }
+        [Test] public void MarkerAliasesCannotOverrideTheValidatedPendingFact()
+        {
+            var json = codec.Encode(new SaveGameData()).Replace("\"worldSeed\":", "\"StartingLoadoutInitialized\": true, \"worldSeed\":");
+            Assert.IsFalse(codec.Decode(json).startingLoadoutInitialized);
+        }
+        [Test] public void VersionAliasCannotTurnPendingCarriedItemsIntoLegacyCompletion()
+        {
+            var data = new SaveGameData();
+            data.containers.Add(new ContainerSaveRecord { saveableId = ContainerSaveSession.PlayerHotbarId,
+                state = new ContainerSaveData { slots = new System.Collections.Generic.List<ContainerSlotSaveData> {
+                    new ContainerSlotSaveData { index = 0, itemId = "a", quantity = 1 } } } });
+            string json = codec.Encode(data).Replace("\"worldSeed\":", "\"Version\": 3, \"worldSeed\":");
+            Assert.Throws<SaveCandidateException>(() => codec.Decode(json));
+        }
+        [Test] public void WorldSeedAliasCannotOverrideTheValidatedSeed()
+        {
+            string json = codec.Encode(new SaveGameData { worldSeed = 29 })
+                .Replace("\"containers\":", "\"WorldSeed\": 99, \"containers\":");
+            Assert.AreEqual(29, codec.Decode(json).worldSeed);
         }
         [Test] public void RealFilesRecoverBackupWithoutOverwritingItWithCorruption()
         {

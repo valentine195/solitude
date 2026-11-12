@@ -173,7 +173,7 @@ namespace SOLITUDE.Tests
             var point = WorldPoint(); MouseState(point, true); yield return null; yield return null; Assert.IsTrue(Actions.Runner.IsExecuting);
             WeaponSystemTestFixtures.Root.StartNewSave(); yield return null; yield return null; yield return null; yield return null;
             var bar = WeaponSystemTestFixtures.Bar;
-            WeaponSystemTestFixtures.Session.Commands.Grant(bar.Container.Handle, WeaponSystemTestFixtures.Wrench.ItemId, 1); bar.SetActive(0);
+            Assert.AreEqual(WeaponSystemTestFixtures.Wrench.ItemId, bar.Container.GetSlot(0).Stack.ItemId); bar.SetActive(0);
             yield return new WaitForSecondsRealtime(.7f); Assert.IsFalse(Actions.Runner.IsExecuting);
             MouseState(WorldPoint(), false); MouseState(WorldPoint(), true); yield return null; yield return null; Assert.IsTrue(Actions.Runner.IsExecuting);
         }

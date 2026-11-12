@@ -65,6 +65,7 @@ namespace SOLITUDE.Tests
             keyboard = InputSystem.AddDevice<Keyboard>();
             yield return Load("Assets/_Project/Scenes/Wakeup.unity"); yield return null;
             Assert.AreEqual(RuntimeStartupState.Ready, Root.State); Root.StartNewSave(); yield return null; yield return null;
+            WeaponSystemTestFixtures.ClearStartingWeaponForSeededScenario();
         }
         [UnityTearDown] public IEnumerator Cleanup()
         {
@@ -217,6 +218,7 @@ namespace SOLITUDE.Tests
         [UnityTest] public IEnumerator AuthoredScrubberKeepsRunningAndReaderBindingsAcrossDeathButResetsOnReload()
         {
             Object.Destroy(Root.gameObject); yield return null; yield return Load(ScrubberScene); yield return null;
+            WeaponSystemTestFixtures.ClearStartingWeaponForSeededScenario();
             Assert.AreEqual(RuntimeStartupState.Ready, Root.State); Feature.Validate();
             var root = Root; var inventory = Inventory; var equipment = One<ScrubberEquipment>(); var state = equipment.State;
             var pickup = One<WorldPickup>(); yield return Use(pickup); equipment.Install(); equipment.Restart();

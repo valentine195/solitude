@@ -56,6 +56,8 @@ namespace SOLITUDE.Editor
                     var config = (GameRuntimeConfig)authoring.FindProperty("config").objectReferenceValue;
                     if (config.database == null) throw new InvalidOperationException("Missing item database.");
                     var catalog = config.database.BuildRuntimeCatalog();
+                    if (config.startingLoadout == null) throw new InvalidOperationException("Missing starting loadout.");
+                    config.startingLoadout.Compile(catalog);
                     if (config.lootTables.Any(t => t == null) || config.lootTables.Distinct().Count() != config.lootTables.Length)
                         throw new InvalidOperationException("Invalid/duplicate configured loot table.");
                     foreach (var table in config.lootTables) table.Compile(catalog);
