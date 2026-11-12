@@ -10,8 +10,11 @@ namespace SOLITUDE.SaveLoad
     public class SaveGameData
     {
         public const int CurrentVersion = 3;
+        // Prepared schema only; production activation belongs to the composed initializer.
+        public const int StartingLoadoutVersion = 4;
 
         public int version = CurrentVersion;
+        public bool startingLoadoutInitialized;
         public int worldSeed;
         public List<ContainerSaveRecord> containers = new();
         public List<string> collectedPickupIds = new();
@@ -23,7 +26,7 @@ namespace SOLITUDE.SaveLoad
 
         public static SaveGameData Migrate(SaveGameData data)
         {
-            if (data == null || data.version < 1 || data.version > CurrentVersion)
+            if (data == null || data.version < 1 || data.version > StartingLoadoutVersion)
                 throw new System.IO.InvalidDataException("Unsupported or invalid save version.");
             if (data.version == 1)
             {
@@ -36,6 +39,11 @@ namespace SOLITUDE.SaveLoad
                 // Do not invent identities, vitals or historical repairs while decoding.
                 data.survivor = null; data.expedition = null; data.pendingDeath = null;
                 data.ship = new ShipStateSnapshot();
+            }
+            if (data.version < StartingLoadoutVersion)
+            {
+                // Legacy games retain their equipment and never receive a retroactive grant.
+                data.startingLoadoutInitialized = true;
                 data.version = CurrentVersion;
             }
             data.collectedPickupIds ??= new List<string>();
@@ -48,8 +56,22 @@ namespace SOLITUDE.SaveLoad
             return data;
         }
 
+        public static SaveGameData NewStartingLoadoutCandidate(int worldSeed) =>
+            new SaveGameData { version = StartingLoadoutVersion, worldSeed = worldSeed, startingLoadoutInitialized = false };
+
+        // Temporary preparation entry point; folded into ordinary migration at production activation.
+        public static SaveGameData MigrateStartingLoadoutCandidate(SaveGameData data)
+        {
+            Migrate(data); data.version = StartingLoadoutVersion; data.ValidateLifecycle(); return data;
+        }
+
         public void ValidateLifecycle()
         {
+            if (version == StartingLoadoutVersion && !startingLoadoutInitialized)
+                foreach (var record in containers ?? new List<ContainerSaveRecord>())
+                    if (record != null && (record.saveableId == ContainerSaveSession.PlayerInventoryId
+                        || record.saveableId == ContainerSaveSession.PlayerHotbarId) && record.state?.slots?.Count > 0)
+                        throw new InvalidDataException("Pending starting equipment cannot retain carried items.");
             if ((survivor == null) != (expedition == null) || ship == null)
                 throw new InvalidDataException("Incomplete saved lifecycle.");
             survivor?.Validate(); expedition?.Validate(); ship.Validate();

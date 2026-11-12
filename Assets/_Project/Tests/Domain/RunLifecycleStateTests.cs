@@ -47,6 +47,7 @@ namespace SOLITUDE.Tests
             var session = new ContainerSaveSession(original, Catalog());
             var migrated = session.Capture();
             Assert.AreEqual(3, migrated.version); Assert.AreEqual(47, migrated.worldSeed);
+            Assert.IsTrue(migrated.startingLoadoutInitialized); Assert.IsFalse(original.startingLoadoutInitialized);
             Assert.AreEqual(2, migrated.containers[0].state.slots[0].quantity);
             Assert.AreEqual(version == 1 ? 0 : 1, migrated.collectedPickupIds.Count);
             Assert.IsNull(migrated.survivor); Assert.IsNull(migrated.expedition); Assert.IsNull(migrated.pendingDeath);

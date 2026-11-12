@@ -50,6 +50,16 @@ namespace SOLITUDE.Tests
             return codec.Decode(codec.Encode(value.Capture()));
         }
 
+        [Test] public void LoadoutPreparationPreservesProductionCommandsCaptureResetAndWireVersion()
+        {
+            Grant(target, battery, 2); var captured = RoundTrip(session);
+            Assert.AreEqual(3, captured.version); Assert.IsTrue(captured.startingLoadoutInitialized);
+            Assert.AreEqual(2, captured.containers.Single(record => record.saveableId == ContainerSaveSession.PlayerInventoryId).state.slots[0].quantity);
+            session.Reset(53); var reset = session.Capture();
+            Assert.AreEqual(3, reset.version); Assert.IsTrue(reset.startingLoadoutInitialized); Assert.IsTrue(target.GetSlot(0).IsEmpty);
+            StringAssert.DoesNotContain("startingLoadoutInitialized", new SaveJsonCodec(catalog).Encode(reset));
+        }
+
         [Test]
         public void PreviewAndCancelKeepSourceOwnership()
         {

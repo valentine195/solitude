@@ -122,7 +122,14 @@ namespace SOLITUDE.SaveLoad
         }
         public void Reset(int worldSeed, bool releaseOwners = false)
         {
-            Commands.Reset(() => { data = new SaveGameData { worldSeed = worldSeed }; collected.Clear(); HasIntegrityFailure = false; });
+            Commands.Reset(() =>
+            {
+                // Keep explicit prepared-v4 candidates pending on reset; production remains v3 until activation.
+                int version = data.version;
+                data = new SaveGameData { worldSeed = worldSeed, version = version,
+                    startingLoadoutInitialized = version < SaveGameData.StartingLoadoutVersion };
+                collected.Clear(); HasIntegrityFailure = false;
+            });
             RequiresImmediateSave = true;
             if (!releaseOwners) return;
             // A new world must not retain cleared locker records or old owner generations.
@@ -147,6 +154,7 @@ namespace SOLITUDE.SaveLoad
         private static SaveGameData Clone(SaveGameData source)
         {
             var result = new SaveGameData { version = source.version, worldSeed = source.worldSeed,
+                startingLoadoutInitialized = source.startingLoadoutInitialized,
                 containers = source.containers == null ? null : new List<ContainerSaveRecord>(),
                 collectedPickupIds = source.collectedPickupIds == null ? null : new List<string>(source.collectedPickupIds),
                 survivor = source.survivor?.Clone(), expedition = source.expedition?.Clone(),
