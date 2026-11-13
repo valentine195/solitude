@@ -184,10 +184,10 @@ namespace SOLITUDE.Tests
             var loaded = codec.Decode(json); Assert.AreEqual(4, loaded.version); Assert.IsTrue(loaded.startingLoadoutInitialized);
             Assert.AreEqual("null", codec.Encode(null));
         }
-        [Test] public void MarkerAliasesCannotOverrideTheValidatedPendingFact()
+        [Test] public void ConflictingMarkerAliasesAreRejected()
         {
             var json = codec.Encode(new SaveGameData()).Replace("\"worldSeed\":", "\"StartingLoadoutInitialized\": true, \"worldSeed\":");
-            Assert.IsFalse(codec.Decode(json).startingLoadoutInitialized);
+            Assert.Throws<SaveCandidateException>(() => codec.Decode(json));
         }
         [Test] public void VersionAliasCannotTurnPendingCarriedItemsIntoLegacyCompletion()
         {
@@ -198,11 +198,63 @@ namespace SOLITUDE.Tests
             string json = codec.Encode(data).Replace("\"worldSeed\":", "\"Version\": 3, \"worldSeed\":");
             Assert.Throws<SaveCandidateException>(() => codec.Decode(json));
         }
-        [Test] public void WorldSeedAliasCannotOverrideTheValidatedSeed()
+        [Test] public void ConflictingWorldSeedAliasesAreRejected()
         {
             string json = codec.Encode(new SaveGameData { worldSeed = 29 })
                 .Replace("\"containers\":", "\"WorldSeed\": 99, \"containers\":");
-            Assert.AreEqual(29, codec.Decode(json).worldSeed);
+            Assert.Throws<SaveCandidateException>(() => codec.Decode(json));
+        }
+        private string AliasedPendingWire(string owner, string alias)
+        {
+            string slots = "\"slots\":[{\"index\":0,\"quantity\":1,\"itemId\":\"a\"}]";
+            if (alias == "slots-null") slots += ",\"Slots\":null";
+            if (alias == "slots-empty") slots += ",\"Slots\":[]";
+            string record = "\"saveableId\":\"" + owner + "\",\"state\":{" + slots + "}";
+            if (alias == "owner") record += ",\"SaveableId\":\"unrelated\"";
+            if (alias == "state") record += ",\"State\":{\"slots\":[]}";
+            string containers = "\"containers\": [{" + record + "}]";
+            if (alias == "containers-null") containers += ",\"Containers\":null";
+            if (alias == "containers-empty") containers += ",\"Containers\":[]";
+            return codec.Encode(new SaveGameData()).Replace("\"containers\": []", containers);
+        }
+        [TestCase(ContainerSaveSession.PlayerInventoryId, "containers-null")]
+        [TestCase(ContainerSaveSession.PlayerHotbarId, "containers-null")]
+        [TestCase(ContainerSaveSession.PlayerInventoryId, "containers-empty")]
+        [TestCase(ContainerSaveSession.PlayerHotbarId, "containers-empty")]
+        [TestCase(ContainerSaveSession.PlayerInventoryId, "owner")]
+        [TestCase(ContainerSaveSession.PlayerHotbarId, "owner")]
+        [TestCase(ContainerSaveSession.PlayerInventoryId, "state")]
+        [TestCase(ContainerSaveSession.PlayerHotbarId, "state")]
+        [TestCase(ContainerSaveSession.PlayerInventoryId, "slots-null")]
+        [TestCase(ContainerSaveSession.PlayerHotbarId, "slots-null")]
+        [TestCase(ContainerSaveSession.PlayerInventoryId, "slots-empty")]
+        [TestCase(ContainerSaveSession.PlayerHotbarId, "slots-empty")]
+        public void AliasesCannotErasePendingCarriedContents(string owner, string alias)
+        {
+            string json = AliasedPendingWire(owner, alias);
+            Assert.Throws<SaveCandidateException>(() => codec.Decode(json));
+        }
+        [Test] public void AliasedPendingPrimaryUsesCompleteBackupWithoutChangingItsBytes()
+        {
+            string directory = Path.Combine(Path.GetTempPath(), "solitude-alias-recovery-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory); string path = Path.Combine(directory, "save");
+            try
+            {
+                var saved = new SaveGameData { worldSeed = 37, startingLoadoutInitialized = true };
+                saved.containers.Add(new ContainerSaveRecord { saveableId = ContainerSaveSession.PlayerHotbarId,
+                    state = new ContainerSaveData { slots = new System.Collections.Generic.List<ContainerSlotSaveData> {
+                        new ContainerSlotSaveData { index = 0, itemId = "a", quantity = 1 } } } });
+                string valid = codec.Encode(saved), invalid = AliasedPendingWire(ContainerSaveSession.PlayerHotbarId, "containers-null");
+                File.WriteAllText(path, invalid); File.WriteAllText(path + ".bak", valid);
+                var store = new SaveRecoveryStore(path, new PhysicalSaveFiles(), codec); var loaded = store.Load(0);
+                Assert.AreEqual(SaveLoadStatus.RecoveredBackup, loaded.Status);
+                Assert.IsTrue(loaded.Data.startingLoadoutInitialized); Assert.AreEqual(37, loaded.Data.worldSeed);
+                Assert.AreEqual(1, loaded.Data.containers.Single().state.slots.Single().quantity);
+                store.CompleteRecovery();
+                Assert.AreEqual(valid, File.ReadAllText(path)); Assert.AreEqual(valid, File.ReadAllText(path + ".bak"));
+                Assert.AreEqual(invalid, File.ReadAllText(Directory.GetFiles(directory, "save.corrupt-*").Single()));
+            }
+            finally { Directory.Delete(directory, true); }
         }
         [Test] public void RealFilesRecoverBackupWithoutOverwritingItWithCorruption()
         {
