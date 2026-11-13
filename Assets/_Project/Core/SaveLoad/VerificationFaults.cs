@@ -6,6 +6,9 @@ namespace SOLITUDE.SaveLoad
     {
 #if SOLITUDE_VERIFICATION
         private static bool writeArmed;
+        private static bool failRepairWrite;
+        public static void ArmRepairWrite(bool failOnce = false) { writeArmed = true; failRepairWrite = failOnce; }
+        public static void RepairBeforeCommit() => Hit("repair-before-commit");
         // Write scenarios target the smoke's explicit write, after normal startup saves.
         public static void ArmWrite() => writeArmed = true;
 #endif
@@ -13,6 +16,9 @@ namespace SOLITUDE.SaveLoad
         {
 #if SOLITUDE_VERIFICATION
             var args=Environment.GetCommandLineArgs();
+            if (failRepairWrite && checkpoint == "before-temp")
+            { failRepairWrite = false; throw new IOException("Injected mechanical repair write failure."); }
+            if (!writeArmed && Array.IndexOf(args, "-verifyMechanicalRepair") >= 0 && !checkpoint.StartsWith("repair-", StringComparison.Ordinal)) return;
             if (!writeArmed && (Array.IndexOf(args,"-faultWrite") >= 0 || Array.IndexOf(args,"-faultStartingLoadout") >= 0)
                 && !checkpoint.StartsWith("loadout-", StringComparison.Ordinal)) return;
             int i=Array.IndexOf(args,"-solitudeCrashAt");

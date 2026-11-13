@@ -4,6 +4,7 @@ import argparse, glob, json, os, pathlib, shutil, subprocess, sys, time, xml.etr
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser();p.add_argument('--workspace',type=pathlib.Path,default=pathlib.Path('/private/tmp/solitude-verification-project'));p.add_argument('--output',type=pathlib.Path,default=ROOT/'Logs'/'Phase5');p.add_argument('--unity',default=str(pathlib.Path.home()/'.unity/bin/unity'));p.add_argument('--skip-build',action='store_true',help='Rerun player scenarios against existing outputs; not a complete gate')
 p.add_argument('--starting-loadout-only',action='store_true',help='Focused starting-equipment process scenarios against an explicitly rebuilt verification player; requires --skip-build')
+p.add_argument('--mechanical-repair-only',action='store_true',help='Focused repair process scenarios; requires current repair verification build and --skip-build')
 a=p.parse_args();workspace=a.workspace.resolve();output=a.output.resolve();output.mkdir(parents=True,exist_ok=True)
 if workspace==ROOT or ROOT in workspace.parents or 'solitude-' not in workspace.name or str(workspace.parent) not in ('/private/tmp','/tmp'):raise SystemExit('Use a dedicated solitude-* workspace under /tmp.')
 env=os.environ.copy();env['SOLITUDE_VALIDATION_OUTPUT']=str(output/'validation');results=[]
@@ -76,7 +77,54 @@ def starting_loadout_scenarios():
  partial=json.loads(json.dumps(complete));partial['startingLoadoutInitialized']=False;directory=fixture('loadout-partial',partial)
  player(directory,['-expectBlocked'],'loadout-partial')
 
+def mechanical_repair_scenarios():
+ def fresh(name, source=None):
+  directory=output/('step4-mechanical-'+name)
+  if directory.exists():raise RuntimeError('Refusing to replace repair evidence: '+str(directory))
+  directory.mkdir()
+  if source:
+   for path in source.glob('solitude-save.json*'):
+    if path.suffix != '.tmp':shutil.copy2(path,directory/path.name)
+  return directory
+ def flags(*extra):return ['-verifyMechanicalRepair',*extra]
+ def data(directory):return json.loads((directory/'solitude-save.json').read_text())
+ def pair(directory):
+  saved=data(directory)
+  repaired=any(r['id']=='verification.mechanical.auxiliary-socket' and r['installed'] and r['running'] for r in saved['ship']['repairs'])
+  count=sum(s['quantity'] for c in saved['containers'] if c['saveableId']=='player.inventory' for s in c['state']['slots'])
+  return repaired,count
+ seed=fresh('seed');player(seed,flags('-repairSeed'),'repair-seed')
+ if pair(seed)!=(False,2):raise RuntimeError('Seed repair/cost mismatch')
+ completed=fresh('commit',seed);player(completed,flags('-repairCommit'),'repair-commit')
+ if pair(completed)!=(True,1):raise RuntimeError('Completed repair/cost mismatch')
+ player(completed,flags('-repairExpectComplete'),'repair-reload')
+ failed=fresh('fail-once',seed);player(failed,flags('-repairCommit','-repairFailOnce'),'repair-fail-retry')
+ if pair(failed)!=(True,1):raise RuntimeError('Retry double charged or split repair')
+ for checkpoint in ['repair-before-commit','before-temp','after-temp','before-commit','after-commit']:
+  directory=fresh('write-'+checkpoint,seed)
+  player(directory,flags('-repairCommit','-solitudeCrashAt',checkpoint),'repair-write-'+checkpoint,True)
+  expected=(True,1) if checkpoint=='after-commit' else (False,2)
+  if pair(directory)!=expected:raise RuntimeError('Interrupted repair published mixed snapshot')
+  if data(directory)!=data(completed if expected[0] else seed):raise RuntimeError('Interrupted repair changed unrelated snapshot facts')
+  player(directory,flags(*(['-repairExpectComplete'] if expected[0] else [])),'repair-restart-'+checkpoint)
+ for checkpoint in ['after-receipt','after-temp','before-commit','after-commit']:
+  directory=fresh('recovery-'+checkpoint,completed)
+  primary=directory/'solitude-save.json';backup=directory/'solitude-save.json.bak'
+  backup.write_bytes(primary.read_bytes());original=backup.read_bytes();primary.write_text('{')
+  player(directory,['-solitudeCrashAt',checkpoint],'repair-recovery-'+checkpoint,True)
+  if backup.read_bytes()!=original:raise RuntimeError('Interrupted repair recovery changed backup bytes')
+  player(directory,flags('-repairExpectComplete'),'repair-recovery-restart-'+checkpoint)
+  if backup.read_bytes()!=original or pair(directory)!=(True,1):raise RuntimeError('Repair recovery lost coherent backup')
+ for name,flag in [('scene-return','-repairSceneReturn'),('successor','-repairSuccessor'),('new-run','-repairNewRun')]:
+  directory=fresh(name,completed);player(directory,flags('-repairExpectComplete',flag),'repair-'+name)
+ directory=fresh('duplicate',completed);saved=data(directory);saved['ship']['repairs'].append(saved['ship']['repairs'][0]);(directory/'solitude-save.json').write_text(json.dumps(saved));(directory/'solitude-save.json.bak').unlink(missing_ok=True)
+ player(directory,['-expectBlocked','-verifyMechanicalRepair'],'repair-duplicate-blocked')
+
 try:
+ if a.mechanical_repair_only:
+  if not a.skip_build:raise RuntimeError('Focused repair scenarios require --skip-build and an explicitly rebuilt repair verification player')
+  mechanical_repair_scenarios()
+  (output/'results.json').write_text(json.dumps(dict(status='Passed (focused mechanical repair process scenarios)',platform='macOS ARM64',results=results),indent=2));print('Focused repair scenarios passed',flush=True);sys.exit(0)
  if a.starting_loadout_only:
   if not a.skip_build:raise RuntimeError('Focused loadout scenarios require --skip-build and an explicitly rebuilt verification player')
   starting_loadout_scenarios()

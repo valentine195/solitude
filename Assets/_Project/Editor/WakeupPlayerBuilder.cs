@@ -9,10 +9,18 @@ namespace SOLITUDE.Editor
     public static class WakeupPlayerBuilder
     {
         public static void BuildVerification()=>Build(true);
-        public static void BuildShipping()=>Build(false);
+        public static void BuildShipping()
+        {
+            if (WakeupBuildManifest.IsRepairVerification) throw new BuildFailedException("Shipping cannot use repair verification scope.");
+            Build(false);
+        }
+        public static void BuildMechanicalRepairVerification()
+        {
+            using (WakeupBuildManifest.SelectRepairVerification()) Build(true);
+        }
         private static void Build(bool verification)
         {
-            PhaseFiveFixtureBuilder.RestoreBuildScope();
+            if (!WakeupBuildManifest.IsRepairVerification) PhaseFiveFixtureBuilder.RestoreBuildScope();
             var manifest=WakeupValidation.LoadManifest();WakeupValidation.ValidateForCI();
             var args=Environment.GetCommandLineArgs();int index=Array.IndexOf(args,"-buildOutput");
             if(index<0)throw new InvalidOperationException("Provide an explicit isolated build output.");string output=args[index+1];
