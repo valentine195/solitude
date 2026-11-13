@@ -13,7 +13,8 @@ namespace SOLITUDE.SaveLoad
         {
 #if SOLITUDE_VERIFICATION
             var args=Environment.GetCommandLineArgs();
-            if(Array.IndexOf(args,"-faultWrite")>=0&&!writeArmed)return;
+            if (!writeArmed && (Array.IndexOf(args,"-faultWrite") >= 0 || Array.IndexOf(args,"-faultStartingLoadout") >= 0)
+                && !checkpoint.StartsWith("loadout-", StringComparison.Ordinal)) return;
             int i=Array.IndexOf(args,"-solitudeCrashAt");
             if(i<0||i+1>=args.Length||args[i+1]!=checkpoint)return;
             int location=Array.IndexOf(args,"-solitudeSaveDirectory");

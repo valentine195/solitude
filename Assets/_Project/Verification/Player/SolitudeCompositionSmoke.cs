@@ -23,7 +23,7 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
     {
         if (UnityEngine.Application.isEditor || FindFirstObjectByType<SolitudeCompositionSmoke>() != null) return;
         var go = new GameObject("CompositionSmoke"); DontDestroyOnLoad(go); go.AddComponent<SolitudeCompositionSmoke>();
-        if (Flag("-verifySnapshotOnly") || Flag("-lifecycleWrite") || Flag("-lifecycleResume") || Flag("-lifecycleFallback"))
+        if (Flag("-verifyStartingLoadout") || Flag("-verifySnapshotOnly") || Flag("-lifecycleWrite") || Flag("-lifecycleResume") || Flag("-lifecycleFallback"))
             lifecyclePause = Field<PauseCoordinator>(FindFirstObjectByType<GameCompositionRoot>(), "pause").Acquire();
     }
     private static void Check(bool condition, string text) { if (!condition) throw new Exception(text); }
@@ -53,6 +53,20 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
             {
                 Check(FindFirstObjectByType<GameCompositionRoot>().State==RuntimeStartupState.Failed,"Bad save did not block startup");
                 Result("Blocked invalid save"); UnityEngine.Application.Quit(0); returnFromStart=true;
+            }
+            else if (Flag("-verifyStartingLoadout"))
+            {
+                var graph = FindFirstObjectByType<GameCompositionRoot>();
+                var session = Field<ContainerSaveSession>(graph, "session");
+                var bar = FindFirstObjectByType<SOLITUDE.Hotbar.Hotbar>();
+                var inventory = FindFirstObjectByType<PlayerInventory>();
+                string item = Field<GameRuntimeConfig>(graph, "config").startingLoadout.Hotbar[0].Item.ItemId;
+                int count = bar.Container.GetSlots().Concat(inventory.Container.GetSlots())
+                    .Where(slot => slot.Stack?.ItemId == item).Sum(slot => slot.Stack.Quantity);
+                Check(graph.State == RuntimeStartupState.Ready && session.StartingLoadoutInitialized, "Starting equipment is not ready/completed");
+                Check(count == (Flag("-expectNoStartingWrench") ? 0 : 1), "Starting equipment was duplicated or refreshed");
+                Check(bar.ActiveIndex == (Flag("-expectFreshStartingSelection") ? 0 : -1), "Starting equipment selection was replayed");
+                Result("Once-only starting loadout verified"); UnityEngine.Application.Quit(0); returnFromStart = true;
             }
             else if (Flag("-faultWrite"))
             {

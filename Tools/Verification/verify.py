@@ -3,6 +3,7 @@
 import argparse, glob, json, os, pathlib, shutil, subprocess, sys, time, xml.etree.ElementTree as ET
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser();p.add_argument('--workspace',type=pathlib.Path,default=pathlib.Path('/private/tmp/solitude-verification-project'));p.add_argument('--output',type=pathlib.Path,default=ROOT/'Logs'/'Phase5');p.add_argument('--unity',default=str(pathlib.Path.home()/'.unity/bin/unity'));p.add_argument('--skip-build',action='store_true',help='Rerun player scenarios against existing outputs; not a complete gate')
+p.add_argument('--starting-loadout-only',action='store_true',help='Focused starting-equipment process scenarios against an explicitly rebuilt verification player; requires --skip-build')
 a=p.parse_args();workspace=a.workspace.resolve();output=a.output.resolve();output.mkdir(parents=True,exist_ok=True)
 if workspace==ROOT or ROOT in workspace.parents or 'solitude-' not in workspace.name or str(workspace.parent) not in ('/private/tmp','/tmp'):raise SystemExit('Use a dedicated solitude-* workspace under /tmp.')
 env=os.environ.copy();env['SOLITUDE_VALIDATION_OUTPUT']=str(output/'validation');results=[]
@@ -36,7 +37,50 @@ def player(directory,flags,name,crash=False):
  else:
   if not result.exists() or not json.loads(result.read_text()).get('success'):raise RuntimeError(f'{name}: absent/failed scenario result')
 
+def starting_loadout_scenarios():
+ def read(directory): return json.loads((directory/'solitude-save.json').read_text())
+ def carried(data): return [c for c in data['containers'] if c['saveableId'] in ['player.inventory','player.hotbar']]
+ def count(data): return sum(slot['quantity'] for c in carried(data) for slot in c['state']['slots'] if slot['itemId']==item)
+ def fixture(name,data):
+  directory=output/name
+  if directory.exists(): raise RuntimeError('Refusing to replace focused scenario evidence: '+str(directory))
+  directory.mkdir();(directory/'solitude-save.json').write_text(json.dumps(data));return directory
+ fresh=output/'loadout-fresh'
+ if fresh.exists(): raise RuntimeError('Use a fresh output directory for loadout verification')
+ player(fresh,['-verifyStartingLoadout','-expectFreshStartingSelection'],'loadout-fresh')
+ complete=read(fresh);bar=next(c for c in carried(complete) if c['saveableId']=='player.hotbar')
+ item=bar['state']['slots'][0]['itemId']
+ if not complete['startingLoadoutInitialized'] or count(complete)!=1: raise RuntimeError('Fresh loadout was not durably complete once')
+ pending=json.loads(json.dumps(complete));pending['startingLoadoutInitialized']=False
+ for c in carried(pending):c['state']['slots']=[]
+ for checkpoint in ['loadout-before-grant','loadout-before-flush','before-temp','after-temp','before-commit','after-commit']:
+  name='loadout-'+checkpoint;directory=fixture(name,pending)
+  player(directory,['-verifyStartingLoadout','-faultStartingLoadout','-solitudeCrashAt',checkpoint],name,True)
+  saved=read(directory);committed=checkpoint=='after-commit'
+  if saved['startingLoadoutInitialized']!=committed or count(saved)!=(1 if committed else 0):raise RuntimeError('Interrupted loadout published partial or false completion')
+  player(directory,['-verifyStartingLoadout']+([] if committed else ['-expectFreshStartingSelection']),'restart-'+name)
+  if not read(directory)['startingLoadoutInitialized'] or count(read(directory))!=1:raise RuntimeError('Restart failed once-only grant')
+  player(directory,['-verifyStartingLoadout'],'second-restart-'+name)
+  if count(read(directory))!=1:raise RuntimeError('Second restart duplicated grant')
+ for name in ['lost','moved','legacy']:
+  data=json.loads(json.dumps(complete));saved_bar=next(c for c in carried(data) if c['saveableId']=='player.hotbar');slots=saved_bar['state']['slots'];saved_bar['state']['slots']=[]
+  if name=='moved':next(c for c in carried(data) if c['saveableId']=='player.inventory')['state']['slots']=slots
+  if name=='legacy':data['version']=3;data.pop('startingLoadoutInitialized')
+  directory=fixture('loadout-'+name,data)
+  player(directory,['-verifyStartingLoadout']+([] if name=='moved' else ['-expectNoStartingWrench']),'loadout-'+name)
+  if count(read(directory))!=(1 if name=='moved' else 0):raise RuntimeError('Completed equipment was refreshed')
+  if not read(directory)['startingLoadoutInitialized']:raise RuntimeError('Completed or legacy marker was lost')
+ directory=fixture('loadout-backup',complete);backup=(fresh/'solitude-save.json').read_bytes();(directory/'solitude-save.json.bak').write_bytes(backup);(directory/'solitude-save.json').write_text('{')
+ player(directory,['-verifyStartingLoadout'],'loadout-backup')
+ if (directory/'solitude-save.json.bak').read_bytes()!=backup:raise RuntimeError('Loadout recovery changed backup bytes')
+ partial=json.loads(json.dumps(complete));partial['startingLoadoutInitialized']=False;directory=fixture('loadout-partial',partial)
+ player(directory,['-expectBlocked'],'loadout-partial')
+
 try:
+ if a.starting_loadout_only:
+  if not a.skip_build:raise RuntimeError('Focused loadout scenarios require --skip-build and an explicitly rebuilt verification player')
+  starting_loadout_scenarios()
+  (output/'results.json').write_text(json.dumps(dict(status='Passed (focused starting-loadout process scenarios)',platform='macOS ARM64',results=results),indent=2));print('Focused starting-loadout scenarios passed',flush=True);sys.exit(0)
  if not a.skip_build:
   workspace.mkdir(parents=True,exist_ok=True)
   for folder in ['Assets','Packages','ProjectSettings']:run(['rsync','-a','--delete',str(ROOT/folder)+'/',str(workspace/folder)+'/'],'copy-'+folder,120)

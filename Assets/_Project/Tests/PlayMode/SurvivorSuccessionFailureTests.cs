@@ -198,9 +198,11 @@ namespace SOLITUDE.Tests
             Assert.AreEqual(3, Quantity(older.Container)); Assert.AreEqual(6, Quantity(newer.Container));
             Assert.AreEqual(SuccessionOutcome.StaleSurvivor, flow.RequestDeath(pending.Successor.Id));
             Assert.AreEqual(SuccessionOutcome.Failed, flow.Retry()); Assert.AreSame(receipt, flow.Receipt);
+            Assert.IsTrue(Field<ContainerSaveSession>(Root, "session").StartingLoadoutInitialized);
             Assert.AreSame(pending, flow.Pending); Assert.AreEqual(1, ports.Committed);
             ports.RejectActivation = false;
             Assert.AreEqual(SuccessionOutcome.Completed, flow.Retry()); Assert.AreSame(pending.Successor, flow.Current);
+            Assert.IsTrue(Field<ContainerSaveSession>(Root, "session").StartingLoadoutInitialized); Assert.AreEqual(0, Quantity(Hotbar), "Successor retry must not refresh starting equipment.");
             Grant(Inventory, 1); oldBegin(sourceIntent); oldDrop(targetIntent);
             Assert.AreEqual(1, Quantity(Inventory)); Assert.AreEqual(3, Quantity(older.Container)); Assert.AreEqual(6, Quantity(newer.Container));
             Assert.IsFalse(Gestures.Interaction.IsHolding); Assert.IsFalse(One<InputSystemUIInputModule>().enabled);
