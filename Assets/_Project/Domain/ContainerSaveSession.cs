@@ -5,6 +5,8 @@ using SOLITUDE.Containers;
 using SOLITUDE.Items;
 using SOLITUDE.Survivors;
 using SOLITUDE.Expeditions;
+using SOLITUDE.Restoration;
+using SOLITUDE.GameplayTags;
 namespace SOLITUDE.SaveLoad
 {
     public sealed class ContainerSaveSession
@@ -42,6 +44,87 @@ namespace SOLITUDE.SaveLoad
             collected.UnionWith(data.collectedPickupIds);
             Commands = new ContainerCommandService(this.catalog);
             Commands.Completed += _ => IsDirty = true;
+        }
+        private readonly Dictionary<string, MechanicalRepairBinding> repairBindings = new Dictionary<string, MechanicalRepairBinding>(StringComparer.Ordinal);
+        public MechanicalRepairBinding BindMechanicalRepair(MechanicalRepairRequirement requirement)
+        {
+            if (Commands.IsBusy || HasIntegrityFailure || requirement == null || !catalog.TryGet(requirement.PartItemId, out _)
+                || repairBindings.ContainsKey(requirement.TargetId)) throw new InvalidOperationException("Repair binding unavailable or duplicated.");
+            // Validate the authored key with the existing save contract before publishing ownership.
+            var ship = data.ship.Clone();
+            ship.repairs.RemoveAll(record => record.id == requirement.TargetId);
+            ship.repairs.Add(new RepairSaveRecord { id = requirement.TargetId }); ship.Validate();
+            var binding = new MechanicalRepairBinding(this, requirement); repairBindings.Add(requirement.TargetId, binding); return binding;
+        }
+        public sealed class MechanicalRepairBinding : IDisposable
+        {
+            private ContainerSaveSession session;
+            private readonly MechanicalRepairRequirement requirement;
+            public event Action Changed;
+            internal MechanicalRepairBinding(ContainerSaveSession session, MechanicalRepairRequirement requirement)
+            { this.session = session; this.requirement = requirement; }
+            public bool IsCompleted
+            {
+                get
+                {
+                    if (session == null) return false;
+                    foreach (var record in session.data.ship.repairs)
+                        if (record.id == requirement.TargetId) return record.installed && record.running && record.recoverySeconds == 0;
+                    return false;
+                }
+            }
+            public MechanicalRepairOutcome TryRepair(ContainerHandle inventory, ContainerHandle hotbar, Func<string, GameplayTagSet> tags)
+            {
+                var owner = session;
+                if (owner == null || owner.HasIntegrityFailure || owner.Commands.IsBusy || tags == null) return MechanicalRepairOutcome.Unavailable;
+                var outcome = MechanicalRepairOutcome.Unavailable;
+                SaveGameData candidate = null;
+                var result = owner.Commands.RemoveForMechanicalRepair(() =>
+                {
+                    if (!owner.bindings.TryGetValue(PlayerInventoryId, out var carried) || !carried.Container.Handle.Equals(inventory)
+                        || !owner.bindings.TryGetValue(PlayerHotbarId, out var bar) || !bar.Container.Handle.Equals(hotbar)
+                        || !ReferenceEquals(owner.Commands.Read(inventory), carried.Container)
+                        || !ReferenceEquals(owner.Commands.Read(hotbar), bar.Container)) return null;
+                    if (IsCompleted) { outcome = MechanicalRepairOutcome.AlreadyRepaired; return null; }
+                    try
+                    {
+                        bool compatible = false;
+                        foreach (var container in new[] { carried.Container, bar.Container })
+                            foreach (var slot in container.GetSlots())
+                            {
+                                if (slot.IsEmpty) continue;
+                                var capabilities = tags(slot.Stack.ItemId);
+                                if (capabilities == null) return null;
+                                if (requirement.ToolQuery.Matches(capabilities)) compatible = true;
+                            }
+                        if (!compatible) { outcome = MechanicalRepairOutcome.MissingTool; return null; }
+                        SlotAddress? cost = null;
+                        foreach (var slot in carried.Container.GetSlots())
+                            if (!slot.IsEmpty && slot.Stack.ItemId == requirement.PartItemId) { cost = slot.Address; break; }
+                        if (!cost.HasValue) { outcome = MechanicalRepairOutcome.MissingPart; return null; }
+                        candidate = Clone(owner.data);
+                        candidate.ship.repairs.RemoveAll(record => record.id == requirement.TargetId);
+                        candidate.ship.repairs.Add(new RepairSaveRecord { id = requirement.TargetId, installed = true, running = true });
+                        candidate.ValidateLifecycle();
+                        return cost;
+                    }
+                    catch (Exception) { return null; } // Unavailable catalog/invalid candidate: nothing has mutated.
+                }, () =>
+                {
+                    // Only trusted non-failing writes occur after inventory mutation.
+                    owner.data = candidate; owner.IsDirty = true; owner.RequiresImmediateSave = true;
+                    if (Changed != null)
+                        foreach (Action observer in Changed.GetInvocationList())
+                            try { observer(); } catch { /* Observers cannot invalidate a committed outcome. */ }
+                });
+                return result.Status == CommandStatus.Applied ? MechanicalRepairOutcome.Committed : outcome;
+            }
+            public void Dispose()
+            {
+                if (session == null) return;
+                if (session.Commands.IsBusy) throw new InvalidOperationException("Cannot release repair during publication.");
+                session.repairBindings.Remove(requirement.TargetId); session = null; Changed = null;
+            }
         }
         public bool StartingLoadoutInitialized => data.startingLoadoutInitialized;
         public CommandResult InitializeStartingLoadout(ContainerHandle inventory, ContainerHandle hotbar,
