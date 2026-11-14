@@ -38,6 +38,72 @@ namespace SOLITUDE.Tests
             InputSystem.settings.backgroundBehavior = background; InputSystem.settings.editorInputBehaviorInPlayMode = editor;
             yield return WeaponSystemTestFixtures.Unload();
         }
+        [UnityTest] public IEnumerator UnrepairedTargetResumesAfterComponentActivation()
+        { yield return ActivationCycle(false, false); }
+        [UnityTest] public IEnumerator UnrepairedTargetResumesAfterGameObjectActivation()
+        { yield return ActivationCycle(true, false); }
+        [UnityTest] public IEnumerator LoadedCompletedTargetResumesAfterComponentActivation()
+        { yield return ActivationCycle(false, true); }
+        [UnityTest] public IEnumerator LoadedCompletedTargetResumesAfterGameObjectActivation()
+        { yield return ActivationCycle(true, true); }
+        private IEnumerator ActivationCycle(bool deactivateObject, bool completed)
+        {
+            var database = Resources.Load<ItemDatabase>("Database");
+            var capabilities = database.BuildCapabilityCatalog();
+            var battery = AssetDatabase.LoadAssetAtPath<ItemDefinition>("Assets/_Project/Features/Items/Definitions/Battery/Battery.asset");
+            definition = ScriptableObject.CreateInstance<MechanicalRepairDefinition>();
+            definition.Configure(database.TagRegistry, AssetDatabase.LoadAssetAtPath<GameplayTagDefinition>("Assets/_Project/Systems/GameplayTags/Assets/ToolMechanical.asset"), battery);
+            const string targetId = "verification.activation.socket";
+            var requirement = definition.Compile(targetId, capabilities.Registry);
+            var seed = new ContainerSaveSession(new SaveGameData { startingLoadoutInitialized = true }, database.BuildRuntimeCatalog());
+            using (var inventory = seed.Register(ContainerSaveSession.PlayerInventoryId, 5))
+            using (var hotbar = seed.Register(ContainerSaveSession.PlayerHotbarId, 4))
+            {
+                seed.Commands.Grant(inventory.Container.Handle, battery.ItemId, 2);
+                seed.Commands.Grant(hotbar.Container.Handle, WeaponSystemTestFixtures.Wrench.ItemId, 1);
+                if (completed)
+                    using (var binding = seed.BindMechanicalRepair(requirement))
+                        Assert.AreEqual(SOLITUDE.Restoration.MechanicalRepairOutcome.Committed,
+                            binding.TryRepair(inventory.Container.Handle, hotbar.Container.Handle, id => capabilities.Resolve(id)?.Tags));
+            }
+            // Reconstruct the session from its saved facts before binding presentation.
+            var session = new ContainerSaveSession(seed.Capture(), database.BuildRuntimeCatalog());
+            using (var inventory = session.Register(ContainerSaveSession.PlayerInventoryId, 5))
+            using (var hotbar = session.Register(ContainerSaveSession.PlayerHotbarId, 4))
+            {
+                var actor = WeaponSystemTestFixtures.One<PlayerInteractor>();
+                host = new GameObject("Activation repair");
+                var system = host.AddComponent<RestorableSystem>();
+                var junction = host.AddComponent<RestorationJunction>();
+                var identity = host.AddComponent<SaveableId>(); identity.AssignRuntimeIdentity(targetId);
+                door = new GameObject("Activation gated door");
+                var gate = door.AddComponent<RestorationDoorGate>(); gate.Configure(system);
+                var composition = host.AddComponent<MechanicalRepairComposition>();
+                composition.Configure(identity, definition, junction, system, gate);
+                composition.Initialize(new SceneFeatureContext(session.Commands, inventory.Container, database.BuildPresentationCatalog(),
+                    null, null, null, null, actor, null, hotbar.Container, lifecycleSession: session, capabilities: capabilities));
+                Assert.AreEqual(completed, system.IsRestored); Assert.AreEqual(completed, gate.AllowsAccess);
+                int quantity = completed ? 1 : 2;
+                if (deactivateObject) host.SetActive(false); else composition.enabled = false;
+                yield return null;
+                Assert.IsFalse(junction.Interact(actor).IsSuccess);
+                Assert.AreEqual(quantity, inventory.Container.GetSlot(0).Stack.Quantity);
+                // Disabling presentation must not surrender scene-owned target identity.
+                Assert.Throws<System.InvalidOperationException>(() => session.BindMechanicalRepair(requirement));
+                if (deactivateObject) host.SetActive(true); else composition.enabled = true;
+                yield return null;
+                Assert.AreEqual(completed, system.IsRestored); Assert.AreEqual(completed, gate.AllowsAccess);
+                if (completed) StringAssert.Contains("already restored", junction.Interact(actor).Message);
+                else Assert.IsTrue(junction.Interact(actor).IsSuccess);
+                Assert.IsTrue(system.IsRestored); Assert.IsTrue(gate.AllowsAccess);
+                Assert.IsFalse(door.GetComponent<SOLITUDE.World.SolitudeStart.SolitudeSlidingDoor>().IsOpen);
+                Assert.AreEqual(1, inventory.Container.GetSlot(0).Stack.Quantity);
+                Assert.AreEqual(1, hotbar.Container.GetSlot(0).Stack.Quantity);
+                composition.Release(); Assert.IsFalse(gate.AllowsAccess);
+                Assert.IsFalse(junction.Interact(actor).IsSuccess);
+                using (session.BindMechanicalRepair(requirement)) { }
+            }
+        }
         [UnityTest] public IEnumerator ContextualInputUsesLiveCarriedRequirementsAndNeverRequestsPrimary()
         {
             var database = Resources.Load<ItemDatabase>("Database"); var capabilities = database.BuildCapabilityCatalog();

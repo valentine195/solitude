@@ -66,7 +66,8 @@ namespace SOLITUDE.World.Restoration
             context = null;
             if (system != null) system.State.ReconcileCompletedRepair(false);
         }
-        private void OnDisable() => Release();
+        // SceneBindings owns the binding across component and GameObject activation changes.
+        private void OnEnable() => Reconcile();
         private void OnDestroy() => Release();
     }
 }
