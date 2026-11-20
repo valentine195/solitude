@@ -11,7 +11,7 @@ namespace SOLITUDE.World.CrewBackgrounds
         [SerializeField] private CrewBackgroundsFault defaultFault;
         [SerializeField] private Collider2D returnDoor;
         [SerializeField] private CrewBackgroundsRoomFeedback roomFeedback;
-        [SerializeField] private GameObject linkagePickup;
+        [SerializeField] private GameObject[] linkageSupplies = Array.Empty<GameObject>();
         [SerializeField] private GameObject jumperPickup;
         [SerializeField] private CrewBackgroundsServicePanel servicePanel;
         [SerializeField] private CrewBackgroundsRepairControl[] controls = Array.Empty<CrewBackgroundsRepairControl>();
@@ -30,11 +30,15 @@ namespace SOLITUDE.World.CrewBackgrounds
         {
             if (returnDoor == null || returnDoor.gameObject.scene != gameObject.scene
                 || roomFeedback == null || roomFeedback.gameObject.scene != gameObject.scene
-                || linkagePickup == null || linkagePickup.scene != gameObject.scene
+                || linkageSupplies == null || linkageSupplies.Length == 0
                 || jumperPickup == null || jumperPickup.scene != gameObject.scene
                 || servicePanel == null || servicePanel.gameObject.scene != gameObject.scene
                 || controls == null || controls.Length == 0)
                 throw new InvalidOperationException("The crew playtest requires local repair controls, room feedback, and a return door.");
+
+            foreach (var supply in linkageSupplies)
+                if (supply == null || supply.scene != gameObject.scene)
+                    throw new InvalidOperationException("The linkage setup requires local supplies.");
 
             roomFeedback.ValidateAuthoring();
             servicePanel.ValidateAuthoring();
@@ -61,7 +65,10 @@ namespace SOLITUDE.World.CrewBackgrounds
             ActiveSetup = setup;
             servicePanel.Bind(context.Commands);
             Encounter = servicePanel.NewEncounter(setup.Fault);
-            if (setup.Fault == CrewBackgroundsFault.LossOfPower) linkagePickup.SetActive(false);
+            if (setup.Fault == CrewBackgroundsFault.LossOfPower)
+            {
+                foreach (var supply in linkageSupplies) supply.SetActive(false);
+            }
             else jumperPickup.SetActive(false);
             foreach (var control in controls) control.Bind(context, setup, Encounter);
             lastAirflow = lastRecovered = false;

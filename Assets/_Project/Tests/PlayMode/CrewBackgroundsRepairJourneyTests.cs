@@ -120,7 +120,7 @@ namespace SOLITUDE.Tests
             {
                 yield return Launch(background, CrewBackgroundsFault.BrokenIntakeLinkage);
                 var scrubber = Control("AtmosphericScrubber");
-                var pickup = Object.FindAnyObjectByType<WorldPickup>();
+                var pickup = Pickup("Intake linkage");
                 var part = pickup.Definition.Item;
 
                 yield return Approach(scrubber);
@@ -155,7 +155,7 @@ namespace SOLITUDE.Tests
         public IEnumerator CancelAndMaterialLossPreserveTheFaultAndItemAccounting()
         {
             yield return Launch(CrewBackground.Technician, CrewBackgroundsFault.BrokenIntakeLinkage);
-            var part = Object.FindAnyObjectByType<WorldPickup>().Definition.Item;
+            var part = Pickup("Intake linkage").Definition.Item;
             var scrubber = Control("AtmosphericScrubber");
 
             Assert.AreEqual(CommandStatus.Applied, Commands.Grant(Inventory.Handle, DifferentPart.ItemId, 1).Status);
@@ -191,7 +191,7 @@ namespace SOLITUDE.Tests
         public IEnumerator SameControlRepairsASecondTargetUsingItsAuthoredPart()
         {
             yield return Launch(CrewBackground.Engineer, CrewBackgroundsFault.BrokenIntakeLinkage);
-            var actualPart = Object.FindAnyObjectByType<WorldPickup>().Definition.Item;
+            var actualPart = Pickup("Intake linkage").Definition.Item;
             Assert.AreEqual(CommandStatus.Applied, Commands.Grant(Inventory.Handle, actualPart.ItemId, 1).Status);
             Assert.AreEqual(CommandStatus.Applied, Commands.Grant(Inventory.Handle, DifferentPart.ItemId, 1).Status);
             var target = new CrewBackgroundsEncounterState(CrewBackgroundsFault.BrokenIntakeLinkage);
@@ -356,6 +356,114 @@ namespace SOLITUDE.Tests
             Assert.IsFalse(Encounter.Airflow);
             Assert.IsTrue(RoomFeedback.CorridorLightEnabled);
         }
+
+        [UnityTest]
+        public IEnumerator TechnicianRigsWithSalvageAndLeavesTheReplacementPickupUntouched()
+        {
+            yield return Launch(CrewBackground.Technician, CrewBackgroundsFault.BrokenIntakeLinkage);
+            var standard = Pickup("Intake linkage");
+            var salvage = Pickup("Linkage salvage");
+            var item = salvage.Definition.Item;
+            var scrubber = Control("AtmosphericScrubber");
+            var bracket = scrubber.transform.Find("Rig Bracket");
+
+            var bindings = Field<CrewBackgroundsRepairControl.ActionBinding[]>(scrubber, "actions");
+            var standardAction = bindings.Single(entry => entry.Material == standard.Definition.Item);
+            var rigAction = bindings.Single(entry => entry.Material == item);
+            Assert.AreEqual(standardAction.Operation, rigAction.Operation);
+            Assert.AreEqual(bracket, rigAction.AccessPoint);
+            Assert.AreEqual(CrewProficiencyRank.Specialist, rigAction.MinimumRank);
+
+            yield return Place((Vector2)bracket.position + Vector2.down * .4f);
+            Assert.AreEqual("Inspect rig bracket", scrubber.GetPrompt());
+            Press(Key.E);
+            Assert.That(Message, Does.Contain("Rig with 1 linkage salvage"));
+            Press(Key.E);
+            Assert.AreEqual("Requires 1 Linkage salvage", Message);
+            Assert.IsFalse(Encounter.Airflow);
+
+            yield return Approach(salvage);
+            Press(Key.E);
+            Assert.AreEqual(1, Quantity(item));
+            Assert.IsFalse(salvage.gameObject.activeSelf);
+            yield return Place((Vector2)bracket.position + Vector2.down * .4f);
+            Press(Key.E);
+            Assert.IsTrue(scrubber.IsWorking);
+            Press(Key.Escape);
+            Assert.IsFalse(scrubber.IsWorking);
+            Assert.AreEqual(1, Quantity(item));
+            Assert.IsFalse(Encounter.Airflow);
+            Press(Key.E);
+            yield return Until(() => Encounter.Airflow, "Technician completes the rig");
+
+            Assert.AreEqual(0, Quantity(item));
+            Assert.IsTrue(standard.gameObject.activeSelf);
+            Assert.AreEqual(0, Quantity(standard.Definition.Item));
+            Press(Key.E);
+            Assert.AreEqual("Repair already complete", Message);
+            yield return CheckRecoveryAndTraverse(checkPause: false);
+        }
+
+        [UnityTest]
+        public IEnumerator EngineerWithSalvageCanInspectButCannotRig()
+        {
+            yield return Launch(CrewBackground.Engineer, CrewBackgroundsFault.BrokenIntakeLinkage);
+            var salvage = Pickup("Linkage salvage");
+            var item = salvage.Definition.Item;
+            yield return Approach(salvage);
+            Press(Key.E);
+            Assert.AreEqual(1, Quantity(item));
+
+            var scrubber = Control("AtmosphericScrubber");
+            var bracket = scrubber.transform.Find("Rig Bracket");
+            yield return Place((Vector2)bracket.position + Vector2.down * .4f);
+            Press(Key.E);
+            Assert.That(Message, Does.Contain("Requires Specialist Field Repair"));
+            Press(Key.E);
+            Assert.AreEqual("Requires Specialist Field Repair", Message);
+            Assert.IsFalse(scrubber.IsWorking);
+            Assert.IsFalse(Encounter.Airflow);
+            Assert.AreEqual(1, Quantity(item));
+        }
+
+        [UnityTest]
+        public IEnumerator TechnicianWithBothMaterialsCanSwitchToTheStandardRoute()
+        {
+            yield return Launch(CrewBackground.Technician, CrewBackgroundsFault.BrokenIntakeLinkage);
+            var salvage = Pickup("Linkage salvage").Definition.Item;
+            var part = Pickup("Intake linkage").Definition.Item;
+            Assert.AreEqual(CommandStatus.Applied, Commands.Grant(Inventory.Handle, salvage.ItemId, 1).Status);
+            Assert.AreEqual(CommandStatus.Applied, Commands.Grant(Inventory.Handle, part.ItemId, 1).Status);
+
+            var scrubber = Control("AtmosphericScrubber");
+            var bracket = scrubber.transform.Find("Rig Bracket");
+            yield return Place((Vector2)bracket.position + Vector2.down * .4f);
+            Press(Key.E);
+            Press(Key.E);
+            Assert.IsTrue(scrubber.IsWorking);
+            yield return WalkUntil(Key.A, () => Body.position.x <= scrubber.transform.position.x + .35f,
+                "Walk from the rig bracket to the standard socket");
+            yield return Until(() => !scrubber.IsWorking, "Changing access point interrupts the rig");
+            Assert.AreEqual(1, Quantity(salvage));
+            Assert.AreEqual(1, Quantity(part));
+            Assert.IsFalse(Encounter.Airflow);
+
+            Assert.AreEqual("Inspect intake linkage", scrubber.GetPrompt());
+            Press(Key.E);
+            Assert.AreEqual("Fit 1 intake linkage", scrubber.GetPrompt());
+            Press(Key.E);
+            yield return Until(() => Encounter.Airflow, "Standard repair remains available");
+            Assert.AreEqual(0, Quantity(part));
+            Assert.AreEqual(1, Quantity(salvage));
+            yield return Place((Vector2)bracket.position + Vector2.down * .4f);
+            Press(Key.E);
+            Press(Key.E);
+            Assert.AreEqual("Repair already complete", Message);
+            Assert.AreEqual(1, Quantity(salvage));
+        }
+
+        private static WorldPickup Pickup(string name) =>
+            Object.FindObjectsByType<WorldPickup>().Single(pickup => pickup.Definition.Item.DisplayName == name);
 
         private IEnumerator CollectJumper(WorldPickup pickup)
         {

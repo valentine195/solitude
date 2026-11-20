@@ -82,6 +82,30 @@ namespace SOLITUDE.Tests
             Assert.AreEqual(CommandStatus.Unavailable, state.TryMoveJumper(CrewRepairOperation.ReclaimJumper, commands, inventory));
         }
 
+        [TestCase("part", "salvage")]
+        [TestCase("salvage", "part")]
+        public void LinkageAlternativesUseTheConfiguredMaterialAndShareOneCompletion(string chosen, string other)
+        {
+            var catalog = new ItemCatalog(new[]
+            {
+                new ItemSpec("part", true, 5),
+                new ItemSpec("salvage", true, 5)
+            });
+            var commands = new ContainerCommandService(catalog);
+            var inventory = commands.Register(ContainerSaveSession.PlayerInventoryId, 2);
+            commands.Grant(inventory.Handle, chosen, 2);
+            commands.Grant(inventory.Handle, other, 1);
+            var state = new CrewBackgroundsEncounterState(CrewBackgroundsFault.BrokenIntakeLinkage);
+
+            Assert.AreEqual(RestorationOutcome.Restored,
+                state.TryRepair(CrewRepairOperation.FitIntakeLinkage, commands, inventory, chosen));
+            Assert.AreEqual(RestorationOutcome.AlreadyRestored,
+                state.TryRepair(CrewRepairOperation.FitIntakeLinkage, commands, inventory, other));
+            Assert.IsTrue(state.Airflow);
+            Assert.AreEqual(1, inventory.GetSlot(0).Stack.Quantity);
+            Assert.AreEqual(1, inventory.GetSlot(1).Stack.Quantity);
+        }
+
         [Test]
         public void CorrectPartCommitsOnceAndObserversSeeRepairedLinkage()
         {

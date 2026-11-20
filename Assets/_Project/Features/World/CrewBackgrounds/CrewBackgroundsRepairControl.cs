@@ -18,6 +18,8 @@ namespace SOLITUDE.World.CrewBackgrounds
             public CrewBackgroundsFault Fault;
             public CrewRepairOperation Operation;
             public ItemDefinition Material;
+            public Transform AccessPoint;
+            public string InspectionLabel;
             public CrewProficiency Skill;
             public CrewProficiencyRank MinimumRank;
             public string Clue;
@@ -36,8 +38,31 @@ namespace SOLITUDE.World.CrewBackgrounds
         private ActionBinding reclaim;
         private ActionBinding inspected;
 
-        private ActionBinding Action => reclaim != null && target.JumperInstalled && target.NormalFeedAvailable ? reclaim : primary;
         private Work work;
+
+        private ActionBinding Action
+        {
+            get
+            {
+                if (target == null) return null;
+                if (reclaim != null && target.JumperInstalled && target.NormalFeedAvailable) return reclaim;
+
+                var player = context.Interactor;
+                if (player == null) return primary;
+                var position = player.transform.position;
+                var selected = primary;
+                float nearest = primary != null ? (position - transform.position).sqrMagnitude : float.PositiveInfinity;
+                foreach (var candidate in actions)
+                {
+                    if (candidate.Fault != target.Fault || candidate.AccessPoint == null) continue;
+                    float distance = (position - candidate.AccessPoint.position).sqrMagnitude;
+                    if (distance >= nearest) continue;
+                    selected = candidate;
+                    nearest = distance;
+                }
+                return selected;
+            }
+        }
 
         public bool IsWorking => work != null;
 
@@ -52,10 +77,13 @@ namespace SOLITUDE.World.CrewBackgrounds
             if (indicator == null || !float.IsFinite(workSeconds) || workSeconds <= 0 || actions == null || actions.Length == 0)
                 throw new InvalidOperationException("Missing repair control authoring at " + name);
 
-            var choices = new System.Collections.Generic.HashSet<(CrewBackgroundsFault, bool)>();
+            var choices = new System.Collections.Generic.HashSet<(CrewBackgroundsFault, Transform, bool)>();
             foreach (var binding in actions)
             {
-                if (binding == null || !choices.Add((binding.Fault, binding.Operation == CrewRepairOperation.ReclaimJumper)) || string.IsNullOrWhiteSpace(binding.Clue)
+                if (binding == null || !choices.Add((binding.Fault, binding.AccessPoint, binding.Operation == CrewRepairOperation.ReclaimJumper))
+                    || string.IsNullOrWhiteSpace(binding.Clue)
+                    || binding.AccessPoint != null && (!binding.AccessPoint.IsChildOf(transform)
+                        || binding.Operation == CrewRepairOperation.ReclaimJumper || string.IsNullOrWhiteSpace(binding.InspectionLabel))
                     || binding.Operation == CrewRepairOperation.FitIntakeLinkage
                         && string.IsNullOrWhiteSpace(binding.Material?.ItemId)
                     || binding.Operation != CrewRepairOperation.Inspect
@@ -72,7 +100,7 @@ namespace SOLITUDE.World.CrewBackgrounds
             setup = profile;
             target = equipment ?? throw new ArgumentNullException(nameof(equipment));
             primary = Array.Find(actions, binding =>
-                binding.Fault == equipment.Fault && binding.Operation != CrewRepairOperation.ReclaimJumper);
+                binding.Fault == equipment.Fault && binding.AccessPoint == null && binding.Operation != CrewRepairOperation.ReclaimJumper);
             reclaim = Array.Find(actions, binding =>
                 binding.Fault == equipment.Fault && binding.Operation == CrewRepairOperation.ReclaimJumper);
         }
@@ -82,7 +110,7 @@ namespace SOLITUDE.World.CrewBackgrounds
             if (IsWorking) return "Working…";
             var action = Action;
             if (action == null || inspected != action || action.Operation == CrewRepairOperation.Inspect)
-                return "Inspect " + name;
+                return string.IsNullOrWhiteSpace(action?.InspectionLabel) ? "Inspect " + name : action.InspectionLabel;
             if (action.Operation == CrewRepairOperation.ResetBreaker && target.NormalFeedAvailable) return "Normal feed restored";
             if (action.Operation == CrewRepairOperation.FitIntakeLinkage && target.IntakeLinkageIntact) return "Airflow running";
             if (action.Operation == CrewRepairOperation.InstallJumper && target.JumperInstalled) return "Jumper installed";
@@ -123,7 +151,10 @@ namespace SOLITUDE.World.CrewBackgrounds
         private InteractionResult Eligibility(ActionBinding action)
         {
             if (setup.Rank(action.Skill) < action.MinimumRank)
-                return InteractionResult.Blocked("Requires " + action.MinimumRank + " " + action.Skill);
+            {
+                string skill = action.Skill == CrewProficiency.FieldRepair ? "Field Repair" : action.Skill.ToString();
+                return InteractionResult.Blocked("Requires " + action.MinimumRank + " " + skill);
+            }
 
             return IsJumperAction(action)
                 ? JumperResult(action, target.CheckJumper(action.Operation, context.Commands, context.Inventory))
@@ -194,6 +225,7 @@ namespace SOLITUDE.World.CrewBackgrounds
             private readonly CrewBackgroundsRepairControl control;
             private readonly PlayerInteractor player;
             private readonly ActionBinding action;
+            private SpriteRenderer workIndicator;
             private Color originalColor;
             private double elapsed;
 
@@ -206,13 +238,15 @@ namespace SOLITUDE.World.CrewBackgrounds
             }
 
             public SOLITUDE.Application.ItemActionRunner Runner { get; }
-            public bool IsValid => control != null && control.ActorAtControl(player);
+            public bool IsValid => control != null && control.ActorAtControl(player) && control.Action == action;
             public bool IsComplete { get; private set; }
             public double CommittedDuration => 0;
 
             public IItemActionExecution Start()
             {
-                originalColor = control.indicator.color;
+                workIndicator = action.AccessPoint != null ? action.AccessPoint.GetComponent<SpriteRenderer>() : null;
+                if (workIndicator == null) workIndicator = control.indicator;
+                originalColor = workIndicator.color;
                 control.work = this;
                 return this;
             }
@@ -220,7 +254,7 @@ namespace SOLITUDE.World.CrewBackgrounds
             public void Advance(double gameplaySeconds)
             {
                 elapsed += gameplaySeconds;
-                control.indicator.color = Color.Lerp(originalColor, new Color(1f, .72f, .32f),
+                workIndicator.color = Color.Lerp(originalColor, new Color(1f, .72f, .32f),
                     (float)(elapsed / control.workSeconds));
                 if (elapsed < control.workSeconds) return;
 
@@ -233,7 +267,7 @@ namespace SOLITUDE.World.CrewBackgrounds
             {
                 if (control == null || control.work != this) return;
                 control.work = null;
-                control.indicator.color = originalColor;
+                if (workIndicator != null) workIndicator.color = originalColor;
                 if (!IsComplete && control.context?.Policy?.Ready == true)
                     control.context.Feedback?.Handle(InteractionResult.Blocked("Repair interrupted"));
             }
