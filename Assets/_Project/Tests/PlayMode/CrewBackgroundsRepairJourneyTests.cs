@@ -225,6 +225,152 @@ namespace SOLITUDE.Tests
             finally { Object.Destroy(fixture); }
         }
 
+        [UnityTest]
+        public IEnumerator EngineerBypassOpensTheDoorInTheDarkAndFreshLaunchRestoresBaseline()
+        {
+            yield return Launch(CrewBackground.Engineer, CrewBackgroundsFault.LossOfPower);
+            var pickup = Object.FindAnyObjectByType<WorldPickup>();
+            var jumper = pickup.Definition.Item;
+            yield return CollectJumper(pickup);
+            var panel = Control("Service Panel");
+            yield return Approach(panel);
+            Press(Key.E);
+            Assert.That(Message, Does.Contain("Lights go out. Jumper stays in panel."));
+            Assert.IsFalse(Encounter.Airflow);
+            Assert.IsTrue(RoomFeedback.CorridorLightEnabled);
+            Assert.AreEqual(1, Quantity(jumper));
+            Assert.IsTrue(PanelSlot.IsEmpty);
+
+            Press(Key.E);
+            Assert.IsTrue(panel.IsWorking);
+            Assert.IsTrue(PanelSlot.IsEmpty);
+            yield return Until(() => Encounter.BypassActive, "Engineer installs the reusable jumper");
+            yield return null;
+            Assert.IsFalse(Encounter.NormalFeedAvailable);
+            Assert.IsFalse(RoomFeedback.CorridorLightEnabled);
+            Assert.AreEqual(0, Quantity(jumper));
+            Assert.AreEqual(jumper.ItemId, PanelSlot.Stack.ItemId);
+
+            yield return Place(new Vector2(21, 2));
+            yield return Approach(panel);
+            Press(Key.E);
+            Assert.That(Message, Is.EqualTo("Jumper already installed"));
+            Assert.IsTrue(Encounter.BypassActive);
+            Assert.AreEqual(0, Quantity(jumper));
+            yield return CheckRecoveryAndTraverse(checkPause: false);
+            Assert.IsFalse(RoomFeedback.CorridorLightEnabled);
+
+            yield return Launch(CrewBackground.Technician, CrewBackgroundsFault.LossOfPower);
+            Assert.IsTrue(PanelSlot.IsEmpty);
+            Assert.IsFalse(Encounter.Airflow);
+            Assert.IsTrue(RoomFeedback.CorridorLightEnabled);
+            Assert.IsTrue(Crew.ReturnDoorClosed);
+            Assert.AreEqual(0, Quantity(jumper));
+            var restoredPickup = Object.FindAnyObjectByType<WorldPickup>();
+            Assert.AreEqual(jumper.ItemId, restoredPickup.Definition.Item.ItemId);
+            yield return CollectJumper(restoredPickup);
+            yield return Approach(Control("Service Panel"));
+            Press(Key.E);
+            Press(Key.E);
+            Assert.That(Message, Is.EqualTo("Requires Specialist Electrical"));
+            Assert.IsTrue(PanelSlot.IsEmpty);
+            Assert.IsFalse(Encounter.BypassActive);
+            Assert.AreEqual(1, Quantity(jumper));
+        }
+
+        [UnityTest]
+        public IEnumerator MainFeedTakesOverAndFullInventoryCannotLoseTheInstalledJumper()
+        {
+            yield return Launch(CrewBackground.Engineer, CrewBackgroundsFault.LossOfPower);
+            var pickup = Object.FindAnyObjectByType<WorldPickup>();
+            var jumper = pickup.Definition.Item;
+            yield return CollectJumper(pickup);
+            var panel = Control("Service Panel");
+            yield return Approach(panel);
+            Press(Key.E);
+            Press(Key.E);
+            yield return Until(() => Encounter.BypassActive, "Bypass must start before restoring normal power");
+            var installed = PanelSlot.Stack;
+
+            yield return Approach(Control("Main Breaker"));
+            Press(Key.E);
+            Press(Key.E);
+            double elapsed = Encounter.RecoverySeconds;
+            Assert.Less(elapsed, CrewBackgroundsEncounterState.RecoveryDuration);
+            yield return Until(() => Encounter.NormalFeedAvailable, "Normal feed restores during recovery");
+            yield return null;
+            Assert.GreaterOrEqual(Encounter.RecoverySeconds, elapsed);
+            Assert.IsTrue(Encounter.Airflow);
+            Assert.IsFalse(Encounter.BypassActive);
+            Assert.IsTrue(RoomFeedback.CorridorLightEnabled);
+            Assert.AreSame(installed, PanelSlot.Stack);
+            Assert.AreEqual(0, Quantity(jumper));
+
+            Assert.AreEqual(CommandStatus.Applied,
+                Commands.Grant(Inventory.Handle, DifferentPart.ItemId, Inventory.Capacity * DifferentPart.MaxStackSize).Status);
+            yield return Approach(panel);
+            Press(Key.E);
+            Assert.That(Message, Does.Contain("inactive jumper can be retrieved"));
+            Press(Key.E);
+            Assert.That(Message, Is.EqualTo("Inventory full. Jumper stays in the panel."));
+            Assert.AreSame(installed, PanelSlot.Stack);
+
+            var slot = Inventory.GetSlot(0);
+            Assert.AreEqual(CommandStatus.Applied, Commands.Remove(slot.Address, slot.Stack.Quantity).Status);
+            Press(Key.E);
+            yield return Until(() => PanelSlot.IsEmpty, "Restore reusable jumper to inventory");
+            Assert.AreEqual(1, Quantity(jumper));
+            Assert.AreSame(installed, Inventory.GetSlot(0).Stack);
+            Press(Key.E);
+            Press(Key.E);
+            Assert.That(Message, Is.EqualTo("Normal feed is already available"));
+            Assert.IsTrue(PanelSlot.IsEmpty);
+            Assert.AreEqual(1, Quantity(jumper));
+        }
+
+        [UnityTest]
+        public IEnumerator BypassCancellationAndStaleJumperDoNotTransferPower()
+        {
+            yield return Launch(CrewBackground.Engineer, CrewBackgroundsFault.LossOfPower);
+            var pickup = Object.FindAnyObjectByType<WorldPickup>();
+            var jumper = pickup.Definition.Item;
+            yield return CollectJumper(pickup);
+            var panel = Control("Service Panel");
+            yield return Approach(panel);
+            Press(Key.E);
+            Press(Key.E);
+            Assert.IsTrue(panel.IsWorking);
+            Press(Key.Escape);
+            Assert.IsFalse(panel.IsWorking);
+            Assert.IsTrue(PanelSlot.IsEmpty);
+            Assert.IsFalse(Encounter.Airflow);
+            Assert.AreEqual(1, Quantity(jumper));
+
+            Press(Key.E);
+            Assert.IsTrue(panel.IsWorking);
+            var slot = Inventory.GetSlots().Single(entry => !entry.IsEmpty && entry.Stack.ItemId == jumper.ItemId);
+            Assert.AreEqual(CommandStatus.Applied, Commands.Remove(slot.Address, 1).Status);
+            yield return Until(() => !panel.IsWorking, "Revalidation after removing the jumper");
+            Assert.That(Message, Is.EqualTo("Requires 1 reusable jumper"));
+            Assert.IsTrue(PanelSlot.IsEmpty);
+            Assert.IsFalse(Encounter.Airflow);
+            Assert.IsTrue(RoomFeedback.CorridorLightEnabled);
+        }
+
+        private IEnumerator CollectJumper(WorldPickup pickup)
+        {
+            Assert.AreEqual("Reusable jumper", pickup.Definition.Item.DisplayName);
+            Assert.IsFalse(pickup.Definition.Item.Stackable);
+            var item = pickup.Definition.Item;
+            yield return Approach(pickup);
+            Press(Key.E);
+            Assert.IsFalse(pickup.gameObject.activeSelf);
+            Assert.AreEqual(1, Quantity(item));
+        }
+
+        private static SlotSnapshot PanelSlot => Object.FindAnyObjectByType<CrewBackgroundsServicePanel>().Installed.GetSlot(0);
+        private static CrewBackgroundsRoomFeedback RoomFeedback => Object.FindAnyObjectByType<CrewBackgroundsRoomFeedback>();
+
         private IEnumerator CheckRecoveryAndTraverse(bool checkPause)
         {
             yield return null;

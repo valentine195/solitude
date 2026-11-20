@@ -34,6 +34,55 @@ namespace SOLITUDE.Tests
         }
 
         [Test]
+        public void JumperOwnershipDeterminesBypassInTheSameTransferNotification()
+        {
+            var catalog = new ItemCatalog(new[] { new ItemSpec("jumper", false, 1), new ItemSpec("filler", true, 5) });
+            var commands = new ContainerCommandService(catalog);
+            var inventory = commands.Register(ContainerSaveSession.PlayerInventoryId, 1);
+            var panel = commands.Register("panel", 1, filter: item => item.ItemId == "jumper");
+            var state = new CrewBackgroundsEncounterState(CrewBackgroundsFault.LossOfPower, panel, "jumper");
+            commands.Grant(inventory.Handle, "jumper", 1);
+            var jumper = inventory.GetSlot(0).Stack;
+            bool? observedBypass = null, observedLights = null, observedAirflow = null, observedPanelItem = null;
+            commands.Completed += _ =>
+            {
+                observedBypass = state.BypassActive;
+                observedLights = state.CorridorLightsOn;
+                observedAirflow = state.Airflow;
+                observedPanelItem = panel.GetSlot(0).Stack == jumper;
+            };
+
+            Assert.AreEqual(CommandStatus.Applied, state.TryMoveJumper(CrewRepairOperation.InstallJumper, commands, inventory));
+            Assert.IsTrue(inventory.GetSlot(0).IsEmpty);
+            Assert.AreEqual(true, observedBypass);
+            Assert.AreEqual(false, observedLights);
+            Assert.AreEqual(true, observedAirflow);
+            Assert.AreEqual(true, observedPanelItem);
+            Assert.AreEqual(CommandStatus.Unavailable, state.TryMoveJumper(CrewRepairOperation.ReclaimJumper, commands, inventory));
+
+            state.Advance(2);
+            Assert.AreEqual(RestorationOutcome.Restored, state.TryRepair(CrewRepairOperation.ResetBreaker, commands, inventory, null));
+            Assert.AreEqual(2, state.RecoverySeconds);
+            Assert.IsFalse(state.BypassActive);
+            Assert.IsTrue(state.CorridorLightsOn);
+            Assert.IsTrue(state.Airflow);
+            Assert.AreSame(jumper, panel.GetSlot(0).Stack);
+
+            commands.Grant(inventory.Handle, "filler", 1);
+            Assert.AreEqual(CommandStatus.InsufficientSpace, state.TryMoveJumper(CrewRepairOperation.ReclaimJumper, commands, inventory));
+            Assert.AreSame(jumper, panel.GetSlot(0).Stack);
+            commands.Remove(inventory.GetSlot(0).Address, 1);
+            Assert.AreEqual(CommandStatus.Applied, state.TryMoveJumper(CrewRepairOperation.ReclaimJumper, commands, inventory));
+            Assert.AreEqual(false, observedBypass);
+            Assert.AreEqual(true, observedLights);
+            Assert.AreEqual(true, observedAirflow);
+            Assert.AreEqual(false, observedPanelItem);
+            Assert.AreSame(jumper, inventory.GetSlot(0).Stack);
+            Assert.IsTrue(panel.GetSlot(0).IsEmpty);
+            Assert.AreEqual(CommandStatus.Unavailable, state.TryMoveJumper(CrewRepairOperation.ReclaimJumper, commands, inventory));
+        }
+
+        [Test]
         public void CorrectPartCommitsOnceAndObserversSeeRepairedLinkage()
         {
             var catalog = new ItemCatalog(new[] { new ItemSpec("part", true, 5), new ItemSpec("wrong", true, 5) });

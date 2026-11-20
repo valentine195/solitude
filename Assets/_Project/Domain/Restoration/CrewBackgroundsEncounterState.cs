@@ -6,21 +6,31 @@ using SOLITUDE.SaveLoad;
 namespace SOLITUDE.World.CrewBackgrounds
 {
     public enum CrewBackgroundsFault { LossOfPower, BrokenIntakeLinkage }
-    public enum CrewRepairOperation { Inspect, ResetBreaker, FitIntakeLinkage }
+    public enum CrewRepairOperation { Inspect, ResetBreaker, FitIntakeLinkage, InstallJumper, ReclaimJumper }
 
     public sealed class CrewBackgroundsEncounterState
     {
         public const double RecoveryDuration = 5;
 
+        private readonly IContainerReader jumperPanel;
+        private readonly string jumperId;
+
         public CrewBackgroundsFault Fault { get; }
         public bool NormalFeedAvailable { get; private set; }
         public bool IntakeLinkageIntact { get; private set; }
-        public bool Airflow => NormalFeedAvailable && IntakeLinkageIntact;
+        public bool JumperInstalled => jumperPanel?.IsAvailable == true && jumperPanel.Capacity == 1 && jumperPanel.GetSlot(0).Stack?.ItemId == jumperId;
+        public bool BypassActive => !NormalFeedAvailable && JumperInstalled;
+        public bool CorridorLightsOn => !BypassActive;
+        public bool Airflow => (NormalFeedAvailable || BypassActive) && IntakeLinkageIntact;
         public double RecoverySeconds { get; private set; }
         public bool RoomRecovered => RecoverySeconds >= RecoveryDuration;
 
-        public CrewBackgroundsEncounterState(CrewBackgroundsFault fault)
+        public CrewBackgroundsEncounterState(CrewBackgroundsFault fault, IContainerReader jumperPanel = null, string jumperId = null)
         {
+            if (jumperPanel != null && (jumperPanel.Capacity != 1 || string.IsNullOrWhiteSpace(jumperId)))
+                throw new ArgumentException("The jumper requires a dedicated one-slot panel.");
+            this.jumperPanel = jumperPanel;
+            this.jumperId = jumperId;
             Fault = fault;
             switch (fault)
             {
@@ -69,6 +79,51 @@ namespace SOLITUDE.World.CrewBackgrounds
             if (!part.HasValue) return RestorationOutcome.MissingItem;
             var removed = commands.Remove(part.Value, 1, () => IntakeLinkageIntact = true);
             return removed.Status == CommandStatus.Applied ? RestorationOutcome.Restored : RestorationOutcome.Rejected;
+        }
+
+        public CommandStatus CheckJumper(CrewRepairOperation operation, ContainerCommandService commands, IContainerReader inventory)
+            => PlanJumper(operation, commands, inventory, out _, out _);
+
+        public CommandStatus TryMoveJumper(CrewRepairOperation operation, ContainerCommandService commands, IContainerReader inventory)
+        {
+            var result = PlanJumper(operation, commands, inventory, out var source, out var destination);
+            return result == CommandStatus.Applied ? commands.Transfer(source, destination).Status : result;
+        }
+
+        private CommandStatus PlanJumper(CrewRepairOperation operation, ContainerCommandService commands,
+            IContainerReader inventory, out SlotAddress source, out SlotAddress destination)
+        {
+            source = default;
+            destination = default;
+            if (Fault != CrewBackgroundsFault.LossOfPower || commands == null || inventory?.IsAvailable != true
+                || inventory.Handle.Id != ContainerSaveSession.PlayerInventoryId
+                || !ReferenceEquals(commands.Read(inventory.Handle), inventory)
+                || jumperPanel?.IsAvailable != true || jumperPanel.Capacity != 1
+                || !ReferenceEquals(commands.Read(jumperPanel.Handle), jumperPanel)
+                || jumperPanel.Handle.Equals(inventory.Handle))
+                return CommandStatus.Unavailable;
+
+            var panel = jumperPanel.GetSlot(0);
+            if (operation == CrewRepairOperation.InstallJumper && !NormalFeedAvailable && panel.IsEmpty)
+            {
+                var part = FindPart(inventory, jumperId);
+                if (!part.HasValue) return CommandStatus.InsufficientQuantity;
+                source = part.Value;
+                destination = panel.Address;
+                return CommandStatus.Applied;
+            }
+
+            if (operation != CrewRepairOperation.ReclaimJumper || !NormalFeedAvailable || !JumperInstalled)
+                return CommandStatus.Unavailable;
+
+            foreach (var slot in inventory.GetSlots())
+            {
+                if (!slot.IsEmpty) continue;
+                source = panel.Address;
+                destination = slot.Address;
+                return CommandStatus.Applied;
+            }
+            return CommandStatus.InsufficientSpace;
         }
 
         public void Advance(double gameplaySeconds)

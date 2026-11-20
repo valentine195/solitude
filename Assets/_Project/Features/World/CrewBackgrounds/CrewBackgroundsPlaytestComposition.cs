@@ -12,10 +12,13 @@ namespace SOLITUDE.World.CrewBackgrounds
         [SerializeField] private Collider2D returnDoor;
         [SerializeField] private CrewBackgroundsRoomFeedback roomFeedback;
         [SerializeField] private GameObject linkagePickup;
+        [SerializeField] private GameObject jumperPickup;
+        [SerializeField] private CrewBackgroundsServicePanel servicePanel;
         [SerializeField] private CrewBackgroundsRepairControl[] controls = Array.Empty<CrewBackgroundsRepairControl>();
         private SceneFeatureContext context;
         private bool lastAirflow;
         private bool lastRecovered;
+        private bool lastCorridorLit;
 
         public CrewBackgroundsPlaytestSetup? ActiveSetup { get; private set; }
         public CrewBackgroundsEncounterState Encounter { get; private set; }
@@ -28,10 +31,13 @@ namespace SOLITUDE.World.CrewBackgrounds
             if (returnDoor == null || returnDoor.gameObject.scene != gameObject.scene
                 || roomFeedback == null || roomFeedback.gameObject.scene != gameObject.scene
                 || linkagePickup == null || linkagePickup.scene != gameObject.scene
+                || jumperPickup == null || jumperPickup.scene != gameObject.scene
+                || servicePanel == null || servicePanel.gameObject.scene != gameObject.scene
                 || controls == null || controls.Length == 0)
                 throw new InvalidOperationException("The crew playtest requires local repair controls, room feedback, and a return door.");
 
             roomFeedback.ValidateAuthoring();
+            servicePanel.ValidateAuthoring();
             foreach (var control in controls)
             {
                 if (control == null || control.gameObject.scene != gameObject.scene)
@@ -53,10 +59,13 @@ namespace SOLITUDE.World.CrewBackgrounds
             var setup = CrewBackgroundsPlaytestSetup.Resolve(gameObject.scene.path,
                 new CrewBackgroundsPlaytestSetup(defaultBackground, defaultFault));
             ActiveSetup = setup;
-            Encounter = new CrewBackgroundsEncounterState(setup.Fault);
+            servicePanel.Bind(context.Commands);
+            Encounter = servicePanel.NewEncounter(setup.Fault);
             if (setup.Fault == CrewBackgroundsFault.LossOfPower) linkagePickup.SetActive(false);
+            else jumperPickup.SetActive(false);
             foreach (var control in controls) control.Bind(context, setup, Encounter);
             lastAirflow = lastRecovered = false;
+            lastCorridorLit = true;
             roomFeedback.ResetRoom();
         }
 
@@ -65,10 +74,14 @@ namespace SOLITUDE.World.CrewBackgrounds
             if (Encounter == null) return;
             if (context.Policy.Gameplay) Encounter.Advance(Time.deltaTime);
 
-            if (Encounter.Airflow == lastAirflow && Encounter.RoomRecovered == lastRecovered) return;
-            lastAirflow = Encounter.Airflow;
-            lastRecovered = Encounter.RoomRecovered;
-            roomFeedback.Render(lastAirflow, lastRecovered);
+            bool airflow = Encounter.Airflow;
+            bool recovered = Encounter.RoomRecovered;
+            bool lit = Encounter.CorridorLightsOn;
+            if (airflow == lastAirflow && recovered == lastRecovered && lit == lastCorridorLit) return;
+            lastAirflow = airflow;
+            lastRecovered = recovered;
+            lastCorridorLit = lit;
+            roomFeedback.Render(airflow, recovered, lit);
         }
 
         public override bool TryBack()
@@ -86,6 +99,7 @@ namespace SOLITUDE.World.CrewBackgrounds
                 foreach (var control in controls)
                     if (control != null) control.Release();
             if (roomFeedback != null) roomFeedback.Release();
+            if (servicePanel != null) servicePanel.Release();
             context = null;
             ActiveSetup = null;
             Encounter = null;

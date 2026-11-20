@@ -13,22 +13,25 @@ namespace SOLITUDE.World.CrewBackgrounds
         [SerializeField] private TMP_Text status;
         [SerializeField] private SpriteRenderer indicator;
         [SerializeField] private SolitudeSlidingDoor returnDoor;
+        [SerializeField] private GameObject corridorLight;
+        public bool CorridorLightEnabled => corridorLight != null && corridorLight.activeSelf;
 
         public void ValidateAuthoring()
         {
             if (alert == null || alert.clip == null || runningSound == null || runningSound.clip == null
-                || status == null || indicator == null || returnDoor == null)
+                || status == null || indicator == null || corridorLight == null || returnDoor == null)
                 throw new InvalidOperationException("Crew room recovery feedback is missing an authored reference.");
         }
 
         internal void ResetRoom()
         {
             returnDoor.ResetClosed();
-            Render(false, false);
+            Render(false, false, true);
         }
 
-        internal void Render(bool airflow, bool recovered)
+        internal void Render(bool airflow, bool recovered, bool corridorLit)
         {
+            corridorLight.SetActive(corridorLit);
             status.text = recovered ? "AIRFLOW RESTORED" : airflow ? "AIR RECOVERING" : "NO AIRFLOW";
             indicator.color = airflow ? new Color(.55f, .95f, .65f) : Color.white;
             SetSound(alert, !recovered);
