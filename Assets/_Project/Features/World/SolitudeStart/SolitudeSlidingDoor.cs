@@ -12,6 +12,7 @@ namespace SOLITUDE.World.SolitudeStart
         [SerializeField] private Collider2D blocker;
         [SerializeField] private float frameSeconds = 0.08f;
         [SerializeField] private RestorationDoorGate accessGate;
+        [SerializeField] private bool automaticOnly;
         private bool requiresAccessGate;
         private bool HasPower => !requiresAccessGate || (accessGate != null && accessGate.AllowsAccess);
         public void SetAccessGate(RestorationDoorGate gate) { accessGate = gate; requiresAccessGate = true; }
@@ -19,14 +20,30 @@ namespace SOLITUDE.World.SolitudeStart
         private bool opening, open;
         public bool IsOpen => open;
         public override string GetPrompt() => open ? "Door open" : !HasPower ? "No power — restore system" : "Open door";
-        public override bool CanInteract(PlayerInteractor player) => !opening && !open;
+        public override bool CanInteract(PlayerInteractor player) => !automaticOnly && !opening && !open;
         public override InteractionResult Interact(PlayerInteractor player)
         {
             if (!CanInteract(player)) return InteractionResult.Blocked();
             if (!HasPower) return InteractionResult.Blocked("No power — restore system");
+            BeginOpening();
+            return InteractionResult.Success("Door opening");
+        }
+        internal bool TryOpenAutomatically()
+        {
+            if (!automaticOnly || !HasPower || opening || open) return false;
+            BeginOpening();
+            return true;
+        }
+        internal void ResetClosed()
+        {
+            opening = false; open = false; elapsed = 0f;
+            if (visual != null && frames != null && frames.Length == 9) visual.sprite = frames[0];
+            if (blocker != null) blocker.enabled = true;
+        }
+        private void BeginOpening()
+        {
             opening = true; elapsed = 0f;
             if (frames != null && frames.Length == 9) visual.sprite = frames[0];
-            return InteractionResult.Success("Door opening");
         }
         private void Awake()
         {

@@ -5,7 +5,6 @@ namespace SOLITUDE.World.CrewBackgrounds
     public enum CrewBackground { Engineer, Technician }
     public enum CrewProficiency { Electrical, FieldRepair }
     public enum CrewProficiencyRank { Basic, Trained, Specialist }
-    public enum CrewBackgroundsFault { LossOfPower, BrokenIntakeLinkage }
 
     public readonly struct CrewBackgroundsPlaytestSetup
     {
