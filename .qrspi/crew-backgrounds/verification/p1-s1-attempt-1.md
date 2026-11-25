@@ -1,0 +1,14 @@
+# Phase 1 Step 1 verification
+
+Source commit `fcb844e5a318047464109ae5af69327590144227` from baseline `4c59a8f42d15f440a46449c10658b31b39f2c971`. Spec SHA-256 `dd8f5bb2d90028526e6c5dcee74e6a8bf40f16f36bfdd06ab033ad73d1b9f339`. Staged binary diff SHA-256 `3ef6093cd1d3afc4cab33194e71eed12e51d8bcb3fb11648f876611685933779`. Verification used Unity 6000.6.4f1 in the feature worktree. Unity's automatic PlayerSettings serialization was discarded after verification. The feature source and scene tested match the committed files.
+
+| Criteria | Expected | Observed |
+| --- | --- | --- |
+| S1 | Each named Editor launch enters one scene at readiness with the requested background and fault. | Ran the four actual menu items across separate Editor Play sessions. Every launch reached Ready in the same scene with its own setup, a bound patrol, a closed door, and a disposable session. See [menu results](p1-s1-attempt-1-menus.json). |
+| S2 | Startup stats are shared, and each profile supplies the paired ranks. | The focused PlayMode fixture compared vitals and maxima, movement speed, capacity, and configured wrench damage across all four combinations, then checked both ranks and initial fault flags. Vitals started at 100 in the inspected scene. Repair eligibility and combat outcomes are checked in later steps. |
+| S11 | A fresh launch resets character state, and a rejected setup never leaks into the next launch. | All four PlayMode loads produced distinct colonist IDs, restored health after modification, and started with fresh empty carried inventories. An invalid fault generated a readable root error with gameplay unready. The following direct launch used the authored Engineer / Loss of Power default and the next named setup applied correctly. Direct Editor Play after the four menu runs also used the default. The changed-world and jumper reset checks follow later. |
+| S14 | One saved room has editable grid layers with collision matching the protected return passage. | The PlayMode scene check found painted floor and cap cells on Unity Tilemaps, found the blocking door and passage wall colliders, and found open floor inside the passage. Verified the room is excluded from enabled build entries. Inspected an [offscreen gameplay-camera capture](p1-s1-attempt-1-room.png) with the player, SEC-0, connected boundary pieces, and the closed return door visible. |
+
+Command: `unity test <worktree> --mode PlayMode --filter SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests --output /private/tmp/solitude-crew-p1-s1-playmode.xml --timeout 180 --format json`.
+
+Result: [three passed, zero failed, zero skipped](p1-s1-attempt-1-playmode.xml). C# staged whitespace check passed. Physical input, loaded production save comparison, repair actions, and door opening are outside this step's verification scope.

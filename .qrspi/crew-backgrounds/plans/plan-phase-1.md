@@ -7,7 +7,7 @@
 
 ### Step 1: Launch and reset the shared room
 
-- [ ] Status marker
+- [x] Status marker
 - Criteria: S1, S2, S11, S14 — apply the named background and fault before play, share the avatar baseline, and author one editable room with a disposable session.
 - Files: `Assets/_Project/Features/World/CrewBackgrounds/CrewBackgroundsPlaytestSetup.cs`, `Assets/_Project/Features/World/CrewBackgrounds/CrewBackgroundsPlaytestComposition.cs`, `Assets/_Project/Features/World/CrewBackgrounds/Demo/CrewBackgroundsRuntimeConfig.asset`, `Assets/_Project/Editor/CrewBackgroundsPlaytestLaunches.cs`, `Assets/_Project/Scenes/Demos/CrewBackgroundsMaintenance.unity`, `Assets/_Project/Tests/PlayMode/CrewBackgroundsPlaytestLaunchTests.cs` (new, with Unity metadata). Reuse the existing disposable startup, avatar bindings, and `Assets/_Project/Features/Npcs/Sec0/Runtime/Sec0Composition.cs`.
 - Changes: Author the initial floor and boundaries in the saved scene as editable Tilemaps. Use reusable palettes and shared tile assets where applicable. Bind one player, one patrol, and two authored fault setups in that room. Add four named Editor entries through one launch path that consumes its background and fault once for the intended scene. Bind the rank lookup and initial state before gameplay input. Keep the launch preset responsible for choosing a background profile and fault. The profile exposes ranks by skill, and the repair controls read those ranks at use time. Reject an invalid setup with a visible reason and clear the pending launch on failure or exit. Keep runtime references free of Editor code and keep the room outside the enabled production build scenes.
@@ -17,7 +17,7 @@
 
 ### Step 2: Restore airflow through the standard routes
 
-- [ ] Status marker
+- [x] Status marker
 - Criteria: S2, S3, S4, S7, S9, S10 — expose the trained clues, complete either ordinary repair, and make the recovery open a traversable return route.
 - Files: `Assets/_Project/Domain/Restoration/CrewBackgroundsEncounterState.cs`, `Assets/_Project/Features/World/CrewBackgrounds/CrewBackgroundsRepairControl.cs`, `Assets/_Project/Features/World/CrewBackgrounds/CrewBackgroundsRoomFeedback.cs`, `Assets/_Project/Tests/Domain/CrewBackgroundsEncounterStateTests.cs`, `Assets/_Project/Tests/PlayMode/CrewBackgroundsRepairJourneyTests.cs` (new). Extend the Step 1 composition, demo catalog/configuration, and maintenance scene. Add the linkage part and its pickup under `Assets/_Project/Features/Items/Definitions/IntakeLinkage/`. Use the interaction contract in `Assets/_Project/Systems/Interaction/Core/IInteractable.cs`. Inspect `Assets/_Project/Application/Items/ItemActionRunner.cs` and its caller in `Assets/_Project/Features/Player/Combat/PlayerItemActionComposition.cs` before choosing the completion timing path. Reuse that lifecycle where it fits contextual repair input. Reuse the transaction pattern in `Assets/_Project/Domain/Restoration/RestorableSystemState.cs` and the door behavior in `Assets/_Project/Features/World/SolitudeStart/SolitudeSlidingDoor.cs`. Scope any automatic-open entry to the new room binding and preserve existing manual callers.
 - Changes: Initialize stopped airflow and only the selected fault. Place the breaker across the patrol route and the replacement part on a reachable path. Wire ordinary inspection, rank 1 and rank 2 diagnoses, and the two standard paths through normal interactions. Resetting the breaker starts airflow with lights on. Fitting the correct part consumes one unit when the repair commits. Use one preview, eligibility, interrupt, and completion path for both controls. Configure the diagnostic clue, skill and rank requirements, material cost when applicable, and target operation with authored bindings. Show short physical feedback, then recheck eligibility at commit. Keep the equipment's available transitions with its own state, and use committed state to drive sound, lighting, recovery, and the return door. Open the initially closed return door automatically after five active recovery seconds, with its normal animation and collider timing.
@@ -27,7 +27,7 @@
 
 ### Step 3: Jump the circuit and recover the jumper
 
-- [ ] Status marker
+- [x] Status marker
 - Criteria: S2, S5, S6, S9, S10, S11 — deliver the Engineer's bypass, recover the same physical item, and carry the effect correctly through interruption and replay.
 - Files: `Assets/_Project/Features/World/CrewBackgrounds/CrewBackgroundsServicePanel.cs` (new), `Assets/_Project/Features/Items/Definitions/ReusableJumper/` (new definition and pickup), and the new encounter state, composition, room feedback, scene, runtime config, and test files named in Steps 1–2. Use `Assets/_Project/Domain/ContainerCommandService.cs` for item ownership. A shared command change, if required, should be confined to a way to publish the transfer and world commit coherently while preserving existing transfer callers.
 - Changes: Make one nonstacking reusable jumper obtainable in the power-loss setup. Bind the panel to the shared preview, eligibility, interruption, and completion path from Step 2. The typed bypass operation owns feed selection and the panel's item. Show the lighting tradeoff before commitment. Recheck rank, fault, power, source item, and panel capacity before moving the jumper into a dedicated panel owner. Commit the transfer, light diversion and airflow as one observable result. Use the existing recovery path. Normal breaker power takes over without restarting recovery, lights return, and the installed jumper becomes reclaimable. Return the same item through a transfer with capacity validation. Keep ownership with the panel after failed reclaim.
@@ -37,7 +37,7 @@
 
 ### Step 4: Rig the broken linkage
 
-- [ ] Status marker
+- [x] Status marker
 - Criteria: S2, S8, S9, S10 — deliver the Technician's alternative with the same recovery and return-door payoff.
 - Files: `Assets/_Project/Features/Items/Definitions/LinkageSalvage/` (new definition and pickup), plus `Assets/_Project/Domain/Restoration/CrewBackgroundsEncounterState.cs`, `Assets/_Project/Features/World/CrewBackgrounds/CrewBackgroundsRepairControl.cs`, the Step 1 demo catalog and scene, and the Step 2 state and journey tests.
 - Changes: Author a reachable salvage source for the linkage setup. Configure an additional rank-2 Field Repair action on the same control, using the same consume-and-repair operation as the standard linkage route. Supply the salvage item and requirement through the authored binding. Consume one authored salvage unit and begin airflow recovery at successful completion. Preserve the availability of the standard replacement part route before repair.
@@ -47,10 +47,11 @@
 
 ### Step 5: Verify the authored room and retained demos
 
-- [ ] Status marker
+- [!] Status marker
 - Criteria: S1–S14 — close the acceptance matrix against the final source snapshot, including the compatibility and physical input checks.
 - Files: `Assets/_Project/Tests/PlayMode/CrewBackgroundsPlaytestLaunchTests.cs`, `Assets/_Project/Tests/PlayMode/CrewBackgroundsRepairJourneyTests.cs`, and existing focused paths in `Assets/_Project/Tests/PlayMode/{ScrubberEncounterLifecycleTests,RestorationSliceTests,Sec0EncounterTests}.cs`. Record criterion-linked results in `.qrspi/crew-backgrounds/verification/phase-1.md` and keep captures, test XML, and temporary saves outside `Assets`.
 - Changes: Complete the normal-input journeys for both backgrounds and both faults. Verify readable fault and action feedback and the walkable return opening in the authored scene. Compare isolated production save bytes before and after the new playtest. Check the legacy demos through their existing entry paths. Inspect the saved Tilemaps and confirm all launch entries use one scene and layout.
 - Tests: Run the new focused state and PlayMode tests and the relevant retained demo cases. Use the physical keyboard and controller for the four launch combinations to cover S12. If device access prevents that check, record the missing evidence and leave S12 pending. Consult `Tools/Verification/README.md` for startup or inventory changes and use its save isolation conventions. Broaden beyond targeted tests only for an actual changed dependency or failure, following the repository's focused verification guidance. Record the snapshot, command or manual scenario, observed result, and criterion IDs.
+- Approved recovery for S12 and S13: Update shared controller routing in `Assets/_Project/Core/Input/UnityInputHost.cs` so a button shared by Interact and Cancel performs only Interact in exploration and only Cancel in menus. Verify both contexts through `Assets/_Project/Tests/Editor/UnityInputCompositionTests.cs` and rerun the four simulated preset journeys and directly affected input checks. Write the retained production-to-scrubber test fixture with the production save codec, preserving its transition and save integrity assertions, and rerun the affected demo checks. The physical device requirement remains in place.
 - Recovery: Keep the last passing evidence tied to its source. On failure, isolate the named scenario and repair the owning step before rerunning it and its affected checks.
 - Risk: Medium — simulated input and scene-level assertions can pass while physical control, room readability, or door traversal still fails during play.

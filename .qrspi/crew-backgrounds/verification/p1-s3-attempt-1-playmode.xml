@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="13" result="Passed" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:58:00Z" duration="47.1379045">
+  <test-suite type="TestSuite" id="1291" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="236" result="Passed" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:58:00Z" duration="47.137905" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1284" name="SOLITUDE.Tests.PlayMode.dll" fullname="/Users/jeremyvalentine/.codex/worktrees/crew-backgrounds/SOLITUDE/Library/ScriptAssemblies/SOLITUDE.Tests.PlayMode.dll" runstate="Runnable" testcasecount="236" result="Passed" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:58:00Z" duration="47.131165" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="87538" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1285" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="236" result="Passed" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:58:00Z" duration="47.129384" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1286" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="236" result="Passed" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:58:00Z" duration="47.127772" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="CrewBackgroundsPlaytestLaunchTests" fullname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests" classname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:57:13Z" duration="0.871237" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1002" name="FourPresetPairsUseOneRoomAndFreshSharedPlayerState" fullname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests.FourPresetPairsUseOneRoomAndFreshSharedPlayerState" methodname="FourPresetPairsUseOneRoomAndFreshSharedPlayerState" classname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests" runstate="Runnable" seed="947969485" result="Passed" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:57:13Z" duration="0.583740" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1003" name="InvalidPresetFailsBeforeReadinessThenOrdinaryAndNamedLaunchesRecover" fullname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests.InvalidPresetFailsBeforeReadinessThenOrdinaryAndNamedLaunchesRecover" methodname="InvalidPresetFailsBeforeReadinessThenOrdinaryAndNamedLaunchesRecover" classname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests" runstate="Runnable" seed="2073640190" result="Passed" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:57:13Z" duration="0.219754" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[GameCompositionRoot] Runtime unavailable; save preserved: Unknown scrubber fault.
+Parameter name: fault
+Actual value was 99.
+]]></output>
+            </test-case>
+            <test-case id="1004" name="SavedRoomHasPaintedFloorBoundariesAndAClosedReturnDoor" fullname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests.SavedRoomHasPaintedFloorBoundariesAndAClosedReturnDoor" methodname="SavedRoomHasPaintedFloorBoundariesAndAClosedReturnDoor" classname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests" runstate="Runnable" seed="1009448853" result="Passed" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:57:13Z" duration="0.058938" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1005" name="CrewBackgroundsRepairJourneyTests" fullname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests" classname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:57:58Z" duration="44.239363" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1006" name="BothBackgroundsFollowTheDeadFeedAndResetTheBreaker" fullname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests.BothBackgroundsFollowTheDeadFeedAndResetTheBreaker" methodname="BothBackgroundsFollowTheDeadFeedAndResetTheBreaker" classname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests" runstate="Runnable" seed="746388454" result="Passed" start-time="2026-11-20 16:57:13Z" end-time="2026-11-20 16:57:31Z" duration="17.785310" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1007" name="BothBackgroundsIdentifyAndFitTheActualPickup" fullname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests.BothBackgroundsIdentifyAndFitTheActualPickup" methodname="BothBackgroundsIdentifyAndFitTheActualPickup" classname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests" runstate="Runnable" seed="1025049059" result="Passed" start-time="2026-11-20 16:57:31Z" end-time="2026-11-20 16:57:46Z" duration="15.028901" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1012" name="BypassCancellationAndStaleJumperDoNotTransferPower" fullname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests.BypassCancellationAndStaleJumperDoNotTransferPower" methodname="BypassCancellationAndStaleJumperDoNotTransferPower" classname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests" runstate="Runnable" seed="1841561924" result="Passed" start-time="2026-11-20 16:57:46Z" end-time="2026-11-20 16:57:47Z" duration="0.717366" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1008" name="CancelAndMaterialLossPreserveTheFaultAndItemAccounting" fullname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests.CancelAndMaterialLossPreserveTheFaultAndItemAccounting" methodname="CancelAndMaterialLossPreserveTheFaultAndItemAccounting" classname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests" runstate="Runnable" seed="60105608" result="Passed" start-time="2026-11-20 16:57:47Z" end-time="2026-11-20 16:57:48Z" duration="0.710831" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1010" name="EngineerBypassOpensTheDoorInTheDarkAndFreshLaunchRestoresBaseline" fullname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests.EngineerBypassOpensTheDoorInTheDarkAndFreshLaunchRestoresBaseline" methodname="EngineerBypassOpensTheDoorInTheDarkAndFreshLaunchRestoresBaseline" classname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests" runstate="Runnable" seed="741375963" result="Passed" start-time="2026-11-20 16:57:48Z" end-time="2026-11-20 16:57:55Z" duration="7.262684" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1011" name="MainFeedTakesOverAndFullInventoryCannotLoseTheInstalledJumper" fullname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests.MainFeedTakesOverAndFullInventoryCannotLoseTheInstalledJumper" methodname="MainFeedTakesOverAndFullInventoryCannotLoseTheInstalledJumper" classname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests" runstate="Runnable" seed="1822050555" result="Passed" start-time="2026-11-20 16:57:55Z" end-time="2026-11-20 16:57:57Z" duration="2.038962" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1009" name="SameControlRepairsASecondTargetUsingItsAuthoredPart" fullname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests.SameControlRepairsASecondTargetUsingItsAuthoredPart" methodname="SameControlRepairsASecondTargetUsingItsAuthoredPart" classname="SOLITUDE.Tests.CrewBackgroundsRepairJourneyTests" runstate="Runnable" seed="503905956" result="Passed" start-time="2026-11-20 16:57:57Z" end-time="2026-11-20 16:57:58Z" duration="0.692166" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1162" name="RestorationDoorTests" fullname="SOLITUDE.Tests.RestorationDoorTests" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-20 16:57:58Z" end-time="2026-11-20 16:58:00Z" duration="2.011225" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1165" name="LateEnableReenableAndMissingSystemReconcileWithoutOpening" fullname="SOLITUDE.Tests.RestorationDoorTests.LateEnableReenableAndMissingSystemReconcileWithoutOpening" methodname="LateEnableReenableAndMissingSystemReconcileWithoutOpening" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" seed="355822746" result="Passed" start-time="2026-11-20 16:57:58Z" end-time="2026-11-20 16:57:58Z" duration="0.006406" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1163" name="OfflineDirectAndPlayerCallsBlockThenRestorationPermitsOpening" fullname="SOLITUDE.Tests.RestorationDoorTests.OfflineDirectAndPlayerCallsBlockThenRestorationPermitsOpening" methodname="OfflineDirectAndPlayerCallsBlockThenRestorationPermitsOpening" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" seed="1455435611" result="Passed" start-time="2026-11-20 16:57:58Z" end-time="2026-11-20 16:57:59Z" duration="1.001659" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1164" name="UngatedDoorPreservesOpeningBehavior" fullname="SOLITUDE.Tests.RestorationDoorTests.UngatedDoorPreservesOpeningBehavior" methodname="UngatedDoorPreservesOpeningBehavior" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" seed="2107836821" result="Passed" start-time="2026-11-20 16:57:59Z" end-time="2026-11-20 16:58:00Z" duration="1.001550" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

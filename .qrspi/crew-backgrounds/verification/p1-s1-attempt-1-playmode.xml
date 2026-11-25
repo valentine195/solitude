@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="3" result="Passed" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-19 02:47:01Z" end-time="2026-11-19 02:47:02Z" duration="0.8268626">
+  <test-suite type="TestSuite" id="1283" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-11-19 02:47:01Z" end-time="2026-11-19 02:47:02Z" duration="0.826863" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1276" name="SOLITUDE.Tests.PlayMode.dll" fullname="/Users/jeremyvalentine/.codex/worktrees/crew-backgrounds/SOLITUDE/Library/ScriptAssemblies/SOLITUDE.Tests.PlayMode.dll" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-11-19 02:47:01Z" end-time="2026-11-19 02:47:02Z" duration="0.816090" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="93911" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1277" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-11-19 02:47:01Z" end-time="2026-11-19 02:47:02Z" duration="0.814167" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1278" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="229" result="Passed" start-time="2026-11-19 02:47:01Z" end-time="2026-11-19 02:47:02Z" duration="0.812639" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="CrewBackgroundsPlaytestLaunchTests" fullname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests" classname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-19 02:47:01Z" end-time="2026-11-19 02:47:02Z" duration="0.808563" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1002" name="FourPresetPairsUseOneRoomAndFreshSharedPlayerState" fullname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests.FourPresetPairsUseOneRoomAndFreshSharedPlayerState" methodname="FourPresetPairsUseOneRoomAndFreshSharedPlayerState" classname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests" runstate="Runnable" seed="1760191123" result="Passed" start-time="2026-11-19 02:47:01Z" end-time="2026-11-19 02:47:02Z" duration="0.517000" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1003" name="InvalidPresetFailsBeforeReadinessThenOrdinaryAndNamedLaunchesRecover" fullname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests.InvalidPresetFailsBeforeReadinessThenOrdinaryAndNamedLaunchesRecover" methodname="InvalidPresetFailsBeforeReadinessThenOrdinaryAndNamedLaunchesRecover" classname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests" runstate="Runnable" seed="1415017662" result="Passed" start-time="2026-11-19 02:47:02Z" end-time="2026-11-19 02:47:02Z" duration="0.224225" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[GameCompositionRoot] Runtime unavailable; save preserved: Unknown scrubber fault.
+Parameter name: fault
+Actual value was 99.
+]]></output>
+            </test-case>
+            <test-case id="1004" name="SavedRoomHasPaintedFloorBoundariesAndAClosedReturnDoor" fullname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests.SavedRoomHasPaintedFloorBoundariesAndAClosedReturnDoor" methodname="SavedRoomHasPaintedFloorBoundariesAndAClosedReturnDoor" classname="SOLITUDE.Tests.CrewBackgroundsPlaytestLaunchTests" runstate="Runnable" seed="541514497" result="Passed" start-time="2026-11-19 02:47:02Z" end-time="2026-11-19 02:47:02Z" duration="0.058017" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

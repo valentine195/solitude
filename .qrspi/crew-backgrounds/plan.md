@@ -8,7 +8,7 @@
 
 | Phase | Name | Depends On | Description | Steps | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Crew backgrounds playtest | none | Launch both backgrounds against each fault in one painted room. Play the standard and specialist repair paths through to a traversable return door. | 5 | [ ] |
+| 1 | Crew backgrounds playtest | none | Launch both backgrounds against each fault in one painted room. Play the standard and specialist repair paths through to a traversable return door. | 5 | [!] |
 
 
 ## Reusable repair behavior

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="5" result="Passed" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.0507551">
+  <test-suite type="TestSuite" id="1000" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="573" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.050755" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1370" name="SOLITUDE.Tests.Domain.dll" fullname="/Users/jeremyvalentine/.codex/worktrees/crew-backgrounds/SOLITUDE/Library/ScriptAssemblies/SOLITUDE.Tests.Domain.dll" runstate="Runnable" testcasecount="210" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.040773" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="92193" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1371" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="210" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.038993" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1372" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="210" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.034429" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1144" name="CrewBackgroundsEncounterStateTests" fullname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests" classname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.027728" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1145" name="BreakerStartsAirflowOnlyForPowerLossAndRecoveryStopsAtFiveSeconds" fullname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests.BreakerStartsAirflowOnlyForPowerLossAndRecoveryStopsAtFiveSeconds" methodname="BreakerStartsAirflowOnlyForPowerLossAndRecoveryStopsAtFiveSeconds" classname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests" runstate="Runnable" seed="1922708971" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.009847" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1150" name="CorrectPartCommitsOnceAndObserversSeeRepairedLinkage" fullname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests.CorrectPartCommitsOnceAndObserversSeeRepairedLinkage" methodname="CorrectPartCommitsOnceAndObserversSeeRepairedLinkage" classname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests" runstate="Runnable" seed="1104675477" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.005004" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1146" name="JumperOwnershipDeterminesBypassInTheSameTransferNotification" fullname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests.JumperOwnershipDeterminesBypassInTheSameTransferNotification" methodname="JumperOwnershipDeterminesBypassInTheSameTransferNotification" classname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests" runstate="Runnable" seed="1475945473" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.001949" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1149" name="LinkageAlternativesUseTheConfiguredMaterialAndShareOneCompletion" fullname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests.LinkageAlternativesUseTheConfiguredMaterialAndShareOneCompletion" classname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.001928" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1147" name="LinkageAlternativesUseTheConfiguredMaterialAndShareOneCompletion(&quot;part&quot;,&quot;salvage&quot;)" fullname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests.LinkageAlternativesUseTheConfiguredMaterialAndShareOneCompletion(&quot;part&quot;,&quot;salvage&quot;)" methodname="LinkageAlternativesUseTheConfiguredMaterialAndShareOneCompletion" classname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests" runstate="Runnable" seed="528371490" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.000314" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1148" name="LinkageAlternativesUseTheConfiguredMaterialAndShareOneCompletion(&quot;salvage&quot;,&quot;part&quot;)" fullname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests.LinkageAlternativesUseTheConfiguredMaterialAndShareOneCompletion(&quot;salvage&quot;,&quot;part&quot;)" methodname="LinkageAlternativesUseTheConfiguredMaterialAndShareOneCompletion" classname="SOLITUDE.Tests.CrewBackgroundsEncounterStateTests" runstate="Runnable" seed="1673896300" result="Passed" start-time="2026-11-20 18:15:01Z" end-time="2026-11-20 18:15:01Z" duration="0.000061" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

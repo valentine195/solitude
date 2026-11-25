@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="4" result="Passed" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-21 03:21:05Z" end-time="2026-11-21 03:21:38Z" duration="33.5292806">
+  <test-suite type="TestSuite" id="1305" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="248" result="Passed" start-time="2026-11-21 03:21:05Z" end-time="2026-11-21 03:21:38Z" duration="33.529281" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1298" name="SOLITUDE.Tests.PlayMode.dll" fullname="/private/tmp/solitude-crew-final.JWcR1N/project/Library/ScriptAssemblies/SOLITUDE.Tests.PlayMode.dll" runstate="Runnable" testcasecount="248" result="Passed" start-time="2026-11-21 03:21:05Z" end-time="2026-11-21 03:21:38Z" duration="33.521448" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="58650" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1299" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="248" result="Passed" start-time="2026-11-21 03:21:05Z" end-time="2026-11-21 03:21:38Z" duration="33.518546" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1300" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="248" result="Passed" start-time="2026-11-21 03:21:05Z" end-time="2026-11-21 03:21:38Z" duration="33.507543" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1168" name="RepairRouteComparisonTests" fullname="SOLITUDE.Tests.RepairRouteComparisonTests" classname="SOLITUDE.Tests.RepairRouteComparisonTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-11-21 03:21:05Z" end-time="2026-11-21 03:21:38Z" duration="33.498477" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1171" name="PatrolElsewhereBreaker" fullname="SOLITUDE.Tests.RepairRouteComparisonTests.PatrolElsewhereBreaker" methodname="PatrolElsewhereBreaker" classname="SOLITUDE.Tests.RepairRouteComparisonTests" runstate="Runnable" seed="1460950339" result="Passed" start-time="2026-11-21 03:21:05Z" end-time="2026-11-21 03:21:14Z" duration="9.180173" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[REPAIR_AB_START patrol=False jumper=False player=(22.00, 2.50) door=(26.00, 0.50, 0.00)
+REPAIR_AB patrol=False jumper=False repair=2.68s exit=8.79s sight=0.00s minDistance=Infinity shots=0 stuns=0 lights=True installed=False
+]]></output>
+            </test-case>
+            <test-case id="1172" name="PatrolElsewhereJumper" fullname="SOLITUDE.Tests.RepairRouteComparisonTests.PatrolElsewhereJumper" methodname="PatrolElsewhereJumper" classname="SOLITUDE.Tests.RepairRouteComparisonTests" runstate="Runnable" seed="262952948" result="Passed" start-time="2026-11-21 03:21:14Z" end-time="2026-11-21 03:21:22Z" duration="7.750210" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[REPAIR_AB_START patrol=False jumper=True player=(22.00, 2.50) door=(26.00, 0.50, 0.00)
+REPAIR_AB patrol=False jumper=True repair=1.58s exit=7.69s sight=0.00s minDistance=Infinity shots=0 stuns=0 lights=False installed=True
+]]></output>
+            </test-case>
+            <test-case id="1169" name="PatrolPresentBreaker" fullname="SOLITUDE.Tests.RepairRouteComparisonTests.PatrolPresentBreaker" methodname="PatrolPresentBreaker" classname="SOLITUDE.Tests.RepairRouteComparisonTests" runstate="Runnable" seed="321946889" result="Passed" start-time="2026-11-21 03:21:22Z" end-time="2026-11-21 03:21:30Z" duration="8.829247" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[REPAIR_AB_START patrol=True jumper=False player=(22.00, 2.50) door=(26.00, 0.50, 0.00)
+REPAIR_AB patrol=True jumper=False repair=2.68s exit=8.79s sight=8.78s minDistance=1.72 shots=2 stuns=2 lights=True installed=False
+]]></output>
+            </test-case>
+            <test-case id="1170" name="PatrolPresentJumper" fullname="SOLITUDE.Tests.RepairRouteComparisonTests.PatrolPresentJumper" methodname="PatrolPresentJumper" classname="SOLITUDE.Tests.RepairRouteComparisonTests" runstate="Runnable" seed="970297040" result="Passed" start-time="2026-11-21 03:21:30Z" end-time="2026-11-21 03:21:38Z" duration="7.728801" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[REPAIR_AB_START patrol=True jumper=True player=(22.00, 2.50) door=(26.00, 0.50, 0.00)
+REPAIR_AB patrol=True jumper=True repair=1.57s exit=7.68s sight=7.68s minDistance=1.47 shots=3 stuns=2 lights=False installed=True
+Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

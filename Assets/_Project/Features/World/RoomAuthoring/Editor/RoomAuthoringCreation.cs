@@ -171,16 +171,18 @@ namespace SOLITUDE.Editor.RoomAuthoring
 
         internal static string GetOwnershipIssue(ShipRoomAuthoring room, bool allowMissingOutput, RoomValidationSnapshot snapshot)
         {
-            var issue = GetIndependentOwnershipIssue(room, allowMissingOutput);
+            if (room == null || !room.gameObject.scene.IsValid() || !room.gameObject.scene.isLoaded)
+                return "Select a room in a loaded scene.";
+            snapshot ??= new RoomValidationSnapshot(room);
+            var issue = GetIndependentOwnershipIssue(room, allowMissingOutput, snapshot);
             return issue ?? GetMembershipIssue(room, allowMissingOutput);
         }
 
-        private static string GetIndependentOwnershipIssue(ShipRoomAuthoring room, bool allowMissingOutput)
+        private static string GetIndependentOwnershipIssue(ShipRoomAuthoring room, bool allowMissingOutput, RoomValidationSnapshot snapshot)
         {
             if (room == null || !room.gameObject.scene.IsValid() || !room.gameObject.scene.isLoaded)
                 return "Select a room in a loaded scene.";
             if (string.IsNullOrWhiteSpace(room.RoomId)) return "Room identity is missing.";
-            snapshot ??= new RoomValidationSnapshot(room);
             if (!snapshot.IdentityCounts.TryGetValue(room.RoomId, out int identities) || identities != 1) return "Room identity is ambiguous in this scene.";
             if (room.Occupancy == null) return "Room occupancy reference is missing.";
             if (room.Occupancy.transform == room.transform || !room.Occupancy.transform.IsChildOf(room.transform))
@@ -231,12 +233,13 @@ namespace SOLITUDE.Editor.RoomAuthoring
             if (layout.Spaces.Count == 0 || layout.Spaces.Any(room => room == null) ||
                 layout.Spaces.Distinct().Count() != layout.Spaces.Count)
                 return "Layout requires distinct, non-null spaces.";
+            var snapshot = new RoomValidationSnapshot(layout.Spaces[0]);
             foreach (var room in layout.Spaces)
             {
                 if (room.Layout != layout || room.gameObject.scene != layout.gameObject.scene ||
                     !room.transform.IsChildOf(layout.transform) || layouts.Count(other => other.Spaces.Contains(room)) != 1)
                     return "Layout space membership is ambiguous or inconsistent.";
-                var issue = GetIndependentOwnershipIssue(room, allowMissingOutput);
+                var issue = GetIndependentOwnershipIssue(room, allowMissingOutput, snapshot);
                 if (issue != null) return issue;
                 if (room.GeneratedOutput != null && room.GeneratedOutput.LayoutOwner != layout)
                     return "Layout space output association is inconsistent.";
