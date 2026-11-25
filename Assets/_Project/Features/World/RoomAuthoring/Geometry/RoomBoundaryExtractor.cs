@@ -11,7 +11,7 @@ namespace SOLITUDE.World.RoomAuthoring
         {
             var cells = new HashSet<Vector2Int>(input ?? throw new ArgumentNullException(nameof(input)));
             var ordered = cells.OrderBy(c => c.y).ThenBy(c => c.x).ToArray();
-            if (ordered.Length == 0) return new RoomGeometry { Cells = ordered, Runs = Array.Empty<RoomBoundaryRun>(), ConvexCorners = Array.Empty<Vector2Int>() };
+            if (ordered.Length == 0) return new RoomGeometry { Cells = ordered, Runs = Array.Empty<RoomBoundaryRun>(), ConvexCorners = Array.Empty<Vector2Int>(), Junctions = Array.Empty<RoomJunction>(), DiagonalContacts = Array.Empty<Vector2Int>() };
             var min = new Vector2Int(cells.Min(c => c.x), cells.Min(c => c.y));
             var max = new Vector2Int(cells.Max(c => c.x) + 1, cells.Max(c => c.y) + 1);
             var bounds = new RectInt(min, max - min);
@@ -34,16 +34,44 @@ namespace SOLITUDE.World.RoomAuthoring
                     }
                 }
             }
-            var corners = new HashSet<Vector2Int>();
-            foreach (var c in cells)
+            var vertices = new HashSet<Vector2Int>(cells.SelectMany(c => new[] { c, c + Vector2Int.right, c + Vector2Int.up, c + Vector2Int.one }));
+            var joins = new List<RoomJunction>();
+            var contacts = new List<Vector2Int>();
+            foreach (var vertex in vertices.OrderBy(v => v.y).ThenBy(v => v.x))
             {
-                if (!cells.Contains(c + Vector2Int.left) && !cells.Contains(c + Vector2Int.down)) corners.Add(c);
-                if (!cells.Contains(c + Vector2Int.right) && !cells.Contains(c + Vector2Int.down)) corners.Add(c + Vector2Int.right);
-                if (!cells.Contains(c + Vector2Int.left) && !cells.Contains(c + Vector2Int.up)) corners.Add(c + Vector2Int.up);
-                if (!cells.Contains(c + Vector2Int.right) && !cells.Contains(c + Vector2Int.up)) corners.Add(c + Vector2Int.one);
+                var quadrants = new[] { vertex - Vector2Int.one, vertex - Vector2Int.up, vertex - Vector2Int.right, vertex };
+                var occupied = quadrants.Select(cells.Contains).ToArray();
+                var count = occupied.Count(v => v);
+                var diagonal = count == 2 && occupied[0] == occupied[3] && occupied[1] == occupied[2];
+                if (diagonal) contacts.Add(vertex);
+                for (var n = 0; n < 4; n++)
+                {
+                    if ((count == 1 || diagonal) && occupied[n])
+                        joins.Add(new RoomJunction(RoomJoinKind.Convex, (RoomCorner)(3 - n), vertex));
+                    if (count == 3 && !occupied[n])
+                        joins.Add(new RoomJunction(RoomJoinKind.Concave, (RoomCorner)n, vertex));
+                }
+            }
+            var junctions = joins.OrderBy(j => j.Position.y).ThenBy(j => j.Position.x).ThenBy(j => j.Kind).ThenBy(j => j.Corner).ToArray();
+            var locatedRuns = runs.Select(run => new RoomBoundaryRun(run.Side, run.Start, run.Length,
+                junctions.Single(j => j.Position == run.Start && j.HasSide(run.Side)),
+                junctions.Single(j => j.Position == run.End && j.HasSide(run.Side)))).ToArray();
+            var remaining = new HashSet<Vector2Int>(cells);
+            var components = 0;
+            var queue = new Queue<Vector2Int>();
+            while (remaining.Count > 0)
+            {
+                var seed = remaining.First(); remaining.Remove(seed); queue.Enqueue(seed); components++;
+                while (queue.Count > 0)
+                {
+                    var cell = queue.Dequeue();
+                    foreach (var offset in new[] { Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right })
+                        if (remaining.Remove(cell + offset)) queue.Enqueue(cell + offset);
+                }
             }
             return new RoomGeometry { Cells = ordered, Bounds = bounds, IsRectangle = (long)bounds.width * bounds.height == cells.Count,
-                Runs = runs.ToArray(), ConvexCorners = corners.OrderBy(c => c.y).ThenBy(c => c.x).ToArray() };
+                Runs = locatedRuns, Junctions = junctions, DiagonalContacts = contacts.ToArray(), ComponentCount = components,
+                ConvexCorners = junctions.Where(j => j.Kind == RoomJoinKind.Convex).Select(j => j.Position).ToArray() };
         }
     }
 }

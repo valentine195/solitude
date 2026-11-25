@@ -14,7 +14,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
     {
         public static string[] Snapshot(ShipRoomAuthoring room)
         {
-            var result = new List<string> { "diagnostic:" + room.GenerationDiagnostic };
+            var result = new List<string> { "diagnostic:" + room.GenerationDiagnostic, "result:" + JsonUtility.ToJson(room.GenerationResult) };
             foreach (var c in RoomAuthoringOperations.ReadCells(room))
                 result.Add("authored:" + c + ":" + room.Occupancy.GetTile(new Vector3Int(c.x, c.y, 0)).GetEntityId());
             foreach (var renderer in room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>())
@@ -28,7 +28,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
 
         [TestCase("Paint")]
         [TestCase("Paint stroke")]
-        [TestCase("Erase invalid")]
+        [TestCase("Erase notch")]
         [TestCase("Box fill")]
         [TestCase("Box expansion")]
         [TestCase("Box erase")]
@@ -41,7 +41,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var before = Snapshot(room);
             var brush = ScriptableObject.CreateInstance<ShipRoomBrush>(); brush.OccupancyMarker = f.Style.FloorTile;
             var editor = (ShipRoomBrushEditor)UnityEditor.Editor.CreateEditor(brush);
-            var tool = operation.StartsWith("Paint") ? GridBrushBase.Tool.Paint : operation == "Erase invalid" ? GridBrushBase.Tool.Erase : GridBrushBase.Tool.Box;
+            var tool = operation.StartsWith("Paint") ? GridBrushBase.Tool.Paint : operation == "Erase notch" ? GridBrushBase.Tool.Erase : GridBrushBase.Tool.Box;
             try
             {
                 editor.RegisterUndo(room.Occupancy.gameObject, tool);
@@ -53,7 +53,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
                         brush.Paint(grid, target, Vector3Int.right);
                         brush.Paint(grid, target, Vector3Int.right * 2);
                         break;
-                    case "Erase invalid": brush.Erase(grid, target, new Vector3Int(7, 5, 0)); break;
+                    case "Erase notch": brush.Erase(grid, target, new Vector3Int(7, 5, 0)); break;
                     case "Box fill": brush.BoxFill(grid, target, new BoundsInt(0, 0, 0, 8, 6, 1)); break;
                     case "Box expansion": brush.BoxFill(grid, target, new BoundsInt(8, 0, 0, 4, 6, 1)); break;
                     case "Box erase": brush.BoxErase(grid, target, new BoundsInt(0, 0, 0, 8, 6, 1)); break;
@@ -65,11 +65,11 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 editor.OnToolDeactivated(tool);
                 var after = Snapshot(room);
                 CollectionAssert.AreNotEqual(before, after);
-                if (operation == "Erase invalid")
+                if (operation == "Erase notch")
                 {
                     Assert.AreEqual(47, RoomAuthoringOperations.ReadCells(room).Length);
-                    Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
-                    Assert.That(room.GenerationDiagnostic, Does.Contain("rectangle"));
+                    Assert.AreEqual(47, RoomAuthoringTestFixtures.FloorCount(room));
+                    Assert.IsEmpty(room.GenerationDiagnostic);
                 }
                 Undo.PerformUndo();
                 CollectionAssert.AreEqual(before, Snapshot(room), operation + " Undo");
@@ -79,6 +79,63 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 Assert.AreSame(room.transform, room.Occupancy.transform.parent);
             }
             finally { brush.EndGesture(); Object.DestroyImmediate(editor); Object.DestroyImmediate(brush); }
+        }
+        [TestCase(false)]
+        [TestCase(true)]
+        public void CompletePartialEmptyAndCorrectionRestoreEveryRecordedState(bool useBoxErase)
+        {
+            using var f = new RoomAuthoringTestFixtures();
+            var room = f.Room(); Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
+            var complete = Snapshot(room);
+            var brush = ScriptableObject.CreateInstance<ShipRoomBrush>(); brush.OccupancyMarker = f.Style.FloorTile;
+            var grid = room.GetComponent<Grid>(); var target = room.Occupancy.gameObject;
+            try
+            {
+                if (useBoxErase)
+                {
+                    brush.BoxMode = ShipRoomBrush.BoxEditMode.Erase;
+                    brush.BoxFill(grid, target, new BoundsInt(6, 4, 0, 1, 1, 1));
+                }
+                else brush.Erase(grid, target, new Vector3Int(6, 4, 0));
+                Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+                Assert.AreEqual(47, RoomAuthoringTestFixtures.FloorCount(room));
+                var partial = Snapshot(room);
+                brush.BoxMode = ShipRoomBrush.BoxEditMode.Erase;
+                brush.BoxFill(grid, target, new BoundsInt(0, 0, 0, 8, 6, 1));
+                Assert.AreEqual(RoomGenerationStatus.Empty, room.GenerationResult.Status);
+                Assert.IsEmpty(room.GenerationResult.Issues);
+                var empty = Snapshot(room);
+                Undo.PerformUndo(); CollectionAssert.AreEqual(partial, Snapshot(room));
+                Undo.PerformUndo(); CollectionAssert.AreEqual(complete, Snapshot(room));
+                Undo.PerformRedo(); CollectionAssert.AreEqual(partial, Snapshot(room));
+                Undo.PerformRedo(); CollectionAssert.AreEqual(empty, Snapshot(room));
+                Undo.PerformUndo();
+                brush.Paint(grid, target, new Vector3Int(6, 4, 0));
+                CollectionAssert.AreEqual(complete, Snapshot(room));
+                Undo.PerformUndo(); CollectionAssert.AreEqual(partial, Snapshot(room));
+                Undo.PerformRedo(); CollectionAssert.AreEqual(complete, Snapshot(room));
+            }
+            finally { Object.DestroyImmediate(brush); }
+        }
+
+        [Test] public void SplitComponentEraseUndoKeepsOneRoomIdentityAndBothBoundaryBranches()
+        {
+            using var f = new RoomAuthoringTestFixtures(32);
+            var room = f.Room(3, 1); Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
+            var before = Snapshot(room); var identity = room.RoomId;
+            Assert.IsFalse(RoomAuthoringOperations.PaintCell(room, Vector3Int.right, null));
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+            Assert.AreEqual(2, room.GenerationResult.Issues.Count(i => i.Kind == RoomIssueKind.Geometry && i.Field.StartsWith("Disconnected/")));
+            Assert.AreEqual(2, RoomBoundaryExtractor.Extract(RoomAuthoringOperations.ReadCells(room)).ComponentCount);
+            Assert.AreEqual(identity, room.RoomId);
+            Assert.AreEqual(2, RoomAuthoringTestFixtures.FloorCount(room));
+            var split = Snapshot(room);
+            Undo.PerformUndo(); CollectionAssert.AreEqual(before, Snapshot(room));
+            Assert.AreEqual(RoomGenerationStatus.Complete, room.GenerationResult.Status);
+            Assert.IsEmpty(room.GenerationDiagnostic);
+            Undo.PerformRedo(); CollectionAssert.AreEqual(split, Snapshot(room));
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+            Assert.AreEqual(identity, room.RoomId);
         }
     }
 }

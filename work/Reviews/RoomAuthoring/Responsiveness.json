@@ -1,0 +1,451 @@
+{
+  "result": "STOPPED",
+  "mode": "phase 4",
+  "step": "4.2",
+  "head": "1c7f4247bbd16b1fe0056fb655744e17d8c6ac6b",
+  "spec_sha256": "b9a81579cbe4931cf6b6e03c74610e867d7a754acd28fd09cbd8f158bc15e4c1",
+  "normalized_plan_bundle": "9d866594dd8fcd96124658010d3f64869de6c27b759a0b737cd947a50e5b6782",
+  "provenance": "all approved spec/normalized plan files and upstream provenance checked before source work; approved spec/normalized plan rechecked after execution",
+  "feature_config_sha256": {
+    "Packages/manifest.json": "61e953ccdb0f8801ce752b462754b722ac4ddd14f38c4a49e2e4baedb3e3ae2d",
+    "Packages/packages-lock.json": "c2ec09b521ae98ee5a7cef21c294018aef32c2c2af83ae432e4d556bff49ee65",
+    "ProjectSettings/ShaderGraphSettings.asset": "5c432c9c73fdf73fee91c8823ea02ab98e3b7a8edf341b5ae6901d699cce52a7",
+    "ProjectSettings/ProjectSettings.asset": "cc09552a6e0dc5c4122371b3f9c1fa2f4f08a001d638fbc093f84e2470736dbb",
+    "ProjectSettings/InputManager.asset": "7a1bb836a1008d26d0860d143e9d9df7ca41731d30a72901b518063819c62df2",
+    "ProjectSettings/TimeManager.asset": "1a83e54adbbda7c9f4851103a0c6ab7f6448a3343d4ea5b7620452fa08416ecd",
+    "ProjectSettings/MultiplayerManager.asset": "aba89fd1a1ddad182727ad82727e536d27372e90328a8196da2a4560398983dd",
+    "ProjectSettings/VersionControlSettings.asset": "e199cdfa6a8f2bf33cfd47e549198f13e3eb2a5099e908fdb4e0f14d939ccc6b",
+    "ProjectSettings/SceneTemplateSettings.json": "bb9098b3bfcde78d93e264b96f7b77b5430e64e8c57a7aad7f5a5d9c3945e16a",
+    "ProjectSettings/GraphicsSettings.asset": "bcdb6ee570b5edc137b79e48f860495035136e494030e214fe39c151d16fe993",
+    "ProjectSettings/ProjectAuditorSettings.asset": "9e68444b9bda981e2927a98df9edf69ea88362f0c6b7f3c81b39b9d515d2a416",
+    "ProjectSettings/XRSettings.asset": "edd2beb4a2e388312b4b7da241aa51070434005d82c59363f1237dd2e567585f",
+    "ProjectSettings/PresetManager.asset": "29c125923fe6e29f90190d4fce1c82d660e7051546e2c9d02908d18c9cf2436c",
+    "ProjectSettings/UnityConnectSettings.asset": "b7dd1e8290598f5ce86919ba1c98b42b766c8c42191a30fa2c4d12195c4ecd00",
+    "ProjectSettings/EditorSettings.asset": "7caecf2c5a7c6cce34a36b72c121a9295eec6666e77771df5130a3ddcd6c55f3",
+    "ProjectSettings/EditorBuildSettings.asset": "c2d68dc476e1e2de0fafccc29e7f73e79f5629b98e5971e275766bfd6e9dbe8e",
+    "ProjectSettings/ClusterInputManager.asset": "40e65dd214bf254955d2c8829ca8ce2130fd3510485560ce012e9a1ddd93e623",
+    "ProjectSettings/PhysicsCoreProjectSettings2D.asset": "bedc5339a832c60dc3f11b84abc4f4384dbfa20b0cd9ad6c444b907e751fc35e",
+    "ProjectSettings/TagManager.asset": "3b5fb9ea2adafd3f1410e8a474530fb32fe573bfec9f79b72df6360b393070a2",
+    "ProjectSettings/NavMeshAreas.asset": "80106cfa7e6181a1928b142c075f3e510d527441e3d79bc83590e4ac91e7cd66",
+    "ProjectSettings/Physics2DSettings.asset": "50e61d70bc38c632cb0e6efe364a9c5bcfd9a8dbcf4e7b5ecfb06a2030c4518f",
+    "ProjectSettings/URPProjectSettings.asset": "c317fe22b9488785c0611f0642429922e5d324430d929bffb41648130f30c218",
+    "ProjectSettings/PackageManagerSettings.asset": "2b949fc9eef99f2b8a8068f686cf8dce70a54bd0edde9130bb2ab41b39bbe13f",
+    "ProjectSettings/NetworkManager.asset": "46395def99a6b5ae38ebb19b3e18f75215a9d4172c219361521a5a51e051f386",
+    "ProjectSettings/AudioManager.asset": "aeedeb3243f07b61dbbe854aa08b5ef6f0b5274dd9852ad9f6129dde3e105a31",
+    "ProjectSettings/VFXManager.asset": "f066c6483919961332415ee64204f74fe52f38c02e82892eb02b7a5b2e381f0e",
+    "ProjectSettings/DynamicsManager.asset": "b7c9a9dc08b98990109d4346f68745e15e238de400f96c583e53e1c83c743a78",
+    "ProjectSettings/QualitySettings.asset": "7ec339d3e5e2b8cc73548e69256f6151782bb68a4afb64f865fd94704dbf0de3",
+    "ProjectSettings/MemorySettings.asset": "1e8379a461b10ae09f3f696911088c16875d63e87ed5f2d95df9e1892703f9fd",
+    "ProjectSettings/ProjectVersion.txt": "338824f489d7ef647583e723283307ae92b3bb241d2fe874ac759dbf2f091701"
+  },
+  "isolated_config_sha256": {
+    "Packages/manifest.json": "61e953ccdb0f8801ce752b462754b722ac4ddd14f38c4a49e2e4baedb3e3ae2d",
+    "Packages/packages-lock.json": "c2ec09b521ae98ee5a7cef21c294018aef32c2c2af83ae432e4d556bff49ee65",
+    "ProjectSettings/ShaderGraphSettings.asset": "5c432c9c73fdf73fee91c8823ea02ab98e3b7a8edf341b5ae6901d699cce52a7",
+    "ProjectSettings/ProjectSettings.asset": "001294316b8b7baaf448810314ee9e50c024f5d63d77ae7b8acfacfd90137191",
+    "ProjectSettings/InputManager.asset": "7a1bb836a1008d26d0860d143e9d9df7ca41731d30a72901b518063819c62df2",
+    "ProjectSettings/TimeManager.asset": "1a83e54adbbda7c9f4851103a0c6ab7f6448a3343d4ea5b7620452fa08416ecd",
+    "ProjectSettings/MultiplayerManager.asset": "aba89fd1a1ddad182727ad82727e536d27372e90328a8196da2a4560398983dd",
+    "ProjectSettings/VersionControlSettings.asset": "e199cdfa6a8f2bf33cfd47e549198f13e3eb2a5099e908fdb4e0f14d939ccc6b",
+    "ProjectSettings/SceneTemplateSettings.json": "bb9098b3bfcde78d93e264b96f7b77b5430e64e8c57a7aad7f5a5d9c3945e16a",
+    "ProjectSettings/GraphicsSettings.asset": "bcdb6ee570b5edc137b79e48f860495035136e494030e214fe39c151d16fe993",
+    "ProjectSettings/ProjectAuditorSettings.asset": "9e68444b9bda981e2927a98df9edf69ea88362f0c6b7f3c81b39b9d515d2a416",
+    "ProjectSettings/XRSettings.asset": "edd2beb4a2e388312b4b7da241aa51070434005d82c59363f1237dd2e567585f",
+    "ProjectSettings/PresetManager.asset": "29c125923fe6e29f90190d4fce1c82d660e7051546e2c9d02908d18c9cf2436c",
+    "ProjectSettings/UnityConnectSettings.asset": "b7dd1e8290598f5ce86919ba1c98b42b766c8c42191a30fa2c4d12195c4ecd00",
+    "ProjectSettings/EditorSettings.asset": "9aad035dbabc65c1cf9d7fe8bd0bdc32883daba110351888432759d2379e59eb",
+    "ProjectSettings/EditorBuildSettings.asset": "c2d68dc476e1e2de0fafccc29e7f73e79f5629b98e5971e275766bfd6e9dbe8e",
+    "ProjectSettings/ClusterInputManager.asset": "40e65dd214bf254955d2c8829ca8ce2130fd3510485560ce012e9a1ddd93e623",
+    "ProjectSettings/PhysicsCoreProjectSettings2D.asset": "bedc5339a832c60dc3f11b84abc4f4384dbfa20b0cd9ad6c444b907e751fc35e",
+    "ProjectSettings/TagManager.asset": "3b5fb9ea2adafd3f1410e8a474530fb32fe573bfec9f79b72df6360b393070a2",
+    "ProjectSettings/NavMeshAreas.asset": "80106cfa7e6181a1928b142c075f3e510d527441e3d79bc83590e4ac91e7cd66",
+    "ProjectSettings/Physics2DSettings.asset": "50e61d70bc38c632cb0e6efe364a9c5bcfd9a8dbcf4e7b5ecfb06a2030c4518f",
+    "ProjectSettings/URPProjectSettings.asset": "c317fe22b9488785c0611f0642429922e5d324430d929bffb41648130f30c218",
+    "ProjectSettings/PackageManagerSettings.asset": "2b949fc9eef99f2b8a8068f686cf8dce70a54bd0edde9130bb2ab41b39bbe13f",
+    "ProjectSettings/NetworkManager.asset": "46395def99a6b5ae38ebb19b3e18f75215a9d4172c219361521a5a51e051f386",
+    "ProjectSettings/AudioManager.asset": "aeedeb3243f07b61dbbe854aa08b5ef6f0b5274dd9852ad9f6129dde3e105a31",
+    "ProjectSettings/VFXManager.asset": "f066c6483919961332415ee64204f74fe52f38c02e82892eb02b7a5b2e381f0e",
+    "ProjectSettings/DynamicsManager.asset": "b7c9a9dc08b98990109d4346f68745e15e238de400f96c583e53e1c83c743a78",
+    "ProjectSettings/QualitySettings.asset": "7ec339d3e5e2b8cc73548e69256f6151782bb68a4afb64f865fd94704dbf0de3",
+    "ProjectSettings/MemorySettings.asset": "1e8379a461b10ae09f3f696911088c16875d63e87ed5f2d95df9e1892703f9fd",
+    "ProjectSettings/ProjectVersion.txt": "338824f489d7ef647583e723283307ae92b3bb241d2fe874ac759dbf2f091701"
+  },
+  "isolated_source_differences": [
+    "Assets/_Project/Settings/UniversalRP.asset"
+  ],
+  "isolated_config_differences": [
+    "ProjectSettings/ProjectSettings.asset",
+    "ProjectSettings/EditorSettings.asset"
+  ],
+  "results": [
+    {
+      "name": "SOLITUDE.Tests.RoomAuthoring.RoomFloorPanelResourceTests.RepeatedSeedStyleUndoReopenAndExplicitCleanupRetainOnlyVerifiedResources",
+      "result": "Passed"
+    },
+    {
+      "name": "SOLITUDE.Tests.RoomAuthoring.ShipLayoutResponsivenessTests.MeasureThreeFixturesWithEquivalentReuseAndSingleApplyGestures",
+      "result": "Passed"
+    }
+  ],
+  "measurements": [
+    {
+      "fixture": "Medbay176",
+      "cells": 176,
+      "objects": 114,
+      "renderers": 111,
+      "textures": 9,
+      "chunks": 9,
+      "pixels": 589824,
+      "rgbaBytes": 2359296,
+      "revisionsBefore": 6,
+      "revisionsAfter": 10,
+      "gestureApplications": [
+        1,
+        1,
+        1
+      ],
+      "result": "IncompletePreview",
+      "rebuildMilliseconds": {
+        "samples": [
+          291.8998,
+          281.50010000000003,
+          280.9987,
+          284.6317,
+          275.9366
+        ],
+        "min": 275.9366,
+        "median": 281.50010000000003,
+        "max": 291.8998
+      },
+      "gestureMilliseconds": {
+        "samples": [
+          440.63980000000004,
+          295.14390000000003,
+          283.1144
+        ],
+        "min": 283.1144,
+        "median": 295.14390000000003,
+        "max": 440.63980000000004
+      },
+      "seedMilliseconds": {
+        "samples": [
+          452.70210000000003,
+          468.5504,
+          473.1727
+        ],
+        "min": 452.70210000000003,
+        "median": 468.5504,
+        "max": 473.1727
+      },
+      "styleMilliseconds": {
+        "samples": [
+          624.3286,
+          625.1046,
+          638.8587
+        ],
+        "min": 624.3286,
+        "median": 625.1046,
+        "max": 638.8587
+      }
+    },
+    {
+      "fixture": "Cryobay83",
+      "cells": 83,
+      "objects": 40,
+      "renderers": 39,
+      "textures": 4,
+      "chunks": 4,
+      "pixels": 262144,
+      "rgbaBytes": 1048576,
+      "revisionsBefore": 1,
+      "revisionsAfter": 5,
+      "gestureApplications": [
+        1,
+        1,
+        1
+      ],
+      "result": "IncompletePreview",
+      "rebuildMilliseconds": {
+        "samples": [
+          98.9621,
+          85.4552,
+          97.9932,
+          85.43440000000001,
+          96.57130000000001
+        ],
+        "min": 85.43440000000001,
+        "median": 96.57130000000001,
+        "max": 98.9621
+      },
+      "gestureMilliseconds": {
+        "samples": [
+          218.66660000000002,
+          100.09790000000001,
+          88.0698
+        ],
+        "min": 88.0698,
+        "median": 100.09790000000001,
+        "max": 218.66660000000002
+      },
+      "seedMilliseconds": {
+        "samples": [
+          245.8951,
+          230.65990000000002,
+          243.9395
+        ],
+        "min": 230.65990000000002,
+        "median": 243.9395,
+        "max": 245.8951
+      },
+      "styleMilliseconds": {
+        "samples": [
+          208.67780000000002,
+          212.3133,
+          206.9556
+        ],
+        "min": 206.9556,
+        "median": 208.67780000000002,
+        "max": 212.3133
+      }
+    },
+    {
+      "fixture": "Larger32x32",
+      "cells": 1024,
+      "objects": 134,
+      "renderers": 133,
+      "textures": 16,
+      "chunks": 16,
+      "pixels": 1048576,
+      "rgbaBytes": 4194304,
+      "revisionsBefore": 1,
+      "revisionsAfter": 5,
+      "gestureApplications": [
+        1,
+        1,
+        1
+      ],
+      "result": "Complete",
+      "rebuildMilliseconds": {
+        "samples": [
+          497.2015,
+          497.12570000000005,
+          476.2332,
+          467.83430000000004,
+          461.29200000000003
+        ],
+        "min": 461.29200000000003,
+        "median": 476.2332,
+        "max": 497.2015
+      },
+      "gestureMilliseconds": {
+        "samples": [
+          708.5319000000001,
+          430.38280000000003,
+          434.14000000000004
+        ],
+        "min": 430.38280000000003,
+        "median": 434.14000000000004,
+        "max": 708.5319000000001
+      },
+      "seedMilliseconds": {
+        "samples": [
+          765.6203,
+          772.3147,
+          767.2823000000001
+        ],
+        "min": 765.6203,
+        "median": 767.2823000000001,
+        "max": 772.3147
+      },
+      "styleMilliseconds": {
+        "samples": [
+          990.2773000000001,
+          985.8528,
+          993.8339000000001
+        ],
+        "min": 985.8528,
+        "median": 990.2773000000001,
+        "max": 993.8339000000001
+      }
+    }
+  ],
+  "criteria": [
+    "S5",
+    "S12",
+    "S14",
+    "S21",
+    "S41",
+    "S42",
+    "S47",
+    "S49",
+    "S59",
+    "S60",
+    "S64"
+  ],
+  "command": "SOLITUDE_RESPONSIVENESS_REPORT=/Users/jeremyvalentine/.codex/worktrees/layout-adoption-repair/SOLITUDE/.qrspi/floor-driven-room-authoring/verification/phase-4-step-2-measurements-attempt-4.json /Users/jeremyvalentine/.unity/bin/unity test /Users/jeremyvalentine/.codex/verification/panel-performance-20261025/SOLITUDE --mode EditMode --filter 'SOLITUDE.Tests.RoomAuthoring.ShipLayoutResponsivenessTests;SOLITUDE.Tests.RoomAuthoring.RoomFloorPanelResourceTests' --output /Users/jeremyvalentine/.codex/worktrees/layout-adoption-repair/SOLITUDE/.qrspi/floor-driven-room-authoring/verification/phase-4-step-2-edit-attempt-4.xml --format json -- -solitudeRoomAuthoringVerification -logFile /Users/jeremyvalentine/.codex/worktrees/layout-adoption-repair/SOLITUDE/.qrspi/floor-driven-room-authoring/verification/phase-4-step-2-edit-attempt-4.log",
+  "bounded_corrections": [
+    "UnityEngine.Application.unityVersion qualification",
+    "select saved Structural Medbay Layout by stable layout ID, excluding sentinels",
+    "retain default asset store for saved Medbay so existing prepared resources remain admitted; synthetic fixtures use isolated test stores"
+  ],
+  "native_observation": "NotRun / deferred by direct human instruction",
+  "remaining": "Native UI responsiveness observations; human acceptance of any unresolved measured responsiveness/retention limits; step3 full shipping gate/player proof and final independent review remain outstanding. No acceptance invented.",
+  "commits": [],
+  "preservation": "No product source changed outside four planned harness files. Batch project received harness copies and disposable generated resources. Native ephemeral measurement edited only new preview fixtures and temporary resources; original saved Medbay authored/input/output/cells stayed identical, clean; original Undo name restored after measurement groups reverted (group number advanced26\u2192267). No domain reload, ClearAll or production access. Native generated immutable revision count10\u219214 during Medbay measurement; historical revisions retained intentionally. Source/config hashes separately recorded. Failed attempts1-3 retained.",
+  "native_api": {
+    "result": "Passed",
+    "artifact": "phase-4-step-2-native-api-attempt-2.json",
+    "script": "phase-4-step-2-native-measurement-attempt-2.cs",
+    "script_sha256": "dae1177d2994c064b30277edb1a0bf47344b7df8d64920f3d108da44150d7077",
+    "command": "/Users/jeremyvalentine/.unity/bin/unity command run_script --project-path /Users/jeremyvalentine/.codex/verification/layout-2e-repair-20261024/SOLITUDE --caller plugin --skill unity-cli --timeout 180 --file /Users/jeremyvalentine/.codex/worktrees/layout-adoption-repair/SOLITUDE/.qrspi/floor-driven-room-authoring/verification/phase-4-step-2-native-measurement-attempt-2.cs --entry SOLITUDE.Tests.RoomAuthoring.NativeResponsivenessMeasurementAttempt2.Main --timeout_ms 180000 --format json",
+    "preservation": {
+      "originalSceneUnchanged": true,
+      "originalUndoGroup": 26,
+      "originalUndoName": "Select Structural Medbay Layout (GameObject in MedbayAuthoringDemo)",
+      "finalUndoGroup": 267,
+      "finalUndoName": "Select Structural Medbay Layout (GameObject in MedbayAuthoringDemo)"
+    },
+    "report": {
+      "utc": "2026-10-28T05:40:18.285634Z",
+      "unity": "6000.6.4f1",
+      "os": "Mac OS X 27.0.1",
+      "cpu": "Apple M1 Pro",
+      "gpu": "Apple M1 Pro",
+      "project": "/Users/jeremyvalentine/.codex/verification/layout-2e-repair-20261024/SOLITUDE",
+      "source": "Phase4 Step2 native ephemeral current harness; no domain reload",
+      "processorCount": 8,
+      "systemMemoryMB": 16384,
+      "sampling": "One untimed warmup; five equivalent rebuilds; three multi-sample gestures, seed changes and style roundtrips. Stopwatch wall time; no speed threshold.",
+      "measurements": [
+        {
+          "fixture": "Medbay176",
+          "settings": "{\"Enabled\":true,\"Seed\":17,\"Version\":1,\"PreferredMinPixels\":{\"x\":32,\"y\":32},\"PreferredMaxPixels\":{\"x\":128,\"y\":128},\"Density\":0.5,\"SeamThickness\":1,\"SeamPalette\":[{\"r\":0.11999999731779099,\"g\":0.1599999964237213,\"b\":0.18000000715255737,\"a\":1.0}]}",
+          "result": "IncompletePreview",
+          "cells": 176,
+          "objects": 114,
+          "renderers": 111,
+          "textures": 9,
+          "chunks": 9,
+          "revisionsBefore": 10,
+          "revisionsAfter": 14,
+          "pixels": 589824,
+          "rgbaBytes": 2359296,
+          "rebuildMilliseconds": [
+            2332.1741,
+            2149.0998,
+            2123.1995,
+            2255.0666,
+            2309.8668
+          ],
+          "gestureMilliseconds": [
+            2700.3931,
+            2344.3204,
+            2222.0166
+          ],
+          "seedMilliseconds": [
+            2592.0239,
+            2965.4775,
+            2922.7726
+          ],
+          "styleMilliseconds": [
+            4962.3347,
+            4829.9641,
+            5125.0663
+          ],
+          "gestureApplications": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "fixture": "Cryobay83",
+          "settings": "{\"Enabled\":true,\"Seed\":17,\"Version\":1,\"PreferredMinPixels\":{\"x\":32,\"y\":32},\"PreferredMaxPixels\":{\"x\":128,\"y\":128},\"Density\":0.5,\"SeamThickness\":1,\"SeamPalette\":[{\"r\":0.11999999731779099,\"g\":0.1599999964237213,\"b\":0.18000000715255737,\"a\":1.0}]}",
+          "result": "IncompletePreview",
+          "cells": 83,
+          "objects": 40,
+          "renderers": 39,
+          "textures": 4,
+          "chunks": 4,
+          "revisionsBefore": 1,
+          "revisionsAfter": 5,
+          "pixels": 262144,
+          "rgbaBytes": 1048576,
+          "rebuildMilliseconds": [
+            693.5672000000001,
+            689.1053,
+            670.4034,
+            621.5273000000001,
+            648.5662
+          ],
+          "gestureMilliseconds": [
+            859.4773,
+            636.4776,
+            833.9875
+          ],
+          "seedMilliseconds": [
+            1128.1286,
+            946.6637,
+            1072.6003
+          ],
+          "styleMilliseconds": [
+            1339.5334,
+            1618.3003,
+            1452.0535
+          ],
+          "gestureApplications": [
+            1,
+            1,
+            1
+          ]
+        },
+        {
+          "fixture": "Larger32x32",
+          "settings": "{\"Enabled\":true,\"Seed\":17,\"Version\":1,\"PreferredMinPixels\":{\"x\":32,\"y\":32},\"PreferredMaxPixels\":{\"x\":128,\"y\":128},\"Density\":0.5,\"SeamThickness\":1,\"SeamPalette\":[{\"r\":0.11999999731779099,\"g\":0.1599999964237213,\"b\":0.18000000715255737,\"a\":1.0}]}",
+          "result": "Complete",
+          "cells": 1024,
+          "objects": 134,
+          "renderers": 133,
+          "textures": 16,
+          "chunks": 16,
+          "revisionsBefore": 1,
+          "revisionsAfter": 5,
+          "pixels": 1048576,
+          "rgbaBytes": 4194304,
+          "rebuildMilliseconds": [
+            2588.077,
+            2695.359,
+            2683.2656,
+            2620.1893,
+            2729.1479
+          ],
+          "gestureMilliseconds": [
+            2927.5696000000003,
+            2579.4142,
+            2804.0484
+          ],
+          "seedMilliseconds": [
+            2924.4771,
+            3124.7940000000003,
+            3157.3804
+          ],
+          "styleMilliseconds": [
+            5713.9123,
+            5962.5872,
+            5813.3727
+          ],
+          "gestureApplications": [
+            1,
+            1,
+            1
+          ]
+        }
+      ]
+    }
+  },
+  "status": "Automated/API checkpoint Passed; Step4.2 incomplete",
+  "acceptance": "Deferred; measured latency and resource-retention limits have not been accepted",
+  "source_snapshot": "1c7f4247bbd16b1fe0056fb655744e17d8c6ac6b plus four exact harness hashes recorded in source evidence",
+  "source_evidence": "phase-4-step-2-resume-evidence-attempt-2.json",
+  "preserved_attempts": "All earlier failed attempts and logs retained"
+}

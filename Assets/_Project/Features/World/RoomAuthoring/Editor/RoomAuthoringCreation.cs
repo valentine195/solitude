@@ -18,6 +18,34 @@ namespace SOLITUDE.Editor.RoomAuthoring
             Selection.activeGameObject = room.gameObject;
         }
 
+        [MenuItem("GameObject/SOLITUDE/Ship Layout Authoring", false, 9)]
+        private static void CreateLayoutFromMenu()
+        {
+            Selection.activeGameObject = CreateLayout(SceneManager.GetActiveScene()).gameObject;
+        }
+
+        public static ShipLayoutAuthoring CreateLayout(Scene scene, RoomStyleDefinition style = null,
+            LogicalSpaceType type = LogicalSpaceType.Room)
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode || !scene.IsValid() || !scene.isLoaded)
+                throw new InvalidOperationException("Create a layout in a loaded Edit Mode scene.");
+            Undo.IncrementCurrentGroup();
+            var group = Undo.GetCurrentGroup();
+            Undo.SetCurrentGroupName("Create Ship Layout");
+            var root = new GameObject("ShipLayout", typeof(ShipLayoutAuthoring));
+            SceneManager.MoveGameObjectToScene(root, scene);
+            Undo.RegisterCreatedObjectUndo(root, "Create Ship Layout");
+            var layout = root.GetComponent<ShipLayoutAuthoring>();
+            var room = Create(scene);
+            Undo.SetTransformParent(room.transform, root.transform, "Create Ship Layout");
+            room.InitializeLayout(layout, type);
+            room.GeneratedOutput.Initialize(room, layout);
+            layout.Initialize(Guid.NewGuid().ToString("N"), style, room, room.GeneratedOutput);
+            Undo.CollapseUndoOperations(group);
+            EditorSceneManager.MarkSceneDirty(scene);
+            return layout;
+        }
+
         public static ShipRoomAuthoring Create(Scene scene, RoomStyleDefinition style = null)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || !scene.IsValid() || !scene.isLoaded)
@@ -40,10 +68,114 @@ namespace SOLITUDE.Editor.RoomAuthoring
             return room;
         }
 
+        public static ShipRoomAuthoring CreateSpace(ShipLayoutAuthoring layout, LogicalSpaceType type = LogicalSpaceType.Room)
+        {
+            var issue = RoomAuthoringOperations.GetSafetyIssue(layout);
+            if (issue != null) throw new InvalidOperationException("Cannot add space: " + issue);
+            RoomAuthoringOperations.CancelActiveEdit();
+            Undo.IncrementCurrentGroup();
+            var group = Undo.GetCurrentGroup();
+            const string action = "Create Layout Space";
+            Undo.SetCurrentGroupName(action);
+            try
+            {
+                var room = Create(layout.gameObject.scene);
+                Undo.SetTransformParent(room.transform, layout.transform, action);
+                Undo.RecordObject(room.transform, action);
+                room.transform.localPosition = Vector3.zero;
+                Undo.RegisterCompleteObjectUndo(room, action);
+                Undo.RegisterCompleteObjectUndo(room.GeneratedOutput, action);
+                Undo.RegisterCompleteObjectUndo(layout, action);
+                room.InitializeLayout(layout, type);
+                room.GeneratedOutput.Initialize(room, layout);
+                layout.AddSpace(room);
+                Undo.FlushUndoRecordObjects();
+                Undo.CollapseUndoOperations(group);
+                EditorUtility.SetDirty(layout);
+                return room;
+            }
+            catch { Undo.RevertAllDownToGroup(group); throw; }
+            finally { Undo.IncrementCurrentGroup(); }
+        }
+
+        public static string GetAdoptionIssue(ShipRoomAuthoring room)
+        {
+            var issue = RoomAuthoringOperations.GetSafetyIssue(room);
+            if (issue != null) return issue;
+            if (room.Layout != null) return "This space already belongs to a layout.";
+            if (EditorUtility.IsPersistent(room) || PrefabUtility.IsPartOfPrefabInstance(room) ||
+                PrefabStageUtility.GetPrefabStage(room.gameObject) != null)
+                return "Adopt a scene room outside a prefab instance.";
+            if (room.GetComponentsInChildren<ShipRoomAuthoring>(true).Any(other => other != room) ||
+                room.GetComponentInParent<ShipLayoutAuthoring>(true) != null ||
+                room.GetComponentsInChildren<ShipLayoutAuthoring>(true).Length != 0)
+                return "Resolve nested room/layout ownership before adoption.";
+            var assessment = RoomAuthoringValidator.Assess(room, out _);
+            if (assessment.Status == RoomGenerationStatus.Refused) return assessment.Summary;
+            return RoomAuthoringValidator.GetAdoptionOutputIssue(room);
+        }
+
+        public static ShipLayoutAuthoring AdoptIntoNewLayout(ShipRoomAuthoring room)
+        {
+            var issue = GetAdoptionIssue(room);
+            if (issue != null) throw new InvalidOperationException("Cannot adopt room: " + issue);
+            var wasCurrent = RoomAuthoringValidator.IsCurrent(room);
+            var previousPath = room.name;
+            for (var parent = room.transform.parent; parent != null; parent = parent.parent)
+                previousPath = parent.name + "/" + previousPath;
+            Undo.IncrementCurrentGroup();
+            var group = Undo.GetCurrentGroup();
+            const string action = "Adopt Room into Ship Layout";
+            Undo.SetCurrentGroupName(action);
+            try
+            {
+                var root = new GameObject("ShipLayout", typeof(ShipLayoutAuthoring));
+                SceneManager.MoveGameObjectToScene(root, room.gameObject.scene);
+                Undo.RegisterCreatedObjectUndo(root, action);
+                var layout = root.GetComponent<ShipLayoutAuthoring>();
+                Undo.SetTransformParent(room.transform, root.transform, action);
+                Undo.RegisterCompleteObjectUndo(room, action);
+                Undo.RegisterCompleteObjectUndo(room.GeneratedOutput, action);
+                Undo.RegisterCompleteObjectUndo(layout, action);
+                room.InitializeLayout(layout, room.SpaceType);
+                room.GeneratedOutput.Initialize(room, layout);
+                layout.Initialize(Guid.NewGuid().ToString("N"), room.Style, room, room.GeneratedOutput);
+                room.GeneratedOutput.RecordAdoption(previousPath);
+                if (wasCurrent)
+                {
+                    var result = RoomAuthoringValidator.Assess(layout, out _);
+                    result.OutputFingerprint = RoomAuthoringValidator.OutputFingerprint(room);
+                    room.SetGenerationResult(result);
+                }
+                // Undo restores inline serialized objects in place; layout deletion must not clear the room's result.
+                layout.SetGenerationResult(room.GenerationResult == null ? null :
+                    JsonUtility.FromJson<RoomGenerationResult>(JsonUtility.ToJson(room.GenerationResult)));
+                EditorUtility.SetDirty(room);
+                EditorUtility.SetDirty(room.GeneratedOutput);
+                EditorUtility.SetDirty(layout);
+                Undo.FlushUndoRecordObjects();
+                Undo.CollapseUndoOperations(group);
+                EditorSceneManager.MarkSceneDirty(room.gameObject.scene);
+                return layout;
+            }
+            catch
+            {
+                Undo.RevertAllDownToGroup(group);
+                throw;
+            }
+            finally { Undo.IncrementCurrentGroup(); }
+        }
+
         public static string GetOwnershipIssue(ShipRoomAuthoring room, bool allowMissingOutput = false)
             => GetOwnershipIssue(room, allowMissingOutput, null);
 
         internal static string GetOwnershipIssue(ShipRoomAuthoring room, bool allowMissingOutput, RoomValidationSnapshot snapshot)
+        {
+            var issue = GetIndependentOwnershipIssue(room, allowMissingOutput);
+            return issue ?? GetMembershipIssue(room, allowMissingOutput);
+        }
+
+        private static string GetIndependentOwnershipIssue(ShipRoomAuthoring room, bool allowMissingOutput)
         {
             if (room == null || !room.gameObject.scene.IsValid() || !room.gameObject.scene.isLoaded)
                 return "Select a room in a loaded scene.";
@@ -71,6 +203,59 @@ namespace SOLITUDE.Editor.RoomAuthoring
                 room.GeneratedOutput.transform.IsChildOf(room.Occupancy.transform)) return "Occupancy and generated output must be separate.";
             if (snapshot.OutputReferences[room.GeneratedOutput] > 1)
                 return "Room occupancy or output is referenced by another room.";
+            return null;
+        }
+
+        private static ShipLayoutAuthoring[] LoadedLayouts() => Resources.FindObjectsOfTypeAll<ShipLayoutAuthoring>()
+            .Where(layout => layout.gameObject.scene.IsValid() && layout.gameObject.scene.isLoaded).ToArray();
+
+        private static string GetMembershipIssue(ShipRoomAuthoring room, bool allowMissingOutput)
+        {
+            var containing = LoadedLayouts().Where(layout => layout.Spaces.Contains(room)).ToArray();
+            if (room.Layout == null)
+                return containing.Length != 0 || (room.GeneratedOutput != null && room.GeneratedOutput.LayoutOwner != null)
+                    ? "Space layout membership is inconsistent." : null;
+            if (containing.Length != 1 || containing[0] != room.Layout)
+                return "Space layout membership is ambiguous or inconsistent.";
+            return GetLayoutOwnershipIssue(room.Layout, allowMissingOutput);
+        }
+
+        public static string GetLayoutOwnershipIssue(ShipLayoutAuthoring layout, bool allowMissingOutput = false)
+        {
+            if (layout == null || !layout.gameObject.scene.IsValid() || !layout.gameObject.scene.isLoaded)
+                return "Select a layout in a loaded scene.";
+            var layouts = LoadedLayouts();
+            if (string.IsNullOrWhiteSpace(layout.LayoutId)) return "Layout identity is missing.";
+            if (layouts.Count(other => other.gameObject.scene == layout.gameObject.scene && other.LayoutId == layout.LayoutId) != 1)
+                return "Layout identity is ambiguous in this scene.";
+            if (layout.Spaces.Count == 0 || layout.Spaces.Any(room => room == null) ||
+                layout.Spaces.Distinct().Count() != layout.Spaces.Count)
+                return "Layout requires distinct, non-null spaces.";
+            foreach (var room in layout.Spaces)
+            {
+                if (room.Layout != layout || room.gameObject.scene != layout.gameObject.scene ||
+                    !room.transform.IsChildOf(layout.transform) || layouts.Count(other => other.Spaces.Contains(room)) != 1)
+                    return "Layout space membership is ambiguous or inconsistent.";
+                var issue = GetIndependentOwnershipIssue(room, allowMissingOutput);
+                if (issue != null) return issue;
+                if (room.GeneratedOutput != null && room.GeneratedOutput.LayoutOwner != layout)
+                    return "Layout space output association is inconsistent.";
+            }
+            if (layout.gameObject.scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<ShipRoomAuthoring>(true))
+                .Any(room => room.Layout == layout && !layout.Spaces.Contains(room)))
+                return "Layout has a space with an unlisted membership back-reference.";
+            var outputs = Resources.FindObjectsOfTypeAll<RoomGeneratedOutput>()
+                .Where(output => output.gameObject.scene.IsValid() && output.gameObject.scene.isLoaded).ToArray();
+            if (outputs.Any(output => output.LayoutOwner == layout &&
+                (!layout.Spaces.Contains(output.Owner) || output.Owner.GeneratedOutput != output)))
+                return "Layout generated output ownership is ambiguous.";
+            if (layout.GeneratedOutput == null)
+                return allowMissingOutput && layout.Spaces[0].GeneratedOutput == null
+                    ? null : "Layout output reference is missing or ambiguous.";
+            if (layout.GeneratedOutput.LayoutOwner != layout || !layout.Spaces.Contains(layout.GeneratedOutput.Owner) ||
+                layout.GeneratedOutput.Owner.GeneratedOutput != layout.GeneratedOutput ||
+                layouts.Any(other => other != layout && other.GeneratedOutput == layout.GeneratedOutput))
+                return "Layout generated output ownership is ambiguous.";
             return null;
         }
     }

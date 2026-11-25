@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using SOLITUDE.Editor.RoomAuthoring;
+using SOLITUDE.World.RoomAuthoring;
 using UnityEditor;
 using UnityEditor.Tilemaps;
 using UnityEngine;
@@ -40,6 +41,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
         {
             using var f = new RoomAuthoringTestFixtures(32);
             var room = f.Room(1, 1);
+            var identity = room.RoomId;
             var grid = room.GetComponent<Grid>();
             GridPaintingState.scenePaintTarget = room.Occupancy.gameObject;
             RoomAuthoringPaletteSetup.ActivateTarget(room.Occupancy.gameObject);
@@ -56,8 +58,15 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsNull(room.GeneratedOutput.GetComponentInChildren<Tilemap>().GetTile(Vector3Int.right));
             brush.Paint(grid, room.Occupancy.gameObject, new Vector3Int(1, 1, 0));
             Assert.AreEqual(2, RoomAuthoringOperations.ReadCells(room).Length);
-            Assert.That(room.GenerationDiagnostic, Does.Contain("rectangle"));
-            Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+            Assert.AreEqual(2, room.GenerationResult.Issues.Count(i => i.Kind == RoomIssueKind.Geometry && i.Field.StartsWith("Disconnected/")));
+            Assert.IsTrue(room.GenerationResult.Issues.All(i => i.HasRegion && i.RoomId == identity));
+            Assert.AreEqual(identity, room.RoomId);
+            Assert.AreEqual(2, RoomAuthoringTestFixtures.FloorCount(room));
+            brush.Paint(grid, room.Occupancy.gameObject, Vector3Int.right);
+            Assert.AreEqual(RoomGenerationStatus.Complete, room.GenerationResult.Status);
+            Assert.IsEmpty(room.GenerationDiagnostic);
+            Assert.AreEqual(3, RoomAuthoringTestFixtures.FloorCount(room));
             RoomAuthoringPaletteSetup.EndEditing();
             Assert.IsFalse(room.Occupancy.gameObject.activeSelf);
         }
@@ -89,6 +98,53 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 finally { Object.DestroyImmediate(editor); }
             }
             finally { Object.DestroyImmediate(invalid); }
+        }
+
+        [TestCase(false, "member")][TestCase(true, "member")]
+        [TestCase(false, "layout")][TestCase(true, "layout")]
+        [TestCase(false, "legacy")][TestCase(true, "legacy")]
+        public void DirectRoomPaintRejectsForeignCellsBeforeMutationOrUndo(bool box, string ownership)
+        {
+            using var f = new RoomAuthoringTestFixtures(32);
+            var layout = RoomAuthoringCreation.CreateLayout(f.Scene, f.Style);
+            var room = layout.Spaces[0];
+            var other = ownership == "member" ? RoomAuthoringCreation.CreateSpace(layout) :
+                ownership == "layout" ? RoomAuthoringCreation.CreateLayout(f.Scene, f.Style).Spaces[0] : f.Room(0, 0);
+            other.transform.localPosition = Vector3.right * 4;
+            Assert.IsTrue(RoomAuthoringOperations.PaintBox(room, new BoundsInt(0, 0, 0, 2, 2, 1), f.Style.FloorTile));
+            Assert.IsTrue(RoomAuthoringOperations.PaintBox(other, new BoundsInt(0, 0, 0, 2, 2, 1), f.Style.FloorTile));
+            var before = RoomUndoRedoTests.Snapshot(room); var otherBefore = RoomUndoRedoTests.Snapshot(other);
+            var input = EditorJsonUtility.ToJson(room); var otherInput = EditorJsonUtility.ToJson(other);
+            var objects = room.GeneratedOutput.GetComponentsInChildren<Transform>(true);
+            var revisions = RoomFloorPanelAssetStore.RetainedRevisionCount;
+            var anchor = new GameObject("Unrelated Undo anchor");
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(anchor, f.Scene);
+            Undo.IncrementCurrentGroup(); Undo.RecordObject(anchor.transform, "Move unrelated anchor");
+            anchor.transform.position = Vector3.up; Undo.FlushUndoRecordObjects(); Undo.IncrementCurrentGroup();
+            var group = Undo.GetCurrentGroup();
+            string issue;
+            var accepted = box ? RoomAuthoringOperations.PaintBox(room, new BoundsInt(2, 0, 0, 3, 2, 1), f.Style.FloorTile, out issue) :
+                RoomAuthoringOperations.PaintCell(room, new Vector3Int(4, 0, 0), f.Style.FloorTile, out issue);
+            Assert.IsFalse(accepted);
+            Assert.That(issue, Does.Contain(room.RoomId).And.Contain(other.RoomId).And.Contain("(4, 0)"));
+            CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+            CollectionAssert.AreEqual(otherBefore, RoomUndoRedoTests.Snapshot(other));
+            Assert.AreEqual(input, EditorJsonUtility.ToJson(room)); Assert.AreEqual(otherInput, EditorJsonUtility.ToJson(other));
+            CollectionAssert.AreEqual(objects, room.GeneratedOutput.GetComponentsInChildren<Transform>(true));
+            Assert.AreEqual(revisions, RoomFloorPanelAssetStore.RetainedRevisionCount); Assert.AreEqual(group, Undo.GetCurrentGroup());
+            Undo.PerformUndo(); Assert.AreEqual(Vector3.zero, anchor.transform.position, "Refusal adds no partial paint Undo item.");
+            CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+        }
+
+        [Test] public void WrongRoomEditCannotBeCancelledByARejectedPaintCall()
+        {
+            using var f = new RoomAuthoringTestFixtures(32);
+            var room = f.Room(2, 2); var other = f.Room(2, 2); other.transform.position = Vector3.right * 4;
+            using var edit = RoomAuthoringOperations.BeginEdit(room, "Valid room stroke");
+            Assert.IsTrue(RoomAuthoringOperations.PaintCell(room, new Vector3Int(2, 0, 0), f.Style.FloorTile, edit));
+            Assert.Throws<InvalidOperationException>(() => RoomAuthoringOperations.PaintCell(other, new Vector3Int(-4, 0, 0), f.Style.FloorTile, edit));
+            Assert.IsTrue(RoomAuthoringOperations.IsEditing(room)); Assert.AreEqual(5, RoomAuthoringOperations.ReadCells(room).Length);
+            edit.Cancel(); Assert.AreEqual(4, RoomAuthoringOperations.ReadCells(room).Length);
         }
 
         [Test] public void RepeatedSetupPreservesManuallyAdjustedPalette()

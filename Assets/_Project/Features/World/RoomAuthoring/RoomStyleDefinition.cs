@@ -9,20 +9,67 @@ namespace SOLITUDE.World.RoomAuthoring
     {
         public const int PixelsPerUnit = 32;
 
+        public enum ModuleOrientation { Any, North, West, East, South, Corner, Junction }
+
+        [Serializable]
+        public sealed class RenderingConfiguration
+        {
+            public string SortingLayerName = "Default";
+            public int FloorOrder;
+            public int DetailOrder = 1;
+            public int ArchitectureOrder = 2;
+            public Material FloorMaterial;
+            public Material ArchitectureMaterial;
+        }
+
         [Serializable]
         public sealed class Module
         {
             public Sprite Sprite;
+            [Min(1)] public int PixelsPerUnit = 32;
+            public ModuleOrientation Orientation;
             public Vector2Int CanvasPixels = new Vector2Int(32, 32);
             [Min(1)] public int RepeatPixels = 32;
             [Tooltip("Structural anchor measured from the imported sprite rectangle's bottom-left, in pixels.")]
             public Vector2 AnchorPixels;
             public Vector2 OffsetPixels;
+            [Tooltip("Enable conservative footprint checks against the whole layout's walkable floor core. Existing bindings remain unqualified until declared.")]
+            public bool HasFootprint;
+            [Tooltip("Occupied visual rectangles in sprite pixels, measured from bottom-left. Use multiple rectangles for thin junction shapes.")]
+            public RectInt[] FootprintsPixels = Array.Empty<RectInt>();
+        }
+
+        [Serializable]
+        public sealed class JunctionModule
+        {
+            public LayoutJunctionRole Role;
+            public Module Artwork = new Module();
+            [Tooltip("Coverage supplied by this junction along west/east incident edges, in logical 32-PPU pixels.")]
+            public Vector2Int HorizontalReservationsPixels;
+            [Tooltip("Coverage supplied by this junction along south/north incident edges, in logical 32-PPU pixels.")]
+            public Vector2Int VerticalReservationsPixels;
+            public int Reservation(BoundaryDirections direction) => direction == BoundaryDirections.West ? HorizontalReservationsPixels.x :
+                direction == BoundaryDirections.East ? HorizontalReservationsPixels.y : direction == BoundaryDirections.South ?
+                VerticalReservationsPixels.x : VerticalReservationsPixels.y;
         }
 
         [SerializeField] private string styleId = Guid.NewGuid().ToString("N");
         [SerializeField] private string displayName = "Room Style";
+        [Tooltip("Seed for automatic structural variants. Selection uses the layout-relative address, role and stable style identity.")]
+        [SerializeField] private int structuralSeed;
+        [Tooltip("Explicitly qualify this style's existing corner/junction treatments to meet these other styles. Same-style joints need no entry. The selected treatment must still pass footprint, aperture and reserved-coverage checks. Layout fallback roles also require this compatibility declaration.")]
+        [SerializeField] private RoomStyleDefinition[] compatibleTransitions = Array.Empty<RoomStyleDefinition>();
+        public int StructuralSeed { get => structuralSeed; set => structuralSeed = value; }
+        public RoomStyleDefinition[] CompatibleTransitions { get => compatibleTransitions; set => compatibleTransitions = value; }
         [SerializeField] private TileBase floorTile;
+        [SerializeField] private Vector2Int floorCanvasPixels = new Vector2Int(32, 32);
+        [Min(1), SerializeField] private int floorPixelsPerUnit = 32;
+        // Opt-in keeps legacy floor/architecture sorting (0/1) and default materials stable on reload.
+        [SerializeField] private RenderingConfiguration rendering = new RenderingConfiguration();
+        [SerializeField] private bool useConfiguredRendering;
+        public Vector2Int FloorCanvasPixels { get => floorCanvasPixels; set => floorCanvasPixels = value; }
+        public int FloorPixelsPerUnit { get => floorPixelsPerUnit; set => floorPixelsPerUnit = value; }
+        public RenderingConfiguration Rendering { get => useConfiguredRendering ? rendering : null; set { rendering = value ?? new RenderingConfiguration(); useConfiguredRendering = value != null; } }
         [SerializeField] private Module[] northWalls = Array.Empty<Module>();
         [SerializeField] private Module westCap = new Module();
         [SerializeField] private Module eastCap = new Module();
@@ -31,11 +78,42 @@ namespace SOLITUDE.World.RoomAuthoring
         [SerializeField] private Module northeast = new Module();
         [SerializeField] private Module southwest = new Module();
         [SerializeField] private Module southeast = new Module();
-        [Tooltip("Start/end reservations along each boundary, in pixels. North/south run west to east; sides run south to north.")]
+        [Tooltip("Start/end reservations along each boundary, in logical 32-PPU pixels. North/south run west to east; sides run south to north.")]
         [SerializeField] private Vector2Int northReservationsPixels;
         [SerializeField] private Vector2Int westReservationsPixels;
         [SerializeField] private Vector2Int eastReservationsPixels;
         [SerializeField] private Vector2Int southReservationsPixels;
+
+        [SerializeField] private Module concaveSouthwest = new Module();
+        [SerializeField] private Module concaveSoutheast = new Module();
+        [SerializeField] private Module concaveNorthwest = new Module();
+        [SerializeField] private Module concaveNortheast = new Module();
+        [Tooltip("Start/end coverage reservations when the corresponding run endpoint is concave. Same axis order as convex reservations.")]
+        [SerializeField] private Vector2Int concaveNorthReservationsPixels;
+        [SerializeField] private Vector2Int concaveWestReservationsPixels;
+        [SerializeField] private Vector2Int concaveEastReservationsPixels;
+        [SerializeField] private Vector2Int concaveSouthReservationsPixels;
+        [Tooltip("Declared empty-cell clearance north of each north-facing boundary. Zero leaves visual fit unqualified; production artwork needs explicit verification.")]
+        [Min(0), SerializeField] private int northWallClearanceCells;
+        [Tooltip("Whether the configured artwork supports two separate branches at a diagonal-only cell contact.")]
+        [SerializeField] private bool supportsDiagonalContact = true;
+        [SerializeField] private JunctionModule[] junctionModules = Array.Empty<JunctionModule>();
+        [Tooltip("Visual boundary band around each floor cell, in pixels. Footprint checks keep the remaining core clear; maximum 15 preserves a nonempty core on a 32-pixel cell.")]
+        [Range(0, 15), SerializeField] private int floorEdgeInsetPixels;
+
+        public JunctionModule[] JunctionModules { get => junctionModules; set => junctionModules = value; }
+        public int FloorEdgeInsetPixels { get => floorEdgeInsetPixels; set => floorEdgeInsetPixels = value; }
+
+        public Module ConcaveSouthwest { get => concaveSouthwest; set => concaveSouthwest = value; }
+        public Module ConcaveSoutheast { get => concaveSoutheast; set => concaveSoutheast = value; }
+        public Module ConcaveNorthwest { get => concaveNorthwest; set => concaveNorthwest = value; }
+        public Module ConcaveNortheast { get => concaveNortheast; set => concaveNortheast = value; }
+        public Vector2Int ConcaveNorthReservationsPixels { get => concaveNorthReservationsPixels; set => concaveNorthReservationsPixels = value; }
+        public Vector2Int ConcaveWestReservationsPixels { get => concaveWestReservationsPixels; set => concaveWestReservationsPixels = value; }
+        public Vector2Int ConcaveEastReservationsPixels { get => concaveEastReservationsPixels; set => concaveEastReservationsPixels = value; }
+        public Vector2Int ConcaveSouthReservationsPixels { get => concaveSouthReservationsPixels; set => concaveSouthReservationsPixels = value; }
+        public int NorthWallClearanceCells { get => northWallClearanceCells; set => northWallClearanceCells = value; }
+        public bool SupportsDiagonalContact { get => supportsDiagonalContact; set => supportsDiagonalContact = value; }
 
         public string StyleId => styleId;
         public string DisplayName { get => displayName; set => displayName = value; }

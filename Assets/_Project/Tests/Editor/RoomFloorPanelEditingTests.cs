@@ -1,0 +1,699 @@
+using System;
+using System.Collections;
+using System.IO;
+using System.Linq;
+using NUnit.Framework;
+using SOLITUDE.Editor.RoomAuthoring;
+using SOLITUDE.World.RoomAuthoring;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEditor.UIElements;
+using UnityEngine;
+using UnityEngine.TestTools;
+using UnityEngine.Tilemaps;
+using UnityEngine.UIElements;
+using Object = UnityEngine.Object;
+
+namespace SOLITUDE.Tests.RoomAuthoring
+{
+    public sealed class RoomFloorPanelDraftTestWindow : EditorWindow { }
+
+    public sealed class RoomFloorPanelEditingTests
+    {
+        private string folder;
+        private ShipRoomAuthoring room;
+        private ShipLayoutAuthoring layout;
+        [SetUp] public void Setup()
+        {
+            Assert.IsTrue(Environment.GetCommandLineArgs().Contains("-solitudeRoomAuthoringVerification"));
+            Undo.ClearAll(); var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            folder = RoomPersistenceTests.CreateAssets(); RoomFloorPanelAssetStore.VerificationRoot = folder + "/Panels";
+            room = RoomPersistenceTests.CreateRoom(scene, folder); room.Style.Rendering = new RoomStyleDefinition.RenderingConfiguration();
+            EditorUtility.SetDirty(room.Style); AssetDatabase.SaveAssets(); Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
+            layout = RoomAuthoringCreation.AdoptIntoNewLayout(room);
+            Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, new RoomFloorPanelSettings { Enabled = true, Seed = 17 }, out var issue), issue);
+        }
+        [TearDown] public void Cleanup()
+        {
+            RoomAuthoringOperations.CancelActiveEdit(); RoomAuthoringPreview.ClearSelection(); Selection.activeObject = null;
+            Undo.ClearAll(); EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            if (folder != null) AssetDatabase.DeleteAsset(folder); RoomFloorPanelAssetStore.VerificationRoot = null;
+        }
+        private static string Partition(ShipRoomAuthoring space, RoomFloorPanelSettings settings = null) =>
+            string.Join("|", RoomAuthoringPreview.BuildFloorPanelPreview(space, settings ?? space.FloorPanels, space.FloorReservations).Partition.Rectangles
+                .Select(r => r.x + "," + r.y + "," + r.width + "," + r.height));
+        private RoomFloorPanelOutput Revision(ShipRoomAuthoring space = null) => AssetDatabase.LoadAssetAtPath<RoomFloorPanelOutput>(AssetDatabase.GetAssetPath(
+            (space ?? room).GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Single(r => r.name == "Generated Floor Panels").sprite));
+        private string[] AssetBytes() => Directory.GetFiles(folder, "*", SearchOption.AllDirectories).OrderBy(p => p)
+            .Select(p => p + ":" + Convert.ToBase64String(System.Security.Cryptography.SHA256.Create().ComputeHash(File.ReadAllBytes(p)))).ToArray();
+
+        [Test] public void PreviewIsReadOnlyAndReportsDraftPartitionsAndExclusions()
+        {
+            Assert.IsTrue(EditorSceneManager.SaveScene(room.gameObject.scene, folder + "/Preview.unity"));
+            var authored = EditorJsonUtility.ToJson(room); var owner = EditorJsonUtility.ToJson(layout); var style = EditorJsonUtility.ToJson(room.Style);
+            var assets = AssetBytes(); var output = RoomUndoRedoTests.Snapshot(room); var group = Undo.GetCurrentGroup(); var count = RoomFloorPanelAssetStore.RetainedRevisionCount;
+            var settings = room.FloorPanels.Copy(); settings.Seed = 31;
+            var records = new[] { new RoomFloorReservation("draft-bed", room.RoomId, Vector2.one, Vector2.one * 2) };
+            Assert.IsTrue(RoomAuthoringPreview.ShowFloorPanelPreview(room, settings, records));
+            var preview = RoomAuthoringPreview.GetFloorPanelPreview(room); Assert.IsNotNull(preview);
+            Assert.AreEqual(4, preview.Domain.ExcludedCells.Count); Assert.IsNotEmpty(preview.Partition.Rectangles);
+            settings.Seed = 1; Assert.AreEqual(31, preview.Partition.Seed);
+            Assert.AreEqual(authored, EditorJsonUtility.ToJson(room)); Assert.AreEqual(owner, EditorJsonUtility.ToJson(layout));
+            Assert.AreEqual(style, EditorJsonUtility.ToJson(room.Style)); CollectionAssert.AreEqual(assets, AssetBytes());
+            CollectionAssert.AreEqual(output, RoomUndoRedoTests.Snapshot(room)); Assert.AreEqual(group, Undo.GetCurrentGroup());
+            Assert.AreEqual(count, RoomFloorPanelAssetStore.RetainedRevisionCount); Assert.IsFalse(room.gameObject.scene.isDirty);
+            RoomAuthoringEditLifecycle.PrepareForRuntime(room.gameObject.scene); // Read-only preview is explicitly cancelled by save notification below.
+            EditorSceneManager.SaveScene(room.gameObject.scene, folder + "/Preview.unity");
+            Assert.IsNull(RoomAuthoringPreview.GetFloorPanelPreview(room));
+        }
+        [Test] public void PreviewCancelsOnCommitUndoAndStaleConnectivityWithoutPublishing()
+        {
+            Assert.IsTrue(RoomAuthoringPreview.ShowFloorPanelPreview(room, room.FloorPanels, room.FloorReservations));
+            Assert.IsNotNull(RoomAuthoringPreview.GetFloorPanelPreview(room));
+            Assert.IsTrue(RoomAuthoringOperations.NewFloorPanelSeed(room, out var issue), issue);
+            Assert.IsNull(RoomAuthoringPreview.GetFloorPanelPreview(room));
+            Assert.IsTrue(RoomAuthoringPreview.ShowFloorPanelPreview(room, room.FloorPanels, room.FloorReservations));
+            Undo.PerformUndo(); Assert.IsNull(RoomAuthoringPreview.GetFloorPanelPreview(room));
+            Assert.IsTrue(RoomAuthoringPreview.ShowFloorPanelPreview(room, room.FloorPanels, room.FloorReservations));
+            var count = RoomFloorPanelAssetStore.RetainedRevisionCount;
+            layout.SetConnections(new[] { new LayoutConnectionDefinition("stale", room.RoomId, "missing", Vector2Int.zero, true, 1, LayoutConnectionType.Doorway) });
+            Assert.IsNull(RoomAuthoringPreview.GetFloorPanelPreview(room));
+            var preview = RoomAuthoringPreview.BuildFloorPanelPreview(room, room.FloorPanels, room.FloorReservations);
+            Assert.IsNotEmpty(preview.Partition.Issues); Assert.AreEqual(count, RoomFloorPanelAssetStore.RetainedRevisionCount);
+        }
+        [Test] public void RegenerateRetainsSeedNewSeedUndoRestoresExactPixelsAndDisableRetainsInputs()
+        {
+            var old = Revision(); var hash = RoomFloorPanelAssetStore.ContentHash(old); var partition = Partition(room);
+            Assert.IsTrue(RoomAuthoringOperations.RegenerateFloorPanels(room, out var issue), issue);
+            Assert.AreEqual(17, room.FloorPanels.Seed); Assert.AreSame(old, Revision());
+            Assert.IsTrue(RoomAuthoringOperations.NewFloorPanelSeed(room, out issue), issue); Assert.AreEqual(18, room.FloorPanels.Seed);
+            Undo.PerformUndo(); Assert.AreEqual(17, room.FloorPanels.Seed); Assert.AreSame(old, Revision());
+            Assert.AreEqual(hash, RoomFloorPanelAssetStore.ContentHash(Revision())); Assert.AreEqual(partition, Partition(room));
+            Assert.IsTrue(RoomAuthoringOperations.DisableFloorPanels(room, out issue), issue); Assert.IsFalse(room.FloorPanels.Enabled);
+            Assert.AreEqual(17, room.FloorPanels.Seed); Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            Assert.IsFalse(room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Any(r => r.name == "Generated Floor Panels"));
+            Undo.PerformUndo(); Assert.AreSame(old, Revision());
+        }
+        [Test] public void OneSettingsCommitGeneratesOnceAndSeamChangesPreservePartition()
+        {
+            var before = RoomUndoRedoTests.Snapshot(room); var partition = Partition(room); var calls = 0;
+            void Generated(ShipRoomAuthoring _) => calls++;
+            RoomAuthoringOperations.GenerationCompleted += Generated;
+            try
+            {
+                var settings = room.FloorPanels.Copy(); settings.SeamThickness = 3; settings.SeamPalette = new[] { Color.cyan, Color.gray };
+                Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, settings, out var issue), issue);
+                Assert.AreEqual(1, calls); Assert.AreEqual(partition, Partition(room));
+                Undo.PerformUndo(); CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+            }
+            finally { RoomAuthoringOperations.GenerationCompleted -= Generated; }
+        }
+        [Test] public void InvalidReservationFocusIsReadOnlyAndCorrectionRestoresOnlyPanelOutput()
+        {
+            room.SetFloorPanelAuthoring(room.FloorPanels, new[] { new RoomFloorReservation("orphan", room.RoomId, new Vector2(100, 100), Vector2.one) });
+            Assert.IsFalse(RoomAuthoringOperations.Rebuild(room)); Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            Selection.activeGameObject = room.gameObject;
+            var issue = layout.GenerationResult.Issues.Single(i => i.Field == "FloorPanels/Reservation/orphan");
+            var before = EditorJsonUtility.ToJson(room); var group = Undo.GetCurrentGroup(); var dirty = room.gameObject.scene.isDirty;
+            Assert.IsTrue(RoomAuthoringPreview.SelectIssue(room, issue.Id, frame: false));
+            Assert.AreEqual("FloorPanels/Reservation/orphan", RoomAuthoringPreview.FieldLabel(issue));
+            Assert.AreEqual(before, EditorJsonUtility.ToJson(room)); Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.AreEqual(dirty, room.gameObject.scene.isDirty);
+            Assert.IsTrue(RoomAuthoringOperations.RemoveFloorReservation(room, "orphan", out var correction), correction);
+            Assert.IsTrue(room.GenerationResult.IsSuccessful, room.GenerationDiagnostic); Assert.IsNotNull(Revision());
+            Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room)); Assert.IsNull(RoomAuthoringPreview.SelectedIssueId);
+        }
+        [Test] public void DisablePreservesExternallyInvalidRecordsAndSupportsUndo()
+        {
+            var orphan = new RoomFloorReservation("bad", "external-owner", Vector2.one * .5f, Vector2.one);
+            room.SetFloorPanelAuthoring(room.FloorPanels, new[] { orphan }); RoomAuthoringOperations.Rebuild(room);
+            var record = JsonUtility.ToJson(room.FloorReservations[0]);
+            Assert.IsTrue(RoomAuthoringOperations.DisableFloorPanels(room, out var issue), issue);
+            Assert.IsFalse(room.FloorPanels.Enabled); Assert.AreEqual(record, JsonUtility.ToJson(room.FloorReservations[0]));
+            Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            Undo.PerformUndo(); Assert.IsTrue(room.FloorPanels.Enabled); Assert.AreEqual(record, JsonUtility.ToJson(room.FloorReservations[0]));
+        }
+        [Test] public void OneSpaceSeedEditPreservesOtherSpacePartitionsAndResourceReferences()
+        {
+            var other = RoomAuthoringCreation.CreateSpace(layout); other.transform.localPosition = Vector3.right * 16;
+            ShipLayoutStyleTests.Fill(other, RoomAuthoringTestFixtures.Cells());
+            other.SetFloorPanelAuthoring(new RoomFloorPanelSettings { Enabled = true, Seed = 37 }, Array.Empty<RoomFloorReservation>());
+            RoomAuthoringOperations.Rebuild(layout); var old = Revision(other); var partition = Partition(other);
+            Assert.IsTrue(RoomAuthoringOperations.NewFloorPanelSeed(room, out var issue), issue);
+            Assert.AreSame(old, Revision(other)); Assert.AreEqual(partition, Partition(other));
+        }
+        private void DiagnosticSpace(string kind)
+        {
+            if (kind == "standalone")
+            {
+                var scene = room.gameObject.scene; Object.DestroyImmediate(layout.gameObject);
+                layout = null; room = RoomPersistenceTests.CreateRoom(scene, folder);
+            }
+            else if (kind == "multi")
+            {
+                var other = RoomAuthoringCreation.CreateSpace(layout);
+                ShipLayoutStyleTests.Fill(other, RoomAuthoringTestFixtures.Cells());
+                room.transform.localPosition = new Vector3(16, -8, 0);
+            }
+        }
+
+        private void ReopenDiagnosticScene()
+        {
+            var path = folder + "/Diagnostics.unity"; var identity = room.RoomId;
+            Assert.IsTrue(EditorSceneManager.SaveScene(room.gameObject.scene, path));
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            var scene = EditorSceneManager.OpenScene(path);
+            room = scene.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<ShipRoomAuthoring>())
+                .Single(r => r.RoomId == identity);
+            layout = room.Layout;
+        }
+
+        private void AssertDiagnosticReadOnly(RoomGenerationIssue diagnostic, bool advisory, bool selectionPrepared = false)
+        {
+            void Inspect(bool inspectLayout)
+            {
+                if (!selectionPrepared) Selection.activeGameObject = inspectLayout ? layout.gameObject : room.gameObject;
+                var selection = Selection.activeObject; var undoName = Undo.GetCurrentGroupName();
+                var roomState = EditorJsonUtility.ToJson(room); var layoutState = layout == null ? null : EditorJsonUtility.ToJson(layout);
+                var output = RoomAuthoringValidator.OutputFingerprint(room); var assets = AssetBytes();
+                var group = Undo.GetCurrentGroup(); var dirty = room.gameObject.scene.isDirty;
+                var publications = RoomFloorPanelAssetStore.PublicationCount;
+                var feedback = inspectLayout ? RoomAuthoringPreview.GetFeedback(layout) : RoomAuthoringPreview.GetFeedback(room);
+                Assert.IsTrue(feedback.Assessment.Diagnostics.Any(i => i.Id == diagnostic.Id));
+                Assert.AreEqual(advisory, feedback.Assessment.Advisories.Any(i => i.Id == diagnostic.Id));
+                Assert.AreEqual(advisory, feedback.IsCurrent);
+                var inspector = UnityEditor.Editor.CreateEditor(inspectLayout ? (Object)layout : room);
+                try
+                {
+                    var root = inspector.CreateInspectorGUI();
+                    Assert.IsTrue(root.Query<HelpBox>().ToList().Any(h => h.text.Contains(diagnostic.Reason) &&
+                        h.messageType == (advisory ? HelpBoxMessageType.Info : HelpBoxMessageType.Warning)));
+                    Assert.IsTrue(root.Query<Button>().ToList().Any(b => b.text ==
+                        (diagnostic.HasRegion ? "Focus " : "Locate ") + RoomAuthoringPreview.FieldLabel(diagnostic)));
+                }
+                finally { Object.DestroyImmediate(inspector); }
+                Assert.IsTrue(inspectLayout ? RoomAuthoringPreview.SelectIssue(layout, diagnostic.Id, false) :
+                    RoomAuthoringPreview.SelectIssue(room, diagnostic.Id, false));
+                Assert.AreEqual(diagnostic.Id, RoomAuthoringPreview.SelectedIssueId);
+                Assert.AreEqual(roomState, EditorJsonUtility.ToJson(room));
+                Assert.AreEqual(layoutState, layout == null ? null : EditorJsonUtility.ToJson(layout));
+                Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(room));
+                CollectionAssert.AreEqual(assets, AssetBytes()); Assert.AreEqual(group, Undo.GetCurrentGroup());
+                Assert.AreEqual(dirty, room.gameObject.scene.isDirty); Assert.AreEqual(publications, RoomFloorPanelAssetStore.PublicationCount);
+                Assert.AreSame(selection, Selection.activeObject); Assert.AreEqual(undoName, Undo.GetCurrentGroupName());
+            }
+            if (selectionPrepared) Inspect(layout != null && Selection.activeGameObject == layout.gameObject);
+            else { Inspect(false); if (layout != null) Inspect(true); }
+        }
+
+        [TestCase("standalone")] [TestCase("layout")] [TestCase("multi")]
+        public void CommittedAdvisoriesRemainInformationalLocatedAndPersistent(string kind)
+        {
+            DiagnosticSpace(kind);
+            // Unity records selection changes as Undo entries. Arrange the target before the edit
+            // so the next Undo must restore authoring, not a test-created selection action.
+            Selection.activeGameObject = kind == "layout" ? layout.gameObject : room.gameObject;
+            var before = JsonUtility.ToJson(room.GenerationResult);
+            var config = room.FloorPanels.Copy(); config.Enabled = true;
+            config.PreferredMinPixels = config.PreferredMaxPixels = new Vector2Int(256, 256);
+            Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, config, out var issue), issue);
+            Assert.AreEqual(RoomGenerationStatus.Complete, room.GenerationResult.Status);
+            Assert.IsEmpty(room.GenerationResult.Issues);
+            var advisory = room.GenerationResult.Advisories.Single(i => i.RoomId == room.RoomId && i.Field.Contains("/Residual/"));
+            Assert.IsTrue(room.GenerationResult.Advisories.Any(i => i.RoomId == room.RoomId && i.Field.EndsWith("DensitySaturated")));
+            Assert.AreEqual(kind == "multi" ? new Vector2Int(16, -8) : Vector2Int.zero, advisory.Start);
+            Assert.AreEqual(advisory.Start + new Vector2Int(8, 6), advisory.End);
+            AssertDiagnosticReadOnly(advisory, true, selectionPrepared: true);
+            Undo.PerformUndo(); Assert.AreEqual(before, JsonUtility.ToJson(room.GenerationResult));
+            Undo.PerformRedo();
+            CollectionAssert.AreEqual(new[] { advisory.Id }, room.GenerationResult.Advisories.Where(i => i.Id == advisory.Id).Select(i => i.Id));
+            var old = Revision(); Assert.IsTrue(RoomAuthoringOperations.Rebuild(room)); Assert.AreSame(old, Revision());
+            ReopenDiagnosticScene();
+            advisory = room.GenerationResult.Advisories.Single(i => i.Id == advisory.Id);
+            AssertDiagnosticReadOnly(advisory, true);
+        }
+
+        [TestCase("raster", "standalone")] [TestCase("publication", "standalone")]
+        [TestCase("raster", "layout")] [TestCase("publication", "layout")]
+        [TestCase("raster", "multi")] [TestCase("publication", "multi")]
+        public void SavedGenerationFailuresRemainActionableUntilInputsChange(string failure, string kind)
+        {
+            DiagnosticSpace(kind); var valid = room.FloorPanels.Copy(); valid.Enabled = true;
+            var config = valid.Copy(); config.Enabled = true; config.Seed = 997; config.SeamThickness = 3;
+            if (failure == "raster") config.SeamPalette = new[] { new Color(.2f, .3f, .4f, .0001f) };
+            try
+            {
+                if (failure == "publication") RoomFloorPanelAssetStore.PublicationCheckpoint = stage =>
+                { if (stage == "allocation") throw new IOException("Injected diagnostic publication failure"); };
+                Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, config, out var issue), issue);
+            }
+            finally { RoomFloorPanelAssetStore.PublicationCheckpoint = null; }
+            Assert.AreEqual(RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
+            var field = failure == "raster" ? "FloorPanels/Raster/Palette" : "FloorPanels/Publication";
+            var diagnostic = room.GenerationResult.Issues.Single(i => i.RoomId == room.RoomId && i.Field == field);
+            Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            AssertDiagnosticReadOnly(diagnostic, false);
+            ReopenDiagnosticScene(); AssertDiagnosticReadOnly(diagnostic, false);
+            // An external input correction invalidates old saved diagnostics before any publication.
+            room.SetFloorPanelAuthoring(valid, room.FloorReservations);
+            Assert.IsFalse(RoomAuthoringPreview.GetFeedback(room).Assessment.Issues.Any(i => i.Id == diagnostic.Id));
+            if (layout != null) Assert.IsFalse(RoomAuthoringPreview.GetFeedback(layout).Assessment.Issues.Any(i => i.Id == diagnostic.Id));
+            Selection.activeGameObject = room.gameObject;
+            Assert.IsFalse(RoomAuthoringPreview.SelectIssue(room, diagnostic.Id, false));
+            room.SetFloorPanelAuthoring(config, room.FloorReservations);
+            Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, valid, out var correction), correction);
+            Assert.IsTrue(RoomAuthoringValidator.IsCurrent(room));
+            Assert.IsFalse(RoomAuthoringPreview.GetFeedback(room).Assessment.Issues.Any(i => i.Id == diagnostic.Id));
+            Undo.PerformUndo(); AssertDiagnosticReadOnly(diagnostic, false);
+            Undo.PerformRedo(); Assert.IsTrue(RoomAuthoringValidator.IsCurrent(room));
+        }
+
+        private void AssertOffsetDiagnosticBounds(RoomGenerationIssue diagnostic, Vector2Int start, Vector2Int size)
+        {
+            Assert.AreEqual(start, diagnostic.Start); Assert.AreEqual(start + size, diagnostic.End);
+            var expected = new Bounds(layout.transform.position + new Vector3(start.x + size.x * .5f, start.y + size.y * .5f, 0),
+                new Vector3(size.x, size.y, .1f));
+            Assert.AreEqual(expected, RoomAuthoringPreview.IssueBounds(room, diagnostic));
+            Assert.AreEqual(expected, RoomAuthoringPreview.IssueBounds(layout, diagnostic));
+        }
+
+        [TestCase(false, -9, -7, 0, 0)] [TestCase(true, -9, -7, 0, 0)]
+        [TestCase(false, 7, 9, -13, 11)] [TestCase(true, 7, 9, -13, 11)]
+        public void OffsetSingleSpaceReservationFocusUsesLayoutCells(bool erase, int x, int y, int originX, int originY)
+        {
+            layout.transform.position = new Vector3(originX, originY, 0);
+            room.transform.localPosition = new Vector3(x, y, 0);
+            Selection.activeGameObject = room.gameObject;
+            var reservation = new RoomFloorReservation("offset", erase ? room.RoomId : "wrong-owner", Vector2.one, Vector2.one);
+            if (erase)
+            {
+                Assert.IsTrue(RoomAuthoringOperations.UpsertFloorReservation(room, reservation, out var issue), issue);
+                Assert.IsFalse(RoomAuthoringOperations.PaintCell(room, new Vector3Int(1, 1, 0), null));
+            }
+            else
+            {
+                room.SetFloorPanelAuthoring(room.FloorPanels, new[] { reservation });
+                Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
+            }
+            RoomGenerationIssue Located() => RoomAuthoringPreview.GetFeedback(layout).Assessment.Issues
+                .Single(i => i.RoomId == room.RoomId && i.Field == "FloorPanels/Reservation/offset");
+            var diagnostic = Located(); var start = new Vector2Int(x + 1, y + 1);
+            AssertOffsetDiagnosticBounds(diagnostic, start, Vector2Int.one);
+            if (erase)
+            {
+                Undo.PerformUndo(); Assert.AreEqual(48, RoomAuthoringOperations.ReadCells(room).Length);
+                Assert.IsFalse(RoomAuthoringPreview.GetFeedback(layout).Assessment.Issues.Any(i => i.Id == diagnostic.Id));
+                Undo.PerformRedo(); Assert.AreEqual(47, RoomAuthoringOperations.ReadCells(room).Length);
+                AssertOffsetDiagnosticBounds(Located(), start, Vector2Int.one);
+            }
+            foreach (var selectLayout in new[] { false, true })
+            {
+                Selection.activeGameObject = selectLayout ? layout.gameObject : room.gameObject;
+                var before = EditorJsonUtility.ToJson(room); var owner = EditorJsonUtility.ToJson(layout);
+                var output = RoomAuthoringValidator.OutputFingerprint(layout); var assets = AssetBytes();
+                var group = Undo.GetCurrentGroup(); var dirty = room.gameObject.scene.isDirty;
+                var publications = RoomFloorPanelAssetStore.PublicationCount;
+                Assert.IsTrue(selectLayout ? RoomAuthoringPreview.SelectIssue(layout, diagnostic.Id, false) :
+                    RoomAuthoringPreview.SelectIssue(room, diagnostic.Id, false));
+                Assert.AreEqual(diagnostic.Id, RoomAuthoringPreview.SelectedIssueId);
+                Assert.AreEqual(before, EditorJsonUtility.ToJson(room)); Assert.AreEqual(owner, EditorJsonUtility.ToJson(layout));
+                Assert.AreEqual(output, RoomAuthoringValidator.OutputFingerprint(layout)); CollectionAssert.AreEqual(assets, AssetBytes());
+                Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.AreEqual(dirty, room.gameObject.scene.isDirty);
+                Assert.AreEqual(publications, RoomFloorPanelAssetStore.PublicationCount);
+            }
+            ReopenDiagnosticScene(); AssertOffsetDiagnosticBounds(Located(), start, Vector2Int.one);
+        }
+
+        [TestCase(-9, -7, 0, 0)] [TestCase(7, 9, -13, 11)]
+        public void OffsetSingleSpaceCommittedAdvisoriesUseSameLayoutFrame(int x, int y, int originX, int originY)
+        {
+            layout.transform.position = new Vector3(originX, originY, 0);
+            room.transform.localPosition = new Vector3(x, y, 0);
+            Selection.activeGameObject = layout.gameObject;
+            var config = room.FloorPanels.Copy(); config.PreferredMinPixels = config.PreferredMaxPixels = new Vector2Int(256, 256);
+            Assert.IsTrue(RoomAuthoringOperations.SetFloorPanelSettings(room, config, out var issue), issue);
+            RoomGenerationIssue Advisory() => room.GenerationResult.Advisories.Single(i => i.Field.Contains("/Residual/"));
+            var diagnostic = Advisory(); var start = new Vector2Int(x, y); var size = new Vector2Int(8, 6);
+            AssertOffsetDiagnosticBounds(diagnostic, start, size);
+            AssertDiagnosticReadOnly(diagnostic, true, selectionPrepared: true);
+            ReopenDiagnosticScene();
+            AssertOffsetDiagnosticBounds(Advisory(), start, size);
+            AssertDiagnosticReadOnly(Advisory(), true);
+        }
+
+        [Test] public void InspectorDraftFieldsDoNotWriteAuthoringOrPublishUntilApply()
+        {
+            var before = RoomUndoRedoTests.Snapshot(room); var count = RoomFloorPanelAssetStore.RetainedRevisionCount; var group = Undo.GetCurrentGroup();
+            var controls = RoomFloorPanelControls.ForSpace(room);
+            controls.Q<Toggle>("panelEnabled").value = false; controls.Q<IntegerField>("panelSeed").value = 991;
+            CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room)); Assert.AreEqual(count, RoomFloorPanelAssetStore.RetainedRevisionCount);
+            Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.IsNotNull(controls.Q<Button>("panelPreview")); Assert.IsNotNull(controls.Q<Button>("panelApply"));
+            var inspector = UnityEditor.Editor.CreateEditor(layout);
+            try { Assert.IsNotNull(inspector.CreateInspectorGUI().Q<VisualElement>("floorPanelControls")); }
+            finally { Object.DestroyImmediate(inspector); }
+        }
+        private static void Submit(Button button)
+        {
+            Assert.IsNotNull(button); Assert.IsNotNull(button.panel);
+            using var submit = NavigationSubmitEvent.GetPooled();
+            submit.target = button; button.SendEvent(submit);
+        }
+        private void ImportFloorPixels()
+        {
+            var texture = new Texture2D(2, 2); var path = folder + "/square.png";
+            texture.LoadImage(File.ReadAllBytes(path)); texture.SetPixel(0, 0, Color.green);
+            File.WriteAllBytes(path, texture.EncodeToPNG()); Object.DestroyImmediate(texture);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+        }
+        [UnityTest] public IEnumerator InspectorDraftImportWaitsForApply() { yield return DraftImport("apply"); }
+        [UnityTest] public IEnumerator InspectorDraftImportWaitsForCancel() { yield return DraftImport("cancel"); }
+        [UnityTest] public IEnumerator FailedDraftApplyKeepsImportDeferred() { yield return DraftImport("invalid"); }
+        [UnityTest] public IEnumerator DetachedDraftReleasesQueuedImport() { yield return DraftImport("detach"); }
+        [UnityTest] public IEnumerator DestroyedInspectorReleasesQueuedImport() { yield return DraftImport("destroy"); }
+
+        private IEnumerator DraftImport(string finish)
+        {
+            var other = RoomAuthoringCreation.CreateLayout(room.gameObject.scene, room.Style);
+            other.transform.position = Vector3.right * 32;
+            Assert.IsTrue(RoomAuthoringOperations.PaintBox(other.Spaces[0], new BoundsInt(0, 0, 0, 8, 6, 1), room.Style.FloorTile));
+            var old = Revision(); var cells = RoomAuthoringOperations.ReadCells(room);
+            var objects = room.GeneratedOutput.GetComponentsInChildren<Transform>(true);
+            var roomId = room.RoomId; var layoutId = layout.LayoutId;
+            var calls = 0; var otherCalls = 0;
+            void Generated(ShipRoomAuthoring generated)
+            { if (generated.Layout == layout) calls++; if (generated.Layout == other) otherCalls++; }
+            var inspector = UnityEditor.Editor.CreateEditor(finish == "cancel" ? (Object)room : layout);
+            var window = ScriptableObject.CreateInstance<RoomFloorPanelDraftTestWindow>();
+            RoomAuthoringOperations.GenerationCompleted += Generated;
+            try
+            {
+                var root = inspector.CreateInspectorGUI(); window.rootVisualElement.Add(root); window.Show();
+                yield return null;
+                var controls = root.Q<VisualElement>("floorPanelControls");
+                Assert.IsNotNull(controls.panel);
+                controls.Q<IntegerField>("panelSeed").value = 991;
+                Submit(controls.Q<Button>("panelAddReservation"));
+                if (finish == "invalid") controls.Query<IntegerField>().ToList().Single(f => f.label == "Seam thickness (1–3 pixels)").value = 0;
+                Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                Submit(controls.Q<Button>("panelPreview"));
+                RoomAuthoringAssetRefresh.Observe(layout); RoomAuthoringAssetRefresh.Observe(other);
+                ImportFloorPixels();
+                var wait = EditorApplication.timeSinceStartup + 1.1;
+                while (EditorApplication.timeSinceStartup < wait) yield return null;
+                Assert.AreEqual(0, calls); Assert.AreEqual(1, otherCalls, "A different layout must not inherit this draft's deferral.");
+                Assert.AreEqual(17, room.FloorPanels.Seed); Assert.IsEmpty(room.FloorReservations);
+                Assert.AreEqual(991, controls.Q<IntegerField>("panelSeed").value);
+                Assert.AreSame(old, Revision()); CollectionAssert.AreEqual(objects, room.GeneratedOutput.GetComponentsInChildren<Transform>(true));
+                Assert.IsTrue(RoomAuthoringAssetRefresh.IsPending(layout));
+                if (finish == "invalid")
+                {
+                    Submit(controls.Q<Button>("panelApply"));
+                    Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                    wait = EditorApplication.timeSinceStartup + .8;
+                    while (EditorApplication.timeSinceStartup < wait) yield return null;
+                    Assert.AreEqual(0, calls); Assert.AreEqual(17, room.FloorPanels.Seed);
+                }
+                if (finish == "destroy") { Object.DestroyImmediate(inspector); inspector = null; }
+                else if (finish == "detach") root.RemoveFromHierarchy();
+                else Submit(controls.Q<Button>(finish == "apply" ? "panelApply" : "panelReload"));
+                Assert.IsFalse(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                var deadline = EditorApplication.timeSinceStartup + 10;
+                while (calls == 0 && EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.AreEqual(1, calls, RoomAuthoringAssetRefresh.GetIssue(layout));
+                if (finish == "detach")
+                {
+                    window.rootVisualElement.Add(root); yield return null;
+                    Assert.AreEqual(17, controls.Q<IntegerField>("panelSeed").value);
+                    Assert.IsFalse(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                }
+                Assert.AreEqual(finish == "apply" ? 991 : 17, room.FloorPanels.Seed);
+                Assert.AreEqual(finish == "apply" ? 1 : 0, room.FloorReservations.Count);
+                if (finish != "apply") Assert.AreSame(old, Revision());
+                CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
+                Assert.AreEqual(roomId, room.RoomId); Assert.AreEqual(layoutId, layout.LayoutId); Assert.IsEmpty(layout.Connections);
+                wait = EditorApplication.timeSinceStartup + .8;
+                while (EditorApplication.timeSinceStartup < wait) yield return null;
+                Assert.AreEqual(1, calls, "Apply/cancel and generated imports must not add another publication.");
+                Assert.AreEqual(1, otherCalls); Assert.IsFalse(RoomAuthoringAssetRefresh.IsPending(layout));
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                if (inspector != null) Object.DestroyImmediate(inspector);
+                window.Close(); Object.DestroyImmediate(window);
+            }
+        }
+        [UnityTest] public IEnumerator MultipleInspectorDraftsReleaseIndependently()
+        {
+            var first = UnityEditor.Editor.CreateEditor(layout); var second = UnityEditor.Editor.CreateEditor(room);
+            var window = ScriptableObject.CreateInstance<RoomFloorPanelDraftTestWindow>(); var calls = 0;
+            void Generated(ShipRoomAuthoring generated) { if (generated.Layout == layout) calls++; }
+            RoomAuthoringOperations.GenerationCompleted += Generated;
+            try
+            {
+                var a = first.CreateInspectorGUI(); var b = second.CreateInspectorGUI();
+                window.rootVisualElement.Add(a); window.rootVisualElement.Add(b); window.Show(); yield return null;
+                a.Q<IntegerField>("panelSeed").value = 991; b.Q<IntegerField>("panelSeed").value = 992;
+                RoomAuthoringAssetRefresh.Observe(layout); ImportFloorPixels();
+                var wait = EditorApplication.timeSinceStartup + .8;
+                while (EditorApplication.timeSinceStartup < wait) yield return null;
+                Assert.AreEqual(0, calls);
+                Object.DestroyImmediate(first); first = null;
+                Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                wait = EditorApplication.timeSinceStartup + .8;
+                while (EditorApplication.timeSinceStartup < wait) yield return null;
+                Assert.AreEqual(0, calls); Submit(b.Q<Button>("panelReload"));
+                Assert.IsFalse(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                var deadline = EditorApplication.timeSinceStartup + 10;
+                while (calls == 0 && EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.AreEqual(1, calls); Assert.AreEqual(17, room.FloorPanels.Seed);
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                if (first != null) Object.DestroyImmediate(first); Object.DestroyImmediate(second);
+                window.Close(); Object.DestroyImmediate(window);
+            }
+        }
+        [UnityTest] public IEnumerator RoomBindingEditWaitsForItsPanelDraft() { yield return DraftBinding(false, false, false); }
+        [UnityTest] public IEnumerator LayoutSpriteBindingWaitsForAppliedDraft() { yield return DraftBinding(true, false, false); }
+        [UnityTest] public IEnumerator SharedBindingEditWaitsForOtherConsumersDraft() { yield return DraftBinding(false, true, false); }
+        [UnityTest] public IEnumerator UnrelatedStyleBindingRemainsEditableDuringDraft() { yield return DraftBinding(false, true, true); }
+
+        private IEnumerator DraftBinding(bool spriteBinding, bool otherConsumer, bool unrelated)
+        {
+            var bindingStyle = room.Style;
+            if (unrelated)
+            {
+                bindingStyle = Object.Instantiate(room.Style);
+                AssetDatabase.CreateAsset(bindingStyle, folder + "/IndependentStyle.asset");
+            }
+            var other = RoomAuthoringCreation.CreateLayout(room.gameObject.scene, bindingStyle);
+            other.transform.position = Vector3.right * 32;
+            Assert.IsTrue(RoomAuthoringOperations.PaintBox(other.Spaces[0], new BoundsInt(0, 0, 0, 8, 6, 1), bindingStyle.FloorTile));
+            Object replacement;
+            var role = spriteBinding ? "northArtwork0" : "boundFloorTile";
+            if (spriteBinding)
+            {
+                Assert.IsTrue(AssetDatabase.CopyAsset(folder + "/wall.png", folder + "/ReplacementWall.png"));
+                replacement = AssetDatabase.LoadAssetAtPath<Sprite>(folder + "/ReplacementWall.png");
+            }
+            else
+            {
+                var tile = Object.Instantiate((Tile)bindingStyle.FloorTile);
+                AssetDatabase.CreateAsset(tile, folder + "/ReplacementFloor.asset"); replacement = tile;
+            }
+            Assert.IsNotNull(replacement); AssetDatabase.SaveAssets();
+            var owner = UnityEditor.Editor.CreateEditor(spriteBinding ? (Object)layout : room);
+            var bindingEditor = otherConsumer ? UnityEditor.Editor.CreateEditor(other) : null;
+            var window = ScriptableObject.CreateInstance<RoomFloorPanelDraftTestWindow>();
+            var calls = 0; var otherCalls = 0;
+            void Generated(ShipRoomAuthoring generated)
+            { if (generated.Layout == layout) calls++; if (generated.Layout == other) otherCalls++; }
+            RoomAuthoringOperations.GenerationCompleted += Generated;
+            try
+            {
+                var root = owner.CreateInspectorGUI(); window.rootVisualElement.Add(root);
+                var bindingRoot = otherConsumer ? bindingEditor.CreateInspectorGUI() : root;
+                if (otherConsumer) window.rootVisualElement.Add(bindingRoot);
+                window.Show(); yield return null;
+                root.Q<IntegerField>("panelSeed").value = 991;
+                Submit(root.Q<Button>("panelAddReservation")); Submit(root.Q<Button>("panelPreview"));
+                Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                var preview = RoomAuthoringPreview.GetFloorPanelPreview(room); Assert.IsNotNull(preview);
+                var oldValue = bindingRoot.Q<ObjectField>(role).value;
+                var oldStyle = EditorJsonUtility.ToJson(bindingStyle);
+                var before = RoomUndoRedoTests.Snapshot(room); var otherBefore = RoomUndoRedoTests.Snapshot(other.Spaces[0]);
+                var resources = RoomFloorPanelAssetStore.RetainedRevisionCount;
+                var group = Undo.GetCurrentGroup(); var groupName = Undo.GetCurrentGroupName(); var dirty = room.gameObject.scene.isDirty;
+                bindingRoot.Q<ObjectField>(role).value = replacement;
+                if (unrelated)
+                {
+                    Assert.AreEqual(0, calls); Assert.AreEqual(1, otherCalls);
+                    Assert.AreSame(replacement, bindingRoot.Q<ObjectField>(role).value);
+                    CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+                    Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                    Assert.AreEqual(17, room.FloorPanels.Seed); Assert.IsEmpty(room.FloorReservations);
+                    yield break;
+                }
+                Assert.AreEqual(0, calls); Assert.AreEqual(0, otherCalls);
+                Assert.AreSame(oldValue, bindingRoot.Q<ObjectField>(role).value);
+                Assert.AreEqual(oldStyle, EditorJsonUtility.ToJson(bindingStyle));
+                CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+                CollectionAssert.AreEqual(otherBefore, RoomUndoRedoTests.Snapshot(other.Spaces[0]));
+                Assert.AreEqual(resources, RoomFloorPanelAssetStore.RetainedRevisionCount);
+                Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.AreEqual(groupName, Undo.GetCurrentGroupName());
+                Assert.AreEqual(dirty, room.gameObject.scene.isDirty);
+                Assert.AreSame(preview, RoomAuthoringPreview.GetFloorPanelPreview(room));
+                Assert.IsTrue(bindingRoot.Query<HelpBox>().ToList().Any(h => h.text.Contains("Apply or cancel") && h.text.Contains(layout.LayoutId)));
+                var invoked = false;
+                Assert.IsFalse(RoomAuthoringOperations.EditStyleBindings(bindingStyle, _ => invoked = true, out var issue));
+                Assert.IsFalse(invoked); StringAssert.Contains(layout.LayoutId, issue);
+                var settle = EditorApplication.timeSinceStartup + .6;
+                while (EditorApplication.timeSinceStartup < settle) yield return null;
+                Assert.AreEqual(0, calls); Assert.AreEqual(0, otherCalls);
+                Submit(root.Q<Button>(spriteBinding ? "panelApply" : "panelReload"));
+                Assert.IsFalse(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                Assert.AreEqual(spriteBinding ? 1 : 0, calls); Assert.AreEqual(0, otherCalls);
+                before = RoomUndoRedoTests.Snapshot(room); otherBefore = RoomUndoRedoTests.Snapshot(other.Spaces[0]);
+                calls = 0;
+                bindingRoot.Q<ObjectField>(role).value = replacement;
+                Assert.AreEqual(1, calls); Assert.AreEqual(1, otherCalls);
+                Assert.AreSame(replacement, bindingRoot.Q<ObjectField>(role).value);
+                var after = RoomUndoRedoTests.Snapshot(room); var otherAfter = RoomUndoRedoTests.Snapshot(other.Spaces[0]);
+                Undo.PerformUndo();
+                Assert.AreSame(oldValue, spriteBinding ? (Object)bindingStyle.NorthWalls[0].Sprite : bindingStyle.FloorTile);
+                CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+                CollectionAssert.AreEqual(otherBefore, RoomUndoRedoTests.Snapshot(other.Spaces[0]));
+                Undo.PerformRedo();
+                Assert.AreSame(replacement, spriteBinding ? (Object)bindingStyle.NorthWalls[0].Sprite : bindingStyle.FloorTile);
+                CollectionAssert.AreEqual(after, RoomUndoRedoTests.Snapshot(room));
+                CollectionAssert.AreEqual(otherAfter, RoomUndoRedoTests.Snapshot(other.Spaces[0]));
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                Object.DestroyImmediate(owner); if (bindingEditor != null) Object.DestroyImmediate(bindingEditor);
+                window.Close(); Object.DestroyImmediate(window);
+            }
+        }
+        [UnityTest] public IEnumerator SpaceStyleWaitsForSettingsDraftCancel() { yield return DraftAssignment(false, false, false, false); }
+        [UnityTest] public IEnumerator SpaceStyleWaitsForReservationDraftApply() { yield return DraftAssignment(false, true, false, false); }
+        [UnityTest] public IEnumerator LayoutStyleWaitsForSettingsDraftApply() { yield return DraftAssignment(true, false, false, false); }
+        [UnityTest] public IEnumerator LayoutStyleWaitsForReservationDraftCancel() { yield return DraftAssignment(true, true, false, false); }
+        [UnityTest] public IEnumerator SpaceStyleWaitsForAnotherMembersDraft() { yield return DraftAssignment(false, true, true, false); }
+        [UnityTest] public IEnumerator UnrelatedLayoutStyleRemainsEditableDuringDraft() { yield return DraftAssignment(true, false, false, true); }
+
+        private IEnumerator DraftAssignment(bool layoutStyle, bool reservation, bool otherMember, bool unrelated)
+        {
+            var targetRoom = room; var targetLayout = layout;
+            if (otherMember)
+            {
+                targetRoom = RoomAuthoringCreation.CreateSpace(layout);
+                targetRoom.transform.localPosition = Vector3.right * 16;
+                ShipLayoutStyleTests.Fill(targetRoom, RoomAuthoringTestFixtures.Cells());
+                Assert.IsTrue(RoomAuthoringOperations.Rebuild(layout));
+            }
+            if (unrelated)
+            {
+                targetLayout = RoomAuthoringCreation.CreateLayout(room.gameObject.scene, room.Style);
+                targetRoom = targetLayout.Spaces[0]; targetLayout.transform.position = Vector3.right * 32;
+                Assert.IsTrue(RoomAuthoringOperations.PaintBox(targetRoom, new BoundsInt(0, 0, 0, 8, 6, 1), room.Style.FloorTile));
+            }
+            var replacement = Object.Instantiate(room.Style);
+            AssetDatabase.CreateAsset(replacement, folder + "/ReplacementStyle.asset"); AssetDatabase.SaveAssets();
+            var draftEditor = UnityEditor.Editor.CreateEditor(room);
+            var assignmentEditor = UnityEditor.Editor.CreateEditor(layoutStyle ? (Object)targetLayout : targetRoom);
+            var window = ScriptableObject.CreateInstance<RoomFloorPanelDraftTestWindow>();
+            var calls = 0; var otherCalls = 0;
+            void Generated(ShipRoomAuthoring generated)
+            { if (generated.Layout == layout) calls++; else if (generated.Layout == targetLayout) otherCalls++; }
+            RoomAuthoringOperations.GenerationCompleted += Generated;
+            try
+            {
+                var draftRoot = draftEditor.CreateInspectorGUI(); var assignmentRoot = assignmentEditor.CreateInspectorGUI();
+                window.rootVisualElement.Add(draftRoot); window.rootVisualElement.Add(assignmentRoot);
+                window.Show(); yield return null;
+                if (reservation) Submit(draftRoot.Q<Button>("panelAddReservation"));
+                else draftRoot.Q<IntegerField>("panelSeed").value = 991;
+                Submit(draftRoot.Q<Button>("panelPreview"));
+                Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                var preview = RoomAuthoringPreview.GetFloorPanelPreview(room); Assert.IsNotNull(preview);
+                var field = assignmentRoot.Q<ObjectField>("assignedStyle"); var oldValue = field.value;
+                var before = RoomUndoRedoTests.Snapshot(room); var targetBefore = RoomUndoRedoTests.Snapshot(targetRoom);
+                var authored = EditorJsonUtility.ToJson(room); var targetAuthored = EditorJsonUtility.ToJson(targetRoom);
+                var layoutAuthored = EditorJsonUtility.ToJson(targetLayout);
+                var resources = RoomFloorPanelAssetStore.RetainedRevisionCount;
+                var group = Undo.GetCurrentGroup(); var groupName = Undo.GetCurrentGroupName(); var dirty = room.gameObject.scene.isDirty;
+                field.value = replacement;
+                if (unrelated)
+                {
+                    Assert.AreEqual(0, calls); Assert.AreEqual(1, otherCalls);
+                    Assert.AreSame(replacement, targetLayout.DefaultStyle);
+                    CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+                    Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                    yield break;
+                }
+                Assert.AreEqual(0, calls); Assert.AreSame(oldValue, field.value);
+                Assert.AreEqual(authored, EditorJsonUtility.ToJson(room));
+                Assert.AreEqual(targetAuthored, EditorJsonUtility.ToJson(targetRoom));
+                Assert.AreEqual(layoutAuthored, EditorJsonUtility.ToJson(targetLayout));
+                CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+                CollectionAssert.AreEqual(targetBefore, RoomUndoRedoTests.Snapshot(targetRoom));
+                Assert.AreEqual(resources, RoomFloorPanelAssetStore.RetainedRevisionCount);
+                Assert.AreEqual(group, Undo.GetCurrentGroup()); Assert.AreEqual(groupName, Undo.GetCurrentGroupName());
+                Assert.AreEqual(dirty, room.gameObject.scene.isDirty);
+                Assert.AreSame(preview, RoomAuthoringPreview.GetFloorPanelPreview(room));
+                Assert.IsTrue(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                Assert.IsTrue(assignmentRoot.Query<HelpBox>().ToList().Any(h => h.text.Contains("Apply or cancel") && h.text.Contains(layout.LayoutId)));
+                var apply = layoutStyle != reservation;
+                Submit(draftRoot.Q<Button>(apply ? "panelApply" : "panelReload"));
+                Assert.IsFalse(RoomAuthoringAssetRefresh.HasPendingPanelDraft(layout));
+                Assert.AreEqual(apply ? 1 : 0, calls);
+                Assert.AreEqual(apply && !reservation ? 991 : 17, room.FloorPanels.Seed);
+                Assert.AreEqual(apply && reservation ? 1 : 0, room.FloorReservations.Count);
+                before = RoomUndoRedoTests.Snapshot(room); targetBefore = RoomUndoRedoTests.Snapshot(targetRoom); calls = 0;
+                field.value = replacement;
+                Assert.AreEqual(1, calls); Assert.AreSame(replacement, field.value);
+                Assert.AreSame(replacement, layoutStyle ? targetLayout.DefaultStyle : targetRoom.Style);
+                var after = RoomUndoRedoTests.Snapshot(room); var targetAfter = RoomUndoRedoTests.Snapshot(targetRoom);
+                Undo.PerformUndo();
+                Assert.AreSame(oldValue, layoutStyle ? targetLayout.DefaultStyle : new SerializedObject(targetRoom).FindProperty("style").objectReferenceValue);
+                CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
+                CollectionAssert.AreEqual(targetBefore, RoomUndoRedoTests.Snapshot(targetRoom));
+                Undo.PerformRedo();
+                Assert.AreSame(replacement, layoutStyle ? targetLayout.DefaultStyle : targetRoom.Style);
+                CollectionAssert.AreEqual(after, RoomUndoRedoTests.Snapshot(room));
+                CollectionAssert.AreEqual(targetAfter, RoomUndoRedoTests.Snapshot(targetRoom));
+            }
+            finally
+            {
+                RoomAuthoringOperations.GenerationCompleted -= Generated;
+                Object.DestroyImmediate(draftEditor); Object.DestroyImmediate(assignmentEditor);
+                window.Close(); Object.DestroyImmediate(window);
+            }
+        }
+        [UnityTest] public IEnumerator ReferencedAssetBurstWaitsForStrokeAndReusesIdenticalPanelResources()
+        {
+            var calls = 0; void Generated(ShipRoomAuthoring _) => calls++;
+            RoomAuthoringAssetRefresh.Observe(layout); var old = Revision(); var partition = Partition(room);
+            RoomAuthoringOperations.GenerationCompleted += Generated;
+            try
+            {
+                using (var edit = RoomAuthoringOperations.BeginEdit(room, "Pending panel stroke"))
+                {
+                    RoomAuthoringOperations.PaintCell(room, new Vector3Int(8, 0, 0), room.Style.FloorTile, edit);
+                    var texture = new Texture2D(2, 2); var path = folder + "/square.png";
+                    texture.LoadImage(File.ReadAllBytes(path)); texture.SetPixel(0, 0, Color.green); File.WriteAllBytes(path, texture.EncodeToPNG()); Object.DestroyImmediate(texture);
+                    AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+                    var wait = EditorApplication.timeSinceStartup + .8; while (EditorApplication.timeSinceStartup < wait) yield return null;
+                    Assert.AreEqual(0, calls); Assert.AreSame(old, Revision()); edit.Cancel();
+                }
+                var deadline = EditorApplication.timeSinceStartup + 10; while (calls == 0 && EditorApplication.timeSinceStartup < deadline) yield return null;
+                Assert.AreEqual(1, calls, RoomAuthoringAssetRefresh.GetIssue(layout)); Assert.AreSame(old, Revision()); Assert.AreEqual(partition, Partition(room));
+                var settle = EditorApplication.timeSinceStartup + .8; while (EditorApplication.timeSinceStartup < settle) yield return null;
+                Assert.AreEqual(1, calls, "Generated imports must not recursively rebuild.");
+            }
+            finally { RoomAuthoringOperations.GenerationCompleted -= Generated; }
+        }
+    }
+}

@@ -44,8 +44,8 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 CollectionAssert.AreEqual(valid, RoomUndoRedoTests.Snapshot(room)); UnrelatedUnchanged();
                 brush.Erase(grid, target, new Vector3Int(11, 5, 0));
                 Assert.AreEqual(71, RoomAuthoringOperations.ReadCells(room).Length);
-                Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
-                Assert.That(room.GenerationDiagnostic, Does.Contain("rectangle"));
+                Assert.AreEqual(71, RoomAuthoringTestFixtures.FloorCount(room));
+                Assert.That(room.GenerationDiagnostic, Does.Contain("not exactly coverable"));
                 var invalid = RoomUndoRedoTests.Snapshot(room); UnrelatedUnchanged();
                 Undo.PerformUndo(); CollectionAssert.AreEqual(valid, RoomUndoRedoTests.Snapshot(room)); UnrelatedUnchanged();
                 Undo.PerformRedo(); CollectionAssert.AreEqual(invalid, RoomUndoRedoTests.Snapshot(room)); UnrelatedUnchanged();
@@ -77,6 +77,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 var objects = room.GetComponentsInChildren<Transform>(true);
                 Assert.IsFalse(scene.isDirty);
                 Assert.IsNull(RoomAuthoringValidator.Validate(room));
+                Assert.IsFalse(RoomAuthoringValidator.IsCurrent(room), "External edits must leave stored output stale.");
                 Assert.IsFalse(scene.isDirty);
                 CollectionAssert.AreEqual(before, RoomUndoRedoTests.Snapshot(room));
                 CollectionAssert.AreEqual(objects, room.GetComponentsInChildren<Transform>(true));

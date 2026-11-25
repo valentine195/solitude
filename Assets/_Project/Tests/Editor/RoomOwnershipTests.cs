@@ -50,7 +50,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 UnityEngine.Object.DestroyImmediate(duplicate);
                 var rebuilt = RoomAuthoringOperations.Rebuild(room);
                 Assert.AreEqual(state != "invalid", rebuilt, room.GenerationDiagnostic);
-                Assert.AreEqual(state == "valid" ? 28 : 0, room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Length);
+                Assert.AreEqual(state == "valid" ? 28 : state == "invalid" ? 24 : 0, room.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>().Length);
                 CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
                 CollectionAssert.AreEqual(neighborObjects, neighbor.GeneratedOutput.GetComponentsInChildren<Transform>(true));
             }
@@ -99,7 +99,15 @@ namespace SOLITUDE.Tests.RoomAuthoring
                 CollectionAssert.AreEqual(firstOutput, first.GeneratedOutput.GetComponentsInChildren<Transform>(true));
                 CollectionAssert.AreEqual(secondOutput, second.GeneratedOutput.GetComponentsInChildren<Transform>(true));
                 authored.transform.SetParent(second.transform, false);
+                if (nested)
+                {
+                    var retained = first.GeneratedOutput.GetComponentsInChildren<Transform>(true);
+                    Assert.IsFalse(RoomAuthoringOperations.Rebuild(first), "The unrecorded container remains protected even when empty.");
+                    CollectionAssert.AreEqual(retained, first.GeneratedOutput.GetComponentsInChildren<Transform>(true));
+                    parent.SetParent(first.transform, false);
+                }
                 Assert.IsTrue(RoomAuthoringOperations.Rebuild(first), first.GenerationDiagnostic);
+                if (nested) Assert.AreEqual(first.transform, parent.parent, "Recovery must preserve the relocated container.");
                 Assert.IsTrue(RoomAuthoringOperations.Rebuild(second), second.GenerationDiagnostic);
             }
             finally
@@ -141,10 +149,12 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.IsTrue(RoomAuthoringOperations.Rebuild(first));
             Assert.IsTrue(RoomAuthoringOperations.Rebuild(second));
             var otherOutput = second.GeneratedOutput.GetComponentsInChildren<Transform>();
+            var retainedOutput = first.GeneratedOutput.GetComponentsInChildren<Transform>();
             second.transform.position = Vector3.right * 7;
             Assert.That(RoomAuthoringValidator.Validate(first), Does.Contain("overlaps"));
             Assert.IsFalse(RoomAuthoringOperations.Rebuild(first));
-            Assert.AreEqual(0, first.GeneratedOutput.transform.childCount);
+            CollectionAssert.AreEqual(retainedOutput, first.GeneratedOutput.GetComponentsInChildren<Transform>());
+            Assert.AreEqual(SOLITUDE.World.RoomAuthoring.RoomGenerationStatus.Refused, first.GenerationResult.Status);
             Assert.AreSame(f.Style.FloorTile, sentinelMap.GetTile(Vector3Int.zero));
             CollectionAssert.AreEqual(otherOutput, second.GeneratedOutput.GetComponentsInChildren<Transform>());
             second.transform.position = Vector3.right * 8;

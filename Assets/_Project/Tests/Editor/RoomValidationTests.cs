@@ -10,7 +10,7 @@ namespace SOLITUDE.Tests.RoomAuthoring
 {
     public sealed class RoomValidationTests
     {
-        [Test] public void ExteriorErasureClearsOnlyOwnedOutputAndRecoveryRebuilds()
+        [Test] public void ExteriorErasureRetainsOwnedFloorAndRecoveryRebuilds()
         {
             using var f = new RoomAuthoringTestFixtures();
             var room = f.Room();
@@ -20,9 +20,9 @@ namespace SOLITUDE.Tests.RoomAuthoring
             var retained = other.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>();
             room.Occupancy.SetTile(Vector3Int.zero, null);
             Assert.AreEqual(47, RoomAuthoringOperations.ReadCells(room).Length);
-            Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
-            Assert.That(room.GenerationDiagnostic, Does.Contain("rectangle"));
-            Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+            Assert.IsTrue(RoomAuthoringOperations.Rebuild(room), room.GenerationDiagnostic);
+            Assert.IsEmpty(room.GenerationDiagnostic);
+            Assert.AreEqual(47, RoomAuthoringTestFixtures.FloorCount(room));
             CollectionAssert.AreEqual(retained, other.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>());
             room.Occupancy.SetTile(Vector3Int.zero, f.Style.FloorTile);
             Assert.IsTrue(RoomAuthoringOperations.Rebuild(room));
@@ -34,12 +34,12 @@ namespace SOLITUDE.Tests.RoomAuthoring
             CollectionAssert.AreEqual(retained, other.GeneratedOutput.GetComponentsInChildren<SpriteRenderer>());
         }
 
-        [TestCase("wall", "North wall")]
+        [TestCase("wall", "North sprite")]
         [TestCase("corner", "Northwest corner")]
         [TestCase("ppu", "32 PPU")]
         [TestCase("filter", "Point filtering")]
         [TestCase("span", "exactly coverable")]
-        public void InvalidStyleClearsPreviewPreservesCellsAndRecovers(string fault, string message)
+        public void InvalidStyleRetainsIndependentPreviewPreservesCellsAndRecovers(string fault, string message)
         {
             using var f = new RoomAuthoringTestFixtures();
             var room = f.Room();
@@ -60,7 +60,8 @@ namespace SOLITUDE.Tests.RoomAuthoring
             Assert.That(RoomAuthoringValidator.Validate(room), Does.Contain(message));
             Assert.IsFalse(RoomAuthoringOperations.Rebuild(room));
             Assert.That(room.GenerationDiagnostic, Does.Contain(message));
-            Assert.AreEqual(0, room.GeneratedOutput.transform.childCount);
+            Assert.AreEqual(48, RoomAuthoringTestFixtures.FloorCount(room));
+            Assert.AreEqual(SOLITUDE.World.RoomAuthoring.RoomGenerationStatus.IncompletePreview, room.GenerationResult.Status);
             CollectionAssert.AreEqual(cells, RoomAuthoringOperations.ReadCells(room));
             f.Style.NorthWalls[0].Sprite = wall;
             f.Style.Northwest.Sprite = corner;
