@@ -1,0 +1,23 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "eval",
+    "parameters": {
+      "code": "var k=UnityEngine.InputSystem.Keyboard.current;UnityEngine.InputSystem.InputSystem.QueueStateEvent(k,new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.E));UnityEngine.InputSystem.InputSystem.Update();UnityEngine.InputSystem.InputSystem.QueueStateEvent(k,new UnityEngine.InputSystem.LowLevel.KeyboardState());UnityEngine.InputSystem.InputSystem.Update();var s=UnityEngine.Object.FindAnyObjectByType<SOLITUDE.Containers.InventoryScreenView>();var f=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;var c=(SOLITUDE.Containers.IContainerReader)s.GetType().GetField(\"carried\",f).GetValue(s);var h=(SOLITUDE.Containers.IContainerReader)s.GetType().GetField(\"hotbar\",f).GetValue(s);if(!c.GetSlot(0).IsEmpty||h.GetSlot(0).IsEmpty)throw new Exception(\"Equip failed\");return \"PASS: keyboard E equipped wrench and restored original item placement\";"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": true,
+      "result": "PASS: keyboard E equipped wrench and restored original item placement"
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

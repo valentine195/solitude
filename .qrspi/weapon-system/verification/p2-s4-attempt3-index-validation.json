@@ -1,0 +1,38 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-validate-feedback.cs",
+      "entry": "ValidateFeedback.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 6232,
+      "executeMs": 4702,
+      "assemblyName": "PipelineRunScript_weapon-system-validate-feedback_4160d09a00ef4357b652b49ce701d247",
+      "success": true,
+      "result": {
+        "metadataValid": true,
+        "tagsValid": true,
+        "capabilitiesValid": true,
+        "prefabGuid": "97d8406383d8c4df2bb9cf3b55fbc66a",
+        "flash": 0.08,
+        "knockbackTiles": 0.1,
+        "knockbackDuration": 0.08,
+        "pixelsPerUnit": 32,
+        "impactDimensions": "9x9",
+        "clipsAssigned": false
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

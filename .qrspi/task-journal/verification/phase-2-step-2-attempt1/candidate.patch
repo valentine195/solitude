@@ -1,0 +1,1534 @@
+diff --git a/Assets/_Project/Core/Composition/SceneBindings.cs b/Assets/_Project/Core/Composition/SceneBindings.cs
+index e2325f1..3923ad3 100644
+--- a/Assets/_Project/Core/Composition/SceneBindings.cs
++++ b/Assets/_Project/Core/Composition/SceneBindings.cs
+@@ -32,6 +32,8 @@ namespace SOLITUDE.Composition
+         [SerializeField] private RestorationJunction[] restorationJunctions = new RestorationJunction[0];
+         [SerializeField] private SceneFeatureComposition[] features = new SceneFeatureComposition[0];
+         [SerializeField] private SOLITUDE.Tasks.UI.TaskJournalView journalView;
++        [SerializeField] private SOLITUDE.Tasks.UI.TaskNoticeView taskNoticeView;
++        private TaskNoticeCoordinator taskNotices;
+         private TaskJournal tasks;
+         private string taskScope;
+         private TaskJournalScreenCoordinator journalScreen;
+@@ -145,6 +147,20 @@ namespace SOLITUDE.Composition
+                         controller.BindDefaultSource();
+                 uiLease = input.ConnectUI(uiInput);
+                 input.Point += Point;
++                if (taskNoticeView != null && tasks != null)
++                {
++                    try
++                    {
++                        taskNotices = new TaskNoticeCoordinator(tasks, policy);
++                        taskNotices.PresentationError += NoticeError;
++                        taskNoticeView.Initialize(taskNotices);
++                    }
++                    catch (Exception error)
++                    {
++                        taskNoticeView.Release(); taskNotices?.Dispose(); taskNotices = null;
++                        Debug.LogWarning("Optional task notice UI unavailable: " + error.Message);
++                    }
++                }
+                 var featureContext = new SceneFeatureContext(session.Commands, inventory.Container, presentations,
+                     policy, input, tasks, taskScope, interactor, interactions.Events);
+                 foreach (var feature in features)
+@@ -165,6 +181,8 @@ namespace SOLITUDE.Composition
+             }
+             catch { Release(); throw; }
+         }
++        private static void NoticeError(Exception error) => Debug.LogWarning("Optional task notice render failed: " + error.Message);
++        private void Update() => taskNotices?.Advance(Time.unscaledDeltaTime);
+         public IDisposable RegisterPickup(WorldPickup pickup)
+         {
+             if (pickups == null || pickup == null || pickup.Definition?.Item == null || pickup.Definition.Quantity < 1 || presentations.Resolve(pickup.Definition.Item.ItemId) == null)
+@@ -264,6 +282,8 @@ namespace SOLITUDE.Composition
+         public void Release()
+         {
+             if (session == null) return;
++            taskNotices?.Dispose(); taskNotices = null;
++            if (taskNoticeView != null) taskNoticeView.Release();
+             journalScreen?.Dispose(); journalScreen = null; journalPresenter?.Dispose(); journalPresenter = null;
+             if (journalView != null) journalView.Release();
+             for (int i = boundFeatures.Count - 1; i >= 0; i--)
+diff --git a/Assets/_Project/Editor/ScrubberEncounterBuilder.cs b/Assets/_Project/Editor/ScrubberEncounterBuilder.cs
+index 39194be..158781e 100644
+--- a/Assets/_Project/Editor/ScrubberEncounterBuilder.cs
++++ b/Assets/_Project/Editor/ScrubberEncounterBuilder.cs
+@@ -42,7 +42,50 @@ namespace SOLITUDE.Editor
+             source.Configure("scrubber-room-01", "DECK 01 / SCRUBBER ROOM", equipment, equipment.GetComponent<ScrubberAccess>());
+             var data = new SerializedObject(All<SceneBindings>(scene).Single());
+             data.FindProperty("journalView").objectReferenceValue = view;
+-            data.ApplyModifiedPropertiesWithoutUndo(); EnsureComposition(scene); view.ValidateAuthoring();
++            data.ApplyModifiedPropertiesWithoutUndo(); EnsureComposition(scene); view.ValidateAuthoring(); EnsureTaskNotice(scene);
++        }
++        private static void EnsureTaskNotice(Scene scene)
++        {
++            string path = JournalFolder + "/TaskNotice.prefab";
++            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
++            if (prefab == null)
++            {
++                font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/_Project/UI/Fonts/pixel_operator/FontAssets/PixelOperator SDF.asset");
++                var root = new GameObject("TaskNotice", typeof(RectTransform), typeof(Canvas), typeof(UnityEngine.UI.CanvasScaler));
++                try
++                {
++                    var canvas = root.GetComponent<Canvas>(); canvas.renderMode = RenderMode.ScreenSpaceOverlay; canvas.sortingOrder = 80;
++                    var scaler = root.GetComponent<UnityEngine.UI.CanvasScaler>(); scaler.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;
++                    scaler.referenceResolution = new Vector2(1920,1080); scaler.matchWidthOrHeight = .5f;
++                    var view = root.AddComponent<SOLITUDE.Tasks.UI.TaskNoticeView>();
++                    var panel = JRect("Panel",root.transform,Vector2.one,Vector2.one,new Vector2(-444,-348),new Vector2(-24,-96));
++                    JImage(panel,new Color(.035f,.05f,.055f,.98f)); JSet(view,"panel",panel.gameObject);
++                    JImage(JRect("AmberRule",panel,Vector2.zero,new Vector2(0,1),Vector2.zero,new Vector2(3,0)),Amber);
++                    NoticeText(view,"heading","Heading",panel,"TASK ADDED",24,Amber,-14,30);
++                    NoticeText(view,"title","Title",panel,"TASK TITLE",28,White,-48,58);
++                    NoticeText(view,"location","Location",panel,"UNKNOWN",22,new Color(.72f,.76f,.77f),-110,28);
++                    JImage(JRect("Divider",panel,new Vector2(0,1),Vector2.one,new Vector2(18,-144),new Vector2(-18,-143)),new Color(.3f,.35f,.36f));
++                    NoticeText(view,"outcome","Outcome",panel,"> ACTIVE",22,new Color(.72f,.76f,.77f),-150,28);
++                    NoticeText(view,"body","Body",panel,"NEXT STEP",22,White,-182,58);
++                    panel.gameObject.SetActive(false); view.ValidateAuthoring(); prefab = PrefabUtility.SaveAsPrefabAsset(root,path);
++                }
++                finally { UnityEngine.Object.DestroyImmediate(root); }
++            }
++            var notice = All<SOLITUDE.Tasks.UI.TaskNoticeView>(scene).SingleOrDefault();
++            if (notice == null) notice = ((GameObject)PrefabUtility.InstantiatePrefab(prefab,scene)).GetComponent<SOLITUDE.Tasks.UI.TaskNoticeView>();
++            JSet(All<SceneBindings>(scene).Single(),"taskNoticeView",notice); notice.ValidateAuthoring();
++            foreach (var legacy in All<ScrubberTaskNotificationView>(scene))
++            {
++                legacy.enabled = false; EditorUtility.SetDirty(legacy); PrefabUtility.RecordPrefabInstancePropertyModifications(legacy);
++                var legacyPanel = new SerializedObject(legacy).FindProperty("notice").objectReferenceValue as GameObject;
++                if (legacyPanel != null) { legacyPanel.SetActive(false); PrefabUtility.RecordPrefabInstancePropertyModifications(legacyPanel); }
++            }
++        }
++        private static void NoticeText(SOLITUDE.Tasks.UI.TaskNoticeView view,string field,string name,Transform parent,string text,float size,Color color,float top,float height)
++        {
++            var label = JText(name,parent,text,size,color); var rect = label.rectTransform;
++            rect.anchorMin = new Vector2(0,1); rect.anchorMax = Vector2.one; rect.offsetMin = new Vector2(18,top-height); rect.offsetMax = new Vector2(-18,top);
++            label.overflowMode = TextOverflowModes.Ellipsis; JSet(view,field,label);
+         }
+         // Deliberately migrate the existing scene; do not rebuild its authored content.
+         [MenuItem("SOLITUDE/Migrations/Compose Scrubber Feature")]
+diff --git a/Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity b/Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity
+index 5bd1eb8..ebded51 100644
+--- a/Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity
++++ b/Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity
+@@ -559,6 +559,114 @@ MonoBehaviour:
+   m_Script: {fileID: 11500000, guid: 056ef8469bc514135ba844a45b684e7a, type: 3}
+   m_Name: 
+   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Containers.ContainerSlotView
++--- !u!1001 &321518016
++PrefabInstance:
++  m_ObjectHideFlags: 0
++  serializedVersion: 2
++  m_Modification:
++    serializedVersion: 3
++    m_TransformParent: {fileID: 0}
++    m_Modifications:
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_Pivot.x
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_Pivot.y
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_AnchorMax.x
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_AnchorMax.y
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_AnchorMin.x
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_AnchorMin.y
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_SizeDelta.x
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_SizeDelta.y
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_LocalPosition.x
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_LocalPosition.y
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_LocalPosition.z
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_LocalRotation.w
++      value: 1
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_LocalRotation.x
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_LocalRotation.y
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_LocalRotation.z
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_AnchoredPosition.x
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_AnchoredPosition.y
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_LocalEulerAnglesHint.x
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_LocalEulerAnglesHint.y
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 3210813608435306179, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_LocalEulerAnglesHint.z
++      value: 0
++      objectReference: {fileID: 0}
++    - target: {fileID: 7373624259344530195, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++      propertyPath: m_Name
++      value: TaskNotice
++      objectReference: {fileID: 0}
++    m_RemovedComponents: []
++    m_RemovedGameObjects: []
++    m_AddedGameObjects: []
++    m_AddedComponents: []
++  m_SourcePrefab: {fileID: 100100000, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++--- !u!114 &321518017 stripped
++MonoBehaviour:
++  m_CorrespondingSourceObject: {fileID: 7042097457733746713, guid: 1ce29ca994f88499b9fe210aca290564, type: 3}
++  m_PrefabInstance: {fileID: 321518016}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 0}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: 8cad561f7405403c9f215d9fe6203b68, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Tasks.UI.TaskNoticeView
+ --- !u!114 &335450136 stripped
+ MonoBehaviour:
+   m_CorrespondingSourceObject: {fileID: 8563340435022653083, guid: 6e58f99432f3241938a80602b6987d2d, type: 3}
+@@ -5174,6 +5282,7 @@ MonoBehaviour:
+   features:
+   - {fileID: 770409762}
+   journalView: {fileID: 664349309}
++  taskNoticeView: {fileID: 321518017}
+   uiInput: {fileID: 1001239075}
+ --- !u!4 &770409761
+ Transform:
+@@ -9075,6 +9184,10 @@ PrefabInstance:
+       propertyPath: equipment
+       value: 
+       objectReference: {fileID: 1870826379}
++    - target: {fileID: 1294144202058634794, guid: fdb0ff303cbe5422e9227df89cf3cd69, type: 3}
++      propertyPath: m_Enabled
++      value: 0
++      objectReference: {fileID: 0}
+     - target: {fileID: 1406056731343643172, guid: fdb0ff303cbe5422e9227df89cf3cd69, type: 3}
+       propertyPath: m_Name
+       value: ScrubberScreen
+@@ -14483,3 +14596,4 @@ SceneRoots:
+   - {fileID: 369883438}
+   - {fileID: 1065739464}
+   - {fileID: 664349308}
++  - {fileID: 321518016}
+diff --git a/Assets/_Project/Systems/Tasks/UI/TaskNotice.prefab b/Assets/_Project/Systems/Tasks/UI/TaskNotice.prefab
+new file mode 100644
+index 0000000..d394269
+--- /dev/null
++++ b/Assets/_Project/Systems/Tasks/UI/TaskNotice.prefab
+@@ -0,0 +1,1023 @@
++%YAML 1.1
++%TAG !u! tag:unity3d.com,2011:
++--- !u!1 &64943320555055492
++GameObject:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  serializedVersion: 6
++  m_Component:
++  - component: {fileID: 3513525338174363655}
++  - component: {fileID: 5668005100649215747}
++  - component: {fileID: 8489054828348008317}
++  m_Layer: 0
++  m_Name: AmberRule
++  m_TagString: Untagged
++  m_Icon: {fileID: 0}
++  m_NavMeshLayer: 0
++  m_StaticEditorFlags: 0
++  m_IsActive: 1
++--- !u!224 &3513525338174363655
++RectTransform:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 64943320555055492}
++  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
++  m_LocalPosition: {x: 0, y: 0, z: 0}
++  m_LocalScale: {x: 1, y: 1, z: 1}
++  m_ConstrainProportionsScale: 0
++  m_Children: []
++  m_Father: {fileID: 4312507033192031014}
++  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
++  m_AnchorMin: {x: 0, y: 0}
++  m_AnchorMax: {x: 0, y: 1}
++  m_AnchoredPosition: {x: 1.5, y: 0}
++  m_SizeDelta: {x: 3, y: 0}
++  m_Pivot: {x: 0.5, y: 0.5}
++--- !u!222 &5668005100649215747
++CanvasRenderer:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 64943320555055492}
++  m_CullTransparentMesh: 1
++--- !u!114 &8489054828348008317
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 64943320555055492}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
++  m_Material: {fileID: 0}
++  m_Color: {r: 0.95, g: 0.66, b: 0.23, a: 1}
++  m_RaycastTarget: 0
++  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
++  m_Maskable: 1
++  m_OnCullStateChanged:
++    m_PersistentCalls:
++      m_Calls: []
++  m_Sprite: {fileID: 0}
++  m_Type: 0
++  m_PreserveAspect: 0
++  m_FillCenter: 1
++  m_FillMethod: 4
++  m_FillAmount: 1
++  m_FillClockwise: 1
++  m_FillOrigin: 0
++  m_UseSpriteMesh: 0
++  m_PixelsPerUnitMultiplier: 1
++--- !u!1 &1342765587686016477
++GameObject:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  serializedVersion: 6
++  m_Component:
++  - component: {fileID: 4312507033192031014}
++  - component: {fileID: 5609813299911237938}
++  - component: {fileID: 1585509696332815518}
++  m_Layer: 0
++  m_Name: Panel
++  m_TagString: Untagged
++  m_Icon: {fileID: 0}
++  m_NavMeshLayer: 0
++  m_StaticEditorFlags: 0
++  m_IsActive: 0
++--- !u!224 &4312507033192031014
++RectTransform:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 1342765587686016477}
++  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
++  m_LocalPosition: {x: 0, y: 0, z: 0}
++  m_LocalScale: {x: 1, y: 1, z: 1}
++  m_ConstrainProportionsScale: 0
++  m_Children:
++  - {fileID: 3513525338174363655}
++  - {fileID: 346124941025899943}
++  - {fileID: 3670916686260253794}
++  - {fileID: 4463115815025097980}
++  - {fileID: 5122515011184710589}
++  - {fileID: 2909125213965299302}
++  - {fileID: 7737740337237171863}
++  m_Father: {fileID: 3210813608435306179}
++  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
++  m_AnchorMin: {x: 1, y: 1}
++  m_AnchorMax: {x: 1, y: 1}
++  m_AnchoredPosition: {x: -234, y: -222}
++  m_SizeDelta: {x: 420, y: 252}
++  m_Pivot: {x: 0.5, y: 0.5}
++--- !u!222 &5609813299911237938
++CanvasRenderer:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 1342765587686016477}
++  m_CullTransparentMesh: 1
++--- !u!114 &1585509696332815518
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 1342765587686016477}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
++  m_Material: {fileID: 0}
++  m_Color: {r: 0.035, g: 0.05, b: 0.055, a: 0.98}
++  m_RaycastTarget: 0
++  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
++  m_Maskable: 1
++  m_OnCullStateChanged:
++    m_PersistentCalls:
++      m_Calls: []
++  m_Sprite: {fileID: 0}
++  m_Type: 0
++  m_PreserveAspect: 0
++  m_FillCenter: 1
++  m_FillMethod: 4
++  m_FillAmount: 1
++  m_FillClockwise: 1
++  m_FillOrigin: 0
++  m_UseSpriteMesh: 0
++  m_PixelsPerUnitMultiplier: 1
++--- !u!1 &1530334610407833403
++GameObject:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  serializedVersion: 6
++  m_Component:
++  - component: {fileID: 5122515011184710589}
++  - component: {fileID: 6715927361315608864}
++  - component: {fileID: 3877152047192218753}
++  m_Layer: 0
++  m_Name: Divider
++  m_TagString: Untagged
++  m_Icon: {fileID: 0}
++  m_NavMeshLayer: 0
++  m_StaticEditorFlags: 0
++  m_IsActive: 1
++--- !u!224 &5122515011184710589
++RectTransform:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 1530334610407833403}
++  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
++  m_LocalPosition: {x: 0, y: 0, z: 0}
++  m_LocalScale: {x: 1, y: 1, z: 1}
++  m_ConstrainProportionsScale: 0
++  m_Children: []
++  m_Father: {fileID: 4312507033192031014}
++  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
++  m_AnchorMin: {x: 0, y: 1}
++  m_AnchorMax: {x: 1, y: 1}
++  m_AnchoredPosition: {x: 0, y: -143.5}
++  m_SizeDelta: {x: -36, y: 1}
++  m_Pivot: {x: 0.5, y: 0.5}
++--- !u!222 &6715927361315608864
++CanvasRenderer:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 1530334610407833403}
++  m_CullTransparentMesh: 1
++--- !u!114 &3877152047192218753
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 1530334610407833403}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
++  m_Material: {fileID: 0}
++  m_Color: {r: 0.3, g: 0.35, b: 0.36, a: 1}
++  m_RaycastTarget: 0
++  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
++  m_Maskable: 1
++  m_OnCullStateChanged:
++    m_PersistentCalls:
++      m_Calls: []
++  m_Sprite: {fileID: 0}
++  m_Type: 0
++  m_PreserveAspect: 0
++  m_FillCenter: 1
++  m_FillMethod: 4
++  m_FillAmount: 1
++  m_FillClockwise: 1
++  m_FillOrigin: 0
++  m_UseSpriteMesh: 0
++  m_PixelsPerUnitMultiplier: 1
++--- !u!1 &2628793879051220109
++GameObject:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  serializedVersion: 6
++  m_Component:
++  - component: {fileID: 4463115815025097980}
++  - component: {fileID: 1669287710134008807}
++  - component: {fileID: 4817621603566747049}
++  m_Layer: 0
++  m_Name: Location
++  m_TagString: Untagged
++  m_Icon: {fileID: 0}
++  m_NavMeshLayer: 0
++  m_StaticEditorFlags: 0
++  m_IsActive: 1
++--- !u!224 &4463115815025097980
++RectTransform:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 2628793879051220109}
++  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
++  m_LocalPosition: {x: 0, y: 0, z: 0}
++  m_LocalScale: {x: 1, y: 1, z: 1}
++  m_ConstrainProportionsScale: 0
++  m_Children: []
++  m_Father: {fileID: 4312507033192031014}
++  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
++  m_AnchorMin: {x: 0, y: 1}
++  m_AnchorMax: {x: 1, y: 1}
++  m_AnchoredPosition: {x: 0, y: -124}
++  m_SizeDelta: {x: -36, y: 28}
++  m_Pivot: {x: 0.5, y: 0.5}
++--- !u!222 &1669287710134008807
++CanvasRenderer:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 2628793879051220109}
++  m_CullTransparentMesh: 1
++--- !u!114 &4817621603566747049
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 2628793879051220109}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
++  m_Material: {fileID: 0}
++  m_Color: {r: 1, g: 1, b: 1, a: 1}
++  m_RaycastTarget: 0
++  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
++  m_Maskable: 1
++  m_OnCullStateChanged:
++    m_PersistentCalls:
++      m_Calls: []
++  m_text: UNKNOWN
++  m_isRightToLeft: 0
++  m_fontAsset: {fileID: 11400000, guid: 3f77392c297694e2b98ec106f444fcfe, type: 2}
++  m_sharedMaterial: {fileID: -5766884782828288870, guid: 3f77392c297694e2b98ec106f444fcfe, type: 2}
++  m_fontSharedMaterials: []
++  m_fontMaterial: {fileID: 0}
++  m_fontMaterials: []
++  m_fontColor32:
++    serializedVersion: 2
++    rgba: 4294967295
++  m_fontColor: {r: 0.72, g: 0.76, b: 0.77, a: 1}
++  m_enableVertexGradient: 0
++  m_colorMode: 3
++  m_fontColorGradient:
++    topLeft: {r: 1, g: 1, b: 1, a: 1}
++    topRight: {r: 1, g: 1, b: 1, a: 1}
++    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
++    bottomRight: {r: 1, g: 1, b: 1, a: 1}
++  m_fontColorGradientPreset: {fileID: 0}
++  m_spriteAsset: {fileID: 0}
++  m_tintAllSprites: 0
++  m_StyleSheet: {fileID: 0}
++  m_TextStyleHashCode: 0
++  m_overrideHtmlColors: 0
++  m_faceColor:
++    serializedVersion: 2
++    rgba: 4294967295
++  m_fontSize: 22
++  m_fontSizeBase: 22
++  m_fontWeight: 400
++  m_enableAutoSizing: 0
++  m_fontSizeMin: 18
++  m_fontSizeMax: 72
++  m_fontStyle: 0
++  m_HorizontalAlignment: 1
++  m_VerticalAlignment: 256
++  m_textAlignment: 65535
++  m_characterSpacing: 0
++  m_characterHorizontalScale: 1
++  m_wordSpacing: 0
++  m_lineSpacing: 0
++  m_lineSpacingMax: 0
++  m_paragraphSpacing: 0
++  m_charWidthMaxAdj: 0
++  m_TextWrappingMode: 1
++  m_wordWrappingRatios: 0.4
++  m_overflowMode: 1
++  m_linkedTextComponent: {fileID: 0}
++  parentLinkedComponent: {fileID: 0}
++  m_enableKerning: 0
++  m_ActiveFontFeatures: 6e72656bu
++  m_enableExtraPadding: 0
++  checkPaddingRequired: 0
++  m_isRichText: 0
++  m_EmojiFallbackSupport: 1
++  m_parseCtrlCharacters: 1
++  m_isOrthographic: 1
++  m_isCullingEnabled: 0
++  m_horizontalMapping: 0
++  m_verticalMapping: 0
++  m_uvLineOffset: 0
++  m_geometrySortingOrder: 0
++  m_IsTextObjectScaleStatic: 0
++  m_VertexBufferAutoSizeReduction: 0
++  m_useMaxVisibleDescender: 1
++  m_pageToDisplay: 1
++  m_margin: {x: 0, y: 0, z: 0, w: 0}
++  m_isUsingLegacyAnimationComponent: 0
++  m_isVolumetricText: 0
++  m_hasFontAssetChanged: 0
++  m_baseMaterial: {fileID: 0}
++  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
++--- !u!1 &3263145713548220294
++GameObject:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  serializedVersion: 6
++  m_Component:
++  - component: {fileID: 7737740337237171863}
++  - component: {fileID: 4664070502296304031}
++  - component: {fileID: 8967885248062992929}
++  m_Layer: 0
++  m_Name: Body
++  m_TagString: Untagged
++  m_Icon: {fileID: 0}
++  m_NavMeshLayer: 0
++  m_StaticEditorFlags: 0
++  m_IsActive: 1
++--- !u!224 &7737740337237171863
++RectTransform:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 3263145713548220294}
++  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
++  m_LocalPosition: {x: 0, y: 0, z: 0}
++  m_LocalScale: {x: 1, y: 1, z: 1}
++  m_ConstrainProportionsScale: 0
++  m_Children: []
++  m_Father: {fileID: 4312507033192031014}
++  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
++  m_AnchorMin: {x: 0, y: 1}
++  m_AnchorMax: {x: 1, y: 1}
++  m_AnchoredPosition: {x: 0, y: -211}
++  m_SizeDelta: {x: -36, y: 58}
++  m_Pivot: {x: 0.5, y: 0.5}
++--- !u!222 &4664070502296304031
++CanvasRenderer:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 3263145713548220294}
++  m_CullTransparentMesh: 1
++--- !u!114 &8967885248062992929
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 3263145713548220294}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
++  m_Material: {fileID: 0}
++  m_Color: {r: 1, g: 1, b: 1, a: 1}
++  m_RaycastTarget: 0
++  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
++  m_Maskable: 1
++  m_OnCullStateChanged:
++    m_PersistentCalls:
++      m_Calls: []
++  m_text: NEXT STEP
++  m_isRightToLeft: 0
++  m_fontAsset: {fileID: 11400000, guid: 3f77392c297694e2b98ec106f444fcfe, type: 2}
++  m_sharedMaterial: {fileID: -5766884782828288870, guid: 3f77392c297694e2b98ec106f444fcfe, type: 2}
++  m_fontSharedMaterials: []
++  m_fontMaterial: {fileID: 0}
++  m_fontMaterials: []
++  m_fontColor32:
++    serializedVersion: 2
++    rgba: 4294967295
++  m_fontColor: {r: 0.9, g: 0.91, b: 0.87, a: 1}
++  m_enableVertexGradient: 0
++  m_colorMode: 3
++  m_fontColorGradient:
++    topLeft: {r: 1, g: 1, b: 1, a: 1}
++    topRight: {r: 1, g: 1, b: 1, a: 1}
++    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
++    bottomRight: {r: 1, g: 1, b: 1, a: 1}
++  m_fontColorGradientPreset: {fileID: 0}
++  m_spriteAsset: {fileID: 0}
++  m_tintAllSprites: 0
++  m_StyleSheet: {fileID: 0}
++  m_TextStyleHashCode: 0
++  m_overrideHtmlColors: 0
++  m_faceColor:
++    serializedVersion: 2
++    rgba: 4294967295
++  m_fontSize: 22
++  m_fontSizeBase: 22
++  m_fontWeight: 400
++  m_enableAutoSizing: 0
++  m_fontSizeMin: 18
++  m_fontSizeMax: 72
++  m_fontStyle: 0
++  m_HorizontalAlignment: 1
++  m_VerticalAlignment: 256
++  m_textAlignment: 65535
++  m_characterSpacing: 0
++  m_characterHorizontalScale: 1
++  m_wordSpacing: 0
++  m_lineSpacing: 0
++  m_lineSpacingMax: 0
++  m_paragraphSpacing: 0
++  m_charWidthMaxAdj: 0
++  m_TextWrappingMode: 1
++  m_wordWrappingRatios: 0.4
++  m_overflowMode: 1
++  m_linkedTextComponent: {fileID: 0}
++  parentLinkedComponent: {fileID: 0}
++  m_enableKerning: 0
++  m_ActiveFontFeatures: 6e72656bu
++  m_enableExtraPadding: 0
++  checkPaddingRequired: 0
++  m_isRichText: 0
++  m_EmojiFallbackSupport: 1
++  m_parseCtrlCharacters: 1
++  m_isOrthographic: 1
++  m_isCullingEnabled: 0
++  m_horizontalMapping: 0
++  m_verticalMapping: 0
++  m_uvLineOffset: 0
++  m_geometrySortingOrder: 0
++  m_IsTextObjectScaleStatic: 0
++  m_VertexBufferAutoSizeReduction: 0
++  m_useMaxVisibleDescender: 1
++  m_pageToDisplay: 1
++  m_margin: {x: 0, y: 0, z: 0, w: 0}
++  m_isUsingLegacyAnimationComponent: 0
++  m_isVolumetricText: 0
++  m_hasFontAssetChanged: 0
++  m_baseMaterial: {fileID: 0}
++  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
++--- !u!1 &4232162904209433990
++GameObject:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  serializedVersion: 6
++  m_Component:
++  - component: {fileID: 346124941025899943}
++  - component: {fileID: 3049460191975246394}
++  - component: {fileID: 2464443526072517368}
++  m_Layer: 0
++  m_Name: Heading
++  m_TagString: Untagged
++  m_Icon: {fileID: 0}
++  m_NavMeshLayer: 0
++  m_StaticEditorFlags: 0
++  m_IsActive: 1
++--- !u!224 &346124941025899943
++RectTransform:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 4232162904209433990}
++  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
++  m_LocalPosition: {x: 0, y: 0, z: 0}
++  m_LocalScale: {x: 1, y: 1, z: 1}
++  m_ConstrainProportionsScale: 0
++  m_Children: []
++  m_Father: {fileID: 4312507033192031014}
++  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
++  m_AnchorMin: {x: 0, y: 1}
++  m_AnchorMax: {x: 1, y: 1}
++  m_AnchoredPosition: {x: 0, y: -29}
++  m_SizeDelta: {x: -36, y: 30}
++  m_Pivot: {x: 0.5, y: 0.5}
++--- !u!222 &3049460191975246394
++CanvasRenderer:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 4232162904209433990}
++  m_CullTransparentMesh: 1
++--- !u!114 &2464443526072517368
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 4232162904209433990}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
++  m_Material: {fileID: 0}
++  m_Color: {r: 1, g: 1, b: 1, a: 1}
++  m_RaycastTarget: 0
++  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
++  m_Maskable: 1
++  m_OnCullStateChanged:
++    m_PersistentCalls:
++      m_Calls: []
++  m_text: TASK ADDED
++  m_isRightToLeft: 0
++  m_fontAsset: {fileID: 11400000, guid: 3f77392c297694e2b98ec106f444fcfe, type: 2}
++  m_sharedMaterial: {fileID: -5766884782828288870, guid: 3f77392c297694e2b98ec106f444fcfe, type: 2}
++  m_fontSharedMaterials: []
++  m_fontMaterial: {fileID: 0}
++  m_fontMaterials: []
++  m_fontColor32:
++    serializedVersion: 2
++    rgba: 4294967295
++  m_fontColor: {r: 0.95, g: 0.66, b: 0.23, a: 1}
++  m_enableVertexGradient: 0
++  m_colorMode: 3
++  m_fontColorGradient:
++    topLeft: {r: 1, g: 1, b: 1, a: 1}
++    topRight: {r: 1, g: 1, b: 1, a: 1}
++    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
++    bottomRight: {r: 1, g: 1, b: 1, a: 1}
++  m_fontColorGradientPreset: {fileID: 0}
++  m_spriteAsset: {fileID: 0}
++  m_tintAllSprites: 0
++  m_StyleSheet: {fileID: 0}
++  m_TextStyleHashCode: 0
++  m_overrideHtmlColors: 0
++  m_faceColor:
++    serializedVersion: 2
++    rgba: 4294967295
++  m_fontSize: 24
++  m_fontSizeBase: 24
++  m_fontWeight: 400
++  m_enableAutoSizing: 0
++  m_fontSizeMin: 18
++  m_fontSizeMax: 72
++  m_fontStyle: 0
++  m_HorizontalAlignment: 1
++  m_VerticalAlignment: 256
++  m_textAlignment: 65535
++  m_characterSpacing: 0
++  m_characterHorizontalScale: 1
++  m_wordSpacing: 0
++  m_lineSpacing: 0
++  m_lineSpacingMax: 0
++  m_paragraphSpacing: 0
++  m_charWidthMaxAdj: 0
++  m_TextWrappingMode: 1
++  m_wordWrappingRatios: 0.4
++  m_overflowMode: 1
++  m_linkedTextComponent: {fileID: 0}
++  parentLinkedComponent: {fileID: 0}
++  m_enableKerning: 0
++  m_ActiveFontFeatures: 6e72656bu
++  m_enableExtraPadding: 0
++  checkPaddingRequired: 0
++  m_isRichText: 0
++  m_EmojiFallbackSupport: 1
++  m_parseCtrlCharacters: 1
++  m_isOrthographic: 1
++  m_isCullingEnabled: 0
++  m_horizontalMapping: 0
++  m_verticalMapping: 0
++  m_uvLineOffset: 0
++  m_geometrySortingOrder: 0
++  m_IsTextObjectScaleStatic: 0
++  m_VertexBufferAutoSizeReduction: 0
++  m_useMaxVisibleDescender: 1
++  m_pageToDisplay: 1
++  m_margin: {x: 0, y: 0, z: 0, w: 0}
++  m_isUsingLegacyAnimationComponent: 0
++  m_isVolumetricText: 0
++  m_hasFontAssetChanged: 0
++  m_baseMaterial: {fileID: 0}
++  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
++--- !u!1 &5204474836420256173
++GameObject:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  serializedVersion: 6
++  m_Component:
++  - component: {fileID: 3670916686260253794}
++  - component: {fileID: 4911410590354247752}
++  - component: {fileID: 4601795415921022129}
++  m_Layer: 0
++  m_Name: Title
++  m_TagString: Untagged
++  m_Icon: {fileID: 0}
++  m_NavMeshLayer: 0
++  m_StaticEditorFlags: 0
++  m_IsActive: 1
++--- !u!224 &3670916686260253794
++RectTransform:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 5204474836420256173}
++  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
++  m_LocalPosition: {x: 0, y: 0, z: 0}
++  m_LocalScale: {x: 1, y: 1, z: 1}
++  m_ConstrainProportionsScale: 0
++  m_Children: []
++  m_Father: {fileID: 4312507033192031014}
++  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
++  m_AnchorMin: {x: 0, y: 1}
++  m_AnchorMax: {x: 1, y: 1}
++  m_AnchoredPosition: {x: 0, y: -77}
++  m_SizeDelta: {x: -36, y: 58}
++  m_Pivot: {x: 0.5, y: 0.5}
++--- !u!222 &4911410590354247752
++CanvasRenderer:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 5204474836420256173}
++  m_CullTransparentMesh: 1
++--- !u!114 &4601795415921022129
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 5204474836420256173}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
++  m_Material: {fileID: 0}
++  m_Color: {r: 1, g: 1, b: 1, a: 1}
++  m_RaycastTarget: 0
++  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
++  m_Maskable: 1
++  m_OnCullStateChanged:
++    m_PersistentCalls:
++      m_Calls: []
++  m_text: TASK TITLE
++  m_isRightToLeft: 0
++  m_fontAsset: {fileID: 11400000, guid: 3f77392c297694e2b98ec106f444fcfe, type: 2}
++  m_sharedMaterial: {fileID: -5766884782828288870, guid: 3f77392c297694e2b98ec106f444fcfe, type: 2}
++  m_fontSharedMaterials: []
++  m_fontMaterial: {fileID: 0}
++  m_fontMaterials: []
++  m_fontColor32:
++    serializedVersion: 2
++    rgba: 4294967295
++  m_fontColor: {r: 0.9, g: 0.91, b: 0.87, a: 1}
++  m_enableVertexGradient: 0
++  m_colorMode: 3
++  m_fontColorGradient:
++    topLeft: {r: 1, g: 1, b: 1, a: 1}
++    topRight: {r: 1, g: 1, b: 1, a: 1}
++    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
++    bottomRight: {r: 1, g: 1, b: 1, a: 1}
++  m_fontColorGradientPreset: {fileID: 0}
++  m_spriteAsset: {fileID: 0}
++  m_tintAllSprites: 0
++  m_StyleSheet: {fileID: 0}
++  m_TextStyleHashCode: 0
++  m_overrideHtmlColors: 0
++  m_faceColor:
++    serializedVersion: 2
++    rgba: 4294967295
++  m_fontSize: 28
++  m_fontSizeBase: 28
++  m_fontWeight: 400
++  m_enableAutoSizing: 0
++  m_fontSizeMin: 18
++  m_fontSizeMax: 72
++  m_fontStyle: 0
++  m_HorizontalAlignment: 1
++  m_VerticalAlignment: 256
++  m_textAlignment: 65535
++  m_characterSpacing: 0
++  m_characterHorizontalScale: 1
++  m_wordSpacing: 0
++  m_lineSpacing: 0
++  m_lineSpacingMax: 0
++  m_paragraphSpacing: 0
++  m_charWidthMaxAdj: 0
++  m_TextWrappingMode: 1
++  m_wordWrappingRatios: 0.4
++  m_overflowMode: 1
++  m_linkedTextComponent: {fileID: 0}
++  parentLinkedComponent: {fileID: 0}
++  m_enableKerning: 0
++  m_ActiveFontFeatures: 6e72656bu
++  m_enableExtraPadding: 0
++  checkPaddingRequired: 0
++  m_isRichText: 0
++  m_EmojiFallbackSupport: 1
++  m_parseCtrlCharacters: 1
++  m_isOrthographic: 1
++  m_isCullingEnabled: 0
++  m_horizontalMapping: 0
++  m_verticalMapping: 0
++  m_uvLineOffset: 0
++  m_geometrySortingOrder: 0
++  m_IsTextObjectScaleStatic: 0
++  m_VertexBufferAutoSizeReduction: 0
++  m_useMaxVisibleDescender: 1
++  m_pageToDisplay: 1
++  m_margin: {x: 0, y: 0, z: 0, w: 0}
++  m_isUsingLegacyAnimationComponent: 0
++  m_isVolumetricText: 0
++  m_hasFontAssetChanged: 0
++  m_baseMaterial: {fileID: 0}
++  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
++--- !u!1 &7373624259344530195
++GameObject:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  serializedVersion: 6
++  m_Component:
++  - component: {fileID: 3210813608435306179}
++  - component: {fileID: 6869793017185347267}
++  - component: {fileID: 2404457296806689554}
++  - component: {fileID: 7042097457733746713}
++  m_Layer: 0
++  m_Name: TaskNotice
++  m_TagString: Untagged
++  m_Icon: {fileID: 0}
++  m_NavMeshLayer: 0
++  m_StaticEditorFlags: 0
++  m_IsActive: 1
++--- !u!224 &3210813608435306179
++RectTransform:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 7373624259344530195}
++  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
++  m_LocalPosition: {x: 0, y: 0, z: 0}
++  m_LocalScale: {x: 0, y: 0, z: 0}
++  m_ConstrainProportionsScale: 0
++  m_Children:
++  - {fileID: 4312507033192031014}
++  m_Father: {fileID: 0}
++  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
++  m_AnchorMin: {x: 0, y: 0}
++  m_AnchorMax: {x: 0, y: 0}
++  m_AnchoredPosition: {x: 0, y: 0}
++  m_SizeDelta: {x: 0, y: 0}
++  m_Pivot: {x: 0, y: 0}
++--- !u!223 &6869793017185347267
++Canvas:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 7373624259344530195}
++  m_Enabled: 1
++  serializedVersion: 3
++  m_RenderMode: 0
++  m_Camera: {fileID: 0}
++  m_PlaneDistance: 100
++  m_PixelPerfect: 0
++  m_ReceivesEvents: 1
++  m_OverrideSorting: 0
++  m_OverridePixelPerfect: 0
++  m_SortingBucketNormalizedSize: 0
++  m_VertexColorAlwaysGammaSpace: 0
++  m_UseReflectionProbes: 0
++  m_AdditionalShaderChannelsFlag: 0
++  m_UpdateRectTransformForStandalone: 0
++  m_SortingLayerID: 0
++  m_SortingOrder: 80
++  m_TargetDisplay: 0
++--- !u!114 &2404457296806689554
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 7373624259344530195}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.CanvasScaler
++  m_UiScaleMode: 1
++  m_ReferencePixelsPerUnit: 100
++  m_ScaleFactor: 1
++  m_ReferenceResolution: {x: 1920, y: 1080}
++  m_ScreenMatchMode: 0
++  m_MatchWidthOrHeight: 0.5
++  m_PhysicalUnit: 3
++  m_FallbackScreenDPI: 96
++  m_DefaultSpriteDPI: 96
++  m_DynamicPixelsPerUnit: 1
++  m_PresetInfoIsWorld: 0
++--- !u!114 &7042097457733746713
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 7373624259344530195}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: 8cad561f7405403c9f215d9fe6203b68, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Tasks.UI.TaskNoticeView
++  panel: {fileID: 1342765587686016477}
++  heading: {fileID: 2464443526072517368}
++  title: {fileID: 4601795415921022129}
++  location: {fileID: 4817621603566747049}
++  outcome: {fileID: 3878035856038489682}
++  body: {fileID: 8967885248062992929}
++--- !u!1 &8232597633409895068
++GameObject:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  serializedVersion: 6
++  m_Component:
++  - component: {fileID: 2909125213965299302}
++  - component: {fileID: 8882778372494788739}
++  - component: {fileID: 3878035856038489682}
++  m_Layer: 0
++  m_Name: Outcome
++  m_TagString: Untagged
++  m_Icon: {fileID: 0}
++  m_NavMeshLayer: 0
++  m_StaticEditorFlags: 0
++  m_IsActive: 1
++--- !u!224 &2909125213965299302
++RectTransform:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 8232597633409895068}
++  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
++  m_LocalPosition: {x: 0, y: 0, z: 0}
++  m_LocalScale: {x: 1, y: 1, z: 1}
++  m_ConstrainProportionsScale: 0
++  m_Children: []
++  m_Father: {fileID: 4312507033192031014}
++  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
++  m_AnchorMin: {x: 0, y: 1}
++  m_AnchorMax: {x: 1, y: 1}
++  m_AnchoredPosition: {x: 0, y: -164}
++  m_SizeDelta: {x: -36, y: 28}
++  m_Pivot: {x: 0.5, y: 0.5}
++--- !u!222 &8882778372494788739
++CanvasRenderer:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 8232597633409895068}
++  m_CullTransparentMesh: 1
++--- !u!114 &3878035856038489682
++MonoBehaviour:
++  m_ObjectHideFlags: 0
++  m_CorrespondingSourceObject: {fileID: 0}
++  m_PrefabInstance: {fileID: 0}
++  m_PrefabAsset: {fileID: 0}
++  m_GameObject: {fileID: 8232597633409895068}
++  m_Enabled: 1
++  m_EditorHideFlags: 0
++  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
++  m_Name: 
++  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
++  m_Material: {fileID: 0}
++  m_Color: {r: 1, g: 1, b: 1, a: 1}
++  m_RaycastTarget: 0
++  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
++  m_Maskable: 1
++  m_OnCullStateChanged:
++    m_PersistentCalls:
++      m_Calls: []
++  m_text: '> ACTIVE'
++  m_isRightToLeft: 0
++  m_fontAsset: {fileID: 11400000, guid: 3f77392c297694e2b98ec106f444fcfe, type: 2}
++  m_sharedMaterial: {fileID: -5766884782828288870, guid: 3f77392c297694e2b98ec106f444fcfe, type: 2}
++  m_fontSharedMaterials: []
++  m_fontMaterial: {fileID: 0}
++  m_fontMaterials: []
++  m_fontColor32:
++    serializedVersion: 2
++    rgba: 4294967295
++  m_fontColor: {r: 0.72, g: 0.76, b: 0.77, a: 1}
++  m_enableVertexGradient: 0
++  m_colorMode: 3
++  m_fontColorGradient:
++    topLeft: {r: 1, g: 1, b: 1, a: 1}
++    topRight: {r: 1, g: 1, b: 1, a: 1}
++    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
++    bottomRight: {r: 1, g: 1, b: 1, a: 1}
++  m_fontColorGradientPreset: {fileID: 0}
++  m_spriteAsset: {fileID: 0}
++  m_tintAllSprites: 0
++  m_StyleSheet: {fileID: 0}
++  m_TextStyleHashCode: 0
++  m_overrideHtmlColors: 0
++  m_faceColor:
++    serializedVersion: 2
++    rgba: 4294967295
++  m_fontSize: 22
++  m_fontSizeBase: 22
++  m_fontWeight: 400
++  m_enableAutoSizing: 0
++  m_fontSizeMin: 18
++  m_fontSizeMax: 72
++  m_fontStyle: 0
++  m_HorizontalAlignment: 1
++  m_VerticalAlignment: 256
++  m_textAlignment: 65535
++  m_characterSpacing: 0
++  m_characterHorizontalScale: 1
++  m_wordSpacing: 0
++  m_lineSpacing: 0
++  m_lineSpacingMax: 0
++  m_paragraphSpacing: 0
++  m_charWidthMaxAdj: 0
++  m_TextWrappingMode: 1
++  m_wordWrappingRatios: 0.4
++  m_overflowMode: 1
++  m_linkedTextComponent: {fileID: 0}
++  parentLinkedComponent: {fileID: 0}
++  m_enableKerning: 0
++  m_ActiveFontFeatures: 6e72656bu
++  m_enableExtraPadding: 0
++  checkPaddingRequired: 0
++  m_isRichText: 0
++  m_EmojiFallbackSupport: 1
++  m_parseCtrlCharacters: 1
++  m_isOrthographic: 1
++  m_isCullingEnabled: 0
++  m_horizontalMapping: 0
++  m_verticalMapping: 0
++  m_uvLineOffset: 0
++  m_geometrySortingOrder: 0
++  m_IsTextObjectScaleStatic: 0
++  m_VertexBufferAutoSizeReduction: 0
++  m_useMaxVisibleDescender: 1
++  m_pageToDisplay: 1
++  m_margin: {x: 0, y: 0, z: 0, w: 0}
++  m_isUsingLegacyAnimationComponent: 0
++  m_isVolumetricText: 0
++  m_hasFontAssetChanged: 0
++  m_baseMaterial: {fileID: 0}
++  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+diff --git a/Assets/_Project/Systems/Tasks/UI/TaskNotice.prefab.meta b/Assets/_Project/Systems/Tasks/UI/TaskNotice.prefab.meta
+new file mode 100644
+index 0000000..e9553b2
+--- /dev/null
++++ b/Assets/_Project/Systems/Tasks/UI/TaskNotice.prefab.meta
+@@ -0,0 +1,7 @@
++fileFormatVersion: 2
++guid: 1ce29ca994f88499b9fe210aca290564
++PrefabImporter:
++  externalObjects: {}
++  userData: 
++  assetBundleName: 
++  assetBundleVariant: 
+diff --git a/Assets/_Project/Systems/Tasks/UI/TaskNoticeView.cs b/Assets/_Project/Systems/Tasks/UI/TaskNoticeView.cs
+new file mode 100644
+index 0000000..a807198
+--- /dev/null
++++ b/Assets/_Project/Systems/Tasks/UI/TaskNoticeView.cs
+@@ -0,0 +1,52 @@
++using System;
++using SOLITUDE.Application;
++using SOLITUDE.Tasks;
++using TMPro;
++using UnityEngine;
++
++namespace SOLITUDE.Tasks.UI
++{
++    public sealed class TaskNoticeView : MonoBehaviour, ITaskNoticeDisplay
++    {
++        [SerializeField] private GameObject panel;
++        [SerializeField] private TMP_Text heading, title, location, outcome, body;
++        private TaskNoticeCoordinator coordinator;
++        private TaskNoticePresentation last;
++        public bool IsVisible => panel != null && panel.activeInHierarchy;
++        public TaskNoticePresentation Presentation => last;
++        public int PresentationCount { get; private set; }
++        public void ValidateAuthoring()
++        {
++            if (panel == null || heading == null || title == null || location == null || outcome == null || body == null)
++                throw new InvalidOperationException("Task notice serialized panel/text endpoints are incomplete.");
++            foreach (var text in new[] { heading, title, location, outcome, body })
++                if (!text.transform.IsChildOf(panel.transform) || text.richText || text.raycastTarget)
++                    throw new InvalidOperationException("Task notice text must belong to its panel, render literal copy and ignore pointer input.");
++        }
++        public void Initialize(TaskNoticeCoordinator value)
++        {
++            Release(); ValidateAuthoring(); coordinator = value ?? throw new ArgumentNullException(nameof(value));
++            if (isActiveAndEnabled) coordinator.BindDisplay(this);
++        }
++        public void Render(TaskNoticePresentation presentation)
++        {
++            if (presentation == null) { panel.SetActive(false); return; }
++            heading.text = presentation.Heading; title.text = presentation.Title; location.text = presentation.Location;
++            body.text = presentation.Text;
++            outcome.text = (presentation.Outcome == "COMPLETED" ? "+ " : presentation.Outcome == "FAILED" ? "! " : "> ") + presentation.Outcome;
++            outcome.color = presentation.Outcome == "COMPLETED" ? TaskJournalView.Operational :
++                presentation.Outcome == "FAILED" ? TaskJournalView.Fault : new Color(.72f,.76f,.77f);
++            if (last == null || last.Key != presentation.Key || last.Kind != presentation.Kind || last.Revision != presentation.Revision)
++                PresentationCount++;
++            last = presentation; panel.SetActive(true);
++        }
++        private void OnEnable() { coordinator?.BindDisplay(this); }
++        private void OnDisable() { coordinator?.BindDisplay(null); if (panel != null) panel.SetActive(false); }
++        public void Release()
++        {
++            coordinator?.BindDisplay(null); coordinator = null; last = null;
++            if (panel != null) panel.SetActive(false);
++        }
++        private void OnDestroy() { Release(); }
++    }
++}
+diff --git a/Assets/_Project/Systems/Tasks/UI/TaskNoticeView.cs.meta b/Assets/_Project/Systems/Tasks/UI/TaskNoticeView.cs.meta
+new file mode 100644
+index 0000000..1e199b1
+--- /dev/null
++++ b/Assets/_Project/Systems/Tasks/UI/TaskNoticeView.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 8cad561f7405403c9f215d9fe6203b68
+diff --git a/Assets/_Project/Tests/Editor/ScrubberEncounterAuthoringTests.cs b/Assets/_Project/Tests/Editor/ScrubberEncounterAuthoringTests.cs
+index 676ac54..744eea8 100644
+--- a/Assets/_Project/Tests/Editor/ScrubberEncounterAuthoringTests.cs
++++ b/Assets/_Project/Tests/Editor/ScrubberEncounterAuthoringTests.cs
+@@ -22,6 +22,10 @@ namespace SOLITUDE.Tests
+             SOLITUDE.Editor.ScrubberEncounterBuilder.AddTaskJournal();
+             SOLITUDE.Editor.ScrubberEncounterBuilder.AddTaskJournal();
+             Assert.AreEqual(guid,AssetDatabase.AssetPathToGUID(path));
++            var noticePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(SOLITUDE.Editor.ScrubberEncounterBuilder.JournalFolder+"/TaskNotice.prefab");
++            noticePrefab.GetComponent<SOLITUDE.Tasks.UI.TaskNoticeView>().ValidateAuthoring();
++            Assert.IsEmpty(noticePrefab.GetComponentsInChildren<UnityEngine.UI.Selectable>(true));
++            Assert.IsNull(noticePrefab.GetComponent<UnityEngine.UI.GraphicRaycaster>());
+             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(SOLITUDE.Editor.ScrubberEncounterBuilder.JournalFolder+"/TaskJournal.prefab");
+             prefab.GetComponent<SOLITUDE.Tasks.UI.TaskJournalView>().ValidateAuthoring();
+             Assert.AreEqual(2,prefab.GetComponentsInChildren<UnityEngine.UI.ScrollRect>(true).Length);
+@@ -35,6 +39,9 @@ namespace SOLITUDE.Tests
+                 Assert.AreEqual("scrubber-room-01",source.SourceId); Assert.IsNotNull(source.Equipment); Assert.IsNotNull(source.Access);
+                 var data = new SerializedObject(roots.SelectMany(g=>g.GetComponentsInChildren<SceneBindings>(true)).Single());
+                 Assert.AreSame(view,data.FindProperty("journalView").objectReferenceValue);
++                var notice = roots.SelectMany(g=>g.GetComponentsInChildren<SOLITUDE.Tasks.UI.TaskNoticeView>(true)).Single();
++                notice.ValidateAuthoring(); Assert.AreSame(notice,data.FindProperty("taskNoticeView").objectReferenceValue);
++                Assert.IsFalse(roots.SelectMany(g=>g.GetComponentsInChildren<ScrubberTaskNotificationView>(true)).Single().enabled);
+                 var feature = roots.SelectMany(g => g.GetComponentsInChildren<ScrubberComposition>(true)).Single();
+                 feature.Validate();
+                 Assert.AreEqual(1, data.FindProperty("features").arraySize);
+diff --git a/Assets/_Project/Tests/PlayMode/ScrubberEncounterSliceTests.cs b/Assets/_Project/Tests/PlayMode/ScrubberEncounterSliceTests.cs
+index 302ae7c..fe699ef 100644
+--- a/Assets/_Project/Tests/PlayMode/ScrubberEncounterSliceTests.cs
++++ b/Assets/_Project/Tests/PlayMode/ScrubberEncounterSliceTests.cs
+@@ -200,7 +200,7 @@ namespace SOLITUDE.Tests
+         [UnityTest] public IEnumerator CompletionNotificationDefersExpiresAndNeverReplays()
+         {
+             yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single));yield return null;
+-            var equipment=All<ScrubberEquipment>().Single();var screen=All<ScrubberScreenView>().Single();var notification=All<ScrubberTaskNotificationView>().Single();var room=All<ScrubberRoomFeedback>().Single();
++            var equipment=All<ScrubberEquipment>().Single();var screen=All<ScrubberScreenView>().Single();var notification=All<SOLITUDE.Tasks.UI.TaskNoticeView>().Single();var room=All<ScrubberRoomFeedback>().Single();
+             var root=All<GameCompositionRoot>().Single();var session=(SOLITUDE.SaveLoad.ContainerSaveSession)typeof(GameCompositionRoot).GetField("session",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(root);
+             session.Commands.Grant(All<PlayerInventory>().Single().Container.Handle,ScrubberEquipment.FuseItemId,1);equipment.Install();Assert.IsTrue(screen.Open());equipment.Restart();
+             var selected=EventSystem.current.currentSelectedGameObject;equipment.State.Advance(5);yield return null;
+diff --git a/Assets/_Project/Tests/PlayMode/TaskJournalNoticeTests.cs b/Assets/_Project/Tests/PlayMode/TaskJournalNoticeTests.cs
+new file mode 100644
+index 0000000..fc63606
+--- /dev/null
++++ b/Assets/_Project/Tests/PlayMode/TaskJournalNoticeTests.cs
+@@ -0,0 +1,123 @@
++#if UNITY_EDITOR
++using System.Collections;
++using System.Linq;
++using NUnit.Framework;
++using SOLITUDE.Application;
++using SOLITUDE.Composition;
++using SOLITUDE.Items;
++using SOLITUDE.Player;
++using SOLITUDE.Tasks;
++using SOLITUDE.Tasks.UI;
++using SOLITUDE.World.ScrubberEncounter;
++using UnityEditor.SceneManagement;
++using UnityEngine;
++using UnityEngine.EventSystems;
++using UnityEngine.InputSystem;
++using UnityEngine.InputSystem.LowLevel;
++using UnityEngine.SceneManagement;
++using UnityEngine.TestTools;
++using Object = UnityEngine.Object;
++namespace SOLITUDE.Tests
++{
++    public class TaskJournalNoticeTests
++    {
++        private const string Scene = "Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity";
++        private Keyboard keyboard;
++        private InputSettings.BackgroundBehavior background;
++        private InputSettings.EditorInputBehaviorInPlayMode editor;
++        private static T One<T>() where T : Object => Object.FindObjectsByType<T>(FindObjectsInactive.Include,FindObjectsSortMode.None).Single();
++        private static T Field<T>(object target,string name) => (T)target.GetType().GetField(name,System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(target);
++        [UnitySetUp] public IEnumerator Prepare()
++        {
++            foreach(var root in Object.FindObjectsByType<GameCompositionRoot>(FindObjectsSortMode.None)) Object.Destroy(root.gameObject);
++            yield return null; background = InputSystem.settings.backgroundBehavior; editor = InputSystem.settings.editorInputBehaviorInPlayMode;
++            InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
++            InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
++            keyboard = InputSystem.AddDevice<Keyboard>();
++            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
++        }
++        [UnityTearDown] public IEnumerator Cleanup()
++        {
++            InputSystem.RemoveDevice(keyboard); InputSystem.settings.backgroundBehavior = background; InputSystem.settings.editorInputBehaviorInPlayMode = editor;
++            foreach(var root in Object.FindObjectsByType<GameCompositionRoot>(FindObjectsSortMode.None)) Object.Destroy(root.gameObject);
++            yield return null; Time.timeScale = 1;
++        }
++        private void Press(Key key)
++        {
++            InputSystem.QueueStateEvent(keyboard,new KeyboardState(key)); InputSystem.Update();
++            InputSystem.QueueStateEvent(keyboard,new KeyboardState()); InputSystem.Update();
++        }
++        private IEnumerator Approach(Component target)
++        {
++            One<PlayerInteractor>().GetComponent<Rigidbody2D>().position = (Vector2)target.transform.position + Vector2.down*.3f;
++            Physics2D.SyncTransforms(); yield return new WaitForFixedUpdate(); yield return null; yield return null;
++        }
++        [UnityTest] public IEnumerator ActualFocusAndRepairProduceSingleNoticesWithoutFocusTheft()
++        {
++            var notice = One<TaskNoticeView>(); Assert.IsFalse(notice.IsVisible);
++            var legacy = One<ScrubberTaskNotificationView>(); Assert.IsFalse(legacy.enabled);
++            var selected = EventSystem.current.currentSelectedGameObject;
++            yield return Approach(One<ScrubberAccess>());
++            Assert.IsTrue(notice.IsVisible); Assert.AreEqual("TASK ADDED",notice.Presentation.Heading);
++            Assert.AreEqual(1,notice.PresentationCount); Assert.AreSame(selected,EventSystem.current.currentSelectedGameObject);
++            var coordinator = Field<TaskNoticeCoordinator>(One<SceneBindings>(),"taskNotices"); coordinator.Advance(4);
++            Assert.IsFalse(notice.IsVisible);
++            yield return Approach(One<WorldPickup>()); Press(Key.E); yield return null;
++            yield return Approach(One<ScrubberAccess>()); Press(Key.E); yield return null;
++            var screen = One<ScrubberScreenView>(); Assert.IsTrue(screen.IsOpen);
++            screen.GetComponentsInChildren<UnityEngine.UI.Button>(true).Single(b=>b.name=="InstallFuse").onClick.Invoke();
++            screen.GetComponentsInChildren<UnityEngine.UI.Button>(true).Single(b=>b.name=="Restart").onClick.Invoke();
++            var equipment = One<ScrubberEquipment>(); Assert.IsTrue(equipment.State.Running);
++            selected = EventSystem.current.currentSelectedGameObject; yield return new WaitForSeconds(5.1f);
++            Assert.IsTrue(equipment.State.Operational); Assert.IsFalse(notice.IsVisible); Assert.AreEqual(1,notice.PresentationCount);
++            Assert.AreSame(selected,EventSystem.current.currentSelectedGameObject); Assert.IsFalse(legacy.IsVisible);
++            screen.Close(); yield return null;
++            Assert.IsTrue(notice.IsVisible); Assert.AreEqual("TASK COMPLETE",notice.Presentation.Heading);
++            Assert.AreEqual("COMPLETED",notice.Presentation.Outcome); Assert.AreEqual(2,notice.PresentationCount);
++            Assert.IsNull(EventSystem.current.currentSelectedGameObject); Assert.AreEqual(0,legacy.PresentationCount);
++            coordinator.Advance(4); Assert.IsFalse(notice.IsVisible); notice.enabled = false; notice.enabled = true;
++            yield return null; Assert.IsFalse(notice.IsVisible); Assert.AreEqual(2,notice.PresentationCount);
++        }
++        [UnityTest] public IEnumerator JournalInventoryTransferAndPauseHideAndResumeRemainingDwell()
++        {
++            yield return Approach(One<ScrubberAccess>()); var notice = One<TaskNoticeView>(); Assert.IsTrue(notice.IsVisible);
++            var scope = One<SceneBindings>(); var coordinator = Field<TaskNoticeCoordinator>(scope,"taskNotices");
++            coordinator.Advance(1); double remaining = coordinator.RemainingSeconds;
++            Press(Key.J); yield return null; Assert.IsTrue(One<TaskJournalView>().IsOpen); Assert.IsFalse(notice.IsVisible);
++            var selected = EventSystem.current.currentSelectedGameObject; coordinator.Advance(100); Assert.AreEqual(remaining,coordinator.RemainingSeconds);
++            Assert.AreSame(selected,EventSystem.current.currentSelectedGameObject); Press(Key.J); yield return null; Assert.IsTrue(notice.IsVisible);
++            Press(Key.Tab); yield return null; Assert.IsFalse(notice.IsVisible); remaining = coordinator.RemainingSeconds;
++            coordinator.Advance(100); Assert.AreEqual(remaining,coordinator.RemainingSeconds); Press(Key.Escape); yield return null;
++            Assert.IsTrue(notice.IsVisible);
++            var modal = Field<ContainerModalCoordinator>(scope,"modal");
++            using (var target = Field<SOLITUDE.SaveLoad.ContainerSaveSession>(One<GameCompositionRoot>(),"session").Register("notice-transfer",1))
++            {
++                Assert.AreEqual(OpenResult.Opened,modal.OpenTarget(target.Container)); Assert.IsFalse(notice.IsVisible);
++                remaining = coordinator.RemainingSeconds; coordinator.Advance(100); Assert.AreEqual(remaining,coordinator.RemainingSeconds);
++                modal.Close(); Assert.IsTrue(notice.IsVisible);
++            }
++            var pause = Field<PauseCoordinator>(One<GameCompositionRoot>(),"pause");
++            using (pause.Acquire()) { Assert.IsFalse(notice.IsVisible); remaining = coordinator.RemainingSeconds; coordinator.Advance(100); Assert.AreEqual(remaining,coordinator.RemainingSeconds); }
++            Assert.IsTrue(notice.IsVisible); coordinator.Advance(remaining); Assert.IsFalse(notice.IsVisible);
++        }
++        [UnityTest] public IEnumerator FailedFixtureCoalescesAndSceneReleaseDropsPendingLane()
++        {
++            var scope = One<SceneBindings>(); var coordinator = Field<TaskNoticeCoordinator>(scope,"taskNotices");
++            var journal = (TaskJournal)One<GameCompositionRoot>().Tasks; journal.RegisterSource("notice-fixture","notice-scope",out var publisher);
++            var pause = Field<PauseCoordinator>(One<GameCompositionRoot>(),"pause");
++            using (pause.Acquire())
++            {
++                publisher.Publish("a",new TaskSnapshot(true,TaskOutcome.Active,"Fixture", "inspect",nextStep:"Inspect"));
++                publisher.Publish("a",new TaskSnapshot(true,TaskOutcome.Failed,"Fixture",result:"Unable to restore"));
++            }
++            var notice = One<TaskNoticeView>(); Assert.IsTrue(notice.IsVisible); Assert.AreEqual("TASK FAILED",notice.Presentation.Heading);
++            Assert.AreEqual(1,notice.PresentationCount); Assert.AreEqual("UNKNOWN",notice.Presentation.Location);
++            Assert.That(notice.GetComponentsInChildren<TMPro.TMP_Text>().Single(t=>t.name=="Outcome").text,Does.Contain("! FAILED"));
++            coordinator.Advance(4); publisher.Publish("b",new TaskSnapshot(true,TaskOutcome.Active,"Other", "inspect",nextStep:"Inspect"));
++            Assert.IsTrue(notice.IsVisible); journal.ReleaseScope("notice-scope"); Assert.IsFalse(notice.IsVisible);
++            yield return EditorSceneManager.LoadSceneAsyncInPlayMode(Scene,new LoadSceneParameters(LoadSceneMode.Single)); yield return null;
++            Assert.IsFalse(One<TaskNoticeView>().IsVisible); Assert.AreEqual(0,Field<TaskNoticeCoordinator>(One<SceneBindings>(),"taskNotices").PendingCount);
++        }
++    }
++}
++#endif
+diff --git a/Assets/_Project/Tests/PlayMode/TaskJournalNoticeTests.cs.meta b/Assets/_Project/Tests/PlayMode/TaskJournalNoticeTests.cs.meta
+new file mode 100644
+index 0000000..f042efb
+--- /dev/null
++++ b/Assets/_Project/Tests/PlayMode/TaskJournalNoticeTests.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 402c0881601e48ffa431f00cdb22caec

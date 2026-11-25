@@ -1,0 +1,34 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-validate-swing.cs",
+      "entry": "ValidateSwing.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 1129,
+      "executeMs": 985,
+      "assemblyName": "PipelineRunScript_weapon-system-validate-swing_ac6e6e010d424d27981264a7bc184aa9",
+      "success": true,
+      "result": {
+        "metadataValid": true,
+        "tagsValid": true,
+        "capabilitiesValid": true,
+        "spriteWidth": 16,
+        "spriteHeight": 24,
+        "totalDuration": 0.55
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

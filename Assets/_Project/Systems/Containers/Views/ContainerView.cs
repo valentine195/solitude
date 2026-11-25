@@ -30,8 +30,12 @@ namespace SOLITUDE.Containers
 
         [Tooltip("Label of the container")]
         [SerializeField] private TextMeshProUGUI label;
+        private bool inspectionVisible = true;
+        public void SetInspectionVisible(bool visible) => inspectionVisible = visible;
         private readonly List<ContainerSlotView> slotViews = new();
         private SOLITUDE.Items.ItemPresentationCatalog presentations;
+        public IReadOnlyList<ContainerSlotView> SlotViews => slotViews;
+        public event Action<SOLITUDE.Application.SlotIntent> Focused;
         public event Action<SOLITUDE.Application.SlotIntent> Hovered, Unhovered, Selected, BeginDrag, EndDrag, Drop;
         public void ValidateAuthoring()
         {
@@ -68,7 +72,7 @@ namespace SOLITUDE.Containers
                     slot.gameObject.SetActive(true);
                 }
                 slot.Bind(i, generation, presentations);
-                slot.Hovered += Hover; slot.Unhovered += Unhover; slot.Clicked += Select;
+                slot.Focused += Focus; slot.Hovered += Hover; slot.Unhovered += Unhover; slot.Clicked += Select;
                 slot.BeginDrag += Begin; slot.EndDrag += End; slot.Dropped += Dropped;
                 slotViews.Add(slot);
             }
@@ -91,19 +95,32 @@ namespace SOLITUDE.Containers
             }
         }
         public void Render(SOLITUDE.Application.SlotPresentation slot)
-        { if (slot.Index >= 0 && slot.Index < slotViews.Count) slotViews[slot.Index].Render(slot); }
+        { if (slot.Index >= 0 && slot.Index < slotViews.Count) slotViews[slot.Index].Render(new SOLITUDE.Application.SlotPresentation(slot.Index, slot.ItemId, slot.Quantity, inspectionVisible && slot.Selected, slot.Active)); }
+        internal float VisibleGridHeight => scrollRect != null ? scrollRect.GetComponent<LayoutElement>().preferredHeight : 0;
+        internal void RevealSlot(int index)
+        {
+            if (scrollRect == null || index < 0 || index >= slotViews.Count) return;
+            var viewport = scrollRect.viewport;
+            var slot = RectTransformUtility.CalculateRelativeRectTransformBounds(viewport, slotViews[index].transform);
+            float delta = slot.min.y < viewport.rect.yMin ? viewport.rect.yMin - slot.min.y :
+                slot.max.y > viewport.rect.yMax ? viewport.rect.yMax - slot.max.y : 0;
+            if (Mathf.Approximately(delta, 0)) return;
+            scrollRect.StopMovement();
+            scrollRect.content.anchoredPosition += new Vector2(0, delta);
+        }
         public void Clear()
         {
             foreach (var slot in slotViews)
             {
                 if (slot == null) continue;
-                slot.Hovered -= Hover; slot.Unhovered -= Unhover; slot.Clicked -= Select;
+                slot.Focused -= Focus; slot.Hovered -= Hover; slot.Unhovered -= Unhover; slot.Clicked -= Select;
                 slot.BeginDrag -= Begin; slot.EndDrag -= End; slot.Dropped -= Dropped;
                 slot.Unbind();
                 if (!useExistingSlotViews || !existingSlotViews.Contains(slot)) Destroy(slot.gameObject);
             }
             slotViews.Clear();
         }
+        private void Focus(SOLITUDE.Application.SlotIntent intent) => Focused?.Invoke(intent);
         private void Hover(SOLITUDE.Application.SlotIntent intent) => Hovered?.Invoke(intent);
         private void Unhover(SOLITUDE.Application.SlotIntent intent) => Unhovered?.Invoke(intent);
         private void Select(SOLITUDE.Application.SlotIntent intent) => Selected?.Invoke(intent);

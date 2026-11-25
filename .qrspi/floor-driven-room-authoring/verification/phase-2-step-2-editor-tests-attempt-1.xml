@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="43" result="Passed" total="43" passed="43" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:54Z" duration="1.9734234">
+  <test-suite type="TestSuite" id="1000" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="386" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:54Z" duration="1.973423" total="43" passed="43" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1472" name="SOLITUDE.Tests.EditMode.dll" fullname="/private/tmp/solitude-room-authoring-phase1/Library/ScriptAssemblies/SOLITUDE.Tests.EditMode.dll" runstate="Runnable" testcasecount="163" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:54Z" duration="1.851384" total="43" passed="43" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="57773" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1473" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="163" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:54Z" duration="1.845328" total="43" passed="43" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1474" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="163" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:54Z" duration="1.836778" total="43" passed="43" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1475" name="RoomAuthoring" fullname="SOLITUDE.Tests.RoomAuthoring" runstate="Runnable" testcasecount="43" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:54Z" duration="1.834173" total="43" passed="43" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1412" name="RoomAuthoringCreationTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-20 12:40:45Z" end-time="2026-10-20 12:40:45Z" duration="0.238096" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1413" name="AdjacentRoomsShareStyleWithoutSharingIdentityOrOutput" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.AdjacentRoomsShareStyleWithoutSharingIdentityOrOutput" methodname="AdjacentRoomsShareStyleWithoutSharingIdentityOrOutput" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" seed="14443417" result="Passed" start-time="2026-10-20 12:40:45Z" end-time="2026-10-20 12:40:45Z" duration="0.044610" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1417" name="CreationPreservesExistingSceneObjectsAndRuntimeAssemblyBoundary" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.CreationPreservesExistingSceneObjectsAndRuntimeAssemblyBoundary" methodname="CreationPreservesExistingSceneObjectsAndRuntimeAssemblyBoundary" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" seed="575816460" result="Passed" start-time="2026-10-20 12:40:45Z" end-time="2026-10-20 12:40:45Z" duration="0.163563" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1416" name="DuplicateIdentityAndForeignOutputAreDiagnosedWithoutRepair" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.DuplicateIdentityAndForeignOutputAreDiagnosedWithoutRepair" methodname="DuplicateIdentityAndForeignOutputAreDiagnosedWithoutRepair" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" seed="565155148" result="Passed" start-time="2026-10-20 12:40:45Z" end-time="2026-10-20 12:40:45Z" duration="0.004181" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1415" name="NewRoomHasNativeGridAndSeparateInactiveAuthoringMask" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.NewRoomHasNativeGridAndSeparateInactiveAuthoringMask" methodname="NewRoomHasNativeGridAndSeparateInactiveAuthoringMask" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" seed="1416786783" result="Passed" start-time="2026-10-20 12:40:45Z" end-time="2026-10-20 12:40:45Z" duration="0.005273" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1414" name="StyleChangeAndDeletingOutputDoNotChangeAuthoredCellsOrIdentity" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.StyleChangeAndDeletingOutputDoNotChangeAuthoredCellsOrIdentity" methodname="StyleChangeAndDeletingOutputDoNotChangeAuthoredCellsOrIdentity" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" seed="24347410" result="Passed" start-time="2026-10-20 12:40:45Z" end-time="2026-10-20 12:40:45Z" duration="0.007040" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1418" name="RoomAuthoringLifecycleTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringLifecycleTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringLifecycleTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:52Z" duration="0.286153" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1421" name="BuildMaskRemovalPreservesGeneratedOutputAndUnrelatedObjects" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringLifecycleTests.BuildMaskRemovalPreservesGeneratedOutputAndUnrelatedObjects" methodname="BuildMaskRemovalPreservesGeneratedOutputAndUnrelatedObjects" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringLifecycleTests" runstate="Runnable" seed="1210723913" result="Passed" start-time="2026-10-20 12:40:45Z" end-time="2026-10-20 12:40:45Z" duration="0.058215" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1420" name="DisabledReloadKeepsAuthoredMaskAndGeneratedOutput" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringLifecycleTests.DisabledReloadKeepsAuthoredMaskAndGeneratedOutput" methodname="DisabledReloadKeepsAuthoredMaskAndGeneratedOutput" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringLifecycleTests" runstate="Runnable" seed="1757040666" result="Passed" start-time="2026-10-20 12:40:45Z" end-time="2026-10-20 12:40:47Z" duration="1.539453" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                </properties>
+              </test-case>
+              <test-case id="1419" name="NormalReloadKeepsAuthoredMaskAndGeneratedOutput" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringLifecycleTests.NormalReloadKeepsAuthoredMaskAndGeneratedOutput" methodname="NormalReloadKeepsAuthoredMaskAndGeneratedOutput" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringLifecycleTests" runstate="Runnable" seed="2097667114" result="Passed" start-time="2026-10-20 12:40:47Z" end-time="2026-10-20 12:40:52Z" duration="5.459505" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1422" name="RoomBrushBatchTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:52Z" duration="0.117969" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1423" name="BoxCallbacksGenerateOnceThenExpandAndRepeatWithoutDuplicates" fullname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests.BoxCallbacksGenerateOnceThenExpandAndRepeatWithoutDuplicates" methodname="BoxCallbacksGenerateOnceThenExpandAndRepeatWithoutDuplicates" classname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests" runstate="Runnable" seed="1359087295" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:52Z" duration="0.037010" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1427" name="BoxRejectsGeneratedTargetsAndNonXYBoundsWithoutGeneration" fullname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests.BoxRejectsGeneratedTargetsAndNonXYBoundsWithoutGeneration" methodname="BoxRejectsGeneratedTargetsAndNonXYBoundsWithoutGeneration" classname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests" runstate="Runnable" seed="1548549434" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:52Z" duration="0.014744" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1426" name="ErasingOuterColumnUsesFinalExtentAndEmptyEraseCleansOutput" fullname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests.ErasingOuterColumnUsesFinalExtentAndEmptyEraseCleansOutput" classname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:52Z" duration="0.063061" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1424" name="ErasingOuterColumnUsesFinalExtentAndEmptyEraseCleansOutput(32,True)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests.ErasingOuterColumnUsesFinalExtentAndEmptyEraseCleansOutput(32,True)" methodname="ErasingOuterColumnUsesFinalExtentAndEmptyEraseCleansOutput" classname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests" runstate="Runnable" seed="1898918124" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:52Z" duration="0.036419" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1425" name="ErasingOuterColumnUsesFinalExtentAndEmptyEraseCleansOutput(64,False)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests.ErasingOuterColumnUsesFinalExtentAndEmptyEraseCleansOutput(64,False)" methodname="ErasingOuterColumnUsesFinalExtentAndEmptyEraseCleansOutput" classname="SOLITUDE.Tests.RoomAuthoring.RoomBrushBatchTests" runstate="Runnable" seed="1976762939" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:52Z" duration="0.024517" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestFixture" id="1428" name="RoomBrushTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomBrushTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomBrushTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:53Z" duration="0.251497" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1430" name="NonRoomAndGeneratedTargetsAndNonzeroZAreRejected" fullname="SOLITUDE.Tests.RoomAuthoring.RoomBrushTests.NonRoomAndGeneratedTargetsAndNonzeroZAreRejected" methodname="NonRoomAndGeneratedTargetsAndNonzeroZAreRejected" classname="SOLITUDE.Tests.RoomAuthoring.RoomBrushTests" runstate="Runnable" seed="1623855496" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:52Z" duration="0.137661" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1429" name="ProductionPaintEraseCallbacksMaintainOwnedCellsAndFloor" fullname="SOLITUDE.Tests.RoomAuthoring.RoomBrushTests.ProductionPaintEraseCallbacksMaintainOwnedCellsAndFloor" methodname="ProductionPaintEraseCallbacksMaintainOwnedCellsAndFloor" classname="SOLITUDE.Tests.RoomAuthoring.RoomBrushTests" runstate="Runnable" seed="40584474" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:52Z" duration="0.008183" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1431" name="RepeatedSetupPreservesManuallyAdjustedPalette" fullname="SOLITUDE.Tests.RoomAuthoring.RoomBrushTests.RepeatedSetupPreservesManuallyAdjustedPalette" methodname="RepeatedSetupPreservesManuallyAdjustedPalette" classname="SOLITUDE.Tests.RoomAuthoring.RoomBrushTests" runstate="Runnable" seed="869056163" result="Passed" start-time="2026-10-20 12:40:52Z" end-time="2026-10-20 12:40:53Z" duration="0.103770" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1432" name="RoomGeometryTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomGeometryTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomGeometryTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.005125" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1434" name="ExteriorErasureAndExpansionUpdateCellSetGeometry" fullname="SOLITUDE.Tests.RoomAuthoring.RoomGeometryTests.ExteriorErasureAndExpansionUpdateCellSetGeometry" methodname="ExteriorErasureAndExpansionUpdateCellSetGeometry" classname="SOLITUDE.Tests.RoomAuthoring.RoomGeometryTests" runstate="Runnable" seed="2083099082" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.001388" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1433" name="RectangleHasDeterministicPerimeterAndFourCorners" fullname="SOLITUDE.Tests.RoomAuthoring.RoomGeometryTests.RectangleHasDeterministicPerimeterAndFourCorners" methodname="RectangleHasDeterministicPerimeterAndFourCorners" classname="SOLITUDE.Tests.RoomAuthoring.RoomGeometryTests" runstate="Runnable" seed="1219341663" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.001631" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1435" name="RoomOwnershipTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.165366" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="ParameterizedMethod" id="1447" name="AmbiguityRefusesDestructionOfBothRooms" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.AmbiguityRefusesDestructionOfBothRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.018668" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1445" name="AmbiguityRefusesDestructionOfBothRooms(&quot;identity&quot;)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.AmbiguityRefusesDestructionOfBothRooms(&quot;identity&quot;)" methodname="AmbiguityRefusesDestructionOfBothRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" seed="330662504" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.009663" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1446" name="AmbiguityRefusesDestructionOfBothRooms(&quot;foreign&quot;)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.AmbiguityRefusesDestructionOfBothRooms(&quot;foreign&quot;)" methodname="AmbiguityRefusesDestructionOfBothRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" seed="934540798" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.008502" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="ParameterizedMethod" id="1440" name="DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.060974" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1436" name="DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved(&quot;valid&quot;,False)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved(&quot;valid&quot;,False)" methodname="DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" seed="1788707829" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.017229" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1437" name="DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved(&quot;invalid&quot;,False)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved(&quot;invalid&quot;,False)" methodname="DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" seed="324176847" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.011908" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1438" name="DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved(&quot;empty&quot;,False)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved(&quot;empty&quot;,False)" methodname="DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" seed="1570432861" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.015796" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1439" name="DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved(&quot;valid&quot;,True)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved(&quot;valid&quot;,True)" methodname="DuplicateOutputOwnerRefusesRebuildUntilExtraRootIsRemoved" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" seed="1736685861" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.014286" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="ParameterizedMethod" id="1444" name="ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.070864" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1441" name="ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms(False,False)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms(False,False)" methodname="ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" seed="1901198068" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.020400" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1442" name="ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms(True,False)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms(True,False)" methodname="ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" seed="1859671958" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.022581" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1443" name="ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms(True,True)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms(True,True)" methodname="ForeignAuthoredDescendantRefusesCleanupAndPreservesBothRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" seed="226856797" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.020518" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1448" name="OverlapIsDiagnosedAndSameNameSentinelIsPreserved" fullname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests.OverlapIsDiagnosedAndSameNameSentinelIsPreserved" methodname="OverlapIsDiagnosedAndSameNameSentinelIsPreserved" classname="SOLITUDE.Tests.RoomAuthoring.RoomOwnershipTests" runstate="Runnable" seed="1521064916" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:53Z" duration="0.013088" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1449" name="RoomPersistenceTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomPersistenceTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomPersistenceTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:54Z" duration="0.763870" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1450" name="SaveReopenPreservesReferencesCellsAndEquivalentRebuildWithoutDirtyingOtherScenes" fullname="SOLITUDE.Tests.RoomAuthoring.RoomPersistenceTests.SaveReopenPreservesReferencesCellsAndEquivalentRebuildWithoutDirtyingOtherScenes" methodname="SaveReopenPreservesReferencesCellsAndEquivalentRebuildWithoutDirtyingOtherScenes" classname="SOLITUDE.Tests.RoomAuthoring.RoomPersistenceTests" runstate="Runnable" seed="1143274104" result="Passed" start-time="2026-10-20 12:40:53Z" end-time="2026-10-20 12:40:54Z" duration="0.762437" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1451" name="RoomPlacementTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomPlacementTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomPlacementTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.012093" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1455" name="ReservationsOffsetsAndPivotAreExplicitAndImpossibleSpanFails" fullname="SOLITUDE.Tests.RoomAuthoring.RoomPlacementTests.ReservationsOffsetsAndPivotAreExplicitAndImpossibleSpanFails" methodname="ReservationsOffsetsAndPivotAreExplicitAndImpossibleSpanFails" classname="SOLITUDE.Tests.RoomAuthoring.RoomPlacementTests" runstate="Runnable" seed="1009237277" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.004308" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1454" name="WallStructuralRepeatExactlyCoversEightCells" fullname="SOLITUDE.Tests.RoomAuthoring.RoomPlacementTests.WallStructuralRepeatExactlyCoversEightCells" classname="SOLITUDE.Tests.RoomAuthoring.RoomPlacementTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.005020" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1452" name="WallStructuralRepeatExactlyCoversEightCells(64,4)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomPlacementTests.WallStructuralRepeatExactlyCoversEightCells(64,4)" methodname="WallStructuralRepeatExactlyCoversEightCells" classname="SOLITUDE.Tests.RoomAuthoring.RoomPlacementTests" runstate="Runnable" seed="1832586763" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.002915" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1453" name="WallStructuralRepeatExactlyCoversEightCells(32,8)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomPlacementTests.WallStructuralRepeatExactlyCoversEightCells(32,8)" methodname="WallStructuralRepeatExactlyCoversEightCells" classname="SOLITUDE.Tests.RoomAuthoring.RoomPlacementTests" runstate="Runnable" seed="1614597654" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.001286" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+            </test-suite>
+            <test-suite type="TestFixture" id="1456" name="RoomRebuildTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.088644" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1457" name="DeletedOutputContainerRebuildsWithoutChangingAuthoredOrUnrelatedContent" fullname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests.DeletedOutputContainerRebuildsWithoutChangingAuthoredOrUnrelatedContent" methodname="DeletedOutputContainerRebuildsWithoutChangingAuthoredOrUnrelatedContent" classname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests" runstate="Runnable" seed="40179852" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.047297" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1461" name="MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms" fullname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests.MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.016648" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1458" name="MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms(&quot;identity&quot;)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests.MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms(&quot;identity&quot;)" methodname="MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests" runstate="Runnable" seed="361365004" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.003616" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1459" name="MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms(&quot;retained output&quot;)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests.MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms(&quot;retained output&quot;)" methodname="MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests" runstate="Runnable" seed="631277151" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.002993" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1460" name="MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms(&quot;transform&quot;)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests.MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms(&quot;transform&quot;)" methodname="MissingOutputRecoveryRefusesAmbiguousOrUnsupportedRooms" classname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests" runstate="Runnable" seed="223373620" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.008254" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1462" name="RepeatedRebuildAndDeletedVisualsProduceSameNativeOutput" fullname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests.RepeatedRebuildAndDeletedVisualsProduceSameNativeOutput" methodname="RepeatedRebuildAndDeletedVisualsProduceSameNativeOutput" classname="SOLITUDE.Tests.RoomAuthoring.RoomRebuildTests" runstate="Runnable" seed="1276003173" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.022820" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1463" name="RoomValidationTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.131001" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1464" name="ExteriorErasureClearsOnlyOwnedOutputAndRecoveryRebuilds" fullname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests.ExteriorErasureClearsOnlyOwnedOutputAndRecoveryRebuilds" methodname="ExteriorErasureClearsOnlyOwnedOutputAndRecoveryRebuilds" classname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests" runstate="Runnable" seed="1282252974" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.034176" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1470" name="InvalidStyleClearsPreviewPreservesCellsAndRecovers" fullname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests.InvalidStyleClearsPreviewPreservesCellsAndRecovers" classname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.086936" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1465" name="InvalidStyleClearsPreviewPreservesCellsAndRecovers(&quot;wall&quot;,&quot;North wall&quot;)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests.InvalidStyleClearsPreviewPreservesCellsAndRecovers(&quot;wall&quot;,&quot;North wall&quot;)" methodname="InvalidStyleClearsPreviewPreservesCellsAndRecovers" classname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests" runstate="Runnable" seed="2097989205" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.025539" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1466" name="InvalidStyleClearsPreviewPreservesCellsAndRecovers(&quot;corner&quot;,&quot;Northwest corner&quot;)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests.InvalidStyleClearsPreviewPreservesCellsAndRecovers(&quot;corner&quot;,&quot;Northwest corner&quot;)" methodname="InvalidStyleClearsPreviewPreservesCellsAndRecovers" classname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests" runstate="Runnable" seed="324639348" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.012602" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1467" name="InvalidStyleClearsPreviewPreservesCellsAndRecovers(&quot;ppu&quot;,&quot;32 PPU&quot;)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests.InvalidStyleClearsPreviewPreservesCellsAndRecovers(&quot;ppu&quot;,&quot;32 PPU&quot;)" methodname="InvalidStyleClearsPreviewPreservesCellsAndRecovers" classname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests" runstate="Runnable" seed="1628193596" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.012861" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1468" name="InvalidStyleClearsPreviewPreservesCellsAndRecovers(&quot;filter&quot;,&quot;Point filtering&quot;)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests.InvalidStyleClearsPreviewPreservesCellsAndRecovers(&quot;filter&quot;,&quot;Point filtering&quot;)" methodname="InvalidStyleClearsPreviewPreservesCellsAndRecovers" classname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests" runstate="Runnable" seed="1521482576" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.011228" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1469" name="InvalidStyleClearsPreviewPreservesCellsAndRecovers(&quot;span&quot;,&quot;exactly coverable&quot;)" fullname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests.InvalidStyleClearsPreviewPreservesCellsAndRecovers(&quot;span&quot;,&quot;exactly coverable&quot;)" methodname="InvalidStyleClearsPreviewPreservesCellsAndRecovers" classname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests" runstate="Runnable" seed="1726529915" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.011770" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1471" name="ValidationDoesNotChangeSerializedStateOutputOrDirtiness" fullname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests.ValidationDoesNotChangeSerializedStateOutputOrDirtiness" methodname="ValidationDoesNotChangeSerializedStateOutputOrDirtiness" classname="SOLITUDE.Tests.RoomAuthoring.RoomValidationTests" runstate="Runnable" seed="2063033201" result="Passed" start-time="2026-10-20 12:40:54Z" end-time="2026-10-20 12:40:54Z" duration="0.006089" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

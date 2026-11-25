@@ -5,6 +5,8 @@ using SOLITUDE.Composition;
 using SOLITUDE.Items;
 using SOLITUDE.Player;
 using SOLITUDE.Core.Interaction;
+using SOLITUDE.Features.Interactables;
+using SOLITUDE.SaveLoad;
 using SOLITUDE.World.Restoration;
 using SOLITUDE.World.ScrubberEncounter;
 using SOLITUDE.World.SolitudeStart;
@@ -43,6 +45,7 @@ namespace SOLITUDE.Editor
             var data = new SerializedObject(All<SceneBindings>(scene).Single());
             data.FindProperty("journalView").objectReferenceValue = view;
             data.ApplyModifiedPropertiesWithoutUndo(); EnsureComposition(scene); view.ValidateAuthoring(); EnsureTaskNotice(scene);
+            ShipMenuAuthoring.Configure(scene);
         }
         private static void EnsureTaskNotice(Scene scene)
         {
@@ -122,7 +125,56 @@ namespace SOLITUDE.Editor
             if (!present) { int index = features.arraySize++; features.GetArrayElementAtIndex(index).objectReferenceValue = feature; }
             data.ApplyModifiedPropertiesWithoutUndo();
             feature.Validate();
+            if (AssetDatabase.LoadAssetAtPath<GameObject>(InventoryScreenAuthoring.ScreenPath) != null)
+            {
+                InventoryScreenAuthoring.ConfigureScene(scene);
+                EnsureCrewLocker(scene);
+            }
+            ExplorationVitalsHudAuthoring.ConfigureScene(scene);
             SurvivorSuccessionAuthoring.ConfigureScene(scene, "ScrubberTestAwakeningPoint");
+        }
+        public static void EnsureCrewLocker(Scene scene)
+        {
+            const string identity = "scrubber.demo.crew-locker";
+            var scope = All<SceneBindings>(scene).Single();
+            var locker = All<LockerContainer>(scene).SingleOrDefault(candidate => candidate.PersistentId == identity);
+            if (locker == null)
+            {
+                var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(
+                    "Assets/_Project/Art/SOLITUDE/Props/solitude_locker_closed_normal_v01.png");
+                var loot = AssetDatabase.LoadAssetAtPath<LootTable>("Assets/_Project/Features/Items/Loot/LockerLootTable.asset");
+                if (sprite == null || loot == null) throw new InvalidOperationException("Crew locker art or loot is missing.");
+                var root = new GameObject("CrewLocker", typeof(SpriteRenderer), typeof(LockerContainer), typeof(Locker));
+                SceneManager.MoveGameObjectToScene(root, scene);
+                root.transform.position = new Vector3(26f, 4.5f);
+                var renderer = root.GetComponent<SpriteRenderer>();
+                renderer.sprite = sprite;
+                renderer.sharedMaterial = All<ScrubberEquipment>(scene).Single().GetComponent<SpriteRenderer>().sharedMaterial;
+                renderer.sortingOrder = 20;
+                var range = new GameObject("InteractionRange", typeof(BoxCollider2D), typeof(InteractableProximitySensor));
+                range.transform.SetParent(root.transform, false);
+                var collider = range.GetComponent<BoxCollider2D>();
+                collider.isTrigger = true;
+                collider.size = new Vector2(2, 2);
+                locker = root.GetComponent<LockerContainer>();
+                JSet(root.GetComponent<Locker>(), "sensor", range.GetComponent<InteractableProximitySensor>());
+                JSet(root.GetComponent<Locker>(), "containerSource", locker);
+                var id = new SerializedObject(root.GetComponent<SaveableId>());
+                id.FindProperty("id").stringValue = identity;
+                id.ApplyModifiedPropertiesWithoutUndo();
+                var data = new SerializedObject(locker);
+                data.FindProperty("displayName").stringValue = "Crew Locker";
+                data.FindProperty("capacity").intValue = 6;
+                data.FindProperty("lootTable").objectReferenceValue = loot;
+                data.ApplyModifiedPropertiesWithoutUndo();
+            }
+            var bindings = new SerializedObject(scope);
+            var lockers = bindings.FindProperty("lockers");
+            if (Enumerable.Range(0, lockers.arraySize).Any(i => lockers.GetArrayElementAtIndex(i).objectReferenceValue == locker))
+                return;
+            lockers.GetArrayElementAtIndex(lockers.arraySize++).objectReferenceValue = locker;
+            bindings.ApplyModifiedPropertiesWithoutUndo();
+            EditorSceneManager.MarkSceneDirty(scene);
         }
         private static RectTransform JRect(string name, Transform parent, Vector2 min, Vector2 max, Vector2 low, Vector2 high)
         {
@@ -336,8 +388,8 @@ namespace SOLITUDE.Editor
                     item = ScriptableObject.CreateInstance<ItemDefinition>();
                     item.DisplayName = "Replacement fuse"; item.Description = "Replacement fuse for the atmospheric scrubber.";
                     item.Stackable = true; item.MaxStackSize = 99;
-                    item.Icon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/SOLITUDE/Props/solitude_battery_normal_v01.png");
-                    if (item.Icon == null) throw new InvalidOperationException("Existing electrical component icon missing.");
+                    item.Icon = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/SOLITUDE/Props/solitude_replacement_fuse_icon_v01.png");
+                    if (item.Icon == null) throw new InvalidOperationException("Replacement fuse icon is missing.");
                     AssetDatabase.CreateAsset(item, FuseFolder + "/ReplacementFuse.asset");
                     var data = new SerializedObject(item); data.FindProperty("itemId").stringValue = AssetDatabase.AssetPathToGUID(FuseFolder + "/ReplacementFuse.asset"); data.ApplyModifiedPropertiesWithoutUndo();
                 }

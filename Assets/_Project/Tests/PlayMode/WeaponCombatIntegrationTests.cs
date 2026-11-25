@@ -77,7 +77,10 @@ namespace SOLITUDE.Tests
         }
         private void CleanPresentation()
         {
-            Assert.AreEqual(1, movement.SpeedFactor); Assert.IsFalse(actions.GetComponent<MeleeSwingView>().HeldRenderer.enabled);
+            Assert.AreEqual(1, movement.SpeedFactor);
+            Assert.IsFalse(player.GetComponent<SpriteRenderer>().forceRenderingOff);
+            var swingBody = player.transform.Find("MeleeBodyAnimation");
+            if (swingBody != null) Assert.IsFalse(swingBody.GetComponent<SpriteRenderer>().enabled);
             Assert.AreEqual(0, Markers.Count); Assert.IsNull(Field<object>(bot, "knockbackOwner"));
         }
         [UnityTest] public IEnumerator FourActualPrimarySwingsDefeatAuthoredRobotAndClearContactResources()
@@ -86,7 +89,8 @@ namespace SOLITUDE.Tests
             for (int hit = 1; hit <= 4; hit++)
             {
                 yield return Primary(); Assert.IsTrue(actions.Runner.IsExecuting);
-                Assert.AreSame(WeaponSystemTestFixtures.Wrench.HeldSprite, actions.GetComponent<MeleeSwingView>().HeldRenderer.sprite);
+                var wrenchAttack = (SOLITUDE.Items.MeleeAttackAction)WeaponSystemTestFixtures.Wrench.Actions[0].Action;
+                Assert.AreSame(wrenchAttack.Configuration.PosedWeaponFrames[4], actions.GetComponent<MeleeSwingView>().HeldRenderer.sprite);
                 actions.Advance(.119); Assert.AreEqual(50 - hit * 10, recipient.CurrentHealth);
                 actions.Advance(.002); Assert.AreEqual(40 - hit * 10, recipient.CurrentHealth); Assert.AreEqual(1, Markers.Count);
                 actions.Advance(.04); Assert.AreEqual(40 - hit * 10, recipient.CurrentHealth, "Repeated active sampling must not duplicate damage.");
@@ -96,6 +100,33 @@ namespace SOLITUDE.Tests
             Assert.IsFalse(bot.GetComponent<Rigidbody2D>().simulated); Assert.IsTrue(bot.GetComponentsInChildren<Collider2D>().All(c => !c.enabled));
             yield return Primary(); actions.Advance(.56); Assert.AreEqual(0, recipient.CurrentHealth); Assert.AreEqual(1, deaths);
             Assert.AreEqual(1, WeaponSystemTestFixtures.Bar.Container.GetSlot(0).Stack.Quantity);
+        }
+        [UnityTest] public IEnumerator MeleeDamageAndPushResistanceWorkIndependentlyOnRepeatedActiveSamples()
+        {
+            var resistance = new UnityEditor.SerializedObject(bot.GetComponent<EnemyMeleeResistance>());
+            var visual = bot.GetComponentInChildren<Animator>().transform;
+            var restingScale = visual.localScale;
+            resistance.FindProperty("damageResistance").floatValue = 1;
+            resistance.FindProperty("knockbackResistance").floatValue = .5f;
+            resistance.ApplyModifiedPropertiesWithoutUndo();
+            yield return Primary();
+            actions.Advance(.13);
+            Assert.AreEqual(40, recipient.CurrentHealth);
+            Assert.AreEqual(.325f * swings.Single().Context.UnitsPerTile, Field<float>(bot, "knockbackDistance"), .0001f);
+            Assert.Less(visual.localScale.y, restingScale.y);
+            actions.Advance(.03);
+            Assert.AreEqual(1, Markers.Count);
+            actions.Advance(.4);
+            Assert.AreEqual(restingScale, visual.localScale);
+
+            resistance.FindProperty("damageResistance").floatValue = .25f;
+            resistance.FindProperty("knockbackResistance").floatValue = 1;
+            resistance.ApplyModifiedPropertiesWithoutUndo();
+            yield return Primary();
+            actions.Advance(.13);
+            Assert.AreEqual(32.5, recipient.CurrentHealth);
+            Assert.IsNull(Field<object>(bot, "knockbackOwner"));
+            Assert.Less(visual.localScale.y, restingScale.y);
         }
         [UnityTest] public IEnumerator ActualPrimaryMissesForRangeArcAndAuthoredCollisionCover()
         {

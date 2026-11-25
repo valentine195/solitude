@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 9186653037048536398}
   - component: {fileID: 2515707831830565653}
   - component: {fileID: 1973371665517468514}
+  - component: {fileID: 3050608721785022560}
   m_Layer: 0
   m_Name: SEC-0
   m_TagString: Untagged
@@ -168,7 +169,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 959b15e69497f4239890d5d771e8be06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Npcs.Sec0.Sec0HitFeedback
-  flashColor: {r: 1, g: 0.85, b: 0.65, a: 1}
+  flashColor: {r: 1, g: 0.48, b: 0.32, a: 1}
+--- !u!114 &3050608721785022560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 315621021835699645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a77cb0944714fb0a2202268f201c321, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Combat.EnemyMeleeResistance
+  damageResistance: 0
+  knockbackResistance: 0.25
 --- !u!1 &772660201735511048
 GameObject:
   m_ObjectHideFlags: 0

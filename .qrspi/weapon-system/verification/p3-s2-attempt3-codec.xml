@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="42" result="Passed" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.1186994">
+  <test-suite type="TestSuite" id="1000" name="SolitudeShippingCheck" fullname="SolitudeShippingCheck" runstate="Runnable" testcasecount="568" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.118699" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1694" name="SOLITUDE.Tests.EditMode.dll" fullname="/private/tmp/solitude-weapon-system-p1-s2-attempt2/Library/ScriptAssemblies/SOLITUDE.Tests.EditMode.dll" runstate="Runnable" testcasecount="268" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.108397" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="71273" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1695" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="268" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.102122" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1696" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="268" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.094760" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1478" name="SaveJsonCodecTests" fullname="SOLITUDE.Tests.SaveJsonCodecTests" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="42" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.091049" total="42" passed="42" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1487" name="CompleteSnapshotRoundTripsInventoryAndWorldFactsTogether" fullname="SOLITUDE.Tests.SaveJsonCodecTests.CompleteSnapshotRoundTripsInventoryAndWorldFactsTogether" methodname="CompleteSnapshotRoundTripsInventoryAndWorldFactsTogether" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1816931469" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.042291" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1488" name="ExplicitLivingWireFixtureIsValidBeforeRemovingFields" fullname="SOLITUDE.Tests.SaveJsonCodecTests.ExplicitLivingWireFixtureIsValidBeforeRemovingFields" methodname="ExplicitLivingWireFixtureIsValidBeforeRemovingFields" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="564751028" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.004375" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1484" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.004755" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1479" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{}&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{}&quot;)" methodname="IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1058054009" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.001637" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1480" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2}&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2}&quot;)" methodname="IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1130303688" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000098" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1481" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2,\&quot;version\&quot;:2}&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2,\&quot;version\&quot;:2}&quot;)" methodname="IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="339239808" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000811" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1482" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;null&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;null&quot;)" methodname="IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="212562157" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000187" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1483" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2&quot;)" methodname="IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1861715197" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000080" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="ParameterizedMethod" id="1523" name="LegacyDecodeCompletesWithoutAddingCarriedItems" fullname="SOLITUDE.Tests.SaveJsonCodecTests.LegacyDecodeCompletesWithoutAddingCarriedItems" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.002937" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1520" name="LegacyDecodeCompletesWithoutAddingCarriedItems(1)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.LegacyDecodeCompletesWithoutAddingCarriedItems(1)" methodname="LegacyDecodeCompletesWithoutAddingCarriedItems" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1355846626" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.001817" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1521" name="LegacyDecodeCompletesWithoutAddingCarriedItems(2)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.LegacyDecodeCompletesWithoutAddingCarriedItems(2)" methodname="LegacyDecodeCompletesWithoutAddingCarriedItems" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="781428515" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000303" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1522" name="LegacyDecodeCompletesWithoutAddingCarriedItems(3)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.LegacyDecodeCompletesWithoutAddingCarriedItems(3)" methodname="LegacyDecodeCompletesWithoutAddingCarriedItems" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="311031059" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000296" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="ParameterizedMethod" id="1491" name="LegacyJsonRetainsContainersAndDoesNotInventAColonist" fullname="SOLITUDE.Tests.SaveJsonCodecTests.LegacyJsonRetainsContainersAndDoesNotInventAColonist" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.001362" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1489" name="LegacyJsonRetainsContainersAndDoesNotInventAColonist(1)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.LegacyJsonRetainsContainersAndDoesNotInventAColonist(1)" methodname="LegacyJsonRetainsContainersAndDoesNotInventAColonist" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="617134043" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000649" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1490" name="LegacyJsonRetainsContainersAndDoesNotInventAColonist(2)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.LegacyJsonRetainsContainersAndDoesNotInventAColonist(2)" methodname="LegacyJsonRetainsContainersAndDoesNotInventAColonist" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="646449825" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000288" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1525" name="MarkerAliasesCannotOverrideTheValidatedPendingFact" fullname="SOLITUDE.Tests.SaveJsonCodecTests.MarkerAliasesCannotOverrideTheValidatedPendingFact" methodname="MarkerAliasesCannotOverrideTheValidatedPendingFact" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="462516166" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000308" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1500" name="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld" fullname="SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.001888" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1493" name="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;ship&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;ship&quot;)" methodname="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="494990215" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000272" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1494" name="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;pendingDeath&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;pendingDeath&quot;)" methodname="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1093754606" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000139" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1495" name="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;expedition&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;expedition&quot;)" methodname="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1114254337" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000125" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1496" name="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;survivor.health.current&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;survivor.health.current&quot;)" methodname="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1244650983" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000130" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1497" name="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;survivor.status&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;survivor.status&quot;)" methodname="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="152780780" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000122" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1498" name="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;expedition.collectedSupplySourceIds&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;expedition.collectedSupplySourceIds&quot;)" methodname="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="382536136" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000122" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1499" name="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;collectedPickupIds&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(&quot;collectedPickupIds&quot;)" methodname="MissingVersionThreeFieldsDoNotDefaultToAUsableWorld" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="447614853" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000118" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="ParameterizedMethod" id="1503" name="NonNumericVitalsAreRejected" fullname="SOLITUDE.Tests.SaveJsonCodecTests.NonNumericVitalsAreRejected" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000995" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1501" name="NonNumericVitalsAreRejected(&quot;NaN&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.NonNumericVitalsAreRejected(&quot;NaN&quot;)" methodname="NonNumericVitalsAreRejected" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1520046665" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000339" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1502" name="NonNumericVitalsAreRejected(&quot;Infinity&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.NonNumericVitalsAreRejected(&quot;Infinity&quot;)" methodname="NonNumericVitalsAreRejected" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1851372573" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000203" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1519" name="PendingWireAllowsExistingLivingLifecycleWithoutCarriedContents" fullname="SOLITUDE.Tests.SaveJsonCodecTests.PendingWireAllowsExistingLivingLifecycleWithoutCarriedContents" methodname="PendingWireAllowsExistingLivingLifecycleWithoutCarriedContents" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="321072394" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000437" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1518" name="PendingWireRejectsCarriedOrPartiallyGrantedItems" fullname="SOLITUDE.Tests.SaveJsonCodecTests.PendingWireRejectsCarriedOrPartiallyGrantedItems" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.001296" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1516" name="PendingWireRejectsCarriedOrPartiallyGrantedItems(&quot;player.inventory&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.PendingWireRejectsCarriedOrPartiallyGrantedItems(&quot;player.inventory&quot;)" methodname="PendingWireRejectsCarriedOrPartiallyGrantedItems" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1019322568" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000616" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1517" name="PendingWireRejectsCarriedOrPartiallyGrantedItems(&quot;player.hotbar&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.PendingWireRejectsCarriedOrPartiallyGrantedItems(&quot;player.hotbar&quot;)" methodname="PendingWireRejectsCarriedOrPartiallyGrantedItems" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1239184509" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000297" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1524" name="PublicVersionFourIsPendingAndLegacyWireRemainsCompleted" fullname="SOLITUDE.Tests.SaveJsonCodecTests.PublicVersionFourIsPendingAndLegacyWireRemainsCompleted" methodname="PublicVersionFourIsPendingAndLegacyWireRemainsCompleted" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="260803850" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000708" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1528" name="RealFilesRecoverBackupWithoutOverwritingItWithCorruption" fullname="SOLITUDE.Tests.SaveJsonCodecTests.RealFilesRecoverBackupWithoutOverwritingItWithCorruption" methodname="RealFilesRecoverBackupWithoutOverwritingItWithCorruption" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="127862360" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.005784" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1485" name="TrailingContentAndWrongTypesAreRejected" fullname="SOLITUDE.Tests.SaveJsonCodecTests.TrailingContentAndWrongTypesAreRejected" methodname="TrailingContentAndWrongTypesAreRejected" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="874046868" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000404" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1486" name="UnknownItemsAndFutureVersionsAreIncompatible" fullname="SOLITUDE.Tests.SaveJsonCodecTests.UnknownItemsAndFutureVersionsAreIncompatible" methodname="UnknownItemsAndFutureVersionsAreIncompatible" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1162412714" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000441" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1526" name="VersionAliasCannotTurnPendingCarriedItemsIntoLegacyCompletion" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionAliasCannotTurnPendingCarriedItemsIntoLegacyCompletion" methodname="VersionAliasCannotTurnPendingCarriedItemsIntoLegacyCompletion" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="750903490" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000354" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1514" name="VersionFourRejectsWrongMarkerTypes" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.001255" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1509" name="VersionFourRejectsWrongMarkerTypes(&quot;null&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes(&quot;null&quot;)" methodname="VersionFourRejectsWrongMarkerTypes" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1258698588" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000199" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1510" name="VersionFourRejectsWrongMarkerTypes(&quot;0&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes(&quot;0&quot;)" methodname="VersionFourRejectsWrongMarkerTypes" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1715869978" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000115" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1511" name="VersionFourRejectsWrongMarkerTypes(&quot;\&quot;false\&quot;&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes(&quot;\&quot;false\&quot;&quot;)" methodname="VersionFourRejectsWrongMarkerTypes" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1337905639" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000114" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1512" name="VersionFourRejectsWrongMarkerTypes(&quot;[]&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes(&quot;[]&quot;)" methodname="VersionFourRejectsWrongMarkerTypes" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1584513966" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000108" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1513" name="VersionFourRejectsWrongMarkerTypes(&quot;{}&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes(&quot;{}&quot;)" methodname="VersionFourRejectsWrongMarkerTypes" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1696603770" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000113" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1515" name="VersionFourRequiresMarkerAndRejectsDuplicateWireFacts" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRequiresMarkerAndRejectsDuplicateWireFacts" methodname="VersionFourRequiresMarkerAndRejectsDuplicateWireFacts" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1252385529" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000264" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1508" name="VersionFourWireRetainsAnExplicitBoolean" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionFourWireRetainsAnExplicitBoolean" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.001025" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1506" name="VersionFourWireRetainsAnExplicitBoolean(False)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionFourWireRetainsAnExplicitBoolean(False)" methodname="VersionFourWireRetainsAnExplicitBoolean" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1487827017" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000582" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1507" name="VersionFourWireRetainsAnExplicitBoolean(True)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionFourWireRetainsAnExplicitBoolean(True)" methodname="VersionFourWireRetainsAnExplicitBoolean" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="844506710" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000153" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1492" name="VersionThreeRoundTripsLivingShipAndExpeditionStateTogether" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionThreeRoundTripsLivingShipAndExpeditionStateTogether" methodname="VersionThreeRoundTripsLivingShipAndExpeditionStateTogether" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="878007218" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.006275" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1505" name="VersionThreeStillRequiresTypedPermanentCollectionFacts" fullname="SOLITUDE.Tests.SaveJsonCodecTests.VersionThreeStillRequiresTypedPermanentCollectionFacts" methodname="VersionThreeStillRequiresTypedPermanentCollectionFacts" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="668682905" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000606" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1527" name="WorldSeedAliasCannotOverrideTheValidatedSeed" fullname="SOLITUDE.Tests.SaveJsonCodecTests.WorldSeedAliasCannotOverrideTheValidatedSeed" methodname="WorldSeedAliasCannotOverrideTheValidatedSeed" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="771577676" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000275" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1504" name="WrongRecordTypesAndPartialLifecycleAreRejected" fullname="SOLITUDE.Tests.SaveJsonCodecTests.WrongRecordTypesAndPartialLifecycleAreRejected" methodname="WrongRecordTypesAndPartialLifecycleAreRejected" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="479918366" result="Passed" start-time="2026-11-12 14:15:30Z" end-time="2026-11-12 14:15:30Z" duration="0.000577" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: /Users/jeremyvalentine/Library/Application Support/SOLITUDE Verification/SolitudeShippingCheck/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

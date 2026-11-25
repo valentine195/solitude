@@ -1,0 +1,39 @@
+{
+  "success": true,
+  "command": "command eval_file",
+  "data": {
+    "command": "eval_file",
+    "parameters": {
+      "file": "/private/tmp/solitude-vitals-p2-s1-runtime-probe.cs",
+      "timeout": "60000"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": true,
+      "result": {
+        "success": true,
+        "checks": [
+          "stable/frozen effect catalog and default non-consumable",
+          "food 90 -> 100, consumes one, delay unchanged",
+          "real inventory/vital observers see committed state and cannot reenter",
+          "observer faults remain committed exactly once",
+          "full food target retains item",
+          "medicine crosses segment while hungry, delay preserved, last stack clears selection",
+          "invalid configuration after O2 change preserves both item and unavailable status",
+          "zero health is not revived",
+          "primary screen gates use without a time-scale assumption",
+          "released composition leaves no active use endpoint"
+        ],
+        "originalSceneDirtyBefore": false
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

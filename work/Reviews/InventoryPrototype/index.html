@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SOLITUDE — Inventory prototype</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="ship-world" aria-hidden="true"></div>
+<div class="prototype-bar"><span><strong>SOLITUDE</strong> · Sample loadout</span><details id="prototype-controls"><summary>Prototype controls</summary><div><label>Preview <select id="scenario"><option value="sample">Sample loadout</option><option value="empty">Empty inventory</option><option value="full">Full inventory</option><option value="blocked">Drop blocked</option></select></label><button id="reset">Reset</button><button id="world-button">World drops <span id="drop-count">0</span></button><span id="device">Keyboard / mouse</span></div></details></div>
+<main id="inventory" aria-label="Inventory">
+<header class="screen-header"><div class="title-group"><h1>Inventory</h1><span class="pause-label">Paused</span></div><div class="header-controls"><span id="capacity"></span><button id="close" aria-label="Close inventory"><kbd>Esc</kbd> Back</button></div></header>
+<div class="workspace"><section class="cargo" aria-label="Carried items"><nav id="categories" aria-label="Item categories"></nav><div id="groups"></div><div class="context-line"><p id="grid-note"></p><div id="toast" role="status" aria-live="polite" aria-atomic="true"></div></div></section>
+<aside class="inspector" aria-label="Selected item"><div id="details"></div><div id="actions"></div><p id="instruction" role="status"></p></aside></div>
+<section class="hotbar-section" aria-label="Hotbar"><div class="section-heading"><h2>Hotbar</h2><span id="equipped"></span></div><div id="hotbar"></div></section>
+<footer><span><kbd>↑ ↓ ← →</kbd> Navigate <kbd>Enter</kbd> Select <kbd>Tab</kbd> Actions</span></footer>
+</main>
+<section id="closed" hidden><div><button class="primary" id="reopen"><kbd>I</kbd> Open inventory</button><p>Prototype · paused ship backdrop</p></div></section>
+<dialog id="quantity-dialog" aria-labelledby="dialog-title"><form method="dialog" id="quantity-form"><h2 id="dialog-title"></h2><p id="dialog-description"></p><label id="quantity-label" for="quantity">Quantity</label><div class="stepper"><button type="button" id="minus" aria-label="Decrease quantity">−</button><input id="quantity" type="number" min="1" value="1" required><button type="button" id="plus" aria-label="Increase quantity">+</button><span id="max-count"></span></div><p id="dialog-error" role="alert"></p><div class="dialog-actions"><button type="button" id="cancel-dialog">Cancel</button><button class="primary" id="confirm">Confirm</button></div></form></dialog>
+<dialog id="world-dialog" aria-labelledby="world-title"><h2 id="world-title">World drops</h2><p>Simulated pickups beside the player. No game save is affected.</p><div id="world-list"></div><button id="world-close">Back to inventory</button></dialog>
+<script src="input-policy.js"></script>
+<script src="app.js"></script>
+</body></html>

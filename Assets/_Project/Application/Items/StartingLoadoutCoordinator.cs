@@ -57,7 +57,8 @@ namespace SOLITUDE.Application
                 }
                 if (!persist()) { LastError = "Starting equipment could not be saved."; return StartingLoadoutOutcome.PersistenceFailed; }
                 if (!selectionPending) return StartingLoadoutOutcome.AlreadyInitialized;
-                selection.Select(pendingSlot); selectionPending = false;
+                if (session.Equipment == null) selection.Select(pendingSlot);
+                selectionPending = false;
                 return StartingLoadoutOutcome.Ready;
             }
             catch (Exception error) { LastError = error.Message; return StartingLoadoutOutcome.PersistenceFailed; }

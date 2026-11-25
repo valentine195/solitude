@@ -16,9 +16,14 @@ namespace SOLITUDE.Core.Input
         private PlayerInteractor interactor;
         private HotbarSelectionState selection;
         private Func<bool> back;
-        private Action inventory;
+        private Action inventory, switchEquipment;
+        private Action<int> selectQuickUse;
+        private bool lastInputWasGamepad;
+        public event Action InputDeviceChanged;
+        public bool LastInputWasGamepad => lastInputWasGamepad;
         private Action fallbackBack;
         private TaskJournalScreenCoordinator journal;
+        private Func<OpenResult> journalRequest;
         private InputControl lastBackControl;
         private double lastBackTime = -1;
         private readonly Dictionary<InputAction, InputControl[]> heldAtReset = new();
@@ -127,7 +132,7 @@ namespace SOLITUDE.Core.Input
         {
             heldAtReset.Clear();
             foreach (var action in actions.asset)
-                if (action.actionMap.name == "Gameplay" || action.name == "Cancel")
+                if (action.actionMap.name == "Gameplay" || action.actionMap.name == "Container")
                 {
                     var held = action.controls.Where(c => c.IsActuated()).ToArray();
                     if (held.Length != 0) heldAtReset[action] = held;
@@ -189,6 +194,8 @@ namespace SOLITUDE.Core.Input
             actions.Gameplay.Journal.performed += ToggleJournal;
             actions.Gameplay.Use.performed += Use;
             actions.Gameplay.Primary.performed += Primary;
+            actions.Gameplay.SwitchEquipment.performed += SwitchEquipment;
+            InputSystem.onActionChange += TrackInputDevice;
             InputSystem.onAfterUpdate += RefreshPrimaryRelease;
             InputSystem.onAfterUpdate += RefreshUseRelease;
             actions.Container.Point.performed += Pointer;
@@ -196,13 +203,14 @@ namespace SOLITUDE.Core.Input
             policy.Changed += Apply; Apply();
         }
         public void Bind(PlayerMovement movement, PlayerInteractor interactor, HotbarSelectionState selection,
-            Action inventory, Func<bool> back, Action fallbackBack, TaskJournalScreenCoordinator journal = null)
+            Action inventory, Func<bool> back, Action fallbackBack, TaskJournalScreenCoordinator journal = null, Action switchEquipment = null,
+            Func<OpenResult> journalRequest = null, Action<int> selectQuickUse = null)
         {
             if (!ReferenceEquals(this.journal, journal)) this.journal?.Close();
             if (this.movement != null) this.movement.SetInput(Vector2.zero); if (this.interactor != null) this.interactor.SetInputAllowed(false);
             this.movement = movement; this.interactor = interactor; this.selection = selection;
             this.inventory = inventory; this.back = back; this.fallbackBack = fallbackBack;
-            this.journal = journal; Apply();
+            this.journal = journal; this.journalRequest = journalRequest; this.switchEquipment = switchEquipment; this.selectQuickUse = selectQuickUse; Apply();
         }
         private static void Enable(InputAction action, bool enabled) { if (enabled) action.Enable(); else action.Disable(); }
         private void Apply()
@@ -216,8 +224,18 @@ namespace SOLITUDE.Core.Input
             if (!policy.Gameplay || !isActiveAndEnabled || !actions.Gameplay.Primary.enabled) CaptureHeldPrimary();
             if (!policy.Gameplay) ClearPendingPrimary();
             Enable(actions.Gameplay.Primary, policy.Gameplay && isActiveAndEnabled);
-            for (int i = 0; i < 9; i++) Enable(actions.asset.FindAction("Gameplay/Hotbar" + (i + 1)), policy.Gameplay);
-            Enable(actions.Gameplay.Inventory, policy.Inventory);
+            var switchAction = actions.Gameplay.SwitchEquipment;
+            bool allowSwitch = policy.Gameplay && isActiveAndEnabled && switchEquipment != null;
+            if (!allowSwitch || !switchAction.enabled)
+            {
+                var held = switchAction.controls.Where(control => control.IsActuated()).ToArray();
+                if (held.Length != 0) heldAtReset[switchAction] = held;
+            }
+            Enable(switchAction, allowSwitch);
+            for (int i = 0; i < 9; i++)
+                Enable(actions.asset.FindAction("Gameplay/Hotbar" + (i + 1)),
+                    policy.Gameplay && (selectQuickUse != null ? i < 5 : switchEquipment == null));
+            Enable(actions.Gameplay.Inventory, InventoryAvailable);
             Enable(actions.Gameplay.Pause, policy.Ready); Enable(actions.Container.Cancel, policy.Ready);
             Enable(actions.Gameplay.Journal, policy.Ready && journal != null);
             Enable(actions.Container.Point, policy.Pointer);
@@ -225,25 +243,78 @@ namespace SOLITUDE.Core.Input
         }
         private void Move(InputAction.CallbackContext context) { if (Fresh(context) && GameplayAllowed && movement != null) movement.SetInput(context.ReadValue<Vector2>()); }
         private void Stop(InputAction.CallbackContext _) { if (movement != null) movement.SetInput(Vector2.zero); }
-        private void Interact(InputAction.CallbackContext context) { if (Fresh(context) && GameplayAllowed && interactor != null) interactor.TryInteract(); }
+        private void Interact(InputAction.CallbackContext context)
+        {
+            if (!Fresh(context) || !GameplayAllowed || interactor == null) return;
+            interactor.TryInteract();
+            if (!policy.Gameplay) ConsumeUIActivation();
+        }
         private void Use(InputAction.CallbackContext context)
         {
             RefreshUseRelease();
             if (!Fresh(context) || !GameplayAllowed || !isActiveAndEnabled || heldUse.Length != 0 || vitalUse == null) return;
             CaptureHeldUse(); vitalUse();
         }
-        private void Inventory(InputAction.CallbackContext context) { if (Fresh(context) && policy.Inventory && consumedFrame != Time.frameCount) inventory?.Invoke(); }
+        private bool InventoryAvailable => policy.Inventory || (policy.Ready && journalRequest != null && journal?.IsOpen == true);
+        private void Inventory(InputAction.CallbackContext context)
+        {
+            if (Fresh(context) && InventoryAvailable && consumedFrame != Time.frameCount) inventory?.Invoke();
+        }
+        private void SwitchEquipment(InputAction.CallbackContext context)
+        {
+            if (!Fresh(context) || !GameplayAllowed || !isActiveAndEnabled || switchEquipment == null) return;
+            ConsumeUIActivation();
+            switchEquipment();
+        }
         private void Hotbar(InputAction.CallbackContext context)
-        { if (Fresh(context) && GameplayAllowed && int.TryParse(context.action.name.Substring(6), out int index)) selection?.Select(index - 1); }
+        {
+            if (!Fresh(context) || !GameplayAllowed || !int.TryParse(context.action.name.Substring(6), out int index)) return;
+            if (selectQuickUse != null) selectQuickUse(index - 1);
+            else selection?.Select(index - 1);
+        }
         private void Pointer(InputAction.CallbackContext context)
         { if (!policy.Pointer) return; var point = context.ReadValue<Vector2>(); Point?.Invoke(point.x, point.y); }
         private void ToggleJournal(InputAction.CallbackContext context)
         {
             if (!Fresh(context) || !policy.Ready || consumedFrame == Time.frameCount || journal == null) return;
-            var result = journal.Toggle();
+            var result = journalRequest == null ? journal.Toggle() : journalRequest();
             if (result == OpenResult.Closed) ConsumeUIActivation();
             Apply();
         }
+        public IDisposable BindInventoryCommand(string name, Action callback)
+        {
+            var action = actions.asset.FindAction("Container/" + name, true);
+            var boundPolicy = policy;
+            void Perform(InputAction.CallbackContext context)
+            {
+                if (Fresh(context) && isActiveAndEnabled && boundPolicy.Pointer && consumedFrame != Time.frameCount)
+                    callback?.Invoke();
+            }
+            void ApplyCommand() => Enable(action, isActiveAndEnabled && boundPolicy.Pointer);
+            action.performed += Perform; boundPolicy.Changed += ApplyCommand; ApplyCommand();
+            var lease = new Lease(() => { action.performed -= Perform; boundPolicy.Changed -= ApplyCommand; action.Disable(); });
+            uiLeases.Add(lease); return lease;
+        }
+        private void TrackInputDevice(object source, InputActionChange change)
+        {
+            if (change != InputActionChange.ActionPerformed || source is not InputAction action ||
+                action.actionMap?.asset != actions?.asset || action.activeControl == null) return;
+            bool gamepad = action.activeControl.device is Gamepad;
+            if (gamepad == lastInputWasGamepad) return;
+            lastInputWasGamepad = gamepad;
+            InputDeviceChanged?.Invoke();
+        }
+
+        public string DeviceBindingLabel(string actionPath)
+        {
+            var action = actions?.asset.FindAction(actionPath, false);
+            if (lastInputWasGamepad && action != null)
+                for (int i = 0; i < action.bindings.Count; i++)
+                    if (action.bindings[i].effectivePath?.StartsWith("<Gamepad>/", StringComparison.Ordinal) == true)
+                        return action.GetBindingDisplayString(i);
+            return BindingLabel(actionPath);
+        }
+
         public string BindingLabel(string actionPath)
         {
             var action = actions?.asset.FindAction(actionPath, false);
@@ -256,22 +327,26 @@ namespace SOLITUDE.Core.Input
         private void Back(InputAction.CallbackContext context)
         {
             if (!Fresh(context) || !policy.Ready || (lastBackControl == context.control && lastBackTime == context.time)) return;
+            bool pauseRequest = context.action == actions.Gameplay.Pause;
+            if (!pauseRequest && (policy.Gameplay || consumedFrame == Time.frameCount)) return;
             lastBackControl = context.control; lastBackTime = context.time;
             if (journal?.IsOpen == true) { ConsumeUIActivation(); journal.Back(); Apply(); return; }
-            if (!(back?.Invoke() ?? false)) fallbackBack?.Invoke();
+            if (!(back?.Invoke() ?? false) && pauseRequest) fallbackBack?.Invoke();
         }
         public void Release()
         {
+            InputSystem.onActionChange -= TrackInputDevice;
+            lastInputWasGamepad = false;
             InputSystem.onAfterUpdate -= RefreshUseRelease;
             InputSystem.onAfterUpdate -= RefreshPrimaryRelease;
             primaryAction = null; primaryOwner = null; heldPrimary = Array.Empty<InputControl>(); ClearPendingPrimary();
             primaryPointer = null; primaryPointerSystem = null; primaryRaycasts.Clear();
             vitalUse = null; vitalUseOwner = null; heldUse = Array.Empty<InputControl>();
-            journal?.Close(); journal = null;
+            journal?.Close(); journal = null; journalRequest = null;
             foreach (var lease in uiLeases) lease.Dispose();
             uiLeases.Clear();
             if (movement != null) movement.SetInput(Vector2.zero); if (interactor != null) interactor.SetInputAllowed(false);
-            movement = null; interactor = null; selection = null; inventory = null; back = null; fallbackBack = null;
+            movement = null; interactor = null; selection = null; inventory = null; switchEquipment = null; selectQuickUse = null; back = null; fallbackBack = null;
             if (policy != null) policy.Changed -= Apply; policy = null;
             if (actions != null) { actions.Disable(); actions.Dispose(); actions = null; }
             lastBackTime = -1; lastBackControl = null;
@@ -282,7 +357,7 @@ namespace SOLITUDE.Core.Input
         private void OnDisable()
         {
             CaptureHeldUse(); CaptureHeldPrimary(); ClearPendingPrimary();
-            if (actions != null) { actions.Gameplay.Use.Disable(); actions.Gameplay.Primary.Disable(); }
+            if (actions != null) { actions.Gameplay.Use.Disable(); actions.Gameplay.Primary.Disable(); actions.Gameplay.SwitchEquipment.Disable(); }
         }
     }
 }

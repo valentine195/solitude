@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="4" result="Failed(Child)" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-07 22:14:04Z" end-time="2026-10-07 22:14:04Z" duration="0.6436089">
+  <test-suite type="TestSuite" id="1034" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="21" result="Failed" site="Child" start-time="2026-10-07 22:14:04Z" end-time="2026-10-07 22:14:04Z" duration="0.643609" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1028" name="SOLITUDE.Tests.PlayMode.dll" fullname="/private/tmp/solitude-scrubber-phase1/Library/ScriptAssemblies/SOLITUDE.Tests.PlayMode.dll" runstate="Runnable" testcasecount="21" result="Failed" site="Child" start-time="2026-10-07 22:14:04Z" end-time="2026-10-07 22:14:04Z" duration="0.638485" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="65751" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1029" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="21" result="Failed" site="Child" start-time="2026-10-07 22:14:04Z" end-time="2026-10-07 22:14:04Z" duration="0.637935" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1030" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="21" result="Failed" site="Child" start-time="2026-10-07 22:14:04Z" end-time="2026-10-07 22:14:04Z" duration="0.637503" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1023" name="ScrubberEncounterSliceTests" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" testcasecount="4" result="Failed" site="Child" start-time="2026-10-07 22:14:04Z" end-time="2026-10-07 22:14:04Z" duration="0.636592" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1024" name="ComposedScreenOwnsInputAndReopensAfterLeavingProximity" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.ComposedScreenOwnsInputAndReopensAfterLeavingProximity" methodname="ComposedScreenOwnsInputAndReopensAfterLeavingProximity" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="207945061" result="Failed" start-time="2026-10-07 22:14:04Z" end-time="2026-10-07 22:14:04Z" duration="0.437108" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Expected: same as <Close (UnityEngine.GameObject)>
+  But was:  <Restart (UnityEngine.GameObject)>
+]]></message>
+                <stack-trace><![CDATA[at SOLITUDE.Tests.ScrubberEncounterSliceTests+<ComposedScreenOwnsInputAndReopensAfterLeavingProximity>d__7.MoveNext () [0x004b4] in /private/tmp/solitude-scrubber-phase1/Assets/_Project/Tests/PlayMode/ScrubberEncounterSliceTests.cs:79
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+]]></output>
+            </test-case>
+            <test-case id="1027" name="FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" methodname="FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="1889218776" result="Passed" start-time="2026-10-07 22:14:04Z" end-time="2026-10-07 22:14:04Z" duration="0.064655" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+]]></output>
+            </test-case>
+            <test-case id="1025" name="FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput" methodname="FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="302189467" result="Passed" start-time="2026-10-07 22:14:04Z" end-time="2026-10-07 22:14:04Z" duration="0.068060" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+[PlayerInteractor] No target
+]]></output>
+            </test-case>
+            <test-case id="1026" name="RepairScreenRechecksInventoryAndKeepsRepairedScrubberOffline" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.RepairScreenRechecksInventoryAndKeepsRepairedScrubberOffline" methodname="RepairScreenRechecksInventoryAndKeepsRepairedScrubberOffline" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="50661923" result="Passed" start-time="2026-10-07 22:14:04Z" end-time="2026-10-07 22:14:04Z" duration="0.057910" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/solitude-validate-starting-loadout.cs",
+      "entry": "ValidateStartingLoadout.Run"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 11979,
+      "executeMs": 6816,
+      "assemblyName": "PipelineRunScript_solitude-validate-starting-loadout_f01cc0a1a1044f929fad80f0b1af8b19",
+      "success": true,
+      "result": {
+        "metadataValid": true,
+        "tagsValid": true,
+        "catalogsValid": true,
+        "configuredRoots": 2,
+        "productionVersion": 4,
+        "newRunPending": true,
+        "legacyCompleted": true,
+        "selectedSlot": 0,
+        "quantity": 1
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

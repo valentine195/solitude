@@ -34,9 +34,8 @@ namespace SOLITUDE.Tests
         {
             pause = new PauseCoordinator(); policy = new InputPolicyCoordinator(pause); policy.SetReady(true);
             database = Resources.Load<ItemDatabase>("Database"); capabilities = database.BuildCapabilityCatalog();
-            foreach (var spec in database.BuildRuntimeCatalog().Items)
-                if (capabilities.Resolve(spec.ItemId)?.Resolve(ItemActionSlot.Primary) != null) wrenchId = spec.ItemId;
-            Assert.NotNull(wrenchId);
+            wrenchId = "104950f738ebc4af4a05ec473310a59a";
+            Assert.NotNull(capabilities.Resolve(wrenchId)?.Resolve(ItemActionSlot.Primary));
             commands = new ContainerCommandService(database.BuildRuntimeCatalog()); hotbar = commands.Register("action-hotbar", 3);
             selection = new HotbarSelectionState(hotbar); commands.Grant(hotbar.Handle, wrenchId, 1); selection.Select(0);
             actor = new GameObject("Shared swing fixture"); actor.AddComponent<Rigidbody2D>().gravityScale = 0;

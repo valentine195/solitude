@@ -64,6 +64,9 @@ namespace SOLITUDE.Editor
                 rover.AddComponent<Sec0Controller>().Configure(visual.GetComponent<Animator>(),AssetDatabase.LoadAssetAtPath<GameObject>(Root+"/PF_Sec0StunFx.prefab"),points);
                 rover.AddComponent<Sec0DamageRecipient>();
                 rover.AddComponent<Sec0HitFeedback>();
+                var resistance = new SerializedObject(rover.AddComponent<SOLITUDE.Combat.EnemyMeleeResistance>());
+                resistance.FindProperty("knockbackResistance").floatValue = .25f;
+                resistance.ApplyModifiedPropertiesWithoutUndo();
                 PrefabUtility.SaveAsPrefabAsset(host,outputPath);
             }
             finally {UnityEngine.Object.DestroyImmediate(host);}

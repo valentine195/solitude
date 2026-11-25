@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-feedback-preview.cs",
+      "entry": "FeedbackPreview.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 1708,
+      "executeMs": 1061,
+      "assemblyName": "PipelineRunScript_weapon-system-feedback-preview_952831b93506410fa5ae6ac024e38cf6",
+      "success": true,
+      "result": {
+        "scene": "Assets/_Project/Scenes/Demos/Sec0Patrol.unity",
+        "healthAfterHit": 30,
+        "sharedSwing": "maintenance_wrench_placeholder",
+        "gameplayCameraSize": 4.5,
+        "mode": "Editor diagnostic, explicitly stepped phases; no live frame progression claimed"
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7801,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

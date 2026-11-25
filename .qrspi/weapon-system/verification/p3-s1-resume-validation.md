@@ -1,0 +1,7 @@
+# Phase 3 Step 1 resume validation
+
+Resumed with HEAD da9e6856da357ab05a2a664fd45cf92141d72054 and the same eight staged files from p3-s1-attempt1-source.json. Working and index bytes independently match every recorded digest. Approved upstream/spec and all normalized plan revisions still match. Retained results.json records complete Passed gate, 46 stages; XML records 549 Editor and 223 PlayMode passed, zero failures/skips; pure log records 284 passed/0 failed. No source changed since those checks. Staged C# whitespace check passed again.
+
+Before the interruption, ValidateLoadoutPreparation.Run completed with successful CLI transport and nested execution. Its returned facts were metadataValid=true, tagsValid=true, catalogsValid=true, productionVersion=3, preparedVersion=4, legacyCompleted=true, preparedPending=true, productionMarkerOmitted=true, publicVersionFourBlocked=true. That result was directly observed in this conversation. The original temporary JSON output and validation script have since been cleared from /private/tmp; this note transcribes the observed result and does not pretend to be the original raw output. Source and staged metadata remain unchanged. A resume environment probe found no running source Unity Editor; no repeated Unity verification is claimed or needed for unchanged tested bytes.
+
+Only unrelated SOLITUDE_Start.unity working-tree changes remain outside the index. No source repair, new test run, editor launch, CLI upgrade or change of approved scope occurred during this resume.

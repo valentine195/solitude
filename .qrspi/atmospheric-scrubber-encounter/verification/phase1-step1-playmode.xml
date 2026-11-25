@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-07 21:27:24Z" end-time="2026-10-07 21:27:24Z" duration="0.3195617">
+  <test-suite type="TestSuite" id="1031" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="18" result="Passed" start-time="2026-10-07 21:27:24Z" end-time="2026-10-07 21:27:24Z" duration="0.319562" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1025" name="SOLITUDE.Tests.PlayMode.dll" fullname="/private/tmp/solitude-scrubber-phase1/Library/ScriptAssemblies/SOLITUDE.Tests.PlayMode.dll" runstate="Runnable" testcasecount="18" result="Passed" start-time="2026-10-07 21:27:24Z" end-time="2026-10-07 21:27:24Z" duration="0.314250" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="59171" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1026" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="18" result="Passed" start-time="2026-10-07 21:27:24Z" end-time="2026-10-07 21:27:24Z" duration="0.309040" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1027" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="18" result="Passed" start-time="2026-10-07 21:27:24Z" end-time="2026-10-07 21:27:24Z" duration="0.308362" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1023" name="ScrubberEncounterSliceTests" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-07 21:27:24Z" end-time="2026-10-07 21:27:24Z" duration="0.307135" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1024" name="FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" methodname="FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="1099803453" result="Passed" start-time="2026-10-07 21:27:24Z" end-time="2026-10-07 21:27:24Z" duration="0.299433" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

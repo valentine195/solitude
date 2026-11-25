@@ -1,0 +1,33 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/solitude-author-starting-loadout.cs",
+      "entry": "AuthorStartingLoadout.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 1101,
+      "executeMs": 341,
+      "assemblyName": "PipelineRunScript_solitude-author-starting-loadout_6e901257aaf749b7a62b71741594fbc6",
+      "success": true,
+      "result": {
+        "loadoutGuid": "e0259b7a0cd14451881ead440ffff4d3",
+        "configGuid": "2b47c35287efd4b0c9981ba459614a9e",
+        "itemId": "104950f738ebc4af4a05ec473310a59a",
+        "quantity": 1,
+        "selectedSlot": 0
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -79,7 +79,7 @@ namespace SOLITUDE.Tests
                 lease = bot.GetComponent<IMeleeHitFeedback>().Present(contact, spec, 1);
                 Assert.NotNull(lease); Assert.AreNotEqual(original, sprite.color);
                 Assert.NotNull(Field<object>(bot, "knockbackOwner"));
-                Assert.AreEqual(spec.KnockbackTiles, Field<float>(bot, "knockbackDistance"));
+                Assert.AreEqual(spec.KnockbackTiles * .75f, Field<float>(bot, "knockbackDistance"));
                 Assert.AreEqual(spec.KnockbackDuration, Field<float>(bot, "knockbackTime"));
                 lease.Dispose(); Assert.AreEqual(original, sprite.color); Assert.IsNull(Field<object>(bot, "knockbackOwner"));
             }

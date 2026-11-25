@@ -1,0 +1,84 @@
+{
+  "version": 3,
+  "worldSeed": 12345,
+  "containers": [
+    {
+      "saveableId": "player.inventory",
+      "state": {
+        "slots": [
+          {
+            "index": 0,
+            "itemId": "a40fd59f5dcc842bd8be23ae75cd7333",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "saveableId": "player.hotbar",
+      "state": {
+        "slots": []
+      }
+    }
+  ],
+  "collectedPickupIds": [],
+  "survivor": {
+    "id": "d8c4851b-145f-4da5-a07c-6461b4273a7a",
+    "status": 1,
+    "scenePath": "Assets/_Project/Scenes/Wakeup.unity",
+    "x": -0.88999998569488525,
+    "y": -2.4000000953674316,
+    "z": 0.0,
+    "health": {
+      "current": 100.0,
+      "max": 100.0
+    },
+    "oxygen": {
+      "current": 100.0,
+      "max": 100.0
+    },
+    "hunger": {
+      "current": 99.99633514881134,
+      "max": 100.0
+    },
+    "recoveryDelayRemaining": 0.0
+  },
+  "expedition": {
+    "id": "869d9acd-bf8f-4b50-9de1-5281b86bbae3",
+    "defeatedEncounterIds": [],
+    "collectedSupplySourceIds": [
+      "expedition.supply.ration"
+    ]
+  },
+  "ship": {
+    "repairs": [
+      {
+        "id": "route.scrubber",
+        "installed": false,
+        "running": false,
+        "recoverySeconds": 0.0
+      }
+    ],
+    "doors": [
+      {
+        "id": "route.shortcut",
+        "powered": false,
+        "unlocked": false,
+        "open": false
+      }
+    ],
+    "criticalSources": [
+      {
+        "id": "route.fuse-source",
+        "objectiveId": "route.scrubber",
+        "available": true,
+        "itemId": "4716e84c715564ad2ac79c4be74037dd",
+        "sharedOwnerIds": [
+          "c7320c2a-7a48-41c9-98b4-bf5976399466"
+        ]
+      }
+    ],
+    "permanentDiscoveryIds": []
+  },
+  "pendingDeath": null
+}

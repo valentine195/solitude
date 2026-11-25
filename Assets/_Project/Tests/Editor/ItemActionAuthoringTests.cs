@@ -45,8 +45,8 @@ namespace SOLITUDE.Tests
             Assert.AreEqual(10, spec.BaseDamage); Assert.AreEqual(1.25f, spec.RangeTiles); Assert.AreEqual(90, spec.ArcDegrees);
             Assert.That(spec.Windup, Is.EqualTo(.12).Within(.000001)); Assert.That(spec.ActiveDuration, Is.EqualTo(.10).Within(.000001));
             Assert.That(spec.Recovery, Is.EqualTo(.33).Within(.000001)); Assert.That(spec.TotalDuration, Is.EqualTo(.55).Within(.000001));
-            Assert.That(spec.MovementFactor, Is.EqualTo(.65f)); Assert.AreEqual(.1f, spec.KnockbackTiles);
-            Assert.AreEqual(.08f, spec.KnockbackDuration); Assert.AreEqual(.08f, spec.FlashDuration);
+            Assert.That(spec.MovementFactor, Is.EqualTo(.65f)); Assert.AreEqual(.65f, spec.KnockbackTiles);
+            Assert.AreEqual(.14f, spec.KnockbackDuration); Assert.AreEqual(.16f, spec.FlashDuration);
             CollectionAssert.AreEqual(new[] { "Damage.Blunt" }, Names(spec.DamageTags)); Assert.IsTrue(spec.TargetEligibility.Matches(caps.Tags));
             Assert.AreEqual(2.5f, spec.RangeWorld(2)); Assert.Throws<ArgumentOutOfRangeException>(() => spec.RangeWorld(0));
         }

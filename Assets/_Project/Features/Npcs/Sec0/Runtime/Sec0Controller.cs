@@ -33,6 +33,10 @@ namespace SOLITUDE.Npcs.Sec0
         private Func<bool> targetAvailable;
         private object owner;
         private Vector2 facing=Vector2.down,lastKnown,chargeDirection;
+        private LineRenderer attackLine;
+        private float dischargeRemaining;
+        private const float DischargeDuration = .12f;
+        private Vector2 Emitter => body.position + new Vector2(0, .25f);
         private int waypoint;
         private float dwell;
         private object knockbackOwner;
@@ -43,6 +47,12 @@ namespace SOLITUDE.Npcs.Sec0
         {
             if (source == null || !CanPresentFeedback || !Positive(distance) || !Positive(duration)
                 || !Finite(direction.x) || !Finite(direction.y) || direction.sqrMagnitude < .001f) return false;
+            if (State == SecurityBotState.Charging)
+            {
+                brain.InterruptCharge();
+                HideAttackLine();
+                Play(false);
+            }
             knockbackOwner = source; knockbackDirection = direction.normalized;
             knockbackDistance = distance; knockbackTime = duration; return true;
         }
@@ -153,15 +163,29 @@ namespace SOLITUDE.Npcs.Sec0
             if(!policy.Gameplay || !targetAvailable())
             {
                 body.linearVelocity=Vector2.zero;Play(false);
-                if(!targetAvailable()) {brain.Reset();navigator.Reset();}
+                if(!targetAvailable()) {brain.Reset();navigator.Reset();HideAttackLine();}
                 return;
             }
             bool visible=CanSeeTarget();if(visible) lastKnown=target.position;
             var previous=State;
             bool fire=brain.Advance(elapsed,visible,Vector2.Distance(body.position,target.position),Vector2.Distance(body.position,lastKnown)<.2f,true);
             if(State==SecurityBotState.Charging && previous!=State)
-            {chargeDirection=(TargetPoint-(body.position+new Vector2(0,.25f))).normalized;Face(chargeDirection);}
-            if(fire) Fire();
+            {chargeDirection=(TargetPoint-Emitter).normalized;Face(chargeDirection);}
+            if (fire) Fire();
+            else if (State == SecurityBotState.Charging)
+            {
+                float distance = TracePulse(out _);
+                float charge = brain.ChargeProgress;
+                ShowAttackLine(distance, Mathf.Lerp(.035f, .065f, charge),
+                    Color.Lerp(new Color(1, .42f, .12f, .7f), new Color(1, .93f, .55f, 1), charge));
+            }
+            else if (dischargeRemaining > 0)
+            {
+                dischargeRemaining = Mathf.Max(0, dischargeRemaining - elapsed);
+                attackLine.widthMultiplier = .13f * dischargeRemaining / DischargeDuration;
+                if (dischargeRemaining == 0) HideAttackLine();
+            }
+            else HideAttackLine();
             if(knockbackOwner != null)
             {
                 float portion = Mathf.Min(elapsed, knockbackTime);
@@ -217,18 +241,58 @@ namespace SOLITUDE.Npcs.Sec0
         {
             if(IsDefeated || owner==null) return;
             ShotsFired++;
-            Vector2 from=body.position+new Vector2(0,.25f);
-            var fx=Instantiate(stunFxPrefab,from+(chargeDirection*.35f),Quaternion.Euler(0,0,Mathf.Atan2(chargeDirection.y,chargeDirection.x)*Mathf.Rad2Deg));
+            float distance = TracePulse(out var hit);
+            ShowAttackLine(distance, .13f, new Color(.68f, .95f, 1, 1));
+            dischargeRemaining = DischargeDuration;
+            var fx = Instantiate(stunFxPrefab, Emitter + chargeDirection * distance,
+                Quaternion.Euler(0, 0, Mathf.Atan2(chargeDirection.y, chargeDirection.x) * Mathf.Rad2Deg));
             UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(fx,gameObject.scene);effects.Add(fx);Destroy(fx,.4f);
-            // Aimed direction is locked when charging begins, so stepping sideways
-            // during the warning can dodge the non-lethal pulse.
-            int count=Physics2D.Raycast(from,chargeDirection,Solids,hits,attackRange);
-            float nearest=float.PositiveInfinity;Collider2D hit=null;
-            if(count==hits.Length) return;
-            for(int i=0;i<count;i++)
-                if(hits[i].collider!=null && !hits[i].collider.transform.IsChildOf(transform) && hits[i].distance<nearest)
-                {nearest=hits[i].distance;hit=hits[i].collider;}
             if(hit!=null && hit.transform.IsChildOf(target) && receiver.TryStun(stunDuration)) StunsLanded++;
+        }
+
+        private float TracePulse(out Collider2D hit)
+        {
+            hit = null;
+            int count = Physics2D.Raycast(Emitter, chargeDirection, Solids, hits, attackRange);
+            if (count == hits.Length) return 0;
+            float distance = attackRange;
+            for (int i = 0; i < count; i++)
+            {
+                var shape = hits[i].collider;
+                if (shape == null || shape.transform.IsChildOf(transform) || hits[i].distance > distance) continue;
+                if (hits[i].distance == distance && hit != null && shape.transform.IsChildOf(target)) continue;
+                hit = shape;
+                distance = hits[i].distance;
+            }
+            return distance;
+        }
+
+        private void ShowAttackLine(float distance, float width, Color color)
+        {
+            if (attackLine == null)
+            {
+                var lineObject = new GameObject("Stun pulse path");
+                lineObject.layer = visual.gameObject.layer;
+                lineObject.transform.SetParent(transform, false);
+                attackLine = lineObject.AddComponent<LineRenderer>();
+                var signal = stunFxPrefab.GetComponent<SpriteRenderer>();
+                attackLine.sharedMaterial = signal.sharedMaterial;
+                attackLine.sortingLayerID = signal.sortingLayerID;
+                attackLine.sortingOrder = signal.sortingOrder + 1;
+                attackLine.positionCount = 2;
+                attackLine.useWorldSpace = true;
+            }
+            attackLine.enabled = distance > 0;
+            attackLine.widthMultiplier = width;
+            attackLine.startColor = attackLine.endColor = color;
+            attackLine.SetPosition(0, Emitter);
+            attackLine.SetPosition(1, Emitter + chargeDirection * distance);
+        }
+
+        private void HideAttackLine()
+        {
+            if (attackLine != null) attackLine.enabled = false;
+            dischargeRemaining = 0;
         }
         private void Play(bool moving)
         {
@@ -245,6 +309,7 @@ namespace SOLITUDE.Npcs.Sec0
         {
             if(!ReferenceEquals(owner,bindingOwner)) return;
             ClearHitFeedback();
+            HideAttackLine();
             owner=null;target=null;receiver=null;policy=null;targetAvailable=null;
             if(body!=null) body.linearVelocity=Vector2.zero;
             brain?.Reset();navigator?.Reset();animationName=null;if(visual!=null) visual.speed=1;
@@ -261,7 +326,7 @@ namespace SOLITUDE.Npcs.Sec0
             foreach(var shape in GetComponentsInChildren<Collider2D>(true)) shape.enabled=false;
             if(visual!=null) visual.speed=0;
         }
-        private void OnDisable() { ClearHitFeedback(); if(body!=null) body.linearVelocity=Vector2.zero; }
+        private void OnDisable() { HideAttackLine(); ClearHitFeedback(); if(body!=null) body.linearVelocity=Vector2.zero; }
         private void OnDestroy() { if(owner!=null) Release(owner); }
         private void OnDrawGizmosSelected()
         {

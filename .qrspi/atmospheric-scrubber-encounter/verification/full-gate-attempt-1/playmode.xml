@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="26" result="Passed" total="26" passed="26" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-07 22:43:24Z" end-time="2026-10-07 22:43:44Z" duration="20.6351803">
+  <test-suite type="TestSuite" id="1040" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="26" result="Passed" start-time="2026-10-07 22:43:24Z" end-time="2026-10-07 22:43:44Z" duration="20.635180" total="26" passed="26" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1034" name="SOLITUDE.Tests.PlayMode.dll" fullname="/private/tmp/solitude-scrubber-fullgate/Library/ScriptAssemblies/SOLITUDE.Tests.PlayMode.dll" runstate="Runnable" testcasecount="26" result="Passed" start-time="2026-10-07 22:43:24Z" end-time="2026-10-07 22:43:44Z" duration="20.620618" total="26" passed="26" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="69196" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1035" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="26" result="Passed" start-time="2026-10-07 22:43:24Z" end-time="2026-10-07 22:43:44Z" duration="20.619476" total="26" passed="26" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1036" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="26" result="Passed" start-time="2026-10-07 22:43:24Z" end-time="2026-10-07 22:43:44Z" duration="20.618718" total="26" passed="26" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="ProductionLifecycleTests" fullname="SOLITUDE.Tests.ProductionLifecycleTests" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-07 22:43:24Z" end-time="2026-10-07 22:43:26Z" duration="2.462799" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1003" name="AdditiveTargetUnloadClosesOnlyItsModalAndInvalidatesHandle" fullname="SOLITUDE.Tests.ProductionLifecycleTests.AdditiveTargetUnloadClosesOnlyItsModalAndInvalidatesHandle" methodname="AdditiveTargetUnloadClosesOnlyItsModalAndInvalidatesHandle" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="1128705667" result="Passed" start-time="2026-10-07 22:43:24Z" end-time="2026-10-07 22:43:24Z" duration="0.884364" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1004" name="CollectionSurvivesActualPlayerSceneReloadAndNewSaveClearsIt" fullname="SOLITUDE.Tests.ProductionLifecycleTests.CollectionSurvivesActualPlayerSceneReloadAndNewSaveClearsIt" methodname="CollectionSurvivesActualPlayerSceneReloadAndNewSaveClearsIt" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="895455695" result="Passed" start-time="2026-10-07 22:43:24Z" end-time="2026-10-07 22:43:25Z" duration="0.557078" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1006" name="DestroyedViewsBeforeScopeDoNotBreakPauseOrInputCleanup" fullname="SOLITUDE.Tests.ProductionLifecycleTests.DestroyedViewsBeforeScopeDoNotBreakPauseOrInputCleanup" methodname="DestroyedViewsBeforeScopeDoNotBreakPauseOrInputCleanup" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="1679468130" result="Passed" start-time="2026-10-07 22:43:25Z" end-time="2026-10-07 22:43:25Z" duration="0.254289" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1005" name="DuplicateBootstrapLeavesExistingGraphAndUnrelatedObjectsAlive" fullname="SOLITUDE.Tests.ProductionLifecycleTests.DuplicateBootstrapLeavesExistingGraphAndUnrelatedObjectsAlive" methodname="DuplicateBootstrapLeavesExistingGraphAndUnrelatedObjectsAlive" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="835013192" result="Passed" start-time="2026-10-07 22:43:25Z" end-time="2026-10-07 22:43:26Z" duration="0.238273" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1007" name="EventSystemAndInputDestroyedBeforeScopeReleaseSafely" fullname="SOLITUDE.Tests.ProductionLifecycleTests.EventSystemAndInputDestroyedBeforeScopeReleaseSafely" methodname="EventSystemAndInputDestroyedBeforeScopeReleaseSafely" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="1042745019" result="Passed" start-time="2026-10-07 22:43:26Z" end-time="2026-10-07 22:43:26Z" duration="0.249199" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1002" name="StartupAndInactiveBindingsStaySingleAcrossEnableCycles" fullname="SOLITUDE.Tests.ProductionLifecycleTests.StartupAndInactiveBindingsStaySingleAcrossEnableCycles" methodname="StartupAndInactiveBindingsStaySingleAcrossEnableCycles" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="1428621646" result="Passed" start-time="2026-10-07 22:43:26Z" end-time="2026-10-07 22:43:26Z" duration="0.258722" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1008" name="RestorationDemoLifecycleTests" fullname="SOLITUDE.Tests.RestorationDemoLifecycleTests" classname="SOLITUDE.Tests.RestorationDemoLifecycleTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-07 22:43:26Z" end-time="2026-10-07 22:43:28Z" duration="1.573850" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1009" name="DemoCompletesReloadsAndNeverReadsOrWritesNormalSave" fullname="SOLITUDE.Tests.RestorationDemoLifecycleTests.DemoCompletesReloadsAndNeverReadsOrWritesNormalSave" methodname="DemoCompletesReloadsAndNeverReadsOrWritesNormalSave" classname="SOLITUDE.Tests.RestorationDemoLifecycleTests" runstate="Runnable" seed="1983546108" result="Passed" start-time="2026-10-07 22:43:26Z" end-time="2026-10-07 22:43:27Z" duration="1.297149" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1010" name="ExistingProductionSessionRejectsDemoWithoutReset" fullname="SOLITUDE.Tests.RestorationDemoLifecycleTests.ExistingProductionSessionRejectsDemoWithoutReset" methodname="ExistingProductionSessionRejectsDemoWithoutReset" classname="SOLITUDE.Tests.RestorationDemoLifecycleTests" runstate="Runnable" seed="353769720" result="Passed" start-time="2026-10-07 22:43:27Z" end-time="2026-10-07 22:43:28Z" duration="0.274492" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[GameCompositionRoot] Runtime unavailable; save preserved: Demo and production sessions cannot be mixed. Stop Play mode and open the scene directly.
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1011" name="RestorationDoorTests" fullname="SOLITUDE.Tests.RestorationDoorTests" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-07 22:43:28Z" end-time="2026-10-07 22:43:30Z" duration="2.015315" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1014" name="LateEnableReenableAndMissingSystemReconcileWithoutOpening" fullname="SOLITUDE.Tests.RestorationDoorTests.LateEnableReenableAndMissingSystemReconcileWithoutOpening" methodname="LateEnableReenableAndMissingSystemReconcileWithoutOpening" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" seed="1458221201" result="Passed" start-time="2026-10-07 22:43:28Z" end-time="2026-10-07 22:43:28Z" duration="0.008919" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1012" name="OfflineDirectAndPlayerCallsBlockThenRestorationPermitsOpening" fullname="SOLITUDE.Tests.RestorationDoorTests.OfflineDirectAndPlayerCallsBlockThenRestorationPermitsOpening" methodname="OfflineDirectAndPlayerCallsBlockThenRestorationPermitsOpening" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" seed="1255132834" result="Passed" start-time="2026-10-07 22:43:28Z" end-time="2026-10-07 22:43:29Z" duration="1.001972" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1013" name="UngatedDoorPreservesOpeningBehavior" fullname="SOLITUDE.Tests.RestorationDoorTests.UngatedDoorPreservesOpeningBehavior" methodname="UngatedDoorPreservesOpeningBehavior" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" seed="691434867" result="Passed" start-time="2026-10-07 22:43:29Z" end-time="2026-10-07 22:43:30Z" duration="1.002013" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1015" name="RestorationSliceTests" fullname="SOLITUDE.Tests.RestorationSliceTests" classname="SOLITUDE.Tests.RestorationSliceTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-07 22:43:30Z" end-time="2026-10-07 22:43:33Z" duration="2.922922" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1016" name="FullLoopThroughSceneTargetingTransferPassageAndReload" fullname="SOLITUDE.Tests.RestorationSliceTests.FullLoopThroughSceneTargetingTransferPassageAndReload" methodname="FullLoopThroughSceneTargetingTransferPassageAndReload" classname="SOLITUDE.Tests.RestorationSliceTests" runstate="Runnable" seed="1560995370" result="Passed" start-time="2026-10-07 22:43:30Z" end-time="2026-10-07 22:43:33Z" duration="2.921466" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1017" name="RestorationTerminalTests" fullname="SOLITUDE.Tests.RestorationTerminalTests" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-07 22:43:33Z" end-time="2026-10-07 22:43:33Z" duration="0.014246" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1022" name="DestroyedSystemTurnsOffPresentation" fullname="SOLITUDE.Tests.RestorationTerminalTests.DestroyedSystemTurnsOffPresentation" methodname="DestroyedSystemTurnsOffPresentation" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" seed="1764010471" result="Passed" start-time="2026-10-07 22:43:33Z" end-time="2026-10-07 22:43:33Z" duration="0.001847" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1021" name="FailingEarlierSubscriberDoesNotPreventTerminalPower" fullname="SOLITUDE.Tests.RestorationTerminalTests.FailingEarlierSubscriberDoesNotPreventTerminalPower" methodname="FailingEarlierSubscriberDoesNotPreventTerminalPower" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" seed="1817817544" result="Passed" start-time="2026-10-07 22:43:33Z" end-time="2026-10-07 22:43:33Z" duration="0.007134" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[InvalidOperationException: terminal observer fixture
+SOLITUDE.Tests.RestorationTerminalTests+<>c.<FailingEarlierSubscriberDoesNotPreventTerminalPower>b__15_0 () (at Assets/_Project/Tests/PlayMode/RestorationTerminalTests.cs:80)
+SOLITUDE.Restoration.RestorableSystemState.Publish () (at Assets/_Project/Domain/Restoration/RestorableSystemState.cs:47)
+UnityEngine.Debug:LogException(Exception)
+SOLITUDE.Restoration.RestorableSystemState:Publish() (at Assets/_Project/Domain/Restoration/RestorableSystemState.cs:52)
+SOLITUDE.Restoration.RestorableSystemState:TryRestore(ContainerCommandService, IContainerReader, String) (at Assets/_Project/Domain/Restoration/RestorableSystemState.cs:35)
+SOLITUDE.Tests.RestorationTerminalTests:Restore() (at Assets/_Project/Tests/PlayMode/RestorationTerminalTests.cs:34)
+SOLITUDE.Tests.RestorationTerminalTests:FailingEarlierSubscriberDoesNotPreventTerminalPower() (at Assets/_Project/Tests/PlayMode/RestorationTerminalTests.cs:83)
+System.Reflection.MethodBase:Invoke(Object, Object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod(MethodInfo, Object, Object[])
+NUnit.Framework.Internal.MethodWrapper:Invoke(Object, Object[])
+NUnit.Framework.Internal.Commands.TestMethodCommand:RunNonAsyncTestMethod(ITestExecutionContext)
+NUnit.Framework.Internal.Commands.TestMethodCommand:RunTestMethod(ITestExecutionContext)
+NUnit.Framework.Internal.Commands.TestMethodCommand:Execute(ITestExecutionContext)
+UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+]]></output>
+            </test-case>
+            <test-case id="1019" name="LateEnableAndEnableCyclesReconcileWithoutRepeatedInstallation" fullname="SOLITUDE.Tests.RestorationTerminalTests.LateEnableAndEnableCyclesReconcileWithoutRepeatedInstallation" methodname="LateEnableAndEnableCyclesReconcileWithoutRepeatedInstallation" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" seed="260480252" result="Passed" start-time="2026-10-07 22:43:33Z" end-time="2026-10-07 22:43:33Z" duration="0.000542" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1020" name="OtherSystemsAndMissingDependenciesStayOffline" fullname="SOLITUDE.Tests.RestorationTerminalTests.OtherSystemsAndMissingDependenciesStayOffline" methodname="OtherSystemsAndMissingDependenciesStayOffline" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" seed="1687276032" result="Passed" start-time="2026-10-07 22:43:33Z" end-time="2026-10-07 22:43:33Z" duration="0.000411" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1018" name="PowerChangesScreenAndDisplaysRepeatableConfiguredContent" fullname="SOLITUDE.Tests.RestorationTerminalTests.PowerChangesScreenAndDisplaysRepeatableConfiguredContent" methodname="PowerChangesScreenAndDisplaysRepeatableConfiguredContent" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" seed="1570808205" result="Passed" start-time="2026-10-07 22:43:33Z" end-time="2026-10-07 22:43:33Z" duration="0.002941" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1023" name="ScrubberEncounterLifecycleTests" fullname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" classname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-07 22:43:33Z" end-time="2026-10-07 22:43:34Z" duration="1.264997" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1026" name="ProductionSessionRejectsScrubberWithoutChangingInventoryOrSave" fullname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests.ProductionSessionRejectsScrubberWithoutChangingInventoryOrSave" methodname="ProductionSessionRejectsScrubberWithoutChangingInventoryOrSave" classname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" runstate="Runnable" seed="1280542647" result="Passed" start-time="2026-10-07 22:43:33Z" end-time="2026-10-07 22:43:33Z" duration="0.201516" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[GameCompositionRoot] Runtime unavailable; save preserved: Demo and production sessions cannot be mixed. Stop Play mode and open the scene directly.
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+]]></output>
+            </test-case>
+            <test-case id="1024" name="ReloadResetsEveryStateTogetherAndReleasesOldEndpoints" fullname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests.ReloadResetsEveryStateTogetherAndReleasesOldEndpoints" methodname="ReloadResetsEveryStateTogetherAndReleasesOldEndpoints" classname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" runstate="Runnable" seed="167669077" result="Passed" start-time="2026-10-07 22:43:33Z" end-time="2026-10-07 22:43:34Z" duration="0.892301" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+]]></output>
+            </test-case>
+            <test-case id="1025" name="ScrubberSessionRejectsProductionWithoutWritingEncounterItems" fullname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests.ScrubberSessionRejectsProductionWithoutWritingEncounterItems" methodname="ScrubberSessionRejectsProductionWithoutWritingEncounterItems" classname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" runstate="Runnable" seed="767936" result="Passed" start-time="2026-10-07 22:43:34Z" end-time="2026-10-07 22:43:34Z" duration="0.170054" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+[GameCompositionRoot] Runtime unavailable; save preserved: Demo and production sessions cannot be mixed. Stop Play mode and open the scene directly.
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1027" name="ScrubberEncounterSliceTests" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-07 22:43:34Z" end-time="2026-10-07 22:43:44Z" duration="10.361616" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1032" name="CompletionNotificationDefersExpiresAndNeverReplays" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.CompletionNotificationDefersExpiresAndNeverReplays" methodname="CompletionNotificationDefersExpiresAndNeverReplays" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="2079544537" result="Passed" start-time="2026-10-07 22:43:34Z" end-time="2026-10-07 22:43:38Z" duration="4.200932" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+]]></output>
+            </test-case>
+            <test-case id="1028" name="ComposedScreenOwnsInputAndReopensAfterLeavingProximity" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.ComposedScreenOwnsInputAndReopensAfterLeavingProximity" methodname="ComposedScreenOwnsInputAndReopensAfterLeavingProximity" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="960785139" result="Passed" start-time="2026-10-07 22:43:38Z" end-time="2026-10-07 22:43:38Z" duration="0.276075" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+]]></output>
+            </test-case>
+            <test-case id="1033" name="FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" methodname="FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="31412244" result="Passed" start-time="2026-10-07 22:43:38Z" end-time="2026-10-07 22:43:38Z" duration="0.121702" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+]]></output>
+            </test-case>
+            <test-case id="1029" name="FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput" methodname="FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="373198932" result="Passed" start-time="2026-10-07 22:43:38Z" end-time="2026-10-07 22:43:39Z" duration="0.123999" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+[PlayerInteractor] No target
+]]></output>
+            </test-case>
+            <test-case id="1031" name="RecoveryContinuesWithScreenOpenAndAwayButActualPauseSuspendsIt" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.RecoveryContinuesWithScreenOpenAndAwayButActualPauseSuspendsIt" methodname="RecoveryContinuesWithScreenOpenAndAwayButActualPauseSuspendsIt" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="1505038400" result="Passed" start-time="2026-10-07 22:43:39Z" end-time="2026-10-07 22:43:44Z" duration="5.490057" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [Telemetry].
+The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+]]></output>
+            </test-case>
+            <test-case id="1030" name="RepairScreenRechecksInventoryAndKeepsRepairedScrubberOffline" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.RepairScreenRechecksInventoryAndKeepsRepairedScrubberOffline" methodname="RepairScreenRechecksInventoryAndKeepsRepairedScrubberOffline" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="1417456430" result="Passed" start-time="2026-10-07 22:43:44Z" end-time="2026-10-07 22:43:44Z" duration="0.146119" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[The character with Unicode value \u2082 was not found in the [PixelOperator SDF] font asset or any potential fallbacks. It was replaced by Unicode character \u25A1 in text object [RoomAtmosphereWarning].
+Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

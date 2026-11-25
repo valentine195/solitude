@@ -8,10 +8,12 @@ namespace SOLITUDE.Npcs.Sec0
     [DisallowMultipleComponent, RequireComponent(typeof(Sec0Controller))]
     public sealed class Sec0HitFeedback : MonoBehaviour, IMeleeHitFeedback
     {
-        [SerializeField] private Color flashColor = new Color(1, .85f, .65f, 1);
+        [SerializeField] private Color flashColor = new Color(1, .48f, .32f, 1);
         private Sec0Controller controller;
         private SpriteRenderer visual;
         private Color original;
+        private Vector3 originalScale;
+        private float duration;
         private bool painted;
         private float remaining;
         private Lease owner;
@@ -21,8 +23,11 @@ namespace SOLITUDE.Npcs.Sec0
             if (!isActiveAndEnabled || !controller.CanPresentFeedback) return null;
             Clear(); visual ??= GetComponentInChildren<Animator>()?.GetComponent<SpriteRenderer>();
             owner = new Lease(this);
-            remaining = configuration.FlashDuration;
-            controller.RequestKnockback(owner, contact.Direction, configuration.KnockbackTiles * unitsPerTile, configuration.KnockbackDuration);
+            remaining = duration = configuration.FlashDuration;
+            float distance = configuration.KnockbackTiles * unitsPerTile;
+            if (TryGetComponent<EnemyMeleeResistance>(out var resistance) && resistance.isActiveAndEnabled)
+                distance = resistance.ReceivedKnockback(distance);
+            controller.RequestKnockback(owner, contact.Direction, distance, configuration.KnockbackDuration);
             Paint(); return owner;
         }
         // Restore before Animator evaluates; capture its current warning color in LateUpdate.
@@ -37,9 +42,22 @@ namespace SOLITUDE.Npcs.Sec0
         private void Paint()
         {
             if (remaining <= 0 || visual == null || painted) return;
-            original = visual.color; visual.color = flashColor; painted = true;
+            original = visual.color;
+            originalScale = visual.transform.localScale;
+            float recoil = remaining / duration;
+            visual.transform.localScale = Vector3.Scale(originalScale, new Vector3(1 + .12f * recoil, 1 - .18f * recoil, 1));
+            visual.color = Color.Lerp(original, flashColor, recoil);
+            painted = true;
         }
-        private void Restore() { if (painted && visual != null) visual.color = original; painted = false; }
+        private void Restore()
+        {
+            if (painted && visual != null)
+            {
+                visual.color = original;
+                visual.transform.localScale = originalScale;
+            }
+            painted = false;
+        }
         public void Clear()
         {
             Restore(); remaining = 0;

@@ -1,0 +1,106 @@
+{
+  "status": "Passed (focused write/recovery/lifecycle scenarios)",
+  "platform": "macOS ARM64",
+  "results": [
+    {
+      "name": "write-before-temp",
+      "seconds": 16.93,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-before-temp",
+      "seconds": 17.01,
+      "exit": 0
+    },
+    {
+      "name": "write-after-temp",
+      "seconds": 11.92,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-after-temp",
+      "seconds": 11.07,
+      "exit": 0
+    },
+    {
+      "name": "write-before-commit",
+      "seconds": 6.54,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-before-commit",
+      "seconds": 1.93,
+      "exit": 0
+    },
+    {
+      "name": "write-after-commit",
+      "seconds": 3.41,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-after-commit",
+      "seconds": 4.15,
+      "exit": 0
+    },
+    {
+      "name": "recovery-after-receipt",
+      "seconds": 1.69,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-after-receipt",
+      "seconds": 1.84,
+      "exit": 0
+    },
+    {
+      "name": "recovery-after-temp",
+      "seconds": 1.5,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-after-temp",
+      "seconds": 1.51,
+      "exit": 0
+    },
+    {
+      "name": "recovery-before-commit",
+      "seconds": 1.24,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-before-commit",
+      "seconds": 1.45,
+      "exit": 0
+    },
+    {
+      "name": "recovery-after-commit",
+      "seconds": 1.25,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-after-commit",
+      "seconds": 1.4,
+      "exit": 0
+    },
+    {
+      "name": "lifecycle-write",
+      "seconds": 1.65,
+      "exit": 0
+    },
+    {
+      "name": "lifecycle-resume",
+      "seconds": 30.04,
+      "exit": 0
+    },
+    {
+      "name": "lifecycle-fallback",
+      "seconds": 10.13,
+      "exit": 0
+    },
+    {
+      "name": "lifecycle-unavailable-scene",
+      "seconds": 9.31,
+      "exit": 0
+    }
+  ]
+}

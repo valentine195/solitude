@@ -41,8 +41,169 @@ namespace SOLITUDE.SaveLoad
             }
             collected.UnionWith(data.collectedPickupIds);
             Commands = new ContainerCommandService(this.catalog);
-            Commands.Completed += _ => IsDirty = true;
+            Commands.Completed += change =>
+            {
+                IsDirty = true;
+                foreach (var handle in change.Containers)
+                    if (handle.Id == PlayerInventoryId || handle.Id == PlayerHotbarId) { ReconcileEquipment(); break; }
+            };
         }
+        public PlayerEquipmentRecord Equipment => data.playerEquipment?.Clone();
+        public event Action EquipmentChanged;
+        private bool HasCarriedItem(string id)
+        {
+            if (id == null || !bindings.TryGetValue(PlayerInventoryId, out var binding)) return false;
+            for (int i = 0; i < binding.Container.Capacity; i++)
+                if (binding.Container.GetSlot(i)?.Stack?.ItemId == id) return true;
+            return false;
+        }
+
+        private void ReconcileEquipment()
+        {
+            if (data.playerEquipment == null || !bindings.ContainsKey(PlayerInventoryId)) return;
+            var next = data.playerEquipment.Clone();
+            if (next.separateStorage && bindings.TryGetValue(PlayerHotbarId, out var gear))
+            {
+                next.weaponItemId = gear.Container.GetSlot(0)?.Stack?.ItemId;
+                next.toolItemId = gear.Container.GetSlot(1)?.Stack?.ItemId;
+            }
+            for (int i = 0; i < PlayerEquipmentRecord.QuickUseCount; i++)
+                if (!HasCarriedItem(next.QuickUseItem(i))) next.SetQuickUseItem(i, null);
+            PublishEquipment(next);
+        }
+
+        private void PublishEquipment(PlayerEquipmentRecord next)
+        {
+            next.ResolveActiveSlot();
+            var old = data.playerEquipment;
+            data.playerEquipment = next;
+            if (old != null && old.activeSlot == next.activeSlot && old.weaponItemId == next.weaponItemId &&
+                old.toolItemId == next.toolItemId && SameQuickUse(old, next)) return;
+            IsDirty = true;
+            EquipmentChanged?.Invoke();
+        }
+
+        private static bool SameQuickUse(PlayerEquipmentRecord old, PlayerEquipmentRecord next)
+        {
+            for (int i = 0; i < PlayerEquipmentRecord.QuickUseCount; i++)
+                if (old.QuickUseItem(i) != next.QuickUseItem(i)) return false;
+            return true;
+        }
+
+        public bool TrySetEquipment(PlayerEquipmentRecord next)
+        {
+            if (next == null || data.playerEquipment == null || IsCollecting || HasIntegrityFailure ||
+                !Enum.IsDefined(typeof(PlayerEquipmentSlot), next.activeSlot) ||
+                (next.additionalQuickUseItems != null && next.additionalQuickUseItems.Length != PlayerEquipmentRecord.QuickUseCount - 1) ||
+                (next.weaponItemId != null && next.weaponItemId == next.toolItemId)) return false;
+            if (next.separateStorage != data.playerEquipment.separateStorage ||
+                next.weaponItemId != data.playerEquipment.weaponItemId || next.toolItemId != data.playerEquipment.toolItemId) return false;
+            for (int i = 0; i < PlayerEquipmentRecord.QuickUseCount; i++)
+            {
+                var id = next.QuickUseItem(i);
+                if (id != null && !HasCarriedItem(id)) return false;
+            }
+            PublishEquipment(next.Clone());
+            return true;
+        }
+
+        public void PrepareEquipmentInventory(int normalCapacity, Func<string, PlayerEquipmentSlot> preferredSlot)
+        {
+            if (bindings.ContainsKey(PlayerInventoryId) || IsCollecting || normalCapacity < 1)
+                throw new InvalidOperationException("Prepare equipment before binding inventory.");
+            if (data.playerEquipment?.separateStorage == true) return;
+
+            TryGetContainer(PlayerInventoryId, out var carried);
+            TryGetContainer(PlayerHotbarId, out var legacy);
+            carried ??= new ContainerSaveData();
+            bool hasAssignments = data.playerEquipment != null;
+            var equipment = data.playerEquipment?.Clone() ?? new PlayerEquipmentRecord();
+            var gear = new ContainerSaveData();
+            var occupied = new Dictionary<int, ContainerSlotSaveData>();
+            foreach (var slot in carried.slots)
+            {
+                if (!hasAssignments && slot.index >= normalCapacity)
+                    throw new InvalidDataException("Legacy carried storage exceeds its authored capacity.");
+                if (!catalog.TryGet(slot.itemId, out var item))
+                    throw new InvalidDataException("Missing carried item.");
+                slot.itemId = item.ItemId;
+                occupied.Add(slot.index, slot);
+            }
+            if (hasAssignments)
+            {
+                equipment.weaponItemId = ExtractEquipped(carried, occupied, gear, equipment.weaponItemId, 0);
+                equipment.toolItemId = ExtractEquipped(carried, occupied, gear, equipment.toolItemId, 1);
+            }
+
+            if (legacy != null)
+            {
+                legacy.slots.Sort((a, b) => a.index.CompareTo(b.index));
+                int overflow = normalCapacity;
+                foreach (int index in occupied.Keys) overflow = Math.Max(overflow, checked(index + 1));
+                foreach (var slot in legacy.slots)
+                {
+                    if (!catalog.TryGet(slot.itemId, out var item))
+                        throw new InvalidDataException("Missing legacy hotbar item.");
+                    int remaining = slot.quantity;
+                    if (!hasAssignments && equipment.activeSlot == PlayerEquipmentSlot.None)
+                    {
+                        equipment.activeSlot = preferredSlot(item.ItemId);
+                        if (equipment.activeSlot != PlayerEquipmentSlot.None)
+                        {
+                            bool weapon = equipment.activeSlot == PlayerEquipmentSlot.Weapon;
+                            if (weapon) equipment.weaponItemId = item.ItemId;
+                            else equipment.toolItemId = item.ItemId;
+                            gear.slots.Add(new ContainerSlotSaveData { index = weapon ? 0 : 1, itemId = item.ItemId, quantity = 1 });
+                            remaining--;
+                        }
+                    }
+                    for (int i = 0; i < normalCapacity && remaining > 0; i++)
+                    {
+                        if (!occupied.TryGetValue(i, out var existing) || existing.itemId != item.ItemId) continue;
+                        int count = Math.Min(remaining, Math.Max(0, item.MaxStackSize - existing.quantity));
+                        existing.quantity += count;
+                        remaining -= count;
+                    }
+                    for (int i = 0; remaining > 0; i++)
+                    {
+                        if (i < normalCapacity && occupied.ContainsKey(i)) continue;
+                        int index = i < normalCapacity ? i : overflow++;
+                        int count = Math.Min(item.MaxStackSize, remaining);
+                        var added = new ContainerSlotSaveData { index = index, itemId = item.ItemId, quantity = count };
+                        carried.slots.Add(added);
+                        occupied.Add(index, added);
+                        remaining -= count;
+                    }
+                }
+            }
+
+            Store(PlayerInventoryId, carried);
+            // Keep the existing ownership container so survivor handoffs collect equipped gear too.
+            Store(PlayerHotbarId, gear);
+            equipment.separateStorage = true;
+            equipment.ResolveActiveSlot();
+            data.playerEquipment = equipment;
+            IsDirty = true;
+            RequiresImmediateSave = true;
+        }
+
+        private static string ExtractEquipped(ContainerSaveData carried, Dictionary<int, ContainerSlotSaveData> occupied,
+            ContainerSaveData gear, string id, int destination)
+        {
+            if (id == null) return null;
+            ContainerSlotSaveData source = null;
+            foreach (var slot in carried.slots)
+                if (slot.itemId == id && (source == null || slot.index < source.index)) source = slot;
+            if (source == null) return null;
+            if (--source.quantity == 0)
+            {
+                carried.slots.Remove(source);
+                occupied.Remove(source.index);
+            }
+            gear.slots.Add(new ContainerSlotSaveData { index = destination, itemId = id, quantity = 1 });
+            return id;
+        }
+
         public bool StartingLoadoutInitialized => data.startingLoadoutInitialized;
         public CommandResult InitializeStartingLoadout(ContainerHandle inventory, ContainerHandle hotbar,
             IReadOnlyList<PickupReward> grants, int selectedSlot)
@@ -53,8 +214,19 @@ namespace SOLITUDE.SaveLoad
             if (!bindings.TryGetValue(PlayerInventoryId, out var first) || !first.Container.Handle.Equals(inventory)
                 || !bindings.TryGetValue(PlayerHotbarId, out var second) || !second.Container.Handle.Equals(hotbar))
                 return new CommandResult(CommandStatus.Unavailable);
-            return Commands.InitializeStartingLoadout(inventory, hotbar, grants, selectedSlot, () =>
-            { data.startingLoadoutInitialized = true; IsDirty = true; RequiresImmediateSave = true; });
+            return Commands.InitializeStartingLoadout(inventory, hotbar, grants, selectedSlot, id =>
+            {
+                data.startingLoadoutInitialized = true;
+                if (data.playerEquipment != null)
+                {
+                    var next = data.playerEquipment.Clone();
+                    next.weaponItemId = id;
+                    next.activeSlot = PlayerEquipmentSlot.Weapon;
+                    PublishEquipment(next);
+                }
+                IsDirty = true;
+                RequiresImmediateSave = true;
+            }, data.playerEquipment != null);
         }
         public bool IsPickupCollected(string id) => collected.Contains(id);
         internal CollectResult Collect(string pickupId, string inventoryId, string itemId, int quantity)
@@ -81,12 +253,18 @@ namespace SOLITUDE.SaveLoad
             if (bindings.ContainsKey(id)) throw new InvalidOperationException("Container identity already registered: " + id);
             bool existing = TryGetContainer(id, out var saved);
             Container container;
-            try { container = Commands.Register(id, capacity, saved, filter, initialLoot); }
+            int actualCapacity = capacity;
+            bool equipmentInventory = id == PlayerInventoryId && data.playerEquipment != null;
+            if (equipmentInventory && saved != null)
+                foreach (var slot in saved.slots) actualCapacity = Math.Max(actualCapacity, checked(slot.index + 1));
+            try { container = Commands.Register(id, actualCapacity, saved, filter, initialLoot, equipmentInventory ? capacity : null); }
             catch (InvalidDataException) { HasIntegrityFailure = true; throw; }
             var binding = new ContainerBinding(this, id, container); bindings.Add(id, binding);
             var normalized = ContainerSaveSerializer.Capture(container);
             if (!existing || !Equivalent(saved, normalized)) IsDirty = true;
-            Store(id, normalized); return binding;
+            Store(id, normalized);
+            if (equipmentInventory || id == PlayerHotbarId) ReconcileEquipment();
+            return binding;
         }
         public CommandResult Restore(ContainerHandle handle, ContainerSaveData state)
         {
@@ -164,7 +342,7 @@ namespace SOLITUDE.SaveLoad
         private static SaveGameData Clone(SaveGameData source)
         {
             var result = new SaveGameData { version = source.version, worldSeed = source.worldSeed,
-                startingLoadoutInitialized = source.startingLoadoutInitialized,
+                startingLoadoutInitialized = source.startingLoadoutInitialized, playerEquipment = source.playerEquipment?.Clone(),
                 containers = source.containers == null ? null : new List<ContainerSaveRecord>(),
                 collectedPickupIds = source.collectedPickupIds == null ? null : new List<string>(source.collectedPickupIds),
                 survivor = source.survivor?.Clone(), expedition = source.expedition?.Clone(),

@@ -5,6 +5,7 @@ namespace SOLITUDE.Containers
 {
     internal sealed class ContainerState
     {
+        internal int? ReceivingCapacity;
         internal readonly ContainerHandle Handle;
         internal readonly HashSet<string> Accepted;
         internal ItemStack[] Slots;

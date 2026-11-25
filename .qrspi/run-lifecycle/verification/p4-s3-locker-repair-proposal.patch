@@ -1,0 +1,16 @@
+--- a/Assets/_Project/Tests/PlayMode/RunLifecycleSliceTests.cs
++++ b/Assets/_Project/Tests/PlayMode/RunLifecycleSliceTests.cs
+@@ -168,8 +168,11 @@
+             yield return Collect(Fuse); Assert.IsFalse(Fuse.gameObject.activeSelf);
+             yield return EnterHazardAndDie(); Assert.IsTrue(Fuse.gameObject.activeSelf);
+             yield return Collect(Fuse);
+-            var locker = One<LockerContainer>(); yield return Move(new Vector2(2.5f, 3.1f)); yield return null;
+-            Assert.AreSame(locker, Field<SOLITUDE.Core.Interaction.IInteractable>(Player, "currentTarget"));
++            var locker = One<LockerContainer>();
++            // Use the upper passage before approaching the actual west-side locker from its east edge.
++            yield return Move(new Vector2(-2, 3));
++            yield return Move((Vector2)locker.transform.position + new Vector2(1.2f, -1)); yield return null;
++            Assert.AreSame(locker.GetComponent<Locker>(), Field<SOLITUDE.Core.Interaction.IInteractable>(Player, "currentTarget"));
+             yield return Press(Key.E);
+             Assert.IsTrue(Field<ContainerTransferModalView>(One<SceneBindings>(), "transferModal").IsOpen);
+             Assert.IsTrue(locker.EnsureInitialized());

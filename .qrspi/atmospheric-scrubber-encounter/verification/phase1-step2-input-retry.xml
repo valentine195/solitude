@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Failed(Child)" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-07 21:40:21Z" end-time="2026-10-07 21:40:21Z" duration="0.259704">
+  <test-suite type="TestSuite" id="1000" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="112" result="Failed" site="Child" start-time="2026-10-07 21:40:21Z" end-time="2026-10-07 21:40:21Z" duration="0.259704" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1134" name="SOLITUDE.Tests.EditMode.dll" fullname="/private/tmp/solitude-scrubber-phase1/Library/ScriptAssemblies/SOLITUDE.Tests.EditMode.dll" runstate="Runnable" testcasecount="52" result="Failed" site="Child" start-time="2026-10-07 21:40:21Z" end-time="2026-10-07 21:40:21Z" duration="0.155075" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="63069" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1135" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="52" result="Failed" site="Child" start-time="2026-10-07 21:40:21Z" end-time="2026-10-07 21:40:21Z" duration="0.154433" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1136" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="52" result="Failed" site="Child" start-time="2026-10-07 21:40:21Z" end-time="2026-10-07 21:40:21Z" duration="0.153836" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1128" name="UnityInputCompositionTests" fullname="SOLITUDE.Tests.UnityInputCompositionTests" classname="SOLITUDE.Tests.UnityInputCompositionTests" runstate="Runnable" testcasecount="1" result="Failed" site="Child" start-time="2026-10-07 21:40:21Z" end-time="2026-10-07 21:40:21Z" duration="0.152572" total="1" passed="0" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1129" name="RealKeyboardAndEventSystemSharePolicyAndSurviveTeardownOrder" fullname="SOLITUDE.Tests.UnityInputCompositionTests.RealKeyboardAndEventSystemSharePolicyAndSurviveTeardownOrder" methodname="RealKeyboardAndEventSystemSharePolicyAndSurviveTeardownOrder" classname="SOLITUDE.Tests.UnityInputCompositionTests" runstate="Runnable" seed="1325595557" result="Failed" start-time="2026-10-07 21:40:17Z" end-time="2026-10-07 21:40:21Z" duration="4.102190" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  UI navigation must use the composed asset.
+  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at SOLITUDE.Tests.UnityInputCompositionTests+<VerifyInput>d__5.MoveNext () [0x00521] in /private/tmp/solitude-scrubber-phase1/Assets/_Project/Tests/Editor/UnityInputCompositionTests.cs:73
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

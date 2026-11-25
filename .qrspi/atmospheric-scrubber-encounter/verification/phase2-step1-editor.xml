@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="15" result="Passed" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-07 22:06:23Z" end-time="2026-10-07 22:06:23Z" duration="0.3618906">
+  <test-suite type="TestSuite" id="1000" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="113" result="Passed" start-time="2026-10-07 22:06:23Z" end-time="2026-10-07 22:06:23Z" duration="0.361891" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1136" name="SOLITUDE.Tests.EditMode.dll" fullname="/private/tmp/solitude-scrubber-phase1/Library/ScriptAssemblies/SOLITUDE.Tests.EditMode.dll" runstate="Runnable" testcasecount="53" result="Passed" start-time="2026-10-07 22:06:23Z" end-time="2026-10-07 22:06:23Z" duration="0.261388" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="65246" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1137" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="53" result="Passed" start-time="2026-10-07 22:06:23Z" end-time="2026-10-07 22:06:23Z" duration="0.260447" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1138" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="53" result="Passed" start-time="2026-10-07 22:06:23Z" end-time="2026-10-07 22:06:23Z" duration="0.259737" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1097" name="PickupPersistenceTests" fullname="SOLITUDE.Tests.PickupPersistenceTests" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-10-07 22:06:23Z" end-time="2026-10-07 22:06:23Z" duration="0.128846" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1103" name="AlteredRewardAndUnknownItemAreRejected" fullname="SOLITUDE.Tests.PickupPersistenceTests.AlteredRewardAndUnknownItemAreRejected" methodname="AlteredRewardAndUnknownItemAreRejected" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1982067487" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.013361" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1098" name="CollectionRoundTripPreservesInventoryAndFact" fullname="SOLITUDE.Tests.PickupPersistenceTests.CollectionRoundTripPreservesInventoryAndFact" methodname="CollectionRoundTripPreservesInventoryAndFact" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="401378660" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.004748" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1102" name="DuplicateOrMissingIdentityCannotGrantReward" fullname="SOLITUDE.Tests.PickupPersistenceTests.DuplicateOrMissingIdentityCannotGrantReward" methodname="DuplicateOrMissingIdentityCannotGrantReward" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1129447143" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.006582" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1110" name="FailedWriteKeepsOldSnapshotAndDirtyStateForCompleteRetry" fullname="SOLITUDE.Tests.PickupPersistenceTests.FailedWriteKeepsOldSnapshotAndDirtyStateForCompleteRetry" methodname="FailedWriteKeepsOldSnapshotAndDirtyStateForCompleteRetry" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1050322620" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.008955" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1101" name="InstancesSharingRewardCollectIndependently" fullname="SOLITUDE.Tests.PickupPersistenceTests.InstancesSharingRewardCollectIndependently" methodname="InstancesSharingRewardCollectIndependently" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1897841382" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.000258" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1109" name="LoadedFactsAreValidatedDeduplicatedAndSorted" fullname="SOLITUDE.Tests.PickupPersistenceTests.LoadedFactsAreValidatedDeduplicatedAndSorted" methodname="LoadedFactsAreValidatedDeduplicatedAndSorted" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="905116793" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.000690" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1099" name="PartialCapacityDoesNotMutateAnySlotOrFact" fullname="SOLITUDE.Tests.PickupPersistenceTests.PartialCapacityDoesNotMutateAnySlotOrFact" methodname="PartialCapacityDoesNotMutateAnySlotOrFact" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="95109554" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.000344" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1100" name="ReentrantCollectionAndCaptureCannotObservePartialTransaction" fullname="SOLITUDE.Tests.PickupPersistenceTests.ReentrantCollectionAndCaptureCannotObservePartialTransaction" methodname="ReentrantCollectionAndCaptureCannotObservePartialTransaction" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="178170775" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.000673" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1107" name="ResetClearsInventoryAndCollectionFacts" fullname="SOLITUDE.Tests.PickupPersistenceTests.ResetClearsInventoryAndCollectionFacts" methodname="ResetClearsInventoryAndCollectionFacts" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="983296919" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.000520" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1106" name="SceneScopeReleasesBindingsForNeverActivePickups" fullname="SOLITUDE.Tests.PickupPersistenceTests.SceneScopeReleasesBindingsForNeverActivePickups" methodname="SceneScopeReleasesBindingsForNeverActivePickups" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="312270950" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.004636" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1105" name="SceneUnregistrationRetainsCollectionFact" fullname="SOLITUDE.Tests.PickupPersistenceTests.SceneUnregistrationRetainsCollectionFact" methodname="SceneUnregistrationRetainsCollectionFact" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1669143455" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.000245" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1104" name="UnregisteredInventoryCannotReceivePersistentPickup" fullname="SOLITUDE.Tests.PickupPersistenceTests.UnregisteredInventoryCannotReceivePersistentPickup" methodname="UnregisteredInventoryCannotReceivePersistentPickup" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1940815568" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.000139" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1108" name="VersionOneMigrationPreservesExistingWorldAndContainers" fullname="SOLITUDE.Tests.PickupPersistenceTests.VersionOneMigrationPreservesExistingWorldAndContainers" methodname="VersionOneMigrationPreservesExistingWorldAndContainers" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="2036960271" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:19Z" duration="0.000282" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1111" name="WorldPresentationStaysCollectedAfterSceneUnloadAndReload" fullname="SOLITUDE.Tests.PickupPersistenceTests.WorldPresentationStaysCollectedAfterSceneUnloadAndReload" methodname="WorldPresentationStaysCollectedAfterSceneUnloadAndReload" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1886650076" result="Passed" start-time="2026-10-07 22:06:19Z" end-time="2026-10-07 22:06:23Z" duration="4.049723" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1128" name="ScrubberEncounterAuthoringTests" fullname="SOLITUDE.Tests.ScrubberEncounterAuthoringTests" classname="SOLITUDE.Tests.ScrubberEncounterAuthoringTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-07 22:06:23Z" end-time="2026-10-07 22:06:23Z" duration="0.128108" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1129" name="FuseCatalogAndSceneInstanceHaveDistinctStableIdentities" fullname="SOLITUDE.Tests.ScrubberEncounterAuthoringTests.FuseCatalogAndSceneInstanceHaveDistinctStableIdentities" methodname="FuseCatalogAndSceneInstanceHaveDistinctStableIdentities" classname="SOLITUDE.Tests.ScrubberEncounterAuthoringTests" runstate="Runnable" seed="1311407679" result="Passed" start-time="2026-10-07 22:06:23Z" end-time="2026-10-07 22:06:23Z" duration="0.127411" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

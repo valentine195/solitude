@@ -13,6 +13,7 @@ namespace SOLITUDE.SaveLoad
 
         public int version = CurrentVersion;
         public bool startingLoadoutInitialized;
+        public PlayerEquipmentRecord playerEquipment;
         public int worldSeed;
         public List<ContainerSaveRecord> containers = new();
         public List<string> collectedPickupIds = new();
@@ -61,6 +62,10 @@ namespace SOLITUDE.SaveLoad
                     if (record != null && (record.saveableId == ContainerSaveSession.PlayerInventoryId
                         || record.saveableId == ContainerSaveSession.PlayerHotbarId) && record.state?.slots?.Count > 0)
                         throw new InvalidDataException("Pending starting equipment cannot retain carried items.");
+            if (playerEquipment != null && (!Enum.IsDefined(typeof(PlayerEquipmentSlot), playerEquipment.activeSlot)
+                || (playerEquipment.additionalQuickUseItems != null && playerEquipment.additionalQuickUseItems.Length != PlayerEquipmentRecord.QuickUseCount - 1)
+                || (playerEquipment.weaponItemId != null && playerEquipment.weaponItemId == playerEquipment.toolItemId)))
+                throw new InvalidDataException("Invalid equipment assignments.");
             if ((survivor == null) != (expedition == null) || ship == null)
                 throw new InvalidDataException("Incomplete saved lifecycle.");
             survivor?.Validate(); expedition?.Validate(); ship.Validate();

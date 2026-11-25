@@ -47,6 +47,7 @@ namespace SOLITUDE.Player
         public VitalsRecoveryState RecoveryState => timing;
         public long Revision { get; private set; }
         public event Action PresentationChanged;
+        internal bool IsPublishingPassiveAdvance { get; private set; }
         private Action cachedPresentation;
         private Delegate[] presentationObservers = Array.Empty<Delegate>();
         public event Action<Exception> ObserverError;
@@ -158,7 +159,12 @@ namespace SOLITUDE.Player
             EnsureVitals();
             var result = VitalsRecoveryRules.Advance(RulesSettings, ReadValues(), timing,
                 publishing ? double.NaN : scaledElapsedSeconds, GameplayEligible);
-            if (result.Outcome == VitalsRecoveryOutcome.Applied) Apply(result);
+            if (result.Outcome == VitalsRecoveryOutcome.Applied)
+            {
+                IsPublishingPassiveAdvance = true;
+                try { Apply(result); }
+                finally { IsPublishingPassiveAdvance = false; }
+            }
             return result;
         }
 

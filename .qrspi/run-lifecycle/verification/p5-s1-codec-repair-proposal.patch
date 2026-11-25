@@ -1,0 +1,12 @@
+--- a/Assets/_Project/Verification/Player/SolitudeCompositionSmoke.cs
++++ b/Assets/_Project/Verification/Player/SolitudeCompositionSmoke.cs
+@@ -105,7 +105,8 @@
+         get { var args = Environment.GetCommandLineArgs(); return args[Array.IndexOf(args, "-qualify") + 1]; }
+     }
+     private static void QualificationSnapshot(ContainerSaveSession session, string name) =>
+-        System.IO.File.WriteAllText(System.IO.Path.Combine(DirectoryArgument, name + ".json"), JsonUtility.ToJson(session.Capture(), true));
++        System.IO.File.WriteAllText(System.IO.Path.Combine(DirectoryArgument, name + ".json"),
++            new SaveJsonCodec(Field<ItemCatalog>(FindFirstObjectByType<GameCompositionRoot>(), "catalog")).Encode(session.Capture()));
+     private static IEnumerator VerifyQualification()
+     {
+         var root = FindFirstObjectByType<GameCompositionRoot>();

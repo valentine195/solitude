@@ -1,0 +1,15 @@
+# Phase 3 Step 1 attempt 1 — failed fixture setup
+
+Source snapshot: p3-s1-attempt1.source.json, base a74bc2c37a0e52298923ceca0915aeca1c5526bc plus four scoped files. Spec SHA-256 f2253ab3429d7c5a34c8e9275f9efac61be9e3f4c30781393ad7d86e68ba85a4; approved phase 3 normalized SHA-256 2f72871d1479b7469180bd384385583292c0cc873435acbbe36b2777453655db. Source hashes unchanged after verification; no source fixes or commits after the failure.
+
+Runtime change: SurvivorRecoveryContainer.Release explicitly unregisters from the player nearby set before clearing context/deferred destruction. New Application checks reject reentrant death/retry during activation/acknowledgment. Test-only FaultPorts wrap real Unity composition; production has no injection controls.
+
+Command: DOTNET_CLI_HOME=/private/tmp/solitude-succession-dotnet DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_CLI_USE_MSBUILD_SERVER=0 MSBUILDDISABLENODEREUSE=1 python3 Tools/Verification/verify.py --workspace /private/tmp/solitude-succession-p3-gate --output Logs/SurvivorSuccession/p3-s1-attempt1
+
+Expected: full Passed result. Actual: exit 1/results.json Failed. Authoring passed; 121 pure and 220 EditMode passed; 65 PlayMode passed, 1 failed. 406 passing test executions, 1 failed; native builds/player scenarios were not run because the gate stopped at PlayMode. This is partial verification and does not qualify the source.
+
+S2/S4/S7/S8/S10 supplemental checks passed: rejection after real recovery preparation frees only its empty prepared owner, preserves older cache and carried stacks, then completes on a fresh attempt; revision mutation rejects the whole handoff; real transfer drag/held mouse plus captured stale presenter callbacks cannot mutate source/recovery after a committed activation failure or retry; uncertain actual acknowledgment delivery retains one message/successor without reactivation/retransfer; disabling a cache retains ownership and explicit release unregisters synchronously; journal/inventory closure and held movement reset work in the composed scrubber demo. Existing tests remain passing.
+
+S4/S9 mixed-item repeated-death check did not reach its lifecycle assertions: PartialCachesEmptyDeathAndRejectedAttemptConserveEveryItem fails at SurvivorSuccessionFailureTests.cs line 234, expecting Applied for repair-fuse grant, actual UnknownItem. Read-only diagnosis: Wakeup's Features/Items/Resources/Database.asset registers battery c756a156ba7f34cb2b65e32264413a60 and O2 canister 8d158110df66c4994b8d575233f619c5. The repair fuse 4716e84c715564ad2ac79c4be74037dd is a scrubber-demo item, absent from this Wakeup catalog. The new test erroneously used the demo item while running in Wakeup. No runtime conservation defect is established by this setup failure.
+
+Proposed bounded repair: use Wakeup's existing O2 canister as the second item in this test, preserving distinct per-item quantities, partial caches, empty/rejected deaths, and identity assertions. Do not expand Wakeup's production item database. Rerun the full gate against a new source snapshot. Await human approval per QRSPI failure gate; Step 1 remains blocked/uncommitted.

@@ -1,0 +1,11 @@
+# Phase 2 Step 3 completion after approved repair
+
+Spec SHA-256: a49ec32f7234b6cf4ceb54236df5144448a15a92fea8dcc07d0fdfca67adc8db. User explicitly approved the proposed per-mutation occupancy capture repair after attempt1 failed. Gesture pre-action creates one group; each actual Tilemap write captures occupancy once; generated hierarchy, diagnostics, and references stay in the same group. No asynchronous rebuild or Undo observer; no global history clearing.
+
+S3/S15/S16/S21: isolated Editor command `unity test /private/tmp/solitude-room-authoring-phase1 --mode EditMode --filter SOLITUDE.Tests.RoomAuthoring` with explicit verification argument:49 passed,0failed/skipped in phase-2-step-3-editor-tests-attempt-2.xml. Production pre-action brush callback integration compares complete authored/floor/sprite/diagnostic/object-count snapshots for Paint,multi-cell stroke,invalid Erase47cells,8×6BoxFill,12×6 expansion,and emptyBoxErase through Undo/Redo. Restored valid state saves/reopens with same identity/references/cells/placements and no duplicates. Other-room and generated-edit isolation regression remains passing. Exact current source matches isolated run (snapshot JSON).
+
+Actual native Paint gesture: docked Tile Palette Paint selected; desktop drag across cells(1,0)to(2,0) from1×1 room produced3 authored cells. Cmd+Z restored1 cell and exact pre-gesture snapshot; Cmd+Shift+Z restored3 cells and exact post-gesture snapshot. Snapshots include authored tiles,generated floor cells,sorted sprite role/position/identity,diagnostic and generated hierarchy count. Read-only CLI inspected equality after native keyboard gestures. No fixture assertions failed. Native floating palette coordinate routing failed once; docked controls worked. Initial main Editor recompile command timed out while processing refresh; later status completed with no errors before UI fixture creation.
+
+Temporary scene/in-memory assets removed; original scene still loaded and dirty. Default brush,selection,framing restored. No production scene save. Input provenance and original dirty-file digests rechecked. Production art/native seam acceptance remains pendingPhase3. Step3 UI checks do not replace Step4 full room walkthrough.
+
+Commit: `91e9e5ec8de4e9dcd6d1bf39aa6bdf69a671f021`

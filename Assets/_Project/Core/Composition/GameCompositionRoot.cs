@@ -191,6 +191,7 @@ namespace SOLITUDE.Composition
             }
             entry.ConfigureLifecyclePersistence(!disposableSession);
             entry.ConfigureCapabilities(capabilities);
+            entry.ConfigureEquipmentFlow(config.useCarriedEquipment);
             entry.Initialize(session, pickups, presentations, loot, gestures, policy, pause, this, input, game, () => ReleaseScene(scene), tasks);
             scopes.Add(scene, entry);
             if (entry.HasPlayer) interactive = entry;

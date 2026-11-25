@@ -1,0 +1,147 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.78,
+      "summary": {
+        "total": 17,
+        "passed": 17,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project.zip\",True)",
+          "Status": "Passed",
+          "Duration": 0.0440062,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project.zip.meta\",True)",
+          "Status": "Passed",
+          "Duration": 0.0020231,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project 2.zip\",True)",
+          "Status": "Passed",
+          "Duration": 0.0006484,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project 3.zip.meta\",True)",
+          "Status": "Passed",
+          "Duration": 0.0010911,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project 123.zip\",True)",
+          "Status": "Passed",
+          "Duration": 0.0005145,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project/Exports/_Project.zip\",False)",
+          "Status": "Passed",
+          "Duration": 0.0009473,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project/Exports/_Project 2.zip.meta\",False)",
+          "Status": "Passed",
+          "Duration": 0.0050219,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/Other.zip\",False)",
+          "Status": "Passed",
+          "Duration": 0.0035303,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project backup.zip\",False)",
+          "Status": "Passed",
+          "Duration": 0.0012858,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project 2backup.zip\",False)",
+          "Status": "Passed",
+          "Duration": 0.0009385,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project 2.zip.asset\",False)",
+          "Status": "Passed",
+          "Duration": 0.0009282,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project 2.zip.meta\\n\",False)",
+          "Status": "Passed",
+          "Duration": 0.0004984,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project/Domain/Item.cs\",False)",
+          "Status": "Passed",
+          "Duration": 0.004223,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project/Domain/Item.cs.meta\",False)",
+          "Status": "Passed",
+          "Duration": 0.0006621,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"Assets/_Project.zip/meta\",False)",
+          "Status": "Passed",
+          "Duration": 0.0007733,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(null,False)",
+          "Status": "Passed",
+          "Duration": 0.0063444,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.UnityMetaValidatorTests.ReviewArchiveExceptionIsLimitedToRootReviewExports(\"\",False)",
+          "Status": "Passed",
+          "Duration": 0.0008716,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "check": "Last-row popover is visible and compact",
+    "result": {
+      "passed": true,
+      "path": "work/Reviews/InventoryUnityHousing/last-row.png"
+    }
+  },
+  {
+    "check": "Empty inventory has no item popover",
+    "result": {
+      "passed": true,
+      "path": "work/Reviews/InventoryUnityHousing/empty.png"
+    }
+  },
+  {
+    "check": "Tool selection opens full command popover",
+    "result": {
+      "passed": true,
+      "path": "work/Reviews/InventoryUnityHousing/default.png"
+    }
+  },
+  {
+    "check": "Non-tool selection shrinks the popover",
+    "result": {
+      "passed": true,
+      "path": "work/Reviews/InventoryUnityHousing/oxygen.png"
+    }
+  },
+  {
+    "check": "Hotbar selection uses the same popover",
+    "result": {
+      "passed": true,
+      "path": "work/Reviews/InventoryUnityHousing/hotbar.png"
+    }
+  },
+  {
+    "check": "Move hides the popover and exposes destinations",
+    "result": {
+      "passed": true,
+      "path": "work/Reviews/InventoryUnityHousing/move-destination.png"
+    }
+  },
+  {
+    "check": "Cancel restores the selected item popover",
+    "result": {
+      "passed": true,
+      "overflow": []
+    }
+  }
+]

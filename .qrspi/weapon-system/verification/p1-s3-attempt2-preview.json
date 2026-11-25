@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-swing-preview.cs",
+      "entry": "SwingPreview.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 1165,
+      "executeMs": 90,
+      "assemblyName": "PipelineRunScript_weapon-system-swing-preview_ee44a475ae3147cd87f53534072ac345",
+      "success": true,
+      "result": {
+        "path": "/Users/jeremyvalentine/SOLITUDE/.qrspi/weapon-system/verification/p1-s3-swing-preview-final.png",
+        "phases": "Windup / Active / Recovery",
+        "sharedSprite": "maintenance_wrench_placeholder"
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -60,13 +60,19 @@ namespace SOLITUDE.Editor
             settings.FindProperty("recoveryDelay").doubleValue = 5;
             settings.FindProperty("recoveryRate").doubleValue = 2;
             settings.ApplyModifiedPropertiesWithoutUndo();
+            ConfigureComposition(scope, player);
+            EditorUtility.SetDirty(player);
+        }
+
+        internal static void ConfigureComposition(SceneBindings scope, PlayerVitalsController player)
+        {
             var feature = scope.GetComponent<PlayerVitalsComposition>() ?? scope.gameObject.AddComponent<PlayerVitalsComposition>();
             feature.Configure(player);
             var data = new SerializedObject(scope); var features = data.FindProperty("features");
             if (!Enumerable.Range(0, features.arraySize).Any(i => features.GetArrayElementAtIndex(i).objectReferenceValue == feature))
             { int index = features.arraySize++; features.GetArrayElementAtIndex(index).objectReferenceValue = feature; }
             data.ApplyModifiedPropertiesWithoutUndo();
-            EditorUtility.SetDirty(feature); EditorUtility.SetDirty(player);
+            EditorUtility.SetDirty(feature);
         }
         private static T[] All<T>(Scene scene) where T : Component
             => scene.GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<T>(true)).ToArray();

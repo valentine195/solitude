@@ -25,7 +25,7 @@ namespace SOLITUDE.Combat
         }
     }
 
-    public enum DamageOutcome { InvalidContext, Unavailable, Ineligible, Rejected, Applied }
+    public enum DamageOutcome { InvalidContext, Unavailable, Ineligible, Rejected, Applied, Resisted }
 
     public readonly struct DamageResult
     {

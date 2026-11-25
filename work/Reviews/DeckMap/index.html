@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOLITUDE Deck Map</title>
+<link rel="stylesheet" href="exploration.css">
+<link rel="stylesheet" href="map.css">
+</head>
+<body>
+<main id="view">
+  <section id="exploration" aria-label="Exploration" hidden>
+  <img class="world" src="maintenance-room.png" alt="">
+  <section class="instruments" aria-label="Crew and vitals">
+    <div class="health" aria-label="Health, three of four segments">
+      <div class="health-label"><span class="cross"></span> HEALTH</div>
+      <div class="health-meter"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="oxygen" aria-label="Oxygen, 76 percent">
+      <div class="oxygen-label">O₂</div>
+      <div class="oxygen-meter"></div>
+    </div>
+    <div class="crew"><span class="crew-mark wrench" aria-hidden="true"></span><strong>ENGINEER</strong><span class="separator" aria-hidden="true">·</span><span class="specialty">Electrical</span></div>
+    <div class="hunger"><span class="warning-icon" aria-hidden="true">!</span> HUNGRY</div>
+  </section>
+    <button id="open-map" class="open-map"><kbd>M</kbd> Deck map</button>
+  </section>
+  <section id="deck-map" aria-labelledby="map-title">
+    <header class="map-header">
+      <h1 id="map-title">Deck map</h1>
+      <button id="close-map" class="close-map"><kbd>Esc</kbd> Close</button>
+    </header>
+
+    <nav class="decks" aria-label="Decks">
+      <span aria-current="page">Service deck</span>
+    </nav>
+
+    <div class="map-layout">
+      <div class="map-column">
+        <div class="plot" aria-label="Service Deck schematic">
+          <canvas id="schematic" width="1288" height="708" aria-hidden="true"></canvas>
+          <div class="room-label cryo">Cryobay</div>
+          <div class="room-label locker">Supply Locker</div>
+          <div class="room-label life">Life Support <span>Unsurveyed</span></div>
+          <div class="room-label spine">Service Spine</div>
+          <div class="room-label contact">AI Contact <span>Unsurveyed</span></div>
+          <div class="you-are-here"><i class="symbol player"></i><span>You are here</span></div>
+          <button id="gate-marker" class="marker gate-marker" data-place="gate" aria-label="Power Gate, unpowered" aria-pressed="true"><i class="symbol door"></i></button>
+          <span class="gate-label">Power Gate</span>
+          <button id="objective-marker" class="marker objective-marker" data-place="objective" aria-label="Life Support, tracked objective" aria-pressed="false"><i class="symbol objective"></i></button>
+          <span class="goal-label">Restore airflow</span>
+        </div>
+        <ul class="legend" aria-label="Map legend">
+          <li><i class="symbol player"></i> Current position</li>
+          <li><i class="symbol objective"></i> Objective</li>
+          <li><i class="symbol door"></i> Blocked door</li>
+          <li><i class="symbol route"></i> Reachable route</li>
+          <li><i class="symbol unsurveyed"></i> Unsurveyed</li>
+        </ul>
+      </div>
+
+      <aside class="inspector" aria-label="Tracking and selection">
+        <section class="tracking">
+          <h2>Tracked objective</h2>
+          <button class="objective-title" data-place="objective"><i class="symbol objective"></i><span>Restore airflow</span></button>
+          <p class="secondary">Life Support · Scrubber</p>
+          <button id="route-toggle" aria-pressed="true"><i class="symbol route"></i> <span>Hide route</span></button>
+        </section>
+        <section class="detail" aria-live="polite">
+          <h2>Selected</h2>
+          <h3 id="selection-name">Power Gate</h3>
+          <div class="condition"><i class="symbol door" id="selection-symbol"></i><strong id="selection-status">Unpowered</strong></div>
+          <p id="selection-copy">Restore power to the gate to continue to Life Support.</p>
+        </section>
+        <section class="layers">
+          <h2>Layers</h2>
+          <label><input id="systems" type="checkbox" checked> <span>Objective markers</span></label>
+        </section>
+      </aside>
+    </div>
+  </section>
+</main>
+<script src="map.js"></script>
+</body>
+</html>

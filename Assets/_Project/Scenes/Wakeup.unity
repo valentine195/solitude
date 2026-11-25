@@ -6522,6 +6522,7 @@ MonoBehaviour:
   lockers:
   - {fileID: 1825872488}
   worldPickups:
+  - {fileID: 9159188210121446101}
   - {fileID: 1134087490}
   - {fileID: 54178029}
   restorationJunctions: []
@@ -18089,10 +18090,51 @@ MonoBehaviour:
   m_LayoutPriority: 1
   m_MaxWidth: -1
   m_MaxHeight: -1
+--- !u!1001 &9159188210121446100
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1916895254183655585, guid: 45aac211a6534f8e8c340ce05077305b, type: 3}
+      propertyPath: m_Name
+      value: Electric Baton
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 45aac211a6534f8e8c340ce05077305b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913448846800954825, guid: 45aac211a6534f8e8c340ce05077305b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5413527586884044776, guid: 45aac211a6534f8e8c340ce05077305b, type: 3}
+      propertyPath: id
+      value: dd8a2980ffcf4ab2a21d658605ccdc4a
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 45aac211a6534f8e8c340ce05077305b, type: 3}
+--- !u!114 &9159188210121446101 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 778504808531962589, guid: 45aac211a6534f8e8c340ce05077305b, type: 3}
+  m_PrefabInstance: {fileID: 9159188210121446100}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c923170122b90492098dfe6859f871fb, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Items.WorldPickup
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 9159188210121446100}
   - {fileID: 560400816}
   - {fileID: 166130306}
   - {fileID: 9076899976978336779}

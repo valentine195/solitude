@@ -12,7 +12,12 @@ namespace SOLITUDE.Combat
         public bool IsEvaluatingActive { get; private set; }
         public bool IsComplete => released;
         public event Action<DamageContext, DamageResult> HitApplied;
-        internal void ReportApplied(in DamageContext context, DamageResult result) => HitApplied?.Invoke(context, result);
+        internal event Action<DamageContext, DamageResult> ContactResolved;
+        internal void ReportContact(in DamageContext context, DamageResult result)
+        {
+            ContactResolved?.Invoke(context, result);
+            if (result.WasApplied) HitApplied?.Invoke(context, result);
+        }
         public MeleeAttackExecution(ItemActionContext context, MeleeAttackSpec configuration)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));

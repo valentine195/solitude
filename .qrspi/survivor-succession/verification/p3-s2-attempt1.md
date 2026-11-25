@@ -1,0 +1,21 @@
+# Phase 3 Step 2 attempt 1 — blocked
+
+Source: p3-s2-attempt1.source.json, base ae579b10fbb43f7f5e6eadf8d614b6e785bc3b8a plus ten scoped files. Spec SHA-256 f2253ab3429d7c5a34c8e9275f9efac61be9e3f4c30781393ad7d86e68ba85a4; normalized Phase 3 SHA-256 2f72871d1479b7469180bd384385583292c0cc873435acbbe36b2777453655db. Production working-tree bytes still match this snapshot; no repairs/commit after failure.
+
+Changes: reusable Editor succession authoring preserves Wakeup configuration and adds ScrubberTestAwakeningPoint at original demo player placement (23,4.5,0), avatar/recovery references and feature opt-in. Scrubber builder preserves it. Associated authoring/lifecycle/succession test expectations retain authored feature references; new ship compatibility tests exercise Wakeup, restoration and scrubber scenes.
+
+Command: DOTNET_CLI_HOME=/private/tmp/solitude-succession-dotnet DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_CLI_USE_MSBUILD_SERVER=0 MSBUILDDISABLENODEREUSE=1 python3 Tools/Verification/verify.py --workspace /private/tmp/solitude-succession-p3-gate --output Logs/SurvivorSuccession/p3-s2-attempt1
+
+Actual: exit 1/results.json Failed. 121 pure, 221 EditMode and 68 PlayMode passed; 1 PlayMode failed (410 passing executions, 1 failure). Authoring passed. Builds/player scenarios unrun. Manual acceptance checks unrun. No completed qualification or final review verdict.
+
+S6/S11/S12 supplemental restoration test passed: repaired RestorableSystem, powered terminal and open door retain object/state/reader identity across equipped death; exact equipment recovers; subsequent repair still consumes from retained player reader; successor traverses open door using production movement/physics; scene reload retains existing offline/closed/pickup reset expectations and old cache owner disappears.
+
+S1/S4/S6/S7/S8/S11 supplemental authored scrubber test passed: installed/running state and recovery time survive equipped death; inventory reader remains bound and available, exact six fuses recover and screen still opens; reload resets demo progress, survivor/cache/acknowledgment state and pickup facts as expected. Existing first-contact, failure/retry, hotbar/pickup/locker and other regressions passed.
+
+S1/S4/S5/S6 Wakeup test blocked at locker focus, before death/recovery assertions: WakeupPickupLockerAndEquippedSuccessionUseRetainedSceneAndUI expected LockerContainer but actual currentTarget was Locker. LockerContainer is MonoBehaviour/IContainerSource; Locker is the authored InteractableBase with the sensor and delegates Open to its container source. The new fixture incorrectly passed the source component to its generic focus helper. Proposed test-only repair: Use(locker.GetComponent<Locker>()) while keeping LockerContainer references/content assertions unchanged. No production locker behavior change indicated.
+
+Separate authoring/snapshot issue: saving scrubber scene in primary Editor wrote camera normalized viewport x=0.010937501,y=0.049074072,width=1,height=1; committed baseline was full viewport x=0,y=0,width=1,height=1. The headless gate's authoring tests changed the same scene to x=0,y=0.125,width=1,height=0.75000006. All other scoped gate-file hashes match. Thus Editor-derived viewport serialization changes are environment-dependent and exceed the intended succession wiring; checked source and gate scene bytes are not identical. Proposed narrow authoring repair: preserve the existing full-frame authored viewport when saving Wakeup/scrubber succession configuration and through the builder, leaving runtime pixel-perfect rendering and room layout unchanged. Re-author the scene through Editor APIs, confirm camera serialization and GUID/reference preservation, then rerun full gate and required manual checks against a new exact snapshot.
+
+Read-only boundary inspection: Domain/Restoration and Features/World contain no SurvivorSuccession/SurvivorState dependency/import; runtime ship code unchanged. Durable survivor identities, recovery locations and ship modifications remain separate scene-transition/save-load work. Existing container saves do not supply those records.
+
+Await human approval for locker fixture repair, viewport authoring repair, full rerun and pending manual checks. Step 2 remains uncommitted/blocked.

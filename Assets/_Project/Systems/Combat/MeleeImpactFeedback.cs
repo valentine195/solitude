@@ -23,7 +23,7 @@ namespace SOLITUDE.Combat
         private bool restoredAudioPause;
         public void Begin(MeleeAttackExecution execution)
         {
-            Clear(); owner = execution; owner.HitApplied += OnHit;
+            Clear(); owner = execution; owner.ContactResolved += OnHit;
             Play(execution.Configuration.SwingSound);
         }
         private void Play(AudioClip clip)
@@ -39,7 +39,7 @@ namespace SOLITUDE.Combat
         }
         private void OnHit(DamageContext contact, DamageResult result)
         {
-            if (owner == null || !result.WasApplied || !owner.Context.CanApplyEffects) return;
+            if (owner == null || !owner.Context.CanApplyEffects) return;
             var spec = owner.Configuration;
             var entity = contact.Target.Entity;
             if (entity != null && entity.GetComponent<IMeleeHitFeedback>() is IMeleeHitFeedback feedback)
@@ -77,7 +77,7 @@ namespace SOLITUDE.Combat
         }
         private void Clear()
         {
-            if (owner != null) owner.HitApplied -= OnHit;
+            if (owner != null) owner.ContactResolved -= OnHit;
             owner = null; ClearEffects();
             foreach (var recipient in recipients) recipient.Dispose(); recipients.Clear();
             if (audioSource != null) audioSource.Stop(); restoredAudioPause = false;

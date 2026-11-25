@@ -1,0 +1,7 @@
+[
+  {
+    "test": "SOLITUDE.Tests.RunLifecycleDeathTests.OpenJournalAndHeldMovementCloseWithoutMovingTheSuccessor",
+    "message": "System.InvalidOperationException : Sequence contains no elements",
+    "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0002d] in <1b6d7e99e5414d05b29c34e3609a3284>:0 \n  at SOLITUDE.Tests.RunLifecycleDeathTests.One[T] () [0x00000] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/RunLifecycleDeathTests.cs:40 \n  at SOLITUDE.Tests.RunLifecycleDeathTests+<OpenJournalAndHeldMovementCloseWithoutMovingTheSuccessor>d__36.MoveNext () [0x000a4] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/RunLifecycleDeathTests.cs:150 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52 "
+  }
+]

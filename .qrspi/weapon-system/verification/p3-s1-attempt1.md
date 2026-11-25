@@ -1,0 +1,33 @@
+# Phase 3 Step 1 — attempt 1
+
+Outcome: PASS for S26 schema-preparation support; preserves current S27/S29/S30 boundaries. Commit `69c1fc7e75f95508692636781c60490c197bb5b1`. This is not S25 or complete S26 qualification.
+
+## Approved inputs and snapshot
+
+Spec SHA-256 78d09ac0e72bb413355cffdab28a21a5e501e69138731c6ad1f0863ff63a74f5; normalized overview 8f785cf5bdde1bb321ef304b4cdfbe3519a8864b6e2219f1dff5bbda5b0fbf10; Phase 3 14d4ab3db4be8fa3d802e755d1649118e4848f9a852471f7a0e96d3691e58011. Upstream provenance and approved plan revisions validated before execution and after verification; revalidated on resume before commit. Status-only progress changes preserve approved hashes.
+
+Eight-file snapshot p3-s1-attempt1-source.json uses baseline da9e6856da357ab05a2a664fd45cf92141d72054. Working/index/isolated gate source were compared after verification. On resume, working/index content still matched all eight retained digests; postcommit file list and committed bytes match exactly. Unrelated SOLITUDE_Start.unity remains excluded and preserved. Resume details and observed pre-interruption metadata result are recorded in p3-s1-resume-validation.md.
+
+## Changes
+
+SaveGameData prepares startingLoadoutInitialized and explicit version-4 candidates. Versions 1–3 migrate to completed legacy status without granting items; older version-specific lifecycle/collection rules remain intact. Version-3 health/recovery, survivor/expedition/ship and collection facts are preserved. Valid empty pending version-4 candidates may already contain lifecycle/world data, but carried player inventory/hotbar contents in a pending candidate reject. Existing pending-succession validation remains authoritative. Session cloning/capture retains the fact; resetting an explicit version-4 candidate clears contents/lifecycle and returns to pending.
+
+Production CurrentVersion remains 3. Existing public Decode still rejects version 4 as incompatible. Production Encode omits the new marker for legacy versions, preserving the existing wire contract; legacy unknown extension data under the marker name is ignored before conversion. Prepared candidate decoding has a private staging path that requires the explicit Boolean marker and reuses current container/catalog/lifecycle validation. New v4 candidate factories/migration are explicit; no real starting grant or readiness change is active.
+
+The staging distinction is intentionally temporary under the approved plan, not a permanent format-selection system. Step 3.2 must fold NewStartingLoadoutCandidate/MigrateStartingLoadoutCandidate and DecodeStartingLoadoutCandidate/DecodeSnapshot's preparation flag into the ordinary version-4 new/reset/migration/decode contract, activate CurrentVersion=4, and qualify the public codec together with its real grant/flush/readiness transaction. It must update tests to use the public production path and retain genuine legacy fixtures.
+
+## Criterion-linked verification
+
+Command: python3 Tools/Verification/verify.py --workspace /private/tmp/solitude-weapon-system-p1-s2-attempt2 --output /Users/jeremyvalentine/SOLITUDE/Logs/WeaponSystemP3S1Attempt1.
+Expected: prepared schema/legacy compatibility checks and existing gameplay/recovery/build gate pass without live v4 activation.
+Actual: results.json Passed, all 46 stages/scenarios; 284 pure tests passed, 549 Editor passed, 223 PlayMode passed, zero failures/skips. Total 1,056 test executions. Both macOS ARM64 verification/shipping builds and established fault-injection process recovery scenarios passed. Results, XML and pure log retained alongside this report. The full gate was not repeated on resume because exact tested source bytes and baseline remained unchanged.
+
+- S26 support: 15 StartingLoadoutSaveTests cases cover new explicit pending v4 candidates, inventory/hotbar partial carried rejection, valid lifecycle-plus-empty pending state, v1/v2/v3 completion migration without extra items, detached clone/capture facts, completed/pending v4 reset, live partial-grant capture rejection/reset recovery, existing succession constraints and unsupported versions. Domain cases passed in both pure and Unity runs.
+- Prepared wire checks: 15 new SaveJsonCodecTests cases directly invoke the private candidate preparation path. Correct Boolean pending/completed values survive; missing/wrong type and duplicate facts reject; partially carried pending candidates reject while completed candidates retain quantities; existing living lifecycle is valid before the grant; v1/v2/v3 migrations preserve defined facts. Public production decoding still blocks prepared v4 and production writing omits the marker; null encoding and the legacy extension behavior remain compatible. Existing codec corrupt/unknown-item/lifecycle/recovery tests continue passing.
+- S27 preservation: legacy carried contents remain unchanged; no retroactive wrench or other grant exists. New ContainerPersistenceTests case exercises real command/capture/reset/codec behavior while the active writer stays version 3. Existing RunLifecycleStateTests also assert detached legacy completion. Production fresh-run once-only grant, arrival/succession initialization and public v4 retry/flush behavior remain Steps 3.2–3.3.
+- S29: existing movement/vitals/consumables, item/container, room generation, input, SEC-0/combat, lifecycle and save recovery suites remain passing under the complete gate. Recovery test sources did not require changes; no assertions or backup guarantees were loosened.
+- S30 preservation: live source Editor recompile completed without errors. After staging, ValidateLoadoutPreparation.Run passed metadata, tags/catalogs and active/prepared version checks, with both CLI transport and nested success observed. Original temporary JSON was cleared during the interruption; the observed values are explicitly transcribed in the resume report, not represented as retained raw output. Staged C# whitespace check passed before commit. Only new Domain test source/paired metadata added; existing identities, assemblies, scene/build authoring and ordinary save directories unchanged.
+
+## Limits and next step
+
+The production writer/readiness remains version 3, and no starting equipment is auto-granted yet. No public v4 decode/new-run or real loadout initializer qualification is claimed. Next authorized-plan step is 3.2: configure the starting wrench and activate the real version-4 grant/marker/durable-persistence path before ordinary controls open. Independent review of Phase 3 remains pending its completion. Step 1 marked complete only after this commit; later steps unstarted.

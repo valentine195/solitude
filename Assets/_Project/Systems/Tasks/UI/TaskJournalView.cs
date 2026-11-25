@@ -18,6 +18,10 @@ namespace SOLITUDE.Tasks.UI
         [SerializeField] private TMP_Text journalKey, backKey;
         [SerializeField] private UnityEngine.UI.ScrollRect listScroll, detailScroll;
         [SerializeField] private TaskJournalRowView rowPrefab;
+        [SerializeField] private GameObject currentStepMark, currentStepSurface;
+        [SerializeField] private UnityEngine.UI.Graphic titleMark;
+        [SerializeField] private UnityEngine.UI.Image currentStepBackground;
+        public event Action VisibilityChanged;
         private readonly Dictionary<TaskKey, TaskJournalRowView> rows = new();
         private TaskJournalPresenter presenter;
         private TaskJournalScreenCoordinator screen;
@@ -39,6 +43,9 @@ namespace SOLITUDE.Tasks.UI
                 stepLabel == null || stepText == null || blocker == null || empty == null || journalKey == null || backKey == null ||
                 listScroll?.content == null || listScroll.viewport == null || detailScroll?.content == null || detailScroll.viewport == null || rowPrefab == null)
                 throw new InvalidOperationException("Task journal authored endpoints are incomplete.");
+            if (titleMark != null && (currentStepMark == null || currentStepSurface == null || currentStepBackground == null
+                || currentStepSurface.GetComponent<UnityEngine.UI.LayoutElement>() == null))
+                throw new InvalidOperationException("Objective detail endpoints are incomplete.");
             rowPrefab.ValidateAuthoring();
             foreach (var label in GetComponentsInChildren<TMP_Text>(true)) if (label.richText) throw new InvalidOperationException("Task journal text must be literal.");
         }
@@ -55,10 +62,21 @@ namespace SOLITUDE.Tasks.UI
         private void Select(TaskKey key) { Remember(); presenter?.Select(key); }
         public void Show()
         {
-            if (!isActiveAndEnabled || presenter == null) throw new InvalidOperationException("Journal view is unavailable.");
-            panel.SetActive(true); presenter.SetVisible(true, requireRender: true); RestoreFocus(presenter.Presentation.FocusToken);
+            ShowPage();
+            VisibilityChanged?.Invoke();
         }
         public void Hide()
+        {
+            HidePage();
+            VisibilityChanged?.Invoke();
+        }
+        internal void ShowPage()
+        {
+            if (!isActiveAndEnabled || presenter == null) throw new InvalidOperationException("Journal view is unavailable.");
+            if (presenter.IsVisible) return;
+            panel.SetActive(true); presenter.SetVisible(true, requireRender: true); RestoreFocus(presenter.Presentation.FocusToken);
+        }
+        internal void HidePage()
         {
             Remember(); presenter?.SetVisible(false);
             if (EventSystem.current?.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.transform.IsChildOf(panel.transform))
@@ -107,6 +125,25 @@ namespace SOLITUDE.Tasks.UI
             outcomeIcon.color = state.Outcome == "FAILED" ? Fault : Operational;
             stepLabel.text = state.StepLabel; stepText.text = state.StepText; blocker.text = state.Blocker; empty.text = state.EmptyText;
             foreach (var label in new[] { location, condition, outcome, availability, stepLabel, stepText, blocker }) label.gameObject.SetActive(!string.IsNullOrEmpty(label.text));
+            if (titleMark != null)
+            {
+                detailScroll.gameObject.SetActive(state.SelectedKey.HasValue);
+                titleMark.gameObject.SetActive(state.SelectedKey.HasValue);
+                titleMark.color = state.Outcome == "FAILED" ? Fault : state.Outcome == "COMPLETED" ? Operational : Amber;
+                outcome.gameObject.SetActive(state.Outcome != "ACTIVE" && !string.IsNullOrEmpty(state.Outcome));
+                bool hasStep = !string.IsNullOrEmpty(state.StepText);
+                bool activeStep = hasStep && state.Outcome == "ACTIVE";
+                currentStepSurface.SetActive(hasStep);
+                currentStepMark.SetActive(activeStep);
+                currentStepBackground.enabled = activeStep;
+                if (hasStep)
+                {
+                    var surface = (RectTransform)currentStepSurface.transform;
+                    float textWidth = Mathf.Max(1, surface.rect.width - 80);
+                    float textHeight = stepText.GetPreferredValues(state.StepText, textWidth, 0).y;
+                    surface.GetComponent<UnityEngine.UI.LayoutElement>().preferredHeight = Mathf.Max(62, textHeight + 16);
+                }
+            }
             journalKey.text = input.BindingLabel("Gameplay/Journal"); backKey.text = input.BindingLabel("Container/Cancel");
             Canvas.ForceUpdateCanvases(); listScroll.verticalNormalizedPosition = state.ListScroll; detailScroll.verticalNormalizedPosition = state.DetailScroll;
             if (focused == null || !focused.activeInHierarchy) RestoreFocus(state.FocusToken);
@@ -114,15 +151,23 @@ namespace SOLITUDE.Tasks.UI
         }
         private void LateUpdate()
         {
-            if (!IsOpen) return;
+            if (!IsOpen || !presenter.IsVisible) return;
             var selected = EventSystem.current?.currentSelectedGameObject;
             if (selected != lastFocused) RevealFocus();
             Remember();
             foreach (var button in new[] { activeTab, completedTab })
             {
                 bool focus = selected == button.gameObject;
-                button.image.color = focus ? Amber : new Color(.08f,.10f,.10f);
-                button.GetComponentInChildren<TMP_Text>(true).color = focus ? Color.black : White;
+                if (titleMark != null)
+                {
+                    button.image.color = focus ? new Color32(32, 66, 78, 255) : new Color32(12, 27, 37, 255);
+                    button.GetComponentInChildren<TMP_Text>(true).color = focus ? new Color32(120, 243, 188, 255) : White;
+                }
+                else
+                {
+                    button.image.color = focus ? Amber : new Color(.08f,.10f,.10f);
+                    button.GetComponentInChildren<TMP_Text>(true).color = focus ? Color.black : White;
+                }
             }
         }
         private void PresentationFailed(Exception error)

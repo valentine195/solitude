@@ -1,0 +1,20 @@
+--- a/Assets/_Project/Tests/Editor/RunLifecycleAuthoringTests.cs
++++ b/Assets/_Project/Tests/Editor/RunLifecycleAuthoringTests.cs
+@@ -43,7 +43,7 @@
+         }
+         [Test] public void ExplicitPlacementAssignsTwoStableSourcesAndRejectsDuplicates()
+         {
+-            var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Additive);
++            var scene = EditorSceneManager.NewPreviewScene();
+             try
+             {
+                 var bandage = RunLifecycleAuthoring.PlaceSupply(scene, true, Vector3.zero);
+@@ -55,7 +55,7 @@
+                 Assert.AreEqual(2, scene.GetRootGameObjects().Length);
+                 ItemCatalogValidator.ValidateExpeditionSupplies();
+             }
+-            finally { EditorSceneManager.CloseScene(scene, true); }
++            finally { EditorSceneManager.ClosePreviewScene(scene); }
+         }
+         [Test] public void RepeatedAuthoringPreservesAssetGuidsAndCatalogBytes()
+         {
