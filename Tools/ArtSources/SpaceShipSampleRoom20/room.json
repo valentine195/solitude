@@ -1,0 +1,3218 @@
+{
+  "name": "SpaceShipSampleRoom20",
+  "mode": "layered_tilemap",
+  "purpose": "Editable art assembly sample; no Unity integration",
+  "width_tiles": 20,
+  "height_tiles": 20,
+  "tile_size": 32,
+  "pixel_size": [
+    640,
+    640
+  ],
+  "origin": "top-left",
+  "footprint": "Walls included in20x20 overall footprint",
+  "assets": {
+    "s5_deck_r02_c01": {
+      "path": "Tiles/s5_deck_r02_c01.png",
+      "size": [
+        32,
+        32
+      ],
+      "source": "Tools/ArtSources/SpaceShipFloor32/Tiles/s5_deck_r02_c01.png",
+      "sha256": "ca766efcf545fc6ce35e5455c0df0effe77d7a2c76e01a34fb06420cd8542e3f"
+    },
+    "s5_deck_r02_c03": {
+      "path": "Tiles/s5_deck_r02_c03.png",
+      "size": [
+        32,
+        32
+      ],
+      "source": "Tools/ArtSources/SpaceShipFloor32/Tiles/s5_deck_r02_c03.png",
+      "sha256": "9f71093297ad75a1f2e12bacc557f69ce46524fd0d8a392df452fa4604925c07"
+    },
+    "s3_steel_r02_c02": {
+      "path": "Tiles/s3_steel_r02_c02.png",
+      "size": [
+        32,
+        32
+      ],
+      "source": "Tools/ArtSources/SpaceShipFloor32/Tiles/s3_steel_r02_c02.png",
+      "sha256": "88ff8f6e569c8c22400ee259005db3296bb7f33931b9fe508915c7bdc5667c79"
+    },
+    "s1_hull_r01_c01": {
+      "path": "Tiles/s1_hull_r01_c01.png",
+      "size": [
+        32,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles32x64/s1_hull_r01_c01.png",
+      "sha256": "7d8f1867c094931c33317431ea1a68bdaa240c309e3a92837d5552cd68420722"
+    },
+    "s1_hull_r01_c02": {
+      "path": "Tiles/s1_hull_r01_c02.png",
+      "size": [
+        32,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles32x64/s1_hull_r01_c02.png",
+      "sha256": "df042be03525882f8ad5cc08abb47fee91572028a7ad890d45ad9721c3f811b7"
+    },
+    "s1_hull_r01_c04": {
+      "path": "Tiles/s1_hull_r01_c04.png",
+      "size": [
+        32,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles32x64/s1_hull_r01_c04.png",
+      "sha256": "ee696e3f58f459c0d36a045c5600f373a2f94771d9708cb2bf03b3927ff6a5ea"
+    },
+    "s1_hull_r01_c05": {
+      "path": "Tiles/s1_hull_r01_c05.png",
+      "size": [
+        32,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles32x64/s1_hull_r01_c05.png",
+      "sha256": "46b760cf892f46e85a7879fc2c25ba33664e3d47ce9d820c5cf99557a1fbb1f0"
+    },
+    "s1_control_left": {
+      "path": "Tiles/s1_control_left.png",
+      "size": [
+        64,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles64x64/s1_control_left.png",
+      "sha256": "9156f9288aa0668f26891600c569f3f46f68f9402c19ab1a690043c1f1d9b37d"
+    },
+    "s1_control_system": {
+      "path": "Tiles/s1_control_system.png",
+      "size": [
+        64,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles64x64/s1_control_system.png",
+      "sha256": "6e8b826f92db83b031ed594b98eb13f53299eb0b061f07bf1fef05798c781c98"
+    },
+    "s1_hull_r01_c03": {
+      "path": "Tiles/s1_hull_r01_c03.png",
+      "size": [
+        32,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles32x64/s1_hull_r01_c03.png",
+      "sha256": "74bd9b76ea5cb2c0146aa63e4b4d8ede862f9903d29d5aff7859d0ebf7800f72"
+    },
+    "s3_medical_r01_c07": {
+      "path": "Tiles/s3_medical_r01_c07.png",
+      "size": [
+        64,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles64x64/s3_medical_r01_c07.png",
+      "sha256": "e33cac68bbbb13d48bc39f0be636b604b82855ba9590e4874d80f23376dbdfc2"
+    },
+    "s1_hull_r01_c06": {
+      "path": "Tiles/s1_hull_r01_c06.png",
+      "size": [
+        32,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles32x64/s1_hull_r01_c06.png",
+      "sha256": "fd224b4e4b915e6ad8cb6b9c3d79fefae37cf0dc848ba9163184db0f6de16f7c"
+    },
+    "s1_hull_r01_c07": {
+      "path": "Tiles/s1_hull_r01_c07.png",
+      "size": [
+        32,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles32x64/s1_hull_r01_c07.png",
+      "sha256": "1cf9e9eff7b4f3776e19e45530461ce90690cbff61f2e29e775015387da658c2"
+    },
+    "s2_hull_r01_c02": {
+      "path": "Tiles/s2_hull_r01_c02.png",
+      "size": [
+        64,
+        64
+      ],
+      "source": "Tools/ArtSources/SpaceShipWallTall/Tiles64x64/s2_hull_r01_c02.png",
+      "sha256": "23942ec8aa3932ceacce2e7b8e67eed19187f07405faf1fb17290aa0d7589a9e"
+    },
+    "room_cap_west": {
+      "path": "Tiles/room_cap_west.png",
+      "size": [
+        32,
+        32
+      ],
+      "source": "Derived by cropping/rotating corrected north-wall top surface only"
+    },
+    "room_cap_east": {
+      "path": "Tiles/room_cap_east.png",
+      "size": [
+        32,
+        32
+      ],
+      "source": "Derived by cropping/rotating corrected north-wall top surface only"
+    },
+    "room_cap_south": {
+      "path": "Tiles/room_cap_south.png",
+      "size": [
+        32,
+        32
+      ],
+      "source": "Derived by cropping/rotating corrected north-wall top surface only"
+    }
+  },
+  "placements": [
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 96,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 160,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 192,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 224,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 256,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 288,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 320,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 352,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 384,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 416,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 448,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 512,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 64
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 96,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 160,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 192,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 224,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 256,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 288,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 320,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 352,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 384,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 416,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 448,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 512,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 96
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 96,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 160,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 192,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 224,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 256,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 288,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 320,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 352,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 384,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 416,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 448,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 512,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 128
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 160,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 192,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 224,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 256,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 288,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 320,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 352,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 384,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 416,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 448,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 160
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 160,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 192,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 224,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 256,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 288,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 320,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 352,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 384,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 416,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 448,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 192
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 160,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 192,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 224,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 256,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 288,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 320,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 352,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 384,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 416,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 448,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 224
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 160,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 192,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 224,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 256,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 288,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 320,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 352,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 384,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 416,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 448,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 256
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 160,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 192,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 224,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 256,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 288,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 320,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 352,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 384,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 416,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 448,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 288
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 160,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 192,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 224,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 256,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 288,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 320,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 352,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 384,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 416,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 448,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 320
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 160,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 192,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 224,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 256,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 288,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 320,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 352,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 384,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 416,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 448,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 352
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 160,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 192,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 224,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 256,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 288,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 320,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 352,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 384,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 416,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 448,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 384
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 160,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 192,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 224,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 256,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 288,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 320,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 352,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 384,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 416,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 448,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 416
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 160,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 192,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 224,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 256,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 288,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 320,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 352,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 384,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 416,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 448,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 448
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 160,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 192,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 224,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 256,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 288,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 320,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 352,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 384,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 416,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s3_steel_r02_c02",
+      "x": 448,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 480
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 96,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 160,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 192,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 224,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 256,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 288,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 320,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 352,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 384,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 416,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 448,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c03",
+      "x": 512,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 512
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 96,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 160,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 192,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 224,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 256,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 288,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 320,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 352,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 384,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 416,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 448,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 512,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 544
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 96,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 160,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 192,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 224,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 256,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 288,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 320,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 352,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 384,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 416,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 448,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 512,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 576
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 0,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 32,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 64,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 96,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 128,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 160,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 192,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 224,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 256,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 288,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 320,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 352,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 384,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 416,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 448,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 480,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 512,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 544,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 576,
+      "y": 608
+    },
+    {
+      "layer": "floors",
+      "asset": "s5_deck_r02_c01",
+      "x": 608,
+      "y": 608
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c01",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c02",
+      "x": 32,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c04",
+      "x": 64,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c05",
+      "x": 96,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c01",
+      "x": 128,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_control_left",
+      "x": 160,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_control_system",
+      "x": 224,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c02",
+      "x": 288,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c03",
+      "x": 320,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s3_medical_r01_c07",
+      "x": 352,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c01",
+      "x": 416,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c06",
+      "x": 448,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c07",
+      "x": 480,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c02",
+      "x": 512,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s1_hull_r01_c01",
+      "x": 544,
+      "y": 0
+    },
+    {
+      "layer": "north_walls",
+      "asset": "s2_hull_r01_c02",
+      "x": 576,
+      "y": 0
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 64
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 96
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 128
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 160
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 192
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 224
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 256
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 288
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 320
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 352
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 384
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 416
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 448
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 480
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 512
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 544
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 576
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_west",
+      "x": 0,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 64
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 96
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 128
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 160
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 192
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 224
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 256
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 288
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 320
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 352
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 384
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 416
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 448
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 480
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 512
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 544
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 576
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_east",
+      "x": 608,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 0,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 32,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 64,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 96,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 128,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 160,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 192,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 224,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 256,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 288,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 320,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 352,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 384,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 416,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 448,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 480,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 512,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 544,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 576,
+      "y": 608
+    },
+    {
+      "layer": "boundary_caps",
+      "asset": "room_cap_south",
+      "x": 608,
+      "y": 608
+    }
+  ],
+  "collision": {
+    "grid": [
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    ],
+    "policy": "Conservative whole-cell boundary collision;1 blocked0 walkable",
+    "walkable_cell_count": 306
+  },
+  "scene_hooks": {
+    "player_spawn_cell": [
+      10,
+      17
+    ],
+    "exits": []
+  },
+  "layer_order": [
+    "floors",
+    "north_walls",
+    "boundary_caps"
+  ]
+}

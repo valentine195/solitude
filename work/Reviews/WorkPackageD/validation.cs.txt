@@ -1,0 +1,11 @@
+SOLITUDE.Editor.UnityMetaValidator.ValidateForCI(); SOLITUDE.Editor.CompositionValidator.ValidateForCI();
+var results = new System.Collections.Generic.List<string>();
+var method = typeof(SOLITUDE.Editor.CompositionValidator).GetMethod("ValidateScene", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+var previous = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+foreach (var path in new [] { "Assets/_Project/Scenes/Wakeup.unity", "Assets/_Project/Scenes/Demos/ShipSystemRestoration.unity", "Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity", "Assets/_Project/Art/SOLITUDE/ReferenceScenes/SOLITUDE_OpeningSlice.unity", "Assets/_Project/Features/World/SolitudeStart/Scenes/SOLITUDE_Start.unity", "Assets/_Project/Features/World/SolitudeStart/Scenes/SOLITUDE_Expedition.unity" }) {
+ var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(path); bool opened = !scene.IsValid() || !scene.isLoaded;
+ if(opened) scene = UnityEditor.SceneManagement.EditorSceneManager.OpenScene(path, UnityEditor.SceneManagement.OpenSceneMode.Additive);
+ try { method.Invoke(null,new object[]{scene}); results.Add(path+": passed"); }
+ finally { if(opened) UnityEditor.SceneManagement.EditorSceneManager.CloseScene(scene,true); if(previous.IsValid()) UnityEngine.SceneManagement.SceneManager.SetActiveScene(previous); }
+}
+return results;

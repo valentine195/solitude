@@ -1,0 +1,72 @@
+{
+  "ok": true,
+  "schema_version": "workflow_manifest.v1",
+  "kind": "validation",
+  "created_files": [],
+  "suggested_next_actions": [
+    "export_gif or render_preview to look at a cycle that measures clean."
+  ],
+  "warnings": [
+    "only one frame, so there is nothing to compare across frames"
+  ],
+  "animation": {
+    "tag": "Idle_Down",
+    "loops": true,
+    "frame_count": 1,
+    "total_duration_ms": 100,
+    "frames": [
+      {
+        "frame": 1,
+        "hash": "7419810c4ca6f12c",
+        "duration_ms": 100,
+        "bounds": {
+          "width": 28,
+          "height": 78,
+          "x": 18,
+          "y": 8
+        },
+        "centroid": {
+          "x": 31.5,
+          "y": 46.5
+        },
+        "bottom": 85
+      }
+    ],
+    "durations_ms": [
+      100
+    ],
+    "spacing": [],
+    "spacing_direction_changes": 0,
+    "duplicate_pairs": [],
+    "seam_duplicate": false,
+    "uniform_timing": false,
+    "empty_frames": [],
+    "contact_rows": [
+      85
+    ],
+    "contact_drift_px": 0,
+    "layer": null,
+    "sprite_frame_count": 8
+  },
+  "validation": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "comparable_frames",
+        "ok": false,
+        "level": "warning",
+        "detail": "only one frame, so there is nothing to compare across frames"
+      },
+      {
+        "name": "no_empty_frames",
+        "ok": true,
+        "level": "warning",
+        "detail": ""
+      }
+    ],
+    "errors": [],
+    "warnings": [
+      "only one frame, so there is nothing to compare across frames"
+    ]
+  }
+}

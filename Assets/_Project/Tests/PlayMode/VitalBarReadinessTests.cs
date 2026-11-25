@@ -1,0 +1,73 @@
+using System.Collections;
+using System.Reflection;
+using NUnit.Framework;
+using SOLITUDE.Player;
+using SOLITUDE.Player.UI;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
+
+namespace SOLITUDE.Tests
+{
+    public class VitalBarReadinessTests
+    {
+        private Scene fixtureScene, previousScene;
+
+        [UnityTest]
+        public IEnumerator ViewBeforePlayer_BindsWhenReady_AndReconcilesWithoutHealing()
+        {
+            // Keep Unity's runner scene while isolating the ambient player and HUD.
+            foreach (var root in Object.FindObjectsByType<SOLITUDE.Composition.GameCompositionRoot>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                Object.Destroy(root.gameObject);
+            yield return null;
+            foreach (var ambientView in Object.FindObjectsByType<VitalBarView>(FindObjectsInactive.Include, FindObjectsSortMode.None)) Object.Destroy(ambientView.gameObject);
+            foreach (var ambientView in Object.FindObjectsByType<VitalRecoveryStatusView>(FindObjectsInactive.Include, FindObjectsSortMode.None)) Object.Destroy(ambientView.gameObject);
+            foreach (var controller in Object.FindObjectsByType<PlayerVitalsController>(FindObjectsInactive.Include, FindObjectsSortMode.None)) Object.Destroy(controller.gameObject);
+            yield return null;
+            previousScene = SceneManager.GetActiveScene();
+            fixtureScene = SceneManager.CreateScene("VitalBarReadiness");
+            SceneManager.SetActiveScene(fixtureScene);
+            var viewObject = new GameObject("ReadinessView", typeof(RectTransform), typeof(UnityEngine.UI.Image));
+            viewObject.SetActive(false);
+            var image = viewObject.GetComponent<UnityEngine.UI.Image>();
+            image.type = UnityEngine.UI.Image.Type.Filled;
+            image.fillAmount = .5f;
+            var view = viewObject.AddComponent<VitalBarView>();
+            typeof(VitalBarView).GetField("fillImage", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(view, image);
+            typeof(VitalBarView).GetField("kind", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(view, VitalKind.Oxygen);
+            viewObject.SetActive(true);
+            yield return null;
+            Assert.AreEqual(.5f, image.fillAmount);
+
+            var playerObject = new GameObject("ReadinessPlayer");
+            playerObject.SetActive(false);
+            var player = playerObject.AddComponent<PlayerVitalsController>();
+            playerObject.SetActive(true);
+            var oxygen = player.Vitals.Oxygen;
+            oxygen.Set(40);
+            yield return null;
+            yield return null;
+            Assert.AreEqual(.4f, image.fillAmount);
+            oxygen.Set(30);
+            Assert.AreEqual(.3f, image.fillAmount);
+            viewObject.SetActive(false);
+            oxygen.Set(20);
+            Assert.AreEqual(.3f, image.fillAmount, "Disabled view unsubscribes.");
+            viewObject.SetActive(true);
+            Assert.AreEqual(.2f, image.fillAmount);
+            Assert.AreEqual(20, oxygen.Current, "Binding must not heal the survivor.");
+            player.ResetForAwakening();
+            Assert.AreSame(oxygen, player.Vitals.Oxygen);
+            Assert.AreEqual(1, image.fillAmount);
+            Object.Destroy(viewObject);
+            Object.Destroy(playerObject);
+            yield return null;
+        }
+
+        [UnityTearDown] public IEnumerator ReleaseFixtureScene()
+        {
+            if (previousScene.IsValid() && previousScene.isLoaded) SceneManager.SetActiveScene(previousScene);
+            if (fixtureScene.IsValid() && fixtureScene.isLoaded) yield return SceneManager.UnloadSceneAsync(fixtureScene);
+        }
+    }
+}

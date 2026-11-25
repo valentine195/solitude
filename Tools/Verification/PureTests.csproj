@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><EnableDefaultCompileItems>false</EnableDefaultCompileItems><LangVersion>latest</LangVersion></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="PureTestRunner.cs" />
+    <Compile Include="../../Assets/_Project/Domain/**/*.cs" />
+    <Compile Include="../../Assets/_Project/Application/**/*.cs" />
+    <Compile Include="../../Assets/_Project/Tests/Domain/**/*.cs" />
+    <Compile Include="../../Assets/_Project/Tests/Application/**/*.cs" />
+    <Reference Include="nunit.framework"><HintPath>$(NUnitPath)</HintPath></Reference>
+  </ItemGroup>
+</Project>

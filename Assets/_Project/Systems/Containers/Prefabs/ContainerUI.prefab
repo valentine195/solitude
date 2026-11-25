@@ -53,7 +53,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Containers.ContainerController
   view: {fileID: 0}
   tooltip: {fileID: 0}
-  containerSource: {fileID: 0}
+  defaultContainerSource: {fileID: 0}
 --- !u!114 &5115474866148438572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,6 +68,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Containers.ContainerView
   slotViewPrefab: {fileID: 7370632015635191026, guid: ccaa4dfa4a3b14e6e934877d362cf557, type: 3}
   slotsParent: {fileID: 3513963548494693231}
+  useExistingSlotViews: 0
+  existingSlotViews: []
   gridLayoutGroup: {fileID: 6391571151293191941}
   columns: 0
   label: {fileID: 4865893132950315630}
@@ -85,6 +87,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Containers.ContainerModalView
   root: {fileID: 1052255548619402596}
   type: 0
+  controller: {fileID: 0}
 --- !u!1 &1661345471714422328
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "project": "SOLITUDE",
+  "milestone": "opening_slice",
+  "state": "NORMAL",
+  "tile_pixels": [
+    32,
+    32
+  ],
+  "pixels_per_unit": 32,
+  "player_target_pixels": [
+    32,
+    48
+  ],
+  "perspective": {
+    "projection": "orthographic",
+    "north": "visible_face",
+    "east_west_south": "wall_caps",
+    "geometry_degrees": 90,
+    "isometric": false
+  },
+  "import": {
+    "filter": "Point",
+    "compression": "Uncompressed",
+    "mipmaps": false,
+    "alpha_values": [
+      0,
+      255
+    ],
+    "mesh": "FullRect",
+    "npot_scale": "None",
+    "transform_scale": [
+      1,
+      1,
+      1
+    ]
+  },
+  "pivots": {
+    "tiles_pixels": [
+      16,
+      16
+    ],
+    "props": "integer feet anchor",
+    "character": "integer feet anchor"
+  },
+  "camera": {
+    "reference_resolution": [
+      640,
+      360
+    ],
+    "assets_ppu": 32,
+    "antialiasing": false,
+    "integer_scale": true,
+    "pipeline": "URP_2D"
+  },
+  "palette": {
+    "graphite": "#293F4A",
+    "graphite_dark": "#182B35",
+    "steel_shadow": "#3C5561",
+    "steel_blue": "#657F85",
+    "steel_light": "#82999A",
+    "ivory_shadow": "#A2A38E",
+    "ivory": "#CAC5AF",
+    "ivory_light": "#E0D8BF",
+    "amber": "#CF9B43",
+    "amber_light": "#EDBE64",
+    "skin_accents": [
+      "#543E32",
+      "#87634B",
+      "#B88B65",
+      "#D7AD83"
+    ]
+  },
+  "palette_policy": "Existing atlas palette from tile-manifest.json is grandfathered; new family uses restrained ramps matching it.",
+  "lighting": {
+    "normal": [
+      "ivory",
+      "amber"
+    ],
+    "emergency_red": "CRITICAL only, localized",
+    "bloom": false
+  },
+  "naming": "solitude_<family>_<asset>_<state>_vNN",
+  "categories": [
+    "ship_base",
+    "cryobay",
+    "containers",
+    "power",
+    "terminals",
+    "personal",
+    "overlays"
+  ],
+  "reuse": {
+    "atlas": "Assets/_Project/Features/World/SolitudeStart/Art/solitude-atlas-32.png",
+    "door": "Assets/_Project/Features/World/SolitudeStart/Art/door-opening-spritesheet.png"
+  },
+  "states": [
+    "NORMAL",
+    "NEGLECTED",
+    "FAILING",
+    "CRITICAL"
+  ],
+  "compatibility_exceptions": [],
+  "review": {
+    "scene": "Assets/_Project/Art/SOLITUDE/ReferenceScenes/SOLITUDE_OpeningSlice.unity",
+    "must_check": [
+      "play_mode",
+      "gameplay_zoom",
+      "moving_player",
+      "locker",
+      "battery_pickup",
+      "unpowered_door",
+      "powered_door_passage",
+      "first_ai_contact",
+      "pixel_seams",
+      "console_errors"
+    ],
+    "expand_after": "opening review passes"
+  },
+  "references": {
+    "conversation": "6ac01170-38e0-83ea-9570-6ab15ee6ed78",
+    "board_images_available": false
+  },
+  "player_replacement_authorized": true,
+  "production_palette_hex": [
+    "182B35",
+    "293F4A",
+    "3C5561",
+    "536E78",
+    "657F85",
+    "82999A",
+    "ACBDB8",
+    "8D907E",
+    "A2A38E",
+    "B5B39D",
+    "CAC5AF",
+    "E0D8BF",
+    "E1E5D1",
+    "77552B",
+    "A67732",
+    "CF9B43",
+    "EDBE64",
+    "FFE0A0",
+    "543E32",
+    "87634B",
+    "B88B65",
+    "D7AD83"
+  ]
+}

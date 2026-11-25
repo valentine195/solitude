@@ -1,0 +1,2255 @@
+{
+  "contract": {
+    "tile_count": 55,
+    "north_walls": 47,
+    "cap_boundaries": 8,
+    "cell_size": [
+      64,
+      32
+    ],
+    "atlas_size": [
+      512,
+      224
+    ],
+    "columns": 8,
+    "rows": 7,
+    "margin": 0,
+    "spacing": 0,
+    "alpha": "binary only",
+    "resampling": "exact4x nearest-neighbor reduction",
+    "palette": "128 shared colors; no dithering",
+    "shared_profiles": "8px top cap;22px north face;2px base rail",
+    "all_cells_match_exports": true,
+    "north_cap_horizontal_edge_match": true,
+    "north_rail_horizontal_edge_match": true
+  },
+  "assets": [
+    {
+      "file": "Tiles/s1_hull_r01_c01.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_hull_r01_c01.png",
+        "source": "1.png",
+        "box_xyxy": [
+          0,
+          0,
+          120,
+          246
+        ],
+        "size": [
+          120,
+          246
+        ]
+      },
+      "raw_box": [
+        0,
+        0,
+        256,
+        128
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        0,
+        0
+      ],
+      "sha256": "b245215807378137caac13ca44f4fa7003b65a156fb5642a7b3f2ddc9adb9b14"
+    },
+    {
+      "file": "Tiles/s1_hull_r01_c02.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_hull_r01_c02.png",
+        "source": "1.png",
+        "box_xyxy": [
+          120,
+          0,
+          241,
+          246
+        ],
+        "size": [
+          121,
+          246
+        ]
+      },
+      "raw_box": [
+        256,
+        0,
+        512,
+        128
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        64,
+        0
+      ],
+      "sha256": "60cb8bd170e082bca194e6afe847b089037dbaf521da0cbfffad1ab9330eba18"
+    },
+    {
+      "file": "Tiles/s1_hull_r01_c03.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_hull_r01_c03.png",
+        "source": "1.png",
+        "box_xyxy": [
+          241,
+          0,
+          361,
+          246
+        ],
+        "size": [
+          120,
+          246
+        ]
+      },
+      "raw_box": [
+        512,
+        0,
+        768,
+        128
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        128,
+        0
+      ],
+      "sha256": "40b69320b1d2b94baf87d15dc6605936b253c0b14c3c035687ceb4cf12c8bb20"
+    },
+    {
+      "file": "Tiles/s1_hull_r01_c04.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_hull_r01_c04.png",
+        "source": "1.png",
+        "box_xyxy": [
+          361,
+          0,
+          481,
+          246
+        ],
+        "size": [
+          120,
+          246
+        ]
+      },
+      "raw_box": [
+        768,
+        0,
+        1024,
+        128
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        192,
+        0
+      ],
+      "sha256": "2b55f6efe0ae0e2279f987b482ec7cdca1c531122d9d63db324caf331d998f7f"
+    },
+    {
+      "file": "Tiles/s1_hull_r01_c05.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_hull_r01_c05.png",
+        "source": "1.png",
+        "box_xyxy": [
+          481,
+          0,
+          602,
+          246
+        ],
+        "size": [
+          121,
+          246
+        ]
+      },
+      "raw_box": [
+        0,
+        128,
+        256,
+        256
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        256,
+        0
+      ],
+      "sha256": "70a061b869ee5821c7e766b278ccf3defd0221e6c18d3ce6cb82f2b014e0c02d"
+    },
+    {
+      "file": "Tiles/s1_hull_r01_c06.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_hull_r01_c06.png",
+        "source": "1.png",
+        "box_xyxy": [
+          602,
+          0,
+          722,
+          246
+        ],
+        "size": [
+          120,
+          246
+        ]
+      },
+      "raw_box": [
+        256,
+        128,
+        512,
+        256
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        320,
+        0
+      ],
+      "sha256": "2e4e141253064267681867831550d8656b927e76d266af5854cb912c36384090"
+    },
+    {
+      "file": "Tiles/s1_hull_r01_c07.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_hull_r01_c07.png",
+        "source": "1.png",
+        "box_xyxy": [
+          722,
+          0,
+          842,
+          246
+        ],
+        "size": [
+          120,
+          246
+        ]
+      },
+      "raw_box": [
+        512,
+        128,
+        768,
+        256
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        384,
+        0
+      ],
+      "sha256": "2030ef2a2f9212190d3cf40c1cdd9154d840926ac736120469e3fa8d5e1e306d"
+    },
+    {
+      "file": "Tiles/s1_hull_r01_c08.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_hull_r01_c08.png",
+        "source": "1.png",
+        "box_xyxy": [
+          842,
+          0,
+          963,
+          246
+        ],
+        "size": [
+          121,
+          246
+        ]
+      },
+      "raw_box": [
+        768,
+        128,
+        1024,
+        256
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        448,
+        0
+      ],
+      "sha256": "07a970c7083f0b1d1e614e2bb9d059dee0609cec1678dc32f5cc58d2b76323de"
+    },
+    {
+      "file": "Tiles/s1_control_left.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_control_left.png",
+        "source": "1.png",
+        "box_xyxy": [
+          965,
+          35,
+          1208,
+          246
+        ],
+        "size": [
+          243,
+          211
+        ]
+      },
+      "raw_box": [
+        0,
+        256,
+        256,
+        384
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        0,
+        32
+      ],
+      "sha256": "96af16a88421b5dab8d19f9eac1f0682c305d2402de2f045ccec0d9ba3b8077a"
+    },
+    {
+      "file": "Tiles/s1_control_system.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_control_system.png",
+        "source": "1.png",
+        "box_xyxy": [
+          1208,
+          35,
+          1452,
+          246
+        ],
+        "size": [
+          244,
+          211
+        ]
+      },
+      "raw_box": [
+        256,
+        256,
+        512,
+        384
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        64,
+        32
+      ],
+      "sha256": "7f81ff569e9c3f1e04db2ce09b374876e7de25042f04e769d373001b12f8496b"
+    },
+    {
+      "file": "Tiles/s1_control_alert.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_control_alert.png",
+        "source": "1.png",
+        "box_xyxy": [
+          1452,
+          35,
+          1690,
+          246
+        ],
+        "size": [
+          238,
+          211
+        ]
+      },
+      "raw_box": [
+        512,
+        256,
+        768,
+        384
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        128,
+        32
+      ],
+      "sha256": "1dd354ea960a51d688390788e282a6a69cb870477aa5f55bbf9220146ab9ac7a"
+    },
+    {
+      "file": "Tiles/s1_switch.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s1_switch.png",
+        "source": "1.png",
+        "box_xyxy": [
+          1928,
+          35,
+          2045,
+          246
+        ],
+        "size": [
+          117,
+          211
+        ]
+      },
+      "raw_box": [
+        768,
+        256,
+        1024,
+        384
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        192,
+        32
+      ],
+      "sha256": "ff23a82003479f849f36cdf5b13c67e5069bc1af2ad4317d22cb5032576af705"
+    },
+    {
+      "file": "Tiles/s2_hull_r01_c01.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s2_hull_r01_c01.png",
+        "source": "2.png",
+        "box_xyxy": [
+          0,
+          0,
+          205,
+          205
+        ],
+        "size": [
+          205,
+          205
+        ]
+      },
+      "raw_box": [
+        0,
+        384,
+        256,
+        512
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        256,
+        32
+      ],
+      "sha256": "8a9651b7f10ab031ffc82f2e373e42ff6da5b7b8b3203e19817b65bf4de2d2ab"
+    },
+    {
+      "file": "Tiles/s2_hull_r01_c02.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s2_hull_r01_c02.png",
+        "source": "2.png",
+        "box_xyxy": [
+          205,
+          0,
+          410,
+          205
+        ],
+        "size": [
+          205,
+          205
+        ]
+      },
+      "raw_box": [
+        256,
+        384,
+        512,
+        512
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        320,
+        32
+      ],
+      "sha256": "5a8a54a2a34f4938163d757194aff3a6525242bcaea13c897f880e29bba6c0eb"
+    },
+    {
+      "file": "Tiles/s2_hull_r01_c03.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s2_hull_r01_c03.png",
+        "source": "2.png",
+        "box_xyxy": [
+          410,
+          0,
+          614,
+          205
+        ],
+        "size": [
+          204,
+          205
+        ]
+      },
+      "raw_box": [
+        512,
+        384,
+        768,
+        512
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        384,
+        32
+      ],
+      "sha256": "91cbb56095f4d80f2832dd40973508f737e417f0961e7b49c823bdfcf1e3cccd"
+    },
+    {
+      "file": "Tiles/s2_hull_r01_c04.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s2_hull_r01_c04.png",
+        "source": "2.png",
+        "box_xyxy": [
+          614,
+          0,
+          819,
+          205
+        ],
+        "size": [
+          205,
+          205
+        ]
+      },
+      "raw_box": [
+        768,
+        384,
+        1024,
+        512
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        448,
+        32
+      ],
+      "sha256": "d9fdc53350a51ae69c1f4321321aebe3dec9da1dfa43a4dc9c9d3f863f6f7cbd"
+    },
+    {
+      "file": "Tiles/s2_hull_r01_c05.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s2_hull_r01_c05.png",
+        "source": "2.png",
+        "box_xyxy": [
+          819,
+          0,
+          1024,
+          205
+        ],
+        "size": [
+          205,
+          205
+        ]
+      },
+      "raw_box": [
+        0,
+        512,
+        256,
+        640
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        0,
+        64
+      ],
+      "sha256": "50ab21791e99b7a4989fd843b44dfda6338b476a770c4bea4528c8f3727e0a80"
+    },
+    {
+      "file": "Tiles/s3_medical_r01_c01.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s3_medical_r01_c01.png",
+        "source": "3.png",
+        "box_xyxy": [
+          0,
+          0,
+          120,
+          247
+        ],
+        "size": [
+          120,
+          247
+        ]
+      },
+      "raw_box": [
+        256,
+        512,
+        512,
+        640
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        64,
+        64
+      ],
+      "sha256": "9a7c5e3de48268494ae1ff4539261247b8189d9d47dec643721eae890a9f65bd"
+    },
+    {
+      "file": "Tiles/s3_medical_r01_c02.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s3_medical_r01_c02.png",
+        "source": "3.png",
+        "box_xyxy": [
+          120,
+          0,
+          241,
+          247
+        ],
+        "size": [
+          121,
+          247
+        ]
+      },
+      "raw_box": [
+        512,
+        512,
+        768,
+        640
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        128,
+        64
+      ],
+      "sha256": "86492a3d56859875c7845a639035872872376eafc60515109eed672e45e3dff7"
+    },
+    {
+      "file": "Tiles/s3_medical_r01_c03.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s3_medical_r01_c03.png",
+        "source": "3.png",
+        "box_xyxy": [
+          241,
+          0,
+          361,
+          247
+        ],
+        "size": [
+          120,
+          247
+        ]
+      },
+      "raw_box": [
+        768,
+        512,
+        1024,
+        640
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        192,
+        64
+      ],
+      "sha256": "b9ad1ff7ce4100766fea8c9d7d4c8eaff5c93a446fd70d3a614f5eecc88c8747"
+    },
+    {
+      "file": "Tiles/s3_medical_r01_c04.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s3_medical_r01_c04.png",
+        "source": "3.png",
+        "box_xyxy": [
+          361,
+          0,
+          422,
+          247
+        ],
+        "size": [
+          61,
+          247
+        ]
+      },
+      "raw_box": [
+        0,
+        640,
+        256,
+        768
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        256,
+        64
+      ],
+      "sha256": "8a3a294cd02cb4faf06a82efadd183cbfaac64705e564d245b6a2759522a116b"
+    },
+    {
+      "file": "Tiles/s3_medical_r01_c05.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s3_medical_r01_c05.png",
+        "source": "3.png",
+        "box_xyxy": [
+          422,
+          0,
+          479,
+          247
+        ],
+        "size": [
+          57,
+          247
+        ]
+      },
+      "raw_box": [
+        256,
+        640,
+        512,
+        768
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        320,
+        64
+      ],
+      "sha256": "6cf3d59278e6e4019929e645cb3e6b6bd43f0e0af10269586090bfbbbde94eaf"
+    },
+    {
+      "file": "Tiles/s3_medical_r01_c06.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s3_medical_r01_c06.png",
+        "source": "3.png",
+        "box_xyxy": [
+          479,
+          0,
+          602,
+          247
+        ],
+        "size": [
+          123,
+          247
+        ]
+      },
+      "raw_box": [
+        512,
+        640,
+        768,
+        768
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        384,
+        64
+      ],
+      "sha256": "98df036807506205078f1629ba2805fc2de84a2c8453e2980a6df6652088bfb5"
+    },
+    {
+      "file": "Tiles/s3_medical_r01_c07.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s3_medical_r01_c07.png",
+        "source": "3.png",
+        "box_xyxy": [
+          602,
+          0,
+          963,
+          247
+        ],
+        "size": [
+          361,
+          247
+        ]
+      },
+      "raw_box": [
+        768,
+        640,
+        1024,
+        768
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        448,
+        64
+      ],
+      "sha256": "f1e3b81ad9a3e502f16262254df16792637568e4b0b3a6c738579bbbe553093e"
+    },
+    {
+      "file": "Tiles/s4_upper_left.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_upper_left.png",
+        "source": "4.png",
+        "box_xyxy": [
+          0,
+          27,
+          354,
+          362
+        ],
+        "size": [
+          354,
+          335
+        ]
+      },
+      "raw_box": [
+        0,
+        768,
+        256,
+        896
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        0,
+        96
+      ],
+      "sha256": "052639cd696e383ec4e8346ba08cf27de7e4004cfe15b0f3da0794058e4784df"
+    },
+    {
+      "file": "Tiles/s4_upper_middle.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_upper_middle.png",
+        "source": "4.png",
+        "box_xyxy": [
+          364,
+          27,
+          597,
+          362
+        ],
+        "size": [
+          233,
+          335
+        ]
+      },
+      "raw_box": [
+        256,
+        768,
+        512,
+        896
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        64,
+        96
+      ],
+      "sha256": "b5961b47f38ca6e019ecc2374e59749b9c8de717c12b3f40dbc7002cfea334ad"
+    },
+    {
+      "file": "Tiles/s4_upper_right.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_upper_right.png",
+        "source": "4.png",
+        "box_xyxy": [
+          607,
+          27,
+          718,
+          362
+        ],
+        "size": [
+          111,
+          335
+        ]
+      },
+      "raw_box": [
+        512,
+        768,
+        768,
+        896
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        128,
+        96
+      ],
+      "sha256": "586462d10e87aa4054d91fa0c3d706c4fee0749027cac6c4645d350af7b51f2c"
+    },
+    {
+      "file": "Tiles/s4_upper_end.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_upper_end.png",
+        "source": "4.png",
+        "box_xyxy": [
+          729,
+          27,
+          963,
+          362
+        ],
+        "size": [
+          234,
+          335
+        ]
+      },
+      "raw_box": [
+        768,
+        768,
+        1024,
+        896
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        192,
+        96
+      ],
+      "sha256": "8964865f99f7350e6b9e16d57477e6e795e9083e599b1f60fceb965d61786282"
+    },
+    {
+      "file": "Tiles/s4_lit_left.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_lit_left.png",
+        "source": "4.png",
+        "box_xyxy": [
+          0,
+          371,
+          354,
+          606
+        ],
+        "size": [
+          354,
+          235
+        ]
+      },
+      "raw_box": [
+        0,
+        896,
+        256,
+        1024
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        256,
+        96
+      ],
+      "sha256": "186d71b98705244ffcbf1c6e47db6532244d14e2354b1e46710fba671ce45e82"
+    },
+    {
+      "file": "Tiles/s4_lit_middle.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_lit_middle.png",
+        "source": "4.png",
+        "box_xyxy": [
+          364,
+          371,
+          597,
+          606
+        ],
+        "size": [
+          233,
+          235
+        ]
+      },
+      "raw_box": [
+        256,
+        896,
+        512,
+        1024
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        320,
+        96
+      ],
+      "sha256": "6c2c946945b85d4f42c7e20aec33e660d5586ed0c2a13f7023515aa1a772589f"
+    },
+    {
+      "file": "Tiles/s4_lit_right.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_lit_right.png",
+        "source": "4.png",
+        "box_xyxy": [
+          607,
+          371,
+          718,
+          606
+        ],
+        "size": [
+          111,
+          235
+        ]
+      },
+      "raw_box": [
+        512,
+        896,
+        768,
+        1024
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        384,
+        96
+      ],
+      "sha256": "3443f909bc6fb6874590897dac569bd26bdc9b1c3d6883648cf92631a299b947"
+    },
+    {
+      "file": "Tiles/s4_lit_end.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_lit_end.png",
+        "source": "4.png",
+        "box_xyxy": [
+          729,
+          371,
+          963,
+          606
+        ],
+        "size": [
+          234,
+          235
+        ]
+      },
+      "raw_box": [
+        768,
+        896,
+        1024,
+        1024
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        448,
+        96
+      ],
+      "sha256": "7e17c11dccd3fe07edd21c5e80dcfa31ba51b9f659aaeae01328efc14e9c8407"
+    },
+    {
+      "file": "Tiles/s4_lower_left.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_lower_left.png",
+        "source": "4.png",
+        "box_xyxy": [
+          0,
+          617,
+          114,
+          848
+        ],
+        "size": [
+          114,
+          231
+        ]
+      },
+      "raw_box": [
+        0,
+        1024,
+        256,
+        1152
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        0,
+        128
+      ],
+      "sha256": "781b45fd3b05097675cfb6cffffb9f52e06f91ffd81246072b85955d4aa23a44"
+    },
+    {
+      "file": "Tiles/s4_jamb_left.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_jamb_left.png",
+        "source": "4.png",
+        "box_xyxy": [
+          364,
+          617,
+          474,
+          848
+        ],
+        "size": [
+          110,
+          231
+        ]
+      },
+      "raw_box": [
+        256,
+        1024,
+        512,
+        1152
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        64,
+        128
+      ],
+      "sha256": "e76c8f287ab16299dd31803451254cd98c6e1f3ee87ed49c426f46f60ed08651"
+    },
+    {
+      "file": "Tiles/s4_lower_panel.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_lower_panel.png",
+        "source": "4.png",
+        "box_xyxy": [
+          485,
+          617,
+          597,
+          848
+        ],
+        "size": [
+          112,
+          231
+        ]
+      },
+      "raw_box": [
+        512,
+        1024,
+        768,
+        1152
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        128,
+        128
+      ],
+      "sha256": "29e3dbb84f08fa8871d120ba589233f40ae15753b2f1637bee3f95348c777814"
+    },
+    {
+      "file": "Tiles/s4_jamb_right.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_jamb_right.png",
+        "source": "4.png",
+        "box_xyxy": [
+          607,
+          617,
+          718,
+          848
+        ],
+        "size": [
+          111,
+          231
+        ]
+      },
+      "raw_box": [
+        768,
+        1024,
+        1024,
+        1152
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        192,
+        128
+      ],
+      "sha256": "60eaf76a10cad1ddafefd3caa47c37f257e20ce1a714e8808ebfa06682bbc37c"
+    },
+    {
+      "file": "Tiles/s4_bottom_left.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_bottom_left.png",
+        "source": "4.png",
+        "box_xyxy": [
+          0,
+          858,
+          114,
+          969
+        ],
+        "size": [
+          114,
+          111
+        ]
+      },
+      "raw_box": [
+        0,
+        1152,
+        256,
+        1280
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        256,
+        128
+      ],
+      "sha256": "6bc3f62c680183350fa65df8954818c8c1f021ebeb6aaaacb2e4b911ae14d7e5"
+    },
+    {
+      "file": "Tiles/s4_bottom_middle.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_bottom_middle.png",
+        "source": "4.png",
+        "box_xyxy": [
+          364,
+          858,
+          474,
+          969
+        ],
+        "size": [
+          110,
+          111
+        ]
+      },
+      "raw_box": [
+        256,
+        1152,
+        512,
+        1280
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        320,
+        128
+      ],
+      "sha256": "6f28cf71d1cfa758755e33d3930101c1c7b2a5d4e1d80f31fab1052a4ac2830a"
+    },
+    {
+      "file": "Tiles/s4_bottom_panel.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_bottom_panel.png",
+        "source": "4.png",
+        "box_xyxy": [
+          485,
+          858,
+          597,
+          969
+        ],
+        "size": [
+          112,
+          111
+        ]
+      },
+      "raw_box": [
+        512,
+        1152,
+        768,
+        1280
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        384,
+        128
+      ],
+      "sha256": "2cd7b2eb2d1fbacfc192d7cf81c7aec6babda527a5aaa9cbb3d71d77ea66b952"
+    },
+    {
+      "file": "Tiles/s4_bottom_right.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_bottom_right.png",
+        "source": "4.png",
+        "box_xyxy": [
+          607,
+          858,
+          718,
+          969
+        ],
+        "size": [
+          111,
+          111
+        ]
+      },
+      "raw_box": [
+        768,
+        1152,
+        1024,
+        1280
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        448,
+        128
+      ],
+      "sha256": "2f6c45d665389f0f3c83e851ea25cbf4bf0a159e9c2a2fa4830c5f76f9fbeffa"
+    },
+    {
+      "file": "Tiles/s4_bottom_end.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s4_bottom_end.png",
+        "source": "4.png",
+        "box_xyxy": [
+          849,
+          858,
+          963,
+          969
+        ],
+        "size": [
+          114,
+          111
+        ]
+      },
+      "raw_box": [
+        0,
+        1280,
+        256,
+        1408
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        0,
+        160
+      ],
+      "sha256": "bbf06c2fe9b256aff778bacd60d188ef8d21d3889db580d15ab38ca0b1e8b428"
+    },
+    {
+      "file": "Tiles/s5_armory_r01_c01.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s5_armory_r01_c01.png",
+        "source": "5.png",
+        "box_xyxy": [
+          0,
+          26,
+          239,
+          248
+        ],
+        "size": [
+          239,
+          222
+        ]
+      },
+      "raw_box": [
+        256,
+        1280,
+        512,
+        1408
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        64,
+        160
+      ],
+      "sha256": "d5ad8f11ffb55f4f731c4f51163c1794f151cfe58faf964737c7e1d3b52b9cf6"
+    },
+    {
+      "file": "Tiles/s5_armory_r01_c02.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s5_armory_r01_c02.png",
+        "source": "5.png",
+        "box_xyxy": [
+          239,
+          26,
+          479,
+          248
+        ],
+        "size": [
+          240,
+          222
+        ]
+      },
+      "raw_box": [
+        512,
+        1280,
+        768,
+        1408
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        128,
+        160
+      ],
+      "sha256": "d150e51336689241495f51f1176872aaddd3aaf3eafe06dd2d6faf16a52e90af"
+    },
+    {
+      "file": "Tiles/s5_armory_r01_c03.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s5_armory_r01_c03.png",
+        "source": "5.png",
+        "box_xyxy": [
+          479,
+          26,
+          719,
+          248
+        ],
+        "size": [
+          240,
+          222
+        ]
+      },
+      "raw_box": [
+        768,
+        1280,
+        1024,
+        1408
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        192,
+        160
+      ],
+      "sha256": "ae800aa18d1c26e79973ec9fbbc06cd85dc75e967caf6d740edc7c16e37951e2"
+    },
+    {
+      "file": "Tiles/s5_armory_r01_c04.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s5_armory_r01_c04.png",
+        "source": "5.png",
+        "box_xyxy": [
+          719,
+          26,
+          963,
+          248
+        ],
+        "size": [
+          244,
+          222
+        ]
+      },
+      "raw_box": [
+        0,
+        1408,
+        256,
+        1536
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        256,
+        160
+      ],
+      "sha256": "59510fb6f98b14e594ba5e9988aba6db14c6eec01002a16b73bfbcd944a1128c"
+    },
+    {
+      "file": "Tiles/s5_door_panel.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s5_door_panel.png",
+        "source": "5.png",
+        "box_xyxy": [
+          0,
+          977,
+          239,
+          1215
+        ],
+        "size": [
+          239,
+          238
+        ]
+      },
+      "raw_box": [
+        256,
+        1408,
+        512,
+        1536
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        320,
+        160
+      ],
+      "sha256": "2fea15e9a3439346684bcacdc79f18b0f1645db592d9730fc159384a56ae67c6"
+    },
+    {
+      "file": "Tiles/s5_lit_panel.png",
+      "role": "north_wall",
+      "source": {
+        "file": "Walls/s5_lit_panel.png",
+        "source": "5.png",
+        "box_xyxy": [
+          239,
+          977,
+          477,
+          1215
+        ],
+        "size": [
+          238,
+          238
+        ]
+      },
+      "raw_box": [
+        512,
+        1408,
+        768,
+        1536
+      ],
+      "size": [
+        64,
+        32
+      ],
+      "cap_rows": [
+        0,
+        8
+      ],
+      "face_rows": [
+        8,
+        30
+      ],
+      "base_rows": [
+        30,
+        32
+      ],
+      "atlas_xy": [
+        384,
+        160
+      ],
+      "sha256": "38480b2c850a1be21c028d777442258bccb94e95101dcee8646206e4aed40a51"
+    },
+    {
+      "file": "Boundaries/wall_cap_north.png",
+      "role": "cap_only_north",
+      "derived_from": "Tiles/s1_hull_r01_c01.png",
+      "size": [
+        64,
+        32
+      ],
+      "atlas_xy": [
+        448,
+        160
+      ],
+      "sha256": "054368001c32d2bd34bf72dbd08130c6f34c472508be179a6f913375476b8dfd"
+    },
+    {
+      "file": "Boundaries/wall_cap_south.png",
+      "role": "cap_only_south",
+      "derived_from": "Tiles/s1_hull_r01_c01.png",
+      "size": [
+        64,
+        32
+      ],
+      "atlas_xy": [
+        0,
+        192
+      ],
+      "sha256": "8d62107762759e1c59b8ba68218e8ff2304d4752d69bc0028cc3dfe5b42d9f22"
+    },
+    {
+      "file": "Boundaries/wall_cap_west.png",
+      "role": "cap_only_west",
+      "derived_from": "Tiles/s1_hull_r01_c01.png",
+      "size": [
+        64,
+        32
+      ],
+      "atlas_xy": [
+        64,
+        192
+      ],
+      "sha256": "fa0b020f3524a152e4604e1c9abb45888de09363eb55a74cc78bfd59de7e9fcb"
+    },
+    {
+      "file": "Boundaries/wall_cap_east.png",
+      "role": "cap_only_east",
+      "derived_from": "Tiles/s1_hull_r01_c01.png",
+      "size": [
+        64,
+        32
+      ],
+      "atlas_xy": [
+        128,
+        192
+      ],
+      "sha256": "b165afc18bfd6eec74f4b587e8d0a2b4ac266abcbd89c43ccc605db5768940b0"
+    },
+    {
+      "file": "Boundaries/wall_cap_north_west.png",
+      "role": "cap_only_north_west",
+      "derived_from": "Tiles/s1_hull_r01_c01.png",
+      "size": [
+        64,
+        32
+      ],
+      "atlas_xy": [
+        192,
+        192
+      ],
+      "sha256": "f364775391314b5943efaa39d446209a21378ae5846c460cdb1809d261f3a50e"
+    },
+    {
+      "file": "Boundaries/wall_cap_north_east.png",
+      "role": "cap_only_north_east",
+      "derived_from": "Tiles/s1_hull_r01_c01.png",
+      "size": [
+        64,
+        32
+      ],
+      "atlas_xy": [
+        256,
+        192
+      ],
+      "sha256": "5a6c17bb630f36fcd0a7f1bc8bf637cec71f23abe43e0279ccf0a486c52f5f38"
+    },
+    {
+      "file": "Boundaries/wall_cap_south_west.png",
+      "role": "cap_only_south_west",
+      "derived_from": "Tiles/s1_hull_r01_c01.png",
+      "size": [
+        64,
+        32
+      ],
+      "atlas_xy": [
+        320,
+        192
+      ],
+      "sha256": "215a868892f18000f82e75a45036e1c59954319af11778122ded9a00dcee2bcc"
+    },
+    {
+      "file": "Boundaries/wall_cap_south_east.png",
+      "role": "cap_only_south_east",
+      "derived_from": "Tiles/s1_hull_r01_c01.png",
+      "size": [
+        64,
+        32
+      ],
+      "atlas_xy": [
+        384,
+        192
+      ],
+      "sha256": "18a1d74dce0038ca4eb82f4907069ce5d9dd89c0ff2534b49d3119b48522b882"
+    }
+  ]
+}

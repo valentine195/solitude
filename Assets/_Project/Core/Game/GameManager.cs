@@ -1,52 +1,18 @@
-using SOLITUDE.Core.Input;
+using System;
+using SOLITUDE.Application;
 using UnityEngine;
-
 namespace SOLITUDE.Core.Systems
 {
-    /// <summary>
-    /// Root bootstrap for SOLITUDE runtime systems.
-    /// Keep this extremely lightweight.
-    /// </summary>
     public class GameManager : MonoBehaviour
     {
-        public static GameManager Instance { get; private set; }
-
         [SerializeField] private TimeSystem timeSystem;
-
-        [Header("Game State")]
-        public bool IsPaused => timeSystem.IsPaused;
-
-        private void Awake()
-        {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-
-        public void Start()
-        {
-            InputRouter.Instance.SetMode(InputMode.Gameplay);
-        }
-
-        public void PauseGame()
-        {
-            timeSystem.Pause();
-        }
-
-        public void ResumeGame()
-        {
-            timeSystem.Resume();
-        }
-
-        public void TogglePause()
-        {
-            if (IsPaused) ResumeGame();
-            else PauseGame();
-        }
+        private PauseCoordinator pause;
+        private IDisposable manual;
+        public bool IsPaused => pause?.IsPaused ?? false;
+        public void Initialize(PauseCoordinator pause) => this.pause = pause;
+        public void PauseGame() { if (manual == null && pause != null) manual = pause.Acquire(); }
+        public void ResumeGame() { manual?.Dispose(); manual = null; }
+        public void TogglePause() { if (manual == null) PauseGame(); else ResumeGame(); }
+        public void Release() { ResumeGame(); pause = null; }
     }
 }

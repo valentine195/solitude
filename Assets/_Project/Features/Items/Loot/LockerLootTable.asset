@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c39d42bfb24744720a3f78c975ed5c5c, type: 3}
+  m_Name: LockerLootTable
+  m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Items.LootTable
+  entries:
+  - item: {fileID: 11400000, guid: c756a156ba7f34cb2b65e32264413a60, type: 2}
+    weight: 1
+    minQuantity: 1
+    maxQuantity: 3
+  - item: {fileID: 11400000, guid: 8d158110df66c4994b8d575233f619c5, type: 2}
+    weight: 1
+    minQuantity: 1
+    maxQuantity: 2
+  minRolls: 1
+  maxRolls: 3

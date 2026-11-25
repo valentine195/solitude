@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "reference": "Assets/_Project/Art/Tiles/Walls/Sprites/wall_panel_1.aseprite",
+  "reference_sha256": "b9135c20a37805cb884c11b81f37640a8f0e1292b04e0186531ccae28d49ea3e",
+  "reference_size": [
+    128,
+    256
+  ],
+  "reference_opaque_colors": 2407,
+  "variant_results": {
+    "pristine": {
+      "dimensions": [
+        128,
+        256
+      ],
+      "opaque_colors": 11,
+      "binary_alpha": true,
+      "reference_alpha_exact": true,
+      "palette_subset_of_reference": true,
+      "horizontal_edge_mismatches": 0,
+      "locked_border_mismatches": 0,
+      "overlay_recomposition_exact": true,
+      "aseprite_roundtrip_exact": true,
+      "changed_pixels": 0,
+      "changed_opaque_percent": 0.0,
+      "png_sha256": "bd6f846b68ab2dd1865068b2212ef5245ce7a6024267d63cdf7f10763d9474e9"
+    },
+    "lightly_worn": {
+      "dimensions": [
+        128,
+        256
+      ],
+      "opaque_colors": 11,
+      "binary_alpha": true,
+      "reference_alpha_exact": true,
+      "palette_subset_of_reference": true,
+      "horizontal_edge_mismatches": 0,
+      "locked_border_mismatches": 0,
+      "overlay_recomposition_exact": true,
+      "aseprite_roundtrip_exact": true,
+      "changed_pixels": 105,
+      "changed_opaque_percent": 0.34,
+      "png_sha256": "ebd58123000ece53c2fc4d51362a77712d929da0f1474a4974967f53c0d2af8e"
+    },
+    "heavily_damaged": {
+      "dimensions": [
+        128,
+        256
+      ],
+      "opaque_colors": 11,
+      "binary_alpha": true,
+      "reference_alpha_exact": true,
+      "palette_subset_of_reference": true,
+      "horizontal_edge_mismatches": 0,
+      "locked_border_mismatches": 0,
+      "overlay_recomposition_exact": true,
+      "aseprite_roundtrip_exact": true,
+      "changed_pixels": 1850,
+      "changed_opaque_percent": 6.07,
+      "png_sha256": "0b7ce6c7c1166bcb556b45508ffb3a74bc1f8bb96d34bad5e8f85af412afa103"
+    }
+  },
+  "comparison": {
+    "opaque_rgb_mean_absolute_error": 12.93,
+    "note": "Comparison is a clean procedural reconstruction, not a pixel-exact trace. MAE is descriptive, not an aesthetic score."
+  },
+  "benchmark_seconds": [
+    0.167,
+    0.165,
+    0.168
+  ],
+  "benchmark_median_seconds": 0.167,
+  "tiling_scope": "Horizontal only. 3x1 and 3x3 generated. Top/bottom include terminal cap/plinth; vertical repeat intentionally not seamless.",
+  "unity_imported": false
+}

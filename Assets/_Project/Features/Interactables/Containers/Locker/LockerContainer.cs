@@ -1,34 +1,35 @@
 using System;
-using System.Collections.Generic;
-using UnityEngine;
 using SOLITUDE.Containers;
-
+using SOLITUDE.Items;
+using SOLITUDE.SaveLoad;
+using UnityEngine;
 namespace SOLITUDE.Features.Interactables
 {
-    /// <summary>
-    /// Thin MonoBehaviour adapter over the shared Container model. A Chest or
-    /// Locker should look almost identical to this - only the interaction
-    /// trigger (always-open vs. requires-interact vs. requires-key) differs.
-    /// </summary>
-    public class LockerContainer : MonoBehaviour, IContainerSource
+    public interface IContainerScreenRequests { bool Open(LockerContainer source); void Close(LockerContainer source); }
+    [RequireComponent(typeof(SaveableId))]
+    public class LockerContainer : MonoBehaviour, IContainerSource, ISaveable<ContainerSaveData>
     {
         [SerializeField] private int capacity = 12;
-
-        private Container container;
-        public Container Container => container ??= new Container(capacity);
+        [SerializeField] private SaveableId saveableId;
+        [SerializeField] private LootTable lootTable;
+        private Func<LockerContainer, IContainerReader> initialize;
+        private Action<ContainerHandle, ContainerSaveData> restore;
+        public IContainerReader Container { get; private set; }
         public string Label => "Locker";
-
-        public int Capacity => capacity;
-
-        public event Action<int> SlotChanged
+        public int Capacity => Container?.Capacity ?? capacity;
+        public string PersistentId => (saveableId != null ? saveableId : GetComponent<SaveableId>()).Value;
+        public LootTable Loot => lootTable;
+        public void Initialize(Func<LockerContainer, IContainerReader> initialize, Action<ContainerHandle, ContainerSaveData> restore)
+        { this.initialize = initialize; this.restore = restore; }
+        public bool EnsureInitialized()
         {
-            add => container.SlotChanged += value;
-            remove => container.SlotChanged -= value;
+            if (Container?.IsAvailable == true) return true;
+            if (initialize == null) return false;
+            try { Container = initialize(this); return Container?.IsAvailable == true; }
+            catch (Exception error) { Debug.LogError("[LockerContainer] " + error.Message, this); return false; }
         }
-
-        private void Awake()
-        {
-            container = new Container(capacity);
-        }
+        public ContainerSaveData CaptureState() => ContainerSaveSerializer.Capture(Container);
+        public void RestoreState(ContainerSaveData state) { if (EnsureInitialized()) restore?.Invoke(Container.Handle, state); }
+        public void Release() { Container = null; initialize = null; restore = null; }
     }
 }

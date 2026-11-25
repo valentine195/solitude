@@ -7,7 +7,8 @@ namespace SOLITUDE.Modals
     {
         [SerializeField] protected GameObject root;
 
-        public bool IsOpen => root.activeSelf;
+        public bool IsConfigured => root != null;
+        public bool IsOpen => root != null && root.activeSelf;
 
         public virtual void Open() => root.SetActive(true);
         public virtual void Close() => root.SetActive(false);

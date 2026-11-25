@@ -19,12 +19,41 @@ namespace SOLITUDE.Player
 
         private IInteractable currentTarget;
 
+        private SceneInteractionEvents events;
+        private InteractionFeedbackService feedback;
+        private bool inputAllowed;
+        public void Bind(SceneInteractionEvents source, InteractionFeedbackService service)
+        { Release(); events = source; feedback = service; }
+        public void Release()
+        {
+            SetInputAllowed(false);
+            events = null; feedback = null;
+        }
+        private void OnDestroy() => Release();
+        public void SetInputAllowed(bool allowed)
+        {
+            inputAllowed = allowed;
+            if (!allowed) ClearFocus();
+        }
         void Update()
         {
+            if (!inputAllowed) return;
             IInteractable target = GetBestFromCache();
+
 
             if (target != currentTarget)
             {
+                if (debugInteraction)
+                {
+                    string name = target == null
+                        ? "null"
+                        : (target as MonoBehaviour)?.gameObject.name ?? target.GetType().Name;
+                    string cname = target == null
+                        ? "null"
+                        : (currentTarget as MonoBehaviour)?.gameObject.name ?? currentTarget.GetType().Name;
+
+                    Debug.Log($"[Interactor] Focus change -> {name} -> {cname}");
+                }
                 currentTarget = target;
 
                 if (debugInteraction)
@@ -36,33 +65,38 @@ namespace SOLITUDE.Player
                     Debug.Log($"[Interactor] Focus -> {name}");
                 }
 
-                InteractionEventBus.Publish(
+                events?.Publish(
                     new InteractionFocusChangedEvent(target)
                 );
             }
         }
 
-        private void OnEnable()
+        public void ClearFocus()
         {
-            GameInput.Actions.Gameplay.Interact.performed += TryInteract;
+            if (currentTarget == null) return;
+            currentTarget = null; events?.Publish(new InteractionFocusChangedEvent(null));
         }
-        private void OnDisable()
+        public void RebuildProximityAfterRelocation()
         {
-            // Update() stops running while disabled (e.g. during a
-            // cutscene), so without this the last-focused prompt would
-            // stay on screen with no further FocusChanged event to hide
-            // it. Explicitly clear focus so the UI hides the prompt, and
-            // let OnEnable's next Update() naturally recompute it.
-            if (currentTarget != null)
-            {
-                currentTarget = null;
-                InteractionEventBus.Publish(new InteractionFocusChangedEvent(null));
-            }
-            GameInput.Actions.Gameplay.Interact.performed -= TryInteract;
+            ClearFocus(); nearby.Clear();
+            var playerColliders = GetComponents<Collider2D>();
+            foreach (var root in gameObject.scene.GetRootGameObjects())
+                foreach (var sensor in root.GetComponentsInChildren<InteractableProximitySensor>())
+                {
+                    if (!sensor.isActiveAndEnabled) continue;
+                    var target = sensor.GetComponentInParent<IInteractable>();
+                    if (target == null) continue;
+                    foreach (var trigger in sensor.GetComponents<Collider2D>())
+                        if (trigger.enabled && trigger.isTrigger)
+                            foreach (var player in playerColliders)
+                                if (player.enabled && Physics2D.Distance(trigger, player).isOverlapped) nearby.Add(target);
+                }
         }
+        private void OnDisable() => ClearFocus();
 
-        private void TryInteract(InputAction.CallbackContext ctx)
+        public void TryInteract()
         {
+            if (!inputAllowed) return;
             if (currentTarget == null)
             {
                 Debug.Log("[PlayerInteractor] No target");
@@ -76,20 +110,20 @@ namespace SOLITUDE.Player
             // up to return false.
             if (!currentTarget.CanInteract(this))
             {
-                InteractionFeedback.Handle(InteractionResult.Blocked());
+                feedback?.Handle(InteractionResult.Blocked());
                 return;
             }
 
             var result = currentTarget.Interact(this);
 
-            InteractionFeedback.Handle(result);
+            feedback?.Handle(result);
 
             // "Triggered" means an interact attempt actually reached a
             // target that allowed it - a blocked attempt above never
             // publishes this, so listeners (achievements, quest tracking,
             // etc.) can treat Triggered as "something really happened"
             // rather than "the button was pressed".
-            InteractionEventBus.Publish(
+            events?.Publish(
                 new InteractionTriggeredEvent(currentTarget, this)
             );
         }
@@ -139,9 +173,6 @@ namespace SOLITUDE.Player
             }
 
             nearby.Remove(interactable);
-
-            if (ReferenceEquals(currentTarget, interactable))
-                currentTarget = null;
         }
     }
 }

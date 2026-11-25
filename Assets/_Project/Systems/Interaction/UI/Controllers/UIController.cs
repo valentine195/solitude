@@ -4,43 +4,61 @@ using SOLITUDE.Core.Interaction;
 
 namespace SOLITUDE.Core.UI
 {
-    /// <summary>
-    /// Listens to interaction events and drives UI views.
-    /// Fully decoupled from gameplay systems.
-    /// </summary>
     public class UIController : MonoBehaviour
     {
+        private IInteractable focused;
+        private string shownPrompt;
+        private SceneInteractionEvents events;
+        private InteractionFeedbackService feedback;
+        private bool listening;
+
         [Header("Views")]
         [SerializeField] private InteractionPromptView interactionPrompt;
         [SerializeField] private InteractionFeedbackView feedbackView;
+        public InteractionFeedbackView FeedbackView => feedbackView;
 
-        private void Awake()
-
+        public void ValidateAuthoring()
         {
-
-            InteractionFeedback.Initialize(feedbackView);
-
+            if (interactionPrompt == null || feedbackView == null ||
+                interactionPrompt.gameObject.scene != gameObject.scene || feedbackView.gameObject.scene != gameObject.scene)
+                throw new System.InvalidOperationException("Interaction UI views are missing or belong to another scene.");
+            interactionPrompt.ValidateAuthoring(); feedbackView.ValidateAuthoring();
         }
-
-        private void OnEnable()
+        public void Bind(SceneInteractionEvents source, InteractionFeedbackService service)
+        { Release(); events = source; feedback = service; Attach(); }
+        private void Attach()
         {
-            InteractionEventBus.OnFocusChanged += HandleFocusChanged;
+            if (listening || events == null || !isActiveAndEnabled) return;
+            events.FocusChanged += HandleFocusChanged; listening = true;
+            focused = events.CurrentFocus; RefreshPrompt();
         }
-
-        private void OnDisable()
+        private void Detach()
         {
-            InteractionEventBus.OnFocusChanged -= HandleFocusChanged;
+            if (listening) events.FocusChanged -= HandleFocusChanged;
+            listening = false; focused = null; shownPrompt = null;
+            if (interactionPrompt != null) interactionPrompt.Hide();
+            feedback?.Clear();
         }
-
+        public void Release() { Detach(); events = null; feedback = null; }
+        private void OnEnable() => Attach();
+        private void OnDisable() => Detach();
+        private void OnDestroy() => Release();
         private void HandleFocusChanged(InteractionFocusChangedEvent evt)
+        { focused = evt.interactable; RefreshPrompt(); }
+        private void LateUpdate() => RefreshPrompt();
+        private void RefreshPrompt()
         {
-            if (evt.interactable == null)
+            if (focused == null || (focused is Object target && target == null))
             {
-                interactionPrompt.Hide();
+                focused = null; shownPrompt = null;
+                if (interactionPrompt != null) interactionPrompt.Hide();
                 return;
             }
-
-            interactionPrompt.Show(evt.interactable.GetPrompt());
+            string current = focused.GetPrompt();
+            if (interactionPrompt == null) return;
+            interactionPrompt.SetTarget((focused as MonoBehaviour)?.transform);
+            if (current == shownPrompt) return;
+            shownPrompt = current; interactionPrompt.Show(current);
         }
     }
 }

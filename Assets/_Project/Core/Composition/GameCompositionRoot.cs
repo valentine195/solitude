@@ -1,0 +1,251 @@
+using System;
+using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
+using SOLITUDE.Application;
+using SOLITUDE.Containers;
+using SOLITUDE.Core.Input;
+using SOLITUDE.Core.Systems;
+using SOLITUDE.Features.Interactables;
+using SOLITUDE.Items;
+using SOLITUDE.SaveLoad;
+using SOLITUDE.World.Restoration;
+using SOLITUDE.Tasks;
+using SOLITUDE.Player.Succession;
+using SOLITUDE.Survivors;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+namespace SOLITUDE.Composition
+{
+    public enum RuntimeStartupState { Unready, Ready, Failed }
+    [DefaultExecutionOrder(-2000)]
+    public sealed class GameCompositionRoot : MonoBehaviour, IContainerScreenRequests
+    {
+        private static GameCompositionRoot active;
+        [SerializeField] private GameRuntimeConfig config;
+        [SerializeField] private SaveGameService persistence;
+        [SerializeField] private UnityInputHost input;
+        [SerializeField] private TimeSystem clock;
+        [SerializeField] private GameManager game;
+        private ContainerSaveSession session;
+        private TaskJournal tasks;
+        public ITaskJournalReader Tasks => tasks;
+        private PickupCollectionService pickups;
+        private ItemCatalog catalog;
+        private ItemPresentationCatalog presentations;
+        private ItemCapabilityCatalog capabilities;
+        private StartingLoadoutSpec startingLoadout;
+        private Dictionary<LootTable, RuntimeLootTable> loot;
+        private PauseCoordinator pause;
+        private InputPolicyCoordinator policy;
+        private ContainerGestureCoordinator gestures;
+        private SceneBindings interactive;
+        private readonly Dictionary<Scene, SceneBindings> scopes = new();
+        private IDisposable failedPause;
+        private bool initialized;
+        private bool disposableSession;
+        private const string CryobayScenePath = "Assets/_Project/Scenes/Wakeup.unity";
+        private string startupDestination;
+        public bool UsesDisposableSession => disposableSession;
+        public RuntimeStartupState State { get; private set; }
+        private void Awake()
+        {
+            if (active != null && active != this)
+            { enabled = false; Destroy(gameObject); return; } // Only dedicated bootstrap objects carry this component.
+            var startupScene = gameObject.scene;
+            active = this; DontDestroyOnLoad(gameObject);
+            try
+            {
+                if (config == null || config.database == null || persistence == null || input == null || clock == null || game == null)
+                    throw new InvalidOperationException("Bootstrap authoring/adapter references are incomplete.");
+                catalog = config.database.BuildRuntimeCatalog(); presentations = config.database.BuildPresentationCatalog();
+                capabilities = config.database.BuildCapabilityCatalog();
+                if (config.startingLoadout == null) throw new InvalidOperationException("Starting loadout configuration is missing.");
+                startingLoadout = config.startingLoadout.Compile(catalog);
+                loot = new Dictionary<LootTable, RuntimeLootTable>();
+                foreach (var table in config.lootTables)
+                { if (table == null || loot.ContainsKey(table)) throw new InvalidOperationException("Null or duplicate configured loot table."); loot.Add(table, table.Compile(catalog)); }
+                pause = new PauseCoordinator(); policy = new InputPolicyCoordinator(pause);
+                clock.Initialize(pause); game.Initialize(pause); input.Initialize(policy);
+                var demo = DemoIn(startupScene);
+                disposableSession = demo != null;
+                if (demo != null) persistence.Configure(demo.CreateStore(catalog));
+                var data = persistence.Load(config.worldSeed, catalog, out var error);
+                if (data == null) throw new InvalidOperationException(error);
+                CreateSession(data);
+                if (!disposableSession && data.survivor != null)
+                {
+                    startupDestination = data.survivor.scenePath;
+                    if (!UnityEngine.Application.CanStreamedLevelBeLoaded(startupDestination))
+                        throw new System.IO.InvalidDataException("Saved production scene is unavailable: " + startupDestination);
+                }
+                SceneManager.sceneLoaded += Loaded; SceneManager.sceneUnloaded += Unloaded; initialized = true;
+                if (startupDestination != null && startupDestination != startupScene.path)
+                { StartCoroutine(LoadSavedScene()); return; }
+                for (int i = 0; i < SceneManager.sceneCount; i++) BindScene(SceneManager.GetSceneAt(i));
+                // The initial scene can still be loading during bootstrap Awake.
+                // sceneLoaded binds it before input is allowed.
+                if (interactive != null) { FinishStartup(); }
+            }
+            catch (Exception failure) { Fail(failure); }
+        }
+        private void FinishStartup()
+        {
+            persistence.CompleteRecovery();
+            var outcome = interactive.InitializeStartingLoadout(startingLoadout, persistence.TryFlush);
+            if (outcome != StartingLoadoutOutcome.Ready && outcome != StartingLoadoutOutcome.AlreadyInitialized)
+                throw new System.IO.IOException("Starting equipment initialization failed: " + interactive.StartingLoadoutError);
+            startupDestination = null;
+            State = RuntimeStartupState.Ready; policy.SetReady(true);
+            if (persistence.RecoveryNoticePending) interactive.ShowRecoveryNotice(persistence.AcknowledgeRecoveryNotice);
+        }
+        public bool RetryStartingEquipment()
+        {
+            if (interactive == null || session == null || State != RuntimeStartupState.Failed) return false;
+            try
+            {
+                persistence.Initialize(session, StartNewSave); FinishStartup();
+                failedPause?.Dispose(); failedPause = null; policy.SetTransition(false); return true;
+            }
+            catch (Exception error) { Fail(error); return false; }
+        }
+        private void CreateSession(SaveGameData data)
+        {
+            tasks?.Dispose(); tasks = new TaskJournal(); tasks.ObserverError += Debug.LogException;
+            session = new ContainerSaveSession(data, catalog); session.Commands.ObserverError += Debug.LogException;
+            pickups = new PickupCollectionService(session);
+            gestures = new ContainerGestureCoordinator(new ContainerInteractionController(session.Commands), policy);
+            persistence.Initialize(session, StartNewSave);
+            persistence.ConfigureCapture(CaptureLivingState);
+        }
+        private void CaptureLivingState()
+        {
+            if (disposableSession || State != RuntimeStartupState.Ready || interactive == null || session == null
+                || !interactive.gameObject.scene.isLoaded) return;
+            var saved = session.Capture();
+            if (saved.survivor == null || saved.pendingDeath != null) return;
+            var roots = interactive.gameObject.scene.GetRootGameObjects();
+            var feature = roots.SelectMany(r => r.GetComponentsInChildren<SurvivorSuccessionComposition>(true)).SingleOrDefault();
+            var avatar = roots.SelectMany(r => r.GetComponentsInChildren<SurvivorAvatarAdapter>(true)).SingleOrDefault();
+            if (feature?.Coordinator?.Current?.Status != SurvivorLifeStatus.Active || avatar == null || !avatar.IsAvailable
+                || feature.Coordinator.Current.Id.ToString("D") != saved.survivor.id) return;
+            session.StoreLifecycle(avatar.Capture(feature.Coordinator.Current.Id), saved.expedition);
+        }
+        private IEnumerator LoadSavedScene()
+        {
+            // Let the opening scene finish loading without binding or overwriting the saved survivor.
+            yield return null;
+            AsyncOperation loading;
+            try { loading = SceneManager.LoadSceneAsync(startupDestination, LoadSceneMode.Single); }
+            catch (Exception error) { Fail(error); yield break; }
+            yield return loading;
+        }
+        private void Fail(Exception error)
+        {
+            if(error is System.IO.InvalidDataException) persistence?.RejectRestore(error.Message);
+            State = RuntimeStartupState.Failed; policy?.SetReady(false);
+            if (pause != null && failedPause == null) failedPause = pause.Acquire();
+            Debug.LogError("[GameCompositionRoot] Runtime unavailable; save preserved: " + error.Message);
+            // Recovery remains explicit even when save validation prevented session construction.
+            persistence?.Initialize(session, StartNewSave, false);
+        }
+        private void Loaded(Scene scene, LoadSceneMode mode)
+        {
+            if (startupDestination != null && scene.path != startupDestination) return;
+            try { BindScene(scene);
+                if (mode == LoadSceneMode.Single && interactive == null) throw new System.IO.InvalidDataException("No composed player scene is available.");
+                if (interactive != null && failedPause == null) { FinishStartup(); policy.SetTransition(false); } }
+            catch (Exception error) { Fail(error); }
+        }
+        private static RestorationDemoSession DemoIn(Scene scene)
+        {
+            RestorationDemoSession found = null;
+            foreach (var root in scene.GetRootGameObjects())
+                foreach (var marker in root.GetComponentsInChildren<RestorationDemoSession>(true))
+                {
+                    if (found != null) throw new InvalidOperationException("Duplicate disposable demo marker.");
+                    found = marker;
+                }
+            return found;
+        }
+        private void BindScene(Scene scene)
+        {
+            if (!scene.isLoaded || scopes.ContainsKey(scene) || session == null) return;
+            if (startupDestination != null && scene.path != startupDestination) return;
+            SceneBindings entry = null;
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                var entries = root.GetComponentsInChildren<SceneBindings>(true);
+                foreach (var candidate in entries)
+                { if (entry != null) throw new InvalidOperationException("Duplicate SceneBindings in " + scene.name); entry = candidate; }
+            }
+            if (entry == null) return;
+            if (entry.HasPlayer && interactive != null) throw new InvalidOperationException("Only one local player scene may be composed.");
+            var demo = DemoIn(scene);
+            if (entry.HasPlayer && (demo != null) != disposableSession)
+                throw new InvalidOperationException("Demo and production sessions cannot be mixed. Stop Play mode and open the scene directly.");
+            if (entry.HasPlayer && disposableSession)
+            {
+                session.Reset(config.worldSeed, releaseOwners: true);
+                tasks?.Dispose(); tasks = new TaskJournal(); tasks.ObserverError += Debug.LogException;
+            }
+            entry.ConfigureLifecyclePersistence(!disposableSession);
+            entry.ConfigureCapabilities(capabilities);
+            entry.Initialize(session, pickups, presentations, loot, gestures, policy, pause, this, input, game, () => ReleaseScene(scene), tasks);
+            scopes.Add(scene, entry);
+            if (entry.HasPlayer) interactive = entry;
+        }
+        private void Unloaded(Scene scene) => ReleaseScene(scene);
+        private void ReleaseScene(Scene scene)
+        {
+            if (!scopes.TryGetValue(scene, out var scope)) return;
+            scopes.Remove(scene);
+            if (ReferenceEquals(interactive, scope)) { policy.SetReady(false); input.Bind(null, null, null, null, null, null); interactive = null; }
+            scope.Release();
+        }
+        public bool Open(LockerContainer source) => State == RuntimeStartupState.Ready && policy.Ready && interactive != null && interactive.Open(source);
+        public void Close(LockerContainer source) => interactive?.Close(source);
+        public AsyncOperation TransitionTo(string scenePath)
+        {
+            if (State != RuntimeStartupState.Ready || !UnityEngine.Application.CanStreamedLevelBeLoaded(scenePath))
+                throw new InvalidOperationException("Scene transition is unavailable: " + scenePath);
+            policy.SetTransition(true);
+            try
+            {
+                interactive?.CloseForTransition();
+                if (!persistence.TryFlush())
+                    throw new System.IO.IOException("Scene transition save failed: " + persistence.LastSaveError);
+                return SceneManager.LoadSceneAsync(scenePath, LoadSceneMode.Single);
+            }
+            catch { policy.SetTransition(false); throw; }
+        }
+        [ContextMenu("Start New Save")]
+        public void StartNewSave()
+        {
+            if (catalog == null || pause == null || loot == null) return;
+            startupDestination = null;
+            policy.SetTransition(true); failedPause?.Dispose(); failedPause = null;
+            foreach (var scope in new List<SceneBindings>(scopes.Values)) scope.Release();
+            scopes.Clear(); interactive = null; input.Bind(null, null, null, null, null, null); game.ResumeGame();
+            tasks?.Dispose(); tasks = new TaskJournal(); tasks.ObserverError += Debug.LogException;
+            if (session == null) CreateSession(new SaveGameData { worldSeed = config.worldSeed });
+            persistence.BeginNewSave();
+            session.Reset(config.worldSeed, releaseOwners: true); persistence.Initialize(session, StartNewSave);
+            if (!persistence.TryFlush())
+            { Fail(new System.IO.IOException("New save failed: " + persistence.LastSaveError)); return; }
+            if (!initialized) { SceneManager.sceneLoaded += Loaded; SceneManager.sceneUnloaded += Unloaded; initialized = true; }
+            var path = disposableSession ? SceneManager.GetActiveScene().path : CryobayScenePath;
+            if (!string.IsNullOrEmpty(path)) SceneManager.LoadScene(path);
+        }
+        private void OnDestroy()
+        {
+            if (active != this) return;
+            policy?.SetTransition(true); persistence?.Flush();
+            foreach (var scope in new List<SceneBindings>(scopes.Values)) scope.Release(); scopes.Clear();
+            input?.Release(); persistence?.Release(); game?.Release(); failedPause?.Dispose(); policy?.Dispose(); clock?.Release();
+            tasks?.Dispose(); tasks = null;
+            SceneManager.sceneLoaded -= Loaded; SceneManager.sceneUnloaded -= Unloaded; active = null;
+        }
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)] private static void ResetStatics() => active = null;
+    }
+}

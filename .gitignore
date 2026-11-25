@@ -106,6 +106,20 @@ InitTestScene*.unity*
 /[Aa]ssets/[Ss]ceneDependencyCache*
 
 _Project.zip
+_Project.zip.meta
+# Numbered root-level copies are disposable review handoffs too.
+/Assets/_Project [0-9]*.zip
+/Assets/_Project [0-9]*.zip.meta
 .DS_Store
 
-*.meta
+# Disposable exports; retained review evidence lives in work/Reviews.
+/work/Temporary/
+
+# Verification .NET outputs
+!/Tools/Verification/PureTests.csproj
+/Tools/Verification/bin/
+/Tools/Verification/obj/
+/Tools/Verification/__pycache__/
+
+# QRSPI disposable workflow artifacts
+/.qrspi/

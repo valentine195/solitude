@@ -66,7 +66,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.5, y: 0.5}
+  m_Offset: {x: 0, y: 0.9245517}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -76,7 +76,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2, y: 1.8491035}
   m_EdgeRadius: 0
 --- !u!1 &6821433000524642905
 GameObject:
@@ -159,7 +159,7 @@ SpriteRenderer:
   m_SortingLayer: 1
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 393178163, guid: ff0199dc43ff34a179819677dcc8d1e5, type: 3}
+  m_Sprite: {fileID: -5866364880484076401, guid: 5b58fd1f13e834307992c211612e1636, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -295,6 +295,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b88c18b988254fdb8217e04a0692a93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Door
+  prompt: Interact
   promptText: Press E
   isOpen: 0
   isLocked: 0

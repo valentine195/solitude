@@ -70,7 +70,7 @@ PrefabInstance:
       objectReference: {fileID: 3068243408538488167, guid: 629703700d3084cccb010c7f13e7e0b9, type: 3}
     - target: {fileID: 3081551848520711288, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
       propertyPath: m_SortingLayer
-      value: 2
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3081551848520711288, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
       propertyPath: m_SortingLayerID
@@ -122,14 +122,17 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 6443611208535386549, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
       insertIndex: -1
-      addedObject: {fileID: -6743333867353505903}
+      addedObject: {fileID: 7341719577900518212}
+    - targetCorrespondingSourceObject: {fileID: 6443611208535386549, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1681981032832486730}
   m_SourcePrefab: {fileID: 100100000, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
 --- !u!1 &2955792002551146583 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6443611208535386549, guid: 7ca197e1db19d4cad8df2833d3b51886, type: 3}
   m_PrefabInstance: {fileID: 8100105921356251618}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &-6743333867353505903
+--- !u!114 &7341719577900518212
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -138,7 +141,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 2955792002551146583}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fbcee23275305405b86968fc2a6f1bc0, type: 3}
+  m_Script: {fileID: 11500000, guid: a2c91146ef91f41ad9a8d5c86ae0d1b7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Features.Interactables.Items.O2Canister
-  itemDefinition: {fileID: 11400000, guid: 8d158110df66c4994b8d575233f619c5, type: 2}
+  m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.SaveLoad.SaveableId
+  id: 
+--- !u!114 &1681981032832486730
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2955792002551146583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c923170122b90492098dfe6859f871fb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Items.WorldPickup
+  prompt: Interact
+  definition: {fileID: 11400000, guid: 81bad3dce5bc14f158e3ec4d9121d50e, type: 2}

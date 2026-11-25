@@ -1,0 +1,3 @@
+# Steel deck tiles
+
+Six cool steel-gray 32x32 floor tiles with restrained panel seams. Order: plate, scuffed, split; access, fastened, slotted. 64x64 copies are exact nearest-neighbor 2x versions. Use native 32px tiles at the project PPU. Mixed preview weights: 55/18/8/4/12/3 percent. All 36 horizontal and vertical ordered edge pairs match. Opaque tiles, no transparent gaps. Context preview is a static composite, not Unity validation. Prior beige study preserved separately. Model opens on Steel Deck scene and retains earlier scenes. Blender model uses pixel-coordinate shallow relief and flat materials. No Unity import.

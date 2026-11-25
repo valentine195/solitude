@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc8a1ce05b8354e4dbae1c696d7e82ee, type: 3}
+  m_Name: ReusableJumper
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Items.ItemDefinition
+  DisplayName: Reusable jumper
+  Icon: {fileID: 21300000, guid: 56985b34a81b04246a5997e20b1af74b, type: 3}
+  Description: Service jumper for compatible maintenance panel ports.
+  PickupPrefab: {fileID: 2828590885106473294, guid: 634a7b54145134e66835578dc6343b70, type: 3}
+  Stackable: 0
+  MaxStackSize: 1
+  GameplayTags: []
+  Actions: []
+  HeldSprite: {fileID: 0}
+  ConsumableKind: 0
+  RestorationAmount: 0
+  itemId: d62de5eff653d42e6a0db0e3d913574c

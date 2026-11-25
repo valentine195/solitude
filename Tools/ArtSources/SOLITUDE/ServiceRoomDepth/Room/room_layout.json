@@ -1,0 +1,1987 @@
+{
+  "schema": "solitude.room_layout.v1",
+  "name": "ServiceRoom",
+  "map_mode": "room_chunk_mode",
+  "visual_model": "layered_tilemap",
+  "runtime_object_model": "separate_props_and_scene_hooks",
+  "collision_model": "tile_walkability_and_rects",
+  "engine_target": "portable_json",
+  "grid": {
+    "columns": 16,
+    "rows": 11,
+    "cell_pixels": 32,
+    "canvas_pixels": [
+      512,
+      352
+    ],
+    "coordinates": "top-left, x right, y down"
+  },
+  "interior": {
+    "cell_rect": [
+      1,
+      2,
+      14,
+      8
+    ],
+    "north_face_height_cells": 2
+  },
+  "floor_assets": {
+    "amber_service_hatch": "Assets/Floor/amber_service_hatch.png",
+    "base_clean": "Assets/Floor/base_clean.png",
+    "base_rubbed": "Assets/Floor/base_rubbed.png",
+    "base_scuff_a": "Assets/Floor/base_scuff_a.png",
+    "base_scuff_b": "Assets/Floor/base_scuff_b.png",
+    "door_threshold": "Assets/Floor/door_threshold.png",
+    "grate_horizontal": "Assets/Floor/grate_horizontal.png",
+    "joint_corner": "Assets/Floor/joint_corner.png",
+    "joint_north": "Assets/Floor/joint_north.png",
+    "joint_west": "Assets/Floor/joint_west.png",
+    "maintenance_hatch": "Assets/Floor/maintenance_hatch.png",
+    "perforated_plate": "Assets/Floor/perforated_plate.png",
+    "service_base_clean": "Assets/Floor/service_base_clean.png",
+    "service_base_rubbed": "Assets/Floor/service_base_rubbed.png",
+    "service_base_scuff_a": "Assets/Floor/service_base_scuff_a.png",
+    "service_base_scuff_b": "Assets/Floor/service_base_scuff_b.png",
+    "service_joint_corner": "Assets/Floor/service_joint_corner.png",
+    "service_joint_north": "Assets/Floor/service_joint_north.png",
+    "service_joint_west": "Assets/Floor/service_joint_west.png",
+    "steel_plate": "Assets/Floor/steel_plate.png"
+  },
+  "floor_cells": [
+    {
+      "cell": [
+        1,
+        1
+      ],
+      "tile": "service_joint_west",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        2,
+        1
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        3,
+        1
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        4,
+        1
+      ],
+      "tile": "joint_west",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        5,
+        1
+      ],
+      "tile": "joint_west",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        6,
+        1
+      ],
+      "tile": "base_clean",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        7,
+        1
+      ],
+      "tile": "base_clean",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        8,
+        1
+      ],
+      "tile": "base_clean",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        9,
+        1
+      ],
+      "tile": "joint_west",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        10,
+        1
+      ],
+      "tile": "base_clean",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        11,
+        1
+      ],
+      "tile": "base_clean",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        12,
+        1
+      ],
+      "tile": "service_joint_west",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        13,
+        1
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        14,
+        1
+      ],
+      "tile": "service_base_scuff_b",
+      "under_north_wall": true
+    },
+    {
+      "cell": [
+        1,
+        2
+      ],
+      "tile": "service_joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        2,
+        2
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        3,
+        2
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        4,
+        2
+      ],
+      "tile": "joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        5,
+        2
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        6,
+        2
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        7,
+        2
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        8,
+        2
+      ],
+      "tile": "joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        9,
+        2
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        10,
+        2
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        11,
+        2
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        12,
+        2
+      ],
+      "tile": "service_joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        13,
+        2
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        14,
+        2
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        1,
+        3
+      ],
+      "tile": "service_joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        2,
+        3
+      ],
+      "tile": "grate_horizontal",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        3,
+        3
+      ],
+      "tile": "grate_horizontal",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        4,
+        3
+      ],
+      "tile": "joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        5,
+        3
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        6,
+        3
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        7,
+        3
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        8,
+        3
+      ],
+      "tile": "joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        9,
+        3
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        10,
+        3
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        11,
+        3
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        12,
+        3
+      ],
+      "tile": "maintenance_hatch",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        13,
+        3
+      ],
+      "tile": "amber_service_hatch",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        14,
+        3
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        1,
+        4
+      ],
+      "tile": "service_joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        2,
+        4
+      ],
+      "tile": "perforated_plate",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        3,
+        4
+      ],
+      "tile": "perforated_plate",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        4,
+        4
+      ],
+      "tile": "joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        5,
+        4
+      ],
+      "tile": "joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        6,
+        4
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        7,
+        4
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        8,
+        4
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        9,
+        4
+      ],
+      "tile": "joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        10,
+        4
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        11,
+        4
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        12,
+        4
+      ],
+      "tile": "service_joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        13,
+        4
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        14,
+        4
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        1,
+        5
+      ],
+      "tile": "service_joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        2,
+        5
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        3,
+        5
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        4,
+        5
+      ],
+      "tile": "joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        5,
+        5
+      ],
+      "tile": "joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        6,
+        5
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        7,
+        5
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        8,
+        5
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        9,
+        5
+      ],
+      "tile": "joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        10,
+        5
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        11,
+        5
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        12,
+        5
+      ],
+      "tile": "service_joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        13,
+        5
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        14,
+        5
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        1,
+        6
+      ],
+      "tile": "service_joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        2,
+        6
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        3,
+        6
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        4,
+        6
+      ],
+      "tile": "joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        5,
+        6
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        6,
+        6
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        7,
+        6
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        8,
+        6
+      ],
+      "tile": "joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        9,
+        6
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        10,
+        6
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        11,
+        6
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        12,
+        6
+      ],
+      "tile": "service_joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        13,
+        6
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        14,
+        6
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        1,
+        7
+      ],
+      "tile": "service_joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        2,
+        7
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        3,
+        7
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        4,
+        7
+      ],
+      "tile": "joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        5,
+        7
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        6,
+        7
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        7,
+        7
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        8,
+        7
+      ],
+      "tile": "joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        9,
+        7
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        10,
+        7
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        11,
+        7
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        12,
+        7
+      ],
+      "tile": "service_joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        13,
+        7
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        14,
+        7
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        1,
+        8
+      ],
+      "tile": "service_joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        2,
+        8
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        3,
+        8
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        4,
+        8
+      ],
+      "tile": "joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        5,
+        8
+      ],
+      "tile": "joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        6,
+        8
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        7,
+        8
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        8,
+        8
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        9,
+        8
+      ],
+      "tile": "joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        10,
+        8
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        11,
+        8
+      ],
+      "tile": "joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        12,
+        8
+      ],
+      "tile": "service_joint_corner",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        13,
+        8
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        14,
+        8
+      ],
+      "tile": "service_joint_north",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        1,
+        9
+      ],
+      "tile": "service_joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        2,
+        9
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        3,
+        9
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        4,
+        9
+      ],
+      "tile": "joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        5,
+        9
+      ],
+      "tile": "joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        6,
+        9
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        7,
+        9
+      ],
+      "tile": "door_threshold",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        8,
+        9
+      ],
+      "tile": "door_threshold",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        9,
+        9
+      ],
+      "tile": "joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        10,
+        9
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        11,
+        9
+      ],
+      "tile": "base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        12,
+        9
+      ],
+      "tile": "service_joint_west",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        13,
+        9
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        14,
+        9
+      ],
+      "tile": "service_base_clean",
+      "under_north_wall": false
+    },
+    {
+      "cell": [
+        7,
+        10
+      ],
+      "tile": "door_threshold",
+      "exit_apron": true
+    },
+    {
+      "cell": [
+        8,
+        10
+      ],
+      "tile": "door_threshold",
+      "exit_apron": true
+    }
+  ],
+  "wall_objects": [
+    {
+      "asset": "Assets/Wall/north_wall_plain_64.png",
+      "position_px": [
+        32,
+        0
+      ],
+      "size_px": [
+        64,
+        64
+      ],
+      "role": "north_face",
+      "render_order": 20
+    },
+    {
+      "asset": "Assets/Wall/north_wall_vent_64.png",
+      "position_px": [
+        96,
+        0
+      ],
+      "size_px": [
+        64,
+        64
+      ],
+      "role": "north_face",
+      "render_order": 20
+    },
+    {
+      "asset": "Assets/Wall/north_wall_wide_64.png",
+      "position_px": [
+        160,
+        0
+      ],
+      "size_px": [
+        64,
+        64
+      ],
+      "role": "north_face",
+      "render_order": 20
+    },
+    {
+      "asset": "Assets/Wall/north_wall_rib_64.png",
+      "position_px": [
+        224,
+        0
+      ],
+      "size_px": [
+        64,
+        64
+      ],
+      "role": "north_face",
+      "render_order": 20
+    },
+    {
+      "asset": "Assets/Wall/north_wall_plain_64.png",
+      "position_px": [
+        288,
+        0
+      ],
+      "size_px": [
+        64,
+        64
+      ],
+      "role": "north_face",
+      "render_order": 20
+    },
+    {
+      "asset": "Assets/Wall/north_wall_service_64.png",
+      "position_px": [
+        352,
+        0
+      ],
+      "size_px": [
+        64,
+        64
+      ],
+      "role": "north_face",
+      "render_order": 20
+    },
+    {
+      "asset": "Assets/Wall/north_wall_wide_64.png",
+      "position_px": [
+        416,
+        0
+      ],
+      "size_px": [
+        64,
+        64
+      ],
+      "role": "north_face",
+      "render_order": 20
+    },
+    {
+      "asset": "Assets/Wall/cap_vertical_8x64.png",
+      "position_px": [
+        24,
+        2
+      ],
+      "size_px": [
+        8,
+        64
+      ],
+      "role": "side_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_vertical_8x64.png",
+      "position_px": [
+        24,
+        66
+      ],
+      "size_px": [
+        8,
+        64
+      ],
+      "role": "side_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_vertical_8x64.png",
+      "position_px": [
+        24,
+        130
+      ],
+      "size_px": [
+        8,
+        64
+      ],
+      "role": "side_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_vertical_8x64.png",
+      "position_px": [
+        24,
+        194
+      ],
+      "size_px": [
+        8,
+        64
+      ],
+      "role": "side_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_vertical_8x64.png",
+      "position_px": [
+        24,
+        258
+      ],
+      "size_px": [
+        8,
+        62
+      ],
+      "role": "side_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_vertical_8x64.png",
+      "position_px": [
+        480,
+        2
+      ],
+      "size_px": [
+        8,
+        64
+      ],
+      "role": "side_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_vertical_8x64.png",
+      "position_px": [
+        480,
+        66
+      ],
+      "size_px": [
+        8,
+        64
+      ],
+      "role": "side_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_vertical_8x64.png",
+      "position_px": [
+        480,
+        130
+      ],
+      "size_px": [
+        8,
+        64
+      ],
+      "role": "side_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_vertical_8x64.png",
+      "position_px": [
+        480,
+        194
+      ],
+      "size_px": [
+        8,
+        64
+      ],
+      "role": "side_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_vertical_8x64.png",
+      "position_px": [
+        480,
+        258
+      ],
+      "size_px": [
+        8,
+        62
+      ],
+      "role": "side_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_horizontal_64x8.png",
+      "position_px": [
+        24,
+        320
+      ],
+      "size_px": [
+        64,
+        8
+      ],
+      "role": "south_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_horizontal_64x8.png",
+      "position_px": [
+        88,
+        320
+      ],
+      "size_px": [
+        64,
+        8
+      ],
+      "role": "south_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_horizontal_64x8.png",
+      "position_px": [
+        152,
+        320
+      ],
+      "size_px": [
+        64,
+        8
+      ],
+      "role": "south_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_horizontal_64x8.png",
+      "position_px": [
+        216,
+        320
+      ],
+      "size_px": [
+        8,
+        8
+      ],
+      "role": "south_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_horizontal_64x8.png",
+      "position_px": [
+        288,
+        320
+      ],
+      "size_px": [
+        64,
+        8
+      ],
+      "role": "south_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_horizontal_64x8.png",
+      "position_px": [
+        352,
+        320
+      ],
+      "size_px": [
+        64,
+        8
+      ],
+      "role": "south_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_horizontal_64x8.png",
+      "position_px": [
+        416,
+        320
+      ],
+      "size_px": [
+        64,
+        8
+      ],
+      "role": "south_cap",
+      "render_order": 30
+    },
+    {
+      "asset": "Assets/Wall/cap_horizontal_64x8.png",
+      "position_px": [
+        480,
+        320
+      ],
+      "size_px": [
+        8,
+        8
+      ],
+      "role": "south_cap",
+      "render_order": 30
+    }
+  ],
+  "props": [
+    {
+      "id": "ventilation_unit",
+      "asset": "Assets/Props/ventilation_unit_64.png",
+      "position_px": [
+        64,
+        160
+      ],
+      "size_px": [
+        64,
+        64
+      ],
+      "collision_rect_px": [
+        64,
+        160,
+        64,
+        64
+      ],
+      "render_order": 25,
+      "occlusionClass": "solid_prop",
+      "occupantPolicy": "blocked",
+      "actorSafeArea": null
+    }
+  ],
+  "walkable_cells": [
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      2
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      4,
+      2
+    ],
+    [
+      5,
+      2
+    ],
+    [
+      6,
+      2
+    ],
+    [
+      7,
+      2
+    ],
+    [
+      8,
+      2
+    ],
+    [
+      9,
+      2
+    ],
+    [
+      10,
+      2
+    ],
+    [
+      11,
+      2
+    ],
+    [
+      12,
+      2
+    ],
+    [
+      13,
+      2
+    ],
+    [
+      14,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      3,
+      3
+    ],
+    [
+      4,
+      3
+    ],
+    [
+      5,
+      3
+    ],
+    [
+      6,
+      3
+    ],
+    [
+      7,
+      3
+    ],
+    [
+      8,
+      3
+    ],
+    [
+      9,
+      3
+    ],
+    [
+      10,
+      3
+    ],
+    [
+      11,
+      3
+    ],
+    [
+      12,
+      3
+    ],
+    [
+      13,
+      3
+    ],
+    [
+      14,
+      3
+    ],
+    [
+      1,
+      4
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      4,
+      4
+    ],
+    [
+      5,
+      4
+    ],
+    [
+      6,
+      4
+    ],
+    [
+      7,
+      4
+    ],
+    [
+      8,
+      4
+    ],
+    [
+      9,
+      4
+    ],
+    [
+      10,
+      4
+    ],
+    [
+      11,
+      4
+    ],
+    [
+      12,
+      4
+    ],
+    [
+      13,
+      4
+    ],
+    [
+      14,
+      4
+    ],
+    [
+      1,
+      5
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      5,
+      5
+    ],
+    [
+      6,
+      5
+    ],
+    [
+      7,
+      5
+    ],
+    [
+      8,
+      5
+    ],
+    [
+      9,
+      5
+    ],
+    [
+      10,
+      5
+    ],
+    [
+      11,
+      5
+    ],
+    [
+      12,
+      5
+    ],
+    [
+      13,
+      5
+    ],
+    [
+      14,
+      5
+    ],
+    [
+      1,
+      6
+    ],
+    [
+      4,
+      6
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      6,
+      6
+    ],
+    [
+      7,
+      6
+    ],
+    [
+      8,
+      6
+    ],
+    [
+      9,
+      6
+    ],
+    [
+      10,
+      6
+    ],
+    [
+      11,
+      6
+    ],
+    [
+      12,
+      6
+    ],
+    [
+      13,
+      6
+    ],
+    [
+      14,
+      6
+    ],
+    [
+      1,
+      7
+    ],
+    [
+      2,
+      7
+    ],
+    [
+      3,
+      7
+    ],
+    [
+      4,
+      7
+    ],
+    [
+      5,
+      7
+    ],
+    [
+      6,
+      7
+    ],
+    [
+      7,
+      7
+    ],
+    [
+      8,
+      7
+    ],
+    [
+      9,
+      7
+    ],
+    [
+      10,
+      7
+    ],
+    [
+      11,
+      7
+    ],
+    [
+      12,
+      7
+    ],
+    [
+      13,
+      7
+    ],
+    [
+      14,
+      7
+    ],
+    [
+      1,
+      8
+    ],
+    [
+      2,
+      8
+    ],
+    [
+      3,
+      8
+    ],
+    [
+      4,
+      8
+    ],
+    [
+      5,
+      8
+    ],
+    [
+      6,
+      8
+    ],
+    [
+      7,
+      8
+    ],
+    [
+      8,
+      8
+    ],
+    [
+      9,
+      8
+    ],
+    [
+      10,
+      8
+    ],
+    [
+      11,
+      8
+    ],
+    [
+      12,
+      8
+    ],
+    [
+      13,
+      8
+    ],
+    [
+      14,
+      8
+    ],
+    [
+      1,
+      9
+    ],
+    [
+      2,
+      9
+    ],
+    [
+      3,
+      9
+    ],
+    [
+      4,
+      9
+    ],
+    [
+      5,
+      9
+    ],
+    [
+      6,
+      9
+    ],
+    [
+      7,
+      9
+    ],
+    [
+      8,
+      9
+    ],
+    [
+      9,
+      9
+    ],
+    [
+      10,
+      9
+    ],
+    [
+      11,
+      9
+    ],
+    [
+      12,
+      9
+    ],
+    [
+      13,
+      9
+    ],
+    [
+      14,
+      9
+    ],
+    [
+      7,
+      10
+    ],
+    [
+      8,
+      10
+    ]
+  ],
+  "collision_rects_px": [
+    [
+      24,
+      2,
+      8,
+      318
+    ],
+    [
+      480,
+      2,
+      8,
+      318
+    ],
+    [
+      32,
+      0,
+      448,
+      64
+    ],
+    [
+      24,
+      320,
+      200,
+      8
+    ],
+    [
+      288,
+      320,
+      200,
+      8
+    ],
+    [
+      64,
+      160,
+      64,
+      64
+    ]
+  ],
+  "scene_hooks": {
+    "player_spawn_cell": [
+      7,
+      7
+    ],
+    "exits": [
+      {
+        "id": "south",
+        "cells": [
+          [
+            7,
+            10
+          ],
+          [
+            8,
+            10
+          ]
+        ],
+        "direction": "south",
+        "width_cells": 2,
+        "door_asset": null,
+        "state": "open_connection"
+      }
+    ],
+    "zones": [
+      {
+        "id": "ventilation_service",
+        "cell_rect": [
+          2,
+          3,
+          2,
+          4
+        ]
+      },
+      {
+        "id": "maintenance_access",
+        "cell_rect": [
+          12,
+          3,
+          2,
+          2
+        ]
+      }
+    ],
+    "camera_bounds_px": [
+      0,
+      0,
+      512,
+      352
+    ]
+  },
+  "qa": {
+    "accent_interior_cells": 8,
+    "interior_cells": 112,
+    "accent_percent": 7.142857142857142,
+    "spawn_to_exit_path_exists": true,
+    "all_walkable_cells_connected": true,
+    "four_cell_central_aisle_clear": true,
+    "unity_imported": false,
+    "runtime_collision_tested": false,
+    "base_pixel_masks_preserved": true,
+    "base_and_joint_percent": 92.85714285714286
+  },
+  "floor_revision": "RefinedSteelFloor32 Round3",
+  "wall_revision": "ServiceRoomDepth",
+  "lighting_layers": [
+    {
+      "asset": "PNG/contact_shadows_layer.png",
+      "order": "after floor before walls and props",
+      "kind": "hard native-pixel contact shadows"
+    }
+  ],
+  "prop_shadow": {
+    "asset": "Assets/Props/ventilation_unit_64.png",
+    "offset_px": [
+      2,
+      3
+    ],
+    "editable_source": "../Source/vent_depth.aseprite"
+  }
+}
