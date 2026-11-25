@@ -27,6 +27,11 @@ namespace SOLITUDE.Tests
             InputSystem.QueueStateEvent(keyboard, new KeyboardState(key)); InputSystem.Update();
             InputSystem.QueueStateEvent(keyboard, new KeyboardState()); InputSystem.Update();
         }
+        private static void Press(Gamepad gamepad, GamepadButton button)
+        {
+            InputSystem.QueueStateEvent(gamepad, new GamepadState().WithButton(button)); InputSystem.Update();
+            InputSystem.QueueStateEvent(gamepad, new GamepadState()); InputSystem.Update();
+        }
         [UnityTest] public IEnumerator RealKeyboardAndEventSystemSharePolicyAndSurviveTeardownOrder()
         {
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -52,6 +57,7 @@ namespace SOLITUDE.Tests
             InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
             InputSystem.settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
             var keyboard = InputSystem.AddDevice<Keyboard>();
+            var gamepad = InputSystem.AddDevice<Gamepad>();
             try
             {
                 policy.SetReady(true); Assert.IsTrue(module.enabled);
@@ -64,6 +70,12 @@ namespace SOLITUDE.Tests
                 Assert.IsFalse(gestures.Interaction.IsHolding); Assert.AreEqual(ContainerModalKind.Inventory, modal.Kind); Assert.AreEqual(0, fallbacks);
                 Press(keyboard, Key.Escape); Assert.AreEqual(ContainerModalKind.Closed, modal.Kind); Assert.AreEqual(0, fallbacks);
                 Press(keyboard, Key.Escape); Assert.AreEqual(1, fallbacks);
+                Press(gamepad, GamepadButton.East); Assert.AreEqual(1, fallbacks, "The shared button must not go Back during exploration.");
+                Press(keyboard, Key.Tab); Assert.AreEqual(ContainerModalKind.Inventory, modal.Kind);
+                Press(gamepad, GamepadButton.East); Assert.AreEqual(ContainerModalKind.Closed, modal.Kind);
+                Assert.AreEqual(1, fallbacks, "Closing inventory must consume exactly one Back.");
+                Press(gamepad, GamepadButton.Start); Assert.AreEqual(2, fallbacks);
+
                 using (var screen = new ScrubberScreenCoordinator(policy, new ScreenDisplay()))
                 {
                     input.Bind(null, null, selection, () => modal.ToggleInventory(), () =>
@@ -74,7 +86,7 @@ namespace SOLITUDE.Tests
                     Press(keyboard, Key.Tab); Assert.AreEqual(ContainerModalKind.Closed, modal.Kind);
                     Assert.AreEqual(OpenResult.Unavailable, modal.ToggleInventory());
                     Press(keyboard, Key.Digit2); Assert.AreEqual(1, changes);
-                    Press(keyboard, Key.Escape); Assert.IsFalse(screen.IsOpen); Assert.AreEqual(1, fallbacks);
+                    Press(keyboard, Key.Escape); Assert.IsFalse(screen.IsOpen); Assert.AreEqual(2, fallbacks);
                     Press(keyboard, Key.Digit2); Assert.AreEqual(1, changes, "Close activation is consumed for this frame.");
                     yield return null;
                     Press(keyboard, Key.Digit2); Assert.AreEqual(2, changes);
@@ -89,6 +101,7 @@ namespace SOLITUDE.Tests
             {
                 input.Release(); uiLease.Dispose(); modal.Dispose(); selection.Dispose(); policy.Dispose();
                 InputSystem.RemoveDevice(keyboard);
+                InputSystem.RemoveDevice(gamepad);
                 InputSystem.settings.backgroundBehavior = previousBackground;
                 InputSystem.settings.editorInputBehaviorInPlayMode = previousEditor;
                 UnityEngine.Object.Destroy(uiObject); UnityEngine.Object.Destroy(inputObject);

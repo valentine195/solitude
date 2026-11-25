@@ -172,7 +172,9 @@ namespace SOLITUDE.Tests
         }
         [UnityTest] public IEnumerator ProductionSessionRejectsScrubberWithoutChangingInventoryOrSave()
         {
-            File.WriteAllText(savePath,JsonUtility.ToJson(new SaveGameData { startingLoadoutInitialized = true }));
+            var catalog = Resources.Load<ItemDatabase>("Database").BuildRuntimeCatalog();
+            var codec = new SaveJsonCodec(catalog);
+            File.WriteAllText(savePath, codec.Encode(new SaveGameData { startingLoadoutInitialized = true }));
             yield return Load("Assets/_Project/Scenes/Wakeup.unity");yield return null;
             var root=All<GameCompositionRoot>().Single();Assert.AreEqual(RuntimeStartupState.Ready,root.State);Assert.IsFalse(root.UsesDisposableSession);
             var session=Field<ContainerSaveSession>(root,"session");var inventory=All<PlayerInventory>().Single().Container;

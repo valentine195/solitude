@@ -185,7 +185,7 @@ namespace SOLITUDE.Core.Input
             Release(); this.policy = policy; actions = new SOLITUDE_InputActions();
             actions.Gameplay.Move.performed += Move; actions.Gameplay.Move.canceled += Stop;
             actions.Gameplay.Interact.performed += Interact; actions.Gameplay.Inventory.performed += Inventory;
-            actions.Gameplay.Pause.performed += Back; actions.Container.Cancel.performed += Back;
+            actions.Gameplay.Pause.performed += Back; actions.Container.Cancel.performed += Cancel;
             actions.Gameplay.Journal.performed += ToggleJournal;
             actions.Gameplay.Use.performed += Use;
             actions.Gameplay.Primary.performed += Primary;
@@ -225,7 +225,20 @@ namespace SOLITUDE.Core.Input
         }
         private void Move(InputAction.CallbackContext context) { if (Fresh(context) && GameplayAllowed && movement != null) movement.SetInput(context.ReadValue<Vector2>()); }
         private void Stop(InputAction.CallbackContext _) { if (movement != null) movement.SetInput(Vector2.zero); }
-        private void Interact(InputAction.CallbackContext context) { if (Fresh(context) && GameplayAllowed && interactor != null) interactor.TryInteract(); }
+        private void Interact(InputAction.CallbackContext context)
+        {
+            // The Cancel callback owns shared controls so opening a modal cannot also close it on the same press.
+            if (!actions.Container.Cancel.controls.Contains(context.control)) TryInteract(context);
+        }
+        private void TryInteract(InputAction.CallbackContext context)
+        {
+            if (Fresh(context) && GameplayAllowed && interactor != null) interactor.TryInteract();
+        }
+        private void Cancel(InputAction.CallbackContext context)
+        {
+            if (policy.Gameplay && actions.Gameplay.Interact.controls.Contains(context.control)) TryInteract(context);
+            else Back(context);
+        }
         private void Use(InputAction.CallbackContext context)
         {
             RefreshUseRelease();
