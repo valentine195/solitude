@@ -181,6 +181,12 @@ namespace SOLITUDE.Containers
         }
         public CommandResult Remove(SlotAddress address, int quantity) => Remove(address, quantity, null);
         internal CommandResult Remove(SlotAddress address, int quantity, Action worldCommit) => Execute(() => RemoveCore(address, quantity, worldCommit));
+        // Keep current eligibility, candidate validation and removal under one reentry guard.
+        internal CommandResult RemoveForMechanicalRepair(Func<SlotAddress?> validate, Action worldCommit) => Execute(() =>
+        {
+            var address = validate();
+            return address.HasValue ? RemoveCore(address.Value, 1, worldCommit) : new CommandResult(CommandStatus.Rejected);
+        });
         private CommandResult RemoveCore(SlotAddress address, int quantity, Action worldCommit)
         {
             var status = Address(address, out var state);

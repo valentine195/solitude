@@ -11,7 +11,8 @@ namespace SOLITUDE.World.Restoration
         [SerializeField] private RestorableSystem system;
         private RestorableSystemState subscribed;
         private bool restored;
-        public bool AllowsAccess => isActiveAndEnabled && system != null && restored;
+        public bool IsConfiguredFor(RestorableSystem target) => system == target;
+        public bool AllowsAccess => isActiveAndEnabled && system != null && system.isActiveAndEnabled && restored;
         public void Configure(RestorableSystem target)
         {
             Unsubscribe(); system = target;

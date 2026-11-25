@@ -23,7 +23,7 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
     {
         if (UnityEngine.Application.isEditor || FindFirstObjectByType<SolitudeCompositionSmoke>() != null) return;
         var go = new GameObject("CompositionSmoke"); DontDestroyOnLoad(go); go.AddComponent<SolitudeCompositionSmoke>();
-        if (Flag("-verifySnapshotOnly") || Flag("-lifecycleWrite") || Flag("-lifecycleResume") || Flag("-lifecycleFallback"))
+        if (Flag("-verifyMechanicalRepair") || Flag("-verifyStartingLoadout") || Flag("-verifySnapshotOnly") || Flag("-lifecycleWrite") || Flag("-lifecycleResume") || Flag("-lifecycleFallback"))
             lifecyclePause = Field<PauseCoordinator>(FindFirstObjectByType<GameCompositionRoot>(), "pause").Acquire();
     }
     private static void Check(bool condition, string text) { if (!condition) throw new Exception(text); }
@@ -54,6 +54,20 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
                 Check(FindFirstObjectByType<GameCompositionRoot>().State==RuntimeStartupState.Failed,"Bad save did not block startup");
                 Result("Blocked invalid save"); UnityEngine.Application.Quit(0); returnFromStart=true;
             }
+            else if (Flag("-verifyStartingLoadout"))
+            {
+                var graph = FindFirstObjectByType<GameCompositionRoot>();
+                var session = Field<ContainerSaveSession>(graph, "session");
+                var bar = FindFirstObjectByType<SOLITUDE.Hotbar.Hotbar>();
+                var inventory = FindFirstObjectByType<PlayerInventory>();
+                string item = Field<GameRuntimeConfig>(graph, "config").startingLoadout.Hotbar[0].Item.ItemId;
+                int count = bar.Container.GetSlots().Concat(inventory.Container.GetSlots())
+                    .Where(slot => slot.Stack?.ItemId == item).Sum(slot => slot.Stack.Quantity);
+                Check(graph.State == RuntimeStartupState.Ready && session.StartingLoadoutInitialized, "Starting equipment is not ready/completed");
+                Check(count == (Flag("-expectNoStartingWrench") ? 0 : 1), "Starting equipment was duplicated or refreshed");
+                Check(bar.ActiveIndex == (Flag("-expectFreshStartingSelection") ? 0 : -1), "Starting equipment selection was replayed");
+                Result("Once-only starting loadout verified"); UnityEngine.Application.Quit(0); returnFromStart = true;
+            }
             else if (Flag("-faultWrite"))
             {
                 var graph=FindFirstObjectByType<GameCompositionRoot>();var data=Field<ContainerSaveSession>(graph,"session").Capture();data.worldSeed++;
@@ -64,6 +78,19 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
             
         } catch(Exception error) { Debug.LogException(error); UnityEngine.Application.Quit(1); yield break; }
         if (returnFromStart) yield break;
+        if (Flag("-verifyMechanicalRepair"))
+        {
+            var repair = VerifyMechanicalRepair();
+            while (true)
+            {
+                bool more;
+                try { more = repair.MoveNext(); }
+                catch (Exception error) { Debug.LogException(error); UnityEngine.Application.Quit(1); yield break; }
+                if (!more) break;
+                yield return repair.Current;
+            }
+            Result("Mechanical repair scenario passed"); UnityEngine.Application.Quit(0); yield break;
+        }
         var verification = Verify();
         if (Flag("-lifecycleWrite") || Flag("-lifecycleResume") || Flag("-lifecycleFallback")) verification = VerifyLifecycle();
         while (true)
@@ -96,6 +123,82 @@ public sealed class SolitudeCompositionSmoke : MonoBehaviour
             UnityEngine.Application.Quit(0);
         }
         catch(Exception error) { Debug.LogException(error); UnityEngine.Application.Quit(1); }
+    }
+    private static IEnumerator VerifyMechanicalRepair()
+    {
+        const string target = "verification.mechanical.auxiliary-socket";
+        string directory = System.IO.Path.GetFullPath(DirectoryArgument);
+        Check(directory.Contains("step4-mechanical-"), "Repair scenarios require explicitly disposable save paths.");
+        var root = FindFirstObjectByType<GameCompositionRoot>();
+        var session = Field<ContainerSaveSession>(root, "session");
+        var saves = Field<SaveGameService>(root, "persistence");
+        Check(root.State == RuntimeStartupState.Ready, "Repair startup not ready");
+        var inventory = FindFirstObjectByType<PlayerInventory>().Container;
+        var bar = FindFirstObjectByType<SOLITUDE.Hotbar.Hotbar>();
+        var junction = FindObjectsByType<SOLITUDE.World.Restoration.RestorationJunction>(FindObjectsSortMode.None).Single(j => j.name == "Auxiliary power socket");
+        var system = Field<SOLITUDE.World.Restoration.RestorableSystem>(junction, "system");
+        var gate = FindFirstObjectByType<SOLITUDE.World.Restoration.RestorationDoorGate>();
+        var actor = FindFirstObjectByType<PlayerInteractor>();
+        string part = FindObjectsByType<WorldPickup>(FindObjectsSortMode.None).First(p => p.Definition.Item.DisplayName == "Battery").Definition.Item.ItemId;
+        int Count() => inventory.GetSlots().Where(s => s.Stack?.ItemId == part).Sum(s => s.Stack.Quantity);
+        bool Repaired() => session.Capture().ship.repairs.Any(r => r.id == target && r.installed && r.running && r.recoverySeconds == 0);
+        Check(system.IsRestored == Repaired() && gate.AllowsAccess == Repaired(), "Repair not reconciled before readiness");
+        Check(!FindFirstObjectByType<SOLITUDE.World.SolitudeStart.SolitudeSlidingDoor>().IsOpen, "Door animation persisted or opened automatically");
+        if (Flag("-repairSeed"))
+        {
+            Check(!Repaired(), "Fresh fixture repaired");
+            Check(session.Commands.Grant(inventory.Handle, part, 2).Succeeded, "Cannot seed repair cost");
+            Check(saves.TryFlush(), "Seed checkpoint failed"); yield break;
+        }
+        if (Flag("-repairCommit"))
+        {
+            Check(!Repaired() && Count() == 2, "Invalid pre-repair checkpoint");
+            bar.SetActive(1);
+            VerificationFaults.RepairBeforeCommit();
+            lifecyclePause.Dispose();
+            Check(junction.Interact(actor).IsSuccess, "Repair rejected");
+            lifecyclePause = Field<PauseCoordinator>(root, "pause").Acquire();
+            Check(Repaired() && Count() == 1 && gate.AllowsAccess && bar.ActiveIndex == 1, "Partial in-memory repair");
+            VerificationFaults.ArmRepairWrite(Flag("-repairFailOnce"));
+            if (Flag("-repairFailOnce"))
+            {
+                Check(!saves.TryFlush() && !string.IsNullOrEmpty(saves.LastSaveError) && session.IsDirty, "Save failure not surfaced/retryable");
+                Check(Repaired() && Count() == 1, "Failed save split in-memory outcome");
+                Check(!junction.Interact(actor).IsSuccess && Count() == 1, "Retry charged repair twice");
+            }
+            Check(saves.TryFlush() && !session.IsDirty && saves.LastSaveError == null, "Repair retry/write failed");
+            yield break;
+        }
+        bool expect = Flag("-repairExpectComplete");
+        Check(Repaired() == expect && Count() == (expect ? 1 : 2), "Restart mixed part/repair snapshot");
+        if (Flag("-repairSuccessor"))
+        {
+            var succession = FindFirstObjectByType<SurvivorSuccessionComposition>();
+            var old = succession.Coordinator.Current.Id;
+            Check(succession.RequestDeath(old) == SOLITUDE.Application.Survivors.SuccessionOutcome.Completed, "Successor activation failed");
+            Check(succession.RequestDeath(old) == SOLITUDE.Application.Survivors.SuccessionOutcome.StaleSurvivor, "Stale retry not rejected");
+            Check(Repaired() && gate.AllowsAccess && Count() == 0, "Successor lost repair or charged new equipment");
+            Check(!junction.Interact(actor).IsSuccess && Repaired(), "Successor repeated repair");
+        }
+        if (Flag("-repairSceneReturn"))
+        {
+            yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Assets/_Project/Scenes/Wakeup.unity");
+            yield return null;
+            yield return UnityEngine.SceneManagement.SceneManager.LoadSceneAsync("Assets/_Project/Tests/Fixtures/MechanicalRepair.unity");
+            yield return null;
+            inventory = FindFirstObjectByType<PlayerInventory>().Container;
+            Check(root.State == RuntimeStartupState.Ready, "Scene return not ready");
+            Check(FindFirstObjectByType<SOLITUDE.World.Restoration.RestorationDoorGate>().AllowsAccess && Repaired() && Count() == 1, "Scene return lost/charged repair");
+        }
+        if (Flag("-repairNewRun"))
+        {
+            root.StartNewSave(); yield return null; yield return null;
+            Check(!session.Capture().ship.repairs.Any(r => r.id == target), "New run retained repair");
+            Check(session.StartingLoadoutInitialized, "New run loadout not initialized");
+            bar = FindFirstObjectByType<SOLITUDE.Hotbar.Hotbar>();
+            Check(bar.Container.GetSlots().Where(s => !s.IsEmpty).Sum(s => s.Stack.Quantity) == 1, "New run starting equipment duplicated/missing");
+        }
+        Check(saves.TryFlush(), "Final repair checkpoint failed");
     }
     private static IEnumerator VerifyLifecycle()
     {

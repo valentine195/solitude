@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SOLITUDE.Application.Persistence;
@@ -10,6 +11,20 @@ namespace SOLITUDE.SaveLoad
     {
         private readonly IItemCatalog catalog;
         public SaveJsonCodec(IItemCatalog catalog) => this.catalog = catalog;
+        private static void RejectAmbiguousFields(JToken token)
+        {
+            if (token is JObject obj)
+            {
+                var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var property in obj.Properties())
+                {
+                    if (!names.Add(property.Name)) throw new SaveCandidateException("Duplicate save field: " + property.Name);
+                    RejectAmbiguousFields(property.Value);
+                }
+            }
+            else if (token is JArray array)
+                foreach (var entry in array) RejectAmbiguousFields(entry);
+        }
         private static JToken Required(JObject obj, string field, JTokenType type)
         {
             var token = obj[field];
@@ -94,6 +109,8 @@ namespace SOLITUDE.SaveLoad
                 using var reader = new JsonTextReader(new StringReader(json)) { DateParseHandling = DateParseHandling.None };
                 var obj = JObject.Load(reader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error });
                 if (reader.Read()) throw new SaveCandidateException("Trailing save content.");
+                // Deserialization matches fields without case; conflicting names must never override validated facts.
+                RejectAmbiguousFields(obj);
                 int version = Required(obj, "version", JTokenType.Integer).Value<int>();
                 if (version < 1 || version > SaveGameData.CurrentVersion) throw new SaveCandidateException("Unsupported save version.", true);
                 int worldSeed = Required(obj, "worldSeed", JTokenType.Integer).Value<int>();

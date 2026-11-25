@@ -40,6 +40,13 @@ namespace SOLITUDE.Restoration
             finally { restoring = false; }
         }
 
+        // Session binding supplies canonical completion before gameplay readiness or inventory observers.
+        public void ReconcileCompletedRepair(bool completed)
+        {
+            if (IsRestored == completed) return;
+            IsRestored = completed; Publish();
+        }
+
         private void Publish()
         {
             if (Changed == null) return;

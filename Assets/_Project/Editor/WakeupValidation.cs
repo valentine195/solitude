@@ -41,7 +41,7 @@ namespace SOLITUDE.Editor
         }
         public static WakeupBuildManifest LoadManifest()
         {
-            var manifest=AssetDatabase.LoadAssetAtPath<WakeupBuildManifest>(WakeupBuildManifest.AssetPath);
+            var manifest=WakeupBuildManifest.Selected;
             if (manifest==null) throw new BuildFailedException("BUILD_MANIFEST: Wakeup build manifest is missing.");
             return manifest;
         }
@@ -58,11 +58,11 @@ namespace SOLITUDE.Editor
         {
             var report=new ValidationReport();var findings=report.findings;
             void Error(string code,string path,string field,string message)=>findings.Add(new ValidationFinding(code,path,field,message));
-            var manifest=AssetDatabase.LoadAssetAtPath<WakeupBuildManifest>(WakeupBuildManifest.AssetPath);
+            var manifest=WakeupBuildManifest.Selected;
             if (manifest==null) Error("BUILD_MANIFEST",WakeupBuildManifest.AssetPath,"manifest","Missing manifest.");
             else
             {
-                if (manifest.scenes==null || manifest.scenes.Length!=1 || manifest.scenes[0]!="Assets/_Project/Scenes/Wakeup.unity") Error("BUILD_SCENES",WakeupBuildManifest.AssetPath,"scenes","Wakeup must be the required entry.");
+                if (!WakeupBuildManifest.AllowsScenes(manifest.scenes)) Error("BUILD_SCENES",WakeupBuildManifest.AssetPath,"scenes","Wakeup must be the required entry.");
                 var selected=EditorBuildSettings.scenes.Where(s=>s.enabled).Select(s=>s.path).ToArray();
                 if (!selected.SequenceEqual(manifest.scenes??Array.Empty<string>())) Error("BUILD_SETTINGS",WakeupBuildManifest.AssetPath,"scenes","Enabled build scenes must match the manifest.");
                 if (manifest.runtimeConfig?.database==null) Error("CATALOG_CONFIG",WakeupBuildManifest.AssetPath,"runtimeConfig","Missing configured catalog.");
@@ -116,7 +116,7 @@ namespace SOLITUDE.Editor
             try {CompositionValidator.ValidateScene(scene);}catch(Exception error){Error("SCENE_ENDPOINTS","SceneBindings",error.Message);}
             foreach(var root in roots)InspectScripts(root,scene.path,findings);
             var owners=new HashSet<string>(StringComparer.Ordinal);var pickupIds=new HashSet<string>(StringComparer.Ordinal);
-            var manifest=AssetDatabase.LoadAssetAtPath<WakeupBuildManifest>(WakeupBuildManifest.AssetPath);var database=manifest?.runtimeConfig?.database;
+            var manifest=WakeupBuildManifest.Selected;var database=manifest?.runtimeConfig?.database;
             foreach(var root in bootstrap)
             {
                 var fields=new SerializedObject(root);

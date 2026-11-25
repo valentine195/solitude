@@ -11,6 +11,10 @@ namespace SOLITUDE.World.Restoration
     {
         [SerializeField] private RestorableSystem system;
         [SerializeField] private ItemDefinition requiredItem;
+        [SerializeField] private MechanicalRepairComposition mechanicalRepair;
+        [SerializeField] private bool persistentRepair;
+        public void ConfigureMechanicalRepair(MechanicalRepairComposition value) { mechanicalRepair = value; persistentRepair = true; }
+        public bool IsMechanicalOwner(MechanicalRepairComposition value) => mechanicalRepair == value;
         private ContainerCommandService commands;
         private IContainerReader inventory;
         public void Configure(RestorableSystem target, ItemDefinition item) { system = target; requiredItem = item; }
@@ -19,11 +23,12 @@ namespace SOLITUDE.World.Restoration
         public void ReleaseBinding() { commands = null; inventory = null; }
         private bool Configured => system != null && requiredItem != null && !string.IsNullOrWhiteSpace(requiredItem.ItemId);
         private string Requirement => string.IsNullOrWhiteSpace(requiredItem.DisplayName) ? requiredItem.ItemId : requiredItem.DisplayName;
-        public override string GetPrompt() => !Configured ? "System unavailable" :
+        public override string GetPrompt() => persistentRepair ? mechanicalRepair != null ? mechanicalRepair.Prompt : "System unavailable" : !Configured ? "System unavailable" :
             system.IsRestored ? "System restored" : "Offline — install 1 " + Requirement;
         public override bool CanInteract(PlayerInteractor player) => isActiveAndEnabled;
         public override InteractionResult Interact(PlayerInteractor player)
         {
+            if (persistentRepair) return isActiveAndEnabled && mechanicalRepair != null ? mechanicalRepair.Repair(player) : InteractionResult.Blocked("System unavailable");
             if (!isActiveAndEnabled || !Configured) return InteractionResult.Blocked("System unavailable");
             switch (system.State.TryRestore(commands, inventory, requiredItem.ItemId))
             {

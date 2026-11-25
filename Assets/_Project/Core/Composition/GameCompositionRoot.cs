@@ -92,7 +92,20 @@ namespace SOLITUDE.Composition
         private void FinishStartup()
         {
             persistence.CompleteRecovery();
-            var outcome = interactive.InitializeStartingLoadout(startingLoadout, persistence.TryFlush);
+            Func<bool> persistLoadout = persistence.TryFlush;
+#if SOLITUDE_VERIFICATION
+            if (!session.StartingLoadoutInitialized)
+            {
+                VerificationFaults.Hit("loadout-before-grant");
+                persistLoadout = () =>
+                {
+                    VerificationFaults.Hit("loadout-before-flush");
+                    VerificationFaults.ArmWrite();
+                    return persistence.TryFlush();
+                };
+            }
+#endif
+            var outcome = interactive.InitializeStartingLoadout(startingLoadout, persistLoadout);
             if (outcome != StartingLoadoutOutcome.Ready && outcome != StartingLoadoutOutcome.AlreadyInitialized)
                 throw new System.IO.IOException("Starting equipment initialization failed: " + interactive.StartingLoadoutError);
             startupDestination = null;
