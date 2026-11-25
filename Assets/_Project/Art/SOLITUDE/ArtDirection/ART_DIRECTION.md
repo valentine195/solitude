@@ -1,8 +1,12 @@
-# SOLITUDE art direction — opening slice
+# SOLITUDE art direction
 
 Normal first, wrong second. SOLITUDE is a generation ship built for people to live and work aboard. The opening feels calm, functional, warm, inhabited but unexpectedly quiet. Curiosity and absence precede suspense. Red emergency light, severe damage and horror are reserved for later narrative states.
 
-## Production contract
+Use high-resolution, hand-illustrated 2D artwork throughout the game. Use [Illustrated Cabin](../ReferenceScenes/IllustratedCabin.unity) as the visual reference for environments, characters, props, pickups, and effects. Preserve editable Tilemaps and the existing world grid when migrating artwork. Replace any pixel art still visible in playable scenes.
+
+## Legacy opening-slice reference
+
+The following specifications describe the original pixel-art prototype and its source tools.
 - 32 × 32 pixel tiles at 32 pixels per Unity unit. No fractional transform scale on new art.
 - Target new player art: approximately 32 × 48 pixels, bottom/feet pivot. The existing taller caretaker is a replaceable placeholder, confirmed by the user. Replace its visual animation with four-direction 32 × 48 art while preserving movement and interaction behavior; fit the foot collider to the new footprint.
 - Orthographic top-down room perspective, similar to Stardew interiors. North walls show a face; east, west and south boundaries primarily show caps. Horizontal and vertical edges, 90-degree corners. No isometric projection, diagonal room geometry or perspective convergence.

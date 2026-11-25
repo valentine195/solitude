@@ -11,6 +11,7 @@ namespace SOLITUDE.Tasks.UI
         [SerializeField] private UnityEngine.UI.Button select;
         [SerializeField] private UnityEngine.UI.Image selection;
         [SerializeField] private UnityEngine.UI.Image outcomeIcon;
+        [SerializeField] private UnityEngine.UI.Graphic taskMark, selectionAccent;
         [SerializeField] private TMP_Text title, location, condition, outcome, availability;
         private Action<TaskKey> activate;
         public TaskKey Key { get; private set; }
@@ -24,15 +25,24 @@ namespace SOLITUDE.Tasks.UI
             title.text = state.Title; location.text = state.Location; outcome.text = state.Outcome;
             condition.text = state.Condition.ToString().ToUpperInvariant(); condition.color = TaskJournalView.ConditionColor(state.Condition);
             availability.text = state.Availability;
-            availability.gameObject.SetActive(!string.IsNullOrEmpty(state.Availability));
+            availability.gameObject.SetActive(taskMark == null && !string.IsNullOrEmpty(state.Availability));
             selection.enabled = state.Selected;
+            if (taskMark != null)
+            {
+                selectionAccent.enabled = state.Selected;
+                taskMark.color = state.Outcome == "FAILED" ? TaskJournalView.Fault :
+                    state.Outcome == "COMPLETED" ? TaskJournalView.Operational :
+                    state.Outcome == "ACTIVE" ? TaskJournalView.Amber : TaskJournalView.White;
+                title.fontStyle = state.Selected ? FontStyles.Bold : FontStyles.Normal;
+            }
             outcome.color = state.Outcome == "FAILED" ? TaskJournalView.Fault : TaskJournalView.White;
             outcomeIcon.enabled = state.Outcome == "FAILED" || state.Outcome == "COMPLETED";
             outcomeIcon.color = state.Outcome == "FAILED" ? TaskJournalView.Fault : TaskJournalView.Operational;
         }
         public void ValidateAuthoring()
         {
-            if (select == null || selection == null || outcomeIcon == null || title == null || location == null || condition == null || outcome == null || availability == null)
+            if (select == null || selection == null || outcomeIcon == null || title == null || location == null || condition == null || outcome == null || availability == null
+                || (taskMark != null && selectionAccent == null))
                 throw new InvalidOperationException("Task journal row endpoints are incomplete.");
         }
     }

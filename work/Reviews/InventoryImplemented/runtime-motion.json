@@ -1,0 +1,23 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "eval",
+    "parameters": {
+      "code": "var s=UnityEngine.Object.FindAnyObjectByType<SOLITUDE.Containers.InventoryScreenView>();var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;var r=(UnityEngine.UI.Image)s.GetType().GetField(\"weaponResponse\",f).GetValue(s);var i=(UnityEngine.UI.Image)s.GetType().GetField(\"weaponIcon\",f).GetValue(s);if(r.color.a!=0||Math.Abs(i.rectTransform.localScale.x-1)>.001f)throw new Exception(\"Motion did not settle\");var h=(SOLITUDE.Containers.ContainerView)s.GetType().GetField(\"hotbarView\",f).GetValue(s);UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(h.SlotViews[0].gameObject);return \"PASS: destination response and equip settle returned to rest; hotbar selection bound\";"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": true,
+      "result": "PASS: destination response and equip settle returned to rest; hotbar selection bound"
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

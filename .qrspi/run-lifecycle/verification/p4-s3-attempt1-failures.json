@@ -1,0 +1,117 @@
+[
+  {
+    "test": "SOLITUDE.Tests.RunLifecycleShipPersistenceTests.SocketPowerSurvivesDiskRestoreWithoutRepeatingBatteryChecks",
+    "message": "System.InvalidOperationException : Sequence contains more than one element",
+    "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x00070] in <1b6d7e99e5414d05b29c34e3609a3284>:0 \n  at SOLITUDE.Tests.RunLifecycleShipPersistenceTests.One[T] () [0x00000] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/RunLifecycleShipPersistenceTests.cs:52 \n  at SOLITUDE.Tests.RunLifecycleShipPersistenceTests+<SocketPowerSurvivesDiskRestoreWithoutRepeatingBatteryChecks>d__52.MoveNext () [0x00021] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/RunLifecycleShipPersistenceTests.cs:351 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52 "
+  },
+  {
+    "test": "SOLITUDE.Tests.RunLifecycleSliceTests.InputJourneyRepairsScrubberUnlocksShortcutAndGameplayDamageRefreshesOnlyExpedition",
+    "message": "  Expected: True\n  But was:  False\n",
+    "stack": "at SOLITUDE.Tests.RunLifecycleSliceTests+<InputJourneyRepairsScrubberUnlocksShortcutAndGameplayDamageRefreshesOnlyExpedition>d__34.MoveNext () [0x00443] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/RunLifecycleSliceTests.cs:137\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.RunLifecycleSliceTests.LostCarriedFuseReturnsButAReachableStoredFusePreventsReplacement",
+    "message": "  Expected: True\n  But was:  False\n",
+    "stack": "at SOLITUDE.Tests.RunLifecycleSliceTests+<LostCarriedFuseReturnsButAReachableStoredFusePreventsReplacement>d__35.MoveNext () [0x00117] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/RunLifecycleSliceTests.cs:162\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.DeathClosesJournalAndInventoryAndSuppressesHeldMovementUntilRelease",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<Prepare>d__30.MoveNext () [0x00111] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:103\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.PartialCachesEmptyDeathAndRejectedAttemptConserveEveryItem",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<Prepare>d__30.MoveNext () [0x00111] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:103\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.RejectedPreparedHandoffReleasesOnlyItsEmptyOwnerAndCanTryAgain",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<Prepare>d__30.MoveNext () [0x00111] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:103\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.ReleasedCacheDropsFocusSynchronouslyWithoutReleasingOtherOwners",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<Prepare>d__30.MoveNext () [0x00111] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:103\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.RevisionChangeBetweenPreparationAndCommitRejectsTheWholeHandoff",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<Prepare>d__30.MoveNext () [0x00111] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:103\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.TransferDragAndHeldPointerCannotActAfterCommittedFailureOrRetry",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<Prepare>d__30.MoveNext () [0x00111] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:103\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.UncertainAcknowledgmentRetriesWithoutReactivationOrAnotherMessage",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<Prepare>d__30.MoveNext () [0x00111] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:103\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests.AuthoredScrubberKeepsRunningAndReaderBindingsAcrossDeathButResetsOnReload",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests+<Prepare>d__27.MoveNext () [0x000ff] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionShipCompatibilityTests.cs:67\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests.RestorationTerminalDoorAndLaterRepairRemainLiveUntilSceneReload",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests+<Prepare>d__27.MoveNext () [0x000ff] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionShipCompatibilityTests.cs:67\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests.SamePositionDeathsRemainRecoverableThroughOrdinaryFocusAfterExhaustion",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests+<Prepare>d__27.MoveNext () [0x000ff] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionShipCompatibilityTests.cs:67\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests.WakeupPickupLockerAndEquippedSuccessionUseRetainedSceneAndUI",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests+<Prepare>d__27.MoveNext () [0x000ff] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionShipCompatibilityTests.cs:67\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.CommittedEquipmentSurvivesActivationFailureAndRetryDoesNotTransferAgain",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<Prepare>d__14.MoveNext () [0x00105] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:51\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.EmptyDeathResetsRetainedAvatarVitalsSelectionReadersAndFeedback",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<Prepare>d__14.MoveNext () [0x00105] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:51\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.EquippedDeathCommitsBothSourcesAndCancelsGestureWithoutAnOpenModal",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<Prepare>d__14.MoveNext () [0x00105] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:51\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.HeldMovementAndInventoryAreNeutralUntilReleaseThenNewInputWorks",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<Prepare>d__14.MoveNext () [0x00105] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:51\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.InvalidPointRejectsDeathWithoutActivatingSuccessor",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<Prepare>d__14.MoveNext () [0x00105] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:51\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.MissingRecoveryRejectsWithoutLosingCarriedEquipment",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<Prepare>d__14.MoveNext () [0x00105] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:51\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.OpenJournalClosesWithoutRebindingAuthoredDemo",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<Prepare>d__14.MoveNext () [0x00105] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:51\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.PoweredDoorFirstContactAndPickupRemainLiveAcrossDeath",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<Prepare>d__14.MoveNext () [0x00105] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:51\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.RepeatedEquippedDeathsKeepPartialCachesAndRecoverThroughInteraction",
+    "message": "SetUp :   Expected: Ready\n  But was:  Failed\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<Prepare>d__14.MoveNext () [0x00105] in /private/tmp/solitude-run-lifecycle-p4-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:51\nat UnityEngine.TestTools.EnumeratorHelper+<ProgressOnEnumerator>d__5.MoveNext () [0x00017] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/EnumeratorHelper.cs:43\nat UnityEngine.TestTools.BeforeAfterTestCommandBase`1+<ExecuteEnumerable>d__16[T].MoveNext () [0x00132] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Commands/BeforeAfterTestCommandBase.cs:156\n"
+  }
+]

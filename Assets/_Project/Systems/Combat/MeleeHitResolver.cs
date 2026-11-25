@@ -145,9 +145,9 @@ namespace SOLITUDE.Combat
                 var damage = new DamageContext(config.BaseDamage, context.ActorObject, target, context.ItemId,
                     context.SourceAction, contacts[i], context.Direction, config.DamageTags);
                 var result = delivery.Deliver(damage, config.TargetEligibility);
-                if (!result.WasApplied) continue;
+                if (!result.WasApplied && result.Outcome != DamageOutcome.Resisted) continue;
                 if (owner == execution) accepted[acceptedCount++] = target;
-                execution.ReportApplied(damage, result);
+                execution.ReportContact(damage, result);
             }
         }
         private bool Trace(double angle, PhysicsScene2D physics, ContactFilter2D filter, int targetMask, int blockerMask, ItemActionContext context)

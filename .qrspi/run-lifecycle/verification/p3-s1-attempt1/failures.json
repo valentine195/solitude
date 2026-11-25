@@ -1,0 +1,67 @@
+[
+  {
+    "test": "SOLITUDE.Tests.RunLifecycleResumeTests.SceneArrivalKeepsColonistVitalsButUsesAuthoredArrivalPosition",
+    "message": "  Expected: (-0.89, -2.40)\n  But was:  (-0.89, -2.40)\n",
+    "stack": "at SOLITUDE.Tests.RunLifecycleResumeTests+<SceneArrivalKeepsColonistVitalsButUsesAuthoredArrivalPosition>d__30.MoveNext () [0x00147] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/RunLifecycleResumeTests.cs:185\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.PartialCachesEmptyDeathAndRejectedAttemptConserveEveryItem",
+    "message": "System.InvalidOperationException : Sequence contains no elements",
+    "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0002d] in <1b6d7e99e5414d05b29c34e3609a3284>:0 \n  at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<PartialCachesEmptyDeathAndRejectedAttemptConserveEveryItem>d__37.MoveNext () [0x00095] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:236 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52 "
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.RejectedPreparedHandoffReleasesOnlyItsEmptyOwnerAndCanTryAgain",
+    "message": "System.InvalidOperationException : Sequence contains no elements",
+    "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0002d] in <1b6d7e99e5414d05b29c34e3609a3284>:0 \n  at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<RejectedPreparedHandoffReleasesOnlyItsEmptyOwnerAndCanTryAgain>d__33.MoveNext () [0x0005b] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:129 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52 "
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.ReleasedCacheDropsFocusSynchronouslyWithoutReleasingOtherOwners",
+    "message": "System.InvalidOperationException : Sequence contains no elements",
+    "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0002d] in <1b6d7e99e5414d05b29c34e3609a3284>:0 \n  at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<ReleasedCacheDropsFocusSynchronouslyWithoutReleasingOtherOwners>d__38.MoveNext () [0x0006e] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:265 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52 "
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionFailureTests.TransferDragAndHeldPointerCannotActAfterCommittedFailureOrRetry",
+    "message": "System.InvalidOperationException : Sequence contains no elements",
+    "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0002d] in <1b6d7e99e5414d05b29c34e3609a3284>:0 \n  at SOLITUDE.Tests.SurvivorSuccessionFailureTests+<TransferDragAndHeldPointerCannotActAfterCommittedFailureOrRetry>d__35.MoveNext () [0x0006d] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionFailureTests.cs:173 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52 "
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests.SamePositionDeathsRemainRecoverableThroughOrdinaryFocusAfterExhaustion",
+    "message": "  Expected: 2\n  But was:  0\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests+<SamePositionDeathsRemainRecoverableThroughOrdinaryFocusAfterExhaustion>d__33.MoveNext () [0x00237] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionShipCompatibilityTests.cs:155\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests.WakeupPickupLockerAndEquippedSuccessionUseRetainedSceneAndUI",
+    "message": "System.InvalidOperationException : Sequence contains no elements",
+    "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0002d] in <1b6d7e99e5414d05b29c34e3609a3284>:0 \n  at SOLITUDE.Tests.SurvivorSuccessionShipCompatibilityTests+<WakeupPickupLockerAndEquippedSuccessionUseRetainedSceneAndUI>d__32.MoveNext () [0x00546] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionShipCompatibilityTests.cs:129 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52 "
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.CommittedEquipmentSurvivesActivationFailureAndRetryDoesNotTransferAgain",
+    "message": "System.InvalidOperationException : Sequence contains no elements",
+    "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0002d] in <1b6d7e99e5414d05b29c34e3609a3284>:0 \n  at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<CommittedEquipmentSurvivesActivationFailureAndRetryDoesNotTransferAgain>d__22.MoveNext () [0x00144] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:207 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52 "
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.EquippedDeathCommitsBothSourcesAndCancelsGestureWithoutAnOpenModal",
+    "message": "System.InvalidOperationException : Sequence contains no elements",
+    "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0002d] in <1b6d7e99e5414d05b29c34e3609a3284>:0 \n  at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<EquippedDeathCommitsBothSourcesAndCancelsGestureWithoutAnOpenModal>d__18.MoveNext () [0x001be] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:124 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52 "
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.InvalidPointRejectsDeathWithoutActivatingSuccessor",
+    "message": "  Expected: same as <SOLITUDE.Survivors.SurvivorState>\n  But was:  null\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<InvalidPointRejectsDeathWithoutActivatingSuccessor>d__23.MoveNext () [0x0005b] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:227\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.MissingRecoveryRejectsWithoutLosingCarriedEquipment",
+    "message": "  Expected: same as <SOLITUDE.Survivors.SurvivorState>\n  But was:  null\n",
+    "stack": "at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<MissingRecoveryRejectsWithoutLosingCarriedEquipment>d__21.MoveNext () [0x00081] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:189\nat UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.PoweredDoorFirstContactAndPickupRemainLiveAcrossDeath",
+    "message": "Unhandled log message: '[Error] [GameCompositionRoot] Runtime unavailable; save preserved: Sequence contains no elements'. Use UnityEngine.TestTools.LogAssert.Expect",
+    "stack": "SOLITUDE.Composition.GameCompositionRoot:Fail (System.Exception) (at Assets/_Project/Core/Composition/GameCompositionRoot.cs:139)\nSOLITUDE.Composition.GameCompositionRoot:Loaded (UnityEngine.SceneManagement.Scene,UnityEngine.SceneManagement.LoadSceneMode) (at Assets/_Project/Core/Composition/GameCompositionRoot.cs:150)\nUnityEngine.SceneManagement.SceneManager:Internal_SceneLoaded (UnityEngine.SceneManagement.Scene,UnityEngine.SceneManagement.LoadSceneMode) (at /Users/bokken/build/output/unity/unity/Runtime/Export/SceneManager/SceneManager.cs:244)\n\n"
+  },
+  {
+    "test": "SOLITUDE.Tests.SurvivorSuccessionSliceTests.RepeatedEquippedDeathsKeepPartialCachesAndRecoverThroughInteraction",
+    "message": "System.InvalidOperationException : Sequence contains no elements",
+    "stack": "  at System.Linq.Enumerable.Single[TSource] (System.Collections.Generic.IEnumerable`1[T] source) [0x0002d] in <1b6d7e99e5414d05b29c34e3609a3284>:0 \n  at SOLITUDE.Tests.SurvivorSuccessionSliceTests+<RepeatedEquippedDeathsKeepPartialCachesAndRecoverThroughInteraction>d__19.MoveNext () [0x0010a] in /private/tmp/solitude-run-lifecycle-p3-s1/Assets/_Project/Tests/PlayMode/SurvivorSuccessionSliceTests.cs:141 \n  at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52 "
+  }
+]

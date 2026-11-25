@@ -56,14 +56,15 @@ namespace SOLITUDE.Application
         private long generation;
         private int selected = -1, hovered = -1;
         private bool disposed;
+        private readonly bool handlesDrag;
         public ContainerPresenter(IContainerReader reader, IContainerDisplay view, string label, ContainerGestureCoordinator gestures,
-            InputPolicyCoordinator policy, ITooltipDisplay tooltip = null, HotbarSelectionState selection = null)
+            InputPolicyCoordinator policy, ITooltipDisplay tooltip = null, HotbarSelectionState selection = null, bool handlesDrag = true)
         {
             this.reader = reader; this.view = view; this.label = label; this.gestures = gestures;
-            this.policy = policy; this.tooltip = tooltip; this.selection = selection;
+            this.policy = policy; this.tooltip = tooltip; this.selection = selection; this.handlesDrag = handlesDrag;
             reader.SlotChanged += Changed; reader.CapacityChanged += Rebuild;
             view.Hovered += Hover; view.Unhovered += Unhover; view.Selected += Select;
-            view.BeginDrag += Begin; view.EndDrag += End; view.Drop += Drop;
+            if (handlesDrag) { view.BeginDrag += Begin; view.EndDrag += End; view.Drop += Drop; }
             policy.Changed += PolicyChanged;
             if (selection != null) selection.Changed += ActiveChanged;
             try { Rebuild(); } catch { Dispose(); throw; }
@@ -98,7 +99,7 @@ namespace SOLITUDE.Application
             if (disposed) return; disposed = true;
             reader.SlotChanged -= Changed; reader.CapacityChanged -= Rebuild;
             view.Hovered -= Hover; view.Unhovered -= Unhover; view.Selected -= Select;
-            view.BeginDrag -= Begin; view.EndDrag -= End; view.Drop -= Drop;
+            if (handlesDrag) { view.BeginDrag -= Begin; view.EndDrag -= End; view.Drop -= Drop; }
             policy.Changed -= PolicyChanged;
             if (selection != null) selection.Changed -= ActiveChanged;
             gestures.Unbind(panel); tooltip?.Hide(); view.Clear();

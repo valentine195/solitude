@@ -31,6 +31,81 @@ namespace SOLITUDE.Tests
             var data=new SaveGameData {worldSeed=123};data.collectedPickupIds.Add("pickup");data.containers.Add(new ContainerSaveRecord {saveableId="inventory",state=new ContainerSaveData {slots=new System.Collections.Generic.List<ContainerSlotSaveData> {new ContainerSlotSaveData {index=0,itemId="a",quantity=2}}}});
             var restored=codec.Decode(codec.Encode(data));Assert.AreEqual(123,restored.worldSeed);Assert.AreEqual(2,restored.containers[0].state.slots[0].quantity);Assert.AreEqual("pickup",restored.collectedPickupIds[0]);
         }
+        [Test] public void QuickUseRoundTripsSlotsAndLoadsLegacyPinInSlotOne()
+        {
+            var data = new SaveGameData { playerEquipment = new PlayerEquipmentRecord { pinnedItemId = "a" } };
+            var legacy = codec.Encode(data);
+            legacy = legacy.Replace(",\n    \"additionalQuickUseItems\": null", string.Empty);
+            var restored = codec.Decode(legacy);
+            Assert.AreEqual("a", restored.playerEquipment.QuickUseItem(0));
+            Assert.IsNull(restored.playerEquipment.QuickUseItem(4));
+
+            data.playerEquipment.SetQuickUseItem(0, null);
+            data.playerEquipment.SetQuickUseItem(4, "a");
+            restored = codec.Decode(codec.Encode(data));
+            Assert.IsNull(restored.playerEquipment.QuickUseItem(0));
+            Assert.AreEqual("a", restored.playerEquipment.QuickUseItem(4));
+        }
+        private sealed class InterruptedFiles : ISaveFiles
+        {
+            private readonly System.Collections.Generic.Dictionary<string, string> files = new();
+            public bool InterruptReplacement;
+            public bool Exists(string path) => files.ContainsKey(path);
+            public string Read(string path) => files[path];
+            public void WriteDurable(string path, string text) => files[path] = text;
+            public void Delete(string path) => files.Remove(path);
+            public void Move(string source, string destination)
+            {
+                files[destination] = files[source];
+                files.Remove(source);
+            }
+            public void Replace(string source, string destination, string backup)
+            {
+                if (InterruptReplacement) throw new IOException("Interrupted before replacement.");
+                files[backup] = files[destination];
+                Move(source, destination);
+            }
+        }
+
+        [Test]
+        public void InterruptedEquipmentMigrationRetainsLegacySnapshotAndRetryCommitsOnce()
+        {
+            var catalog = new ItemCatalog(new[] { new ItemSpec("a", true, 10) });
+            var files = new InterruptedFiles();
+            var store = new SaveRecoveryStore("equipment-save", files, codec);
+            var original = new SaveGameData { startingLoadoutInitialized = true };
+            var bar = new ContainerSaveRecord { saveableId = ContainerSaveSession.PlayerHotbarId, state = new ContainerSaveData() };
+            bar.state.slots.Add(new ContainerSlotSaveData { index = 0, itemId = "a", quantity = 2 });
+            original.containers.Add(bar);
+            store.Write(original);
+
+            SaveGameData ConvertCurrent()
+            {
+                var session = new ContainerSaveSession(store.Load(1).Data, catalog);
+                session.PrepareEquipmentInventory(1, _ => PlayerEquipmentSlot.Weapon);
+                return session.Capture();
+            }
+
+            var candidate = ConvertCurrent();
+            files.InterruptReplacement = true;
+            Assert.Throws<IOException>(() => store.Write(candidate));
+            var interrupted = store.Load(1).Data;
+            Assert.IsNull(interrupted.playerEquipment);
+            Assert.AreEqual(2, interrupted.containers.Single().state.slots.Single().quantity);
+
+            files.InterruptReplacement = false;
+            store.Write(ConvertCurrent());
+            var committed = ConvertCurrent();
+            Assert.AreEqual(PlayerEquipmentSlot.Weapon, committed.playerEquipment.activeSlot);
+            Assert.AreEqual("a", committed.playerEquipment.weaponItemId);
+            Assert.IsNull(committed.playerEquipment.pinnedItemId);
+            Assert.AreEqual(1, committed.containers.Single(record =>
+                record.saveableId == ContainerSaveSession.PlayerInventoryId).state.slots.Single().quantity);
+            Assert.AreEqual(1, committed.containers.Single(record =>
+                record.saveableId == ContainerSaveSession.PlayerHotbarId).state.slots.Single().quantity);
+            Assert.IsTrue(committed.startingLoadoutInitialized);
+        }
+
         private static SaveGameData LivingSnapshot() => new SaveGameData
         {
             startingLoadoutInitialized = true,

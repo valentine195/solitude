@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="145" result="Passed" total="145" passed="145" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-08 17:16:20Z" end-time="2026-10-08 17:16:23Z" duration="2.326277">
+  <test-suite type="TestSuite" id="1000" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="145" result="Passed" start-time="2026-10-08 17:16:20Z" end-time="2026-10-08 17:16:23Z" duration="2.326277" total="145" passed="145" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1046" name="SOLITUDE.Tests.Application.dll" fullname="/private/tmp/solitude-task-journal-p1-s4/Library/ScriptAssemblies/SOLITUDE.Tests.Application.dll" runstate="Runnable" testcasecount="39" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.057229" total="39" passed="39" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="60136" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1047" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="39" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.056734" total="39" passed="39" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1048" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="39" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.056341" total="39" passed="39" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="ApplicationCompositionTests" fullname="SOLITUDE.Tests.ApplicationCompositionTests" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" testcasecount="15" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.035818" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1016" name="ApplicationAssemblyHasNoUnityReferences" fullname="SOLITUDE.Tests.ApplicationCompositionTests.ApplicationAssemblyHasNoUnityReferences" methodname="ApplicationAssemblyHasNoUnityReferences" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="454425636" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.010009" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1002" name="BothScreensPauseAndGateGameplayButKeepPointerAndToggle" fullname="SOLITUDE.Tests.ApplicationCompositionTests.BothScreensPauseAndGateGameplayButKeepPointerAndToggle" methodname="BothScreensPauseAndGateGameplayButKeepPointerAndToggle" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="1691309556" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.004331" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1004" name="ClosingDoesNotResumeIndependentPauseOrLoseSlowMotion" fullname="SOLITUDE.Tests.ApplicationCompositionTests.ClosingDoesNotResumeIndependentPauseOrLoseSlowMotion" methodname="ClosingDoesNotResumeIndependentPauseOrLoseSlowMotion" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="2052388995" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000571" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1013" name="DisposedAndUnrelatedPanelCannotCancelAnotherPanelGesture" fullname="SOLITUDE.Tests.ApplicationCompositionTests.DisposedAndUnrelatedPanelCannotCancelAnotherPanelGesture" methodname="DisposedAndUnrelatedPanelCannotCancelAnotherPanelGesture" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="1991484127" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.004345" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1003" name="EscapeCancelsGestureBeforeClosingAndNeverChangesQuantities" fullname="SOLITUDE.Tests.ApplicationCompositionTests.EscapeCancelsGestureBeforeClosingAndNeverChangesQuantities" methodname="EscapeCancelsGestureBeforeClosingAndNeverChangesQuantities" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="1534514592" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000290" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1007" name="FailedActivationReleasesTemporaryPauseAndDoesNotOpenState" fullname="SOLITUDE.Tests.ApplicationCompositionTests.FailedActivationReleasesTemporaryPauseAndDoesNotOpenState" methodname="FailedActivationReleasesTemporaryPauseAndDoesNotOpenState" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="872754996" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000140" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1006" name="FailedReplacementPreservesOldModalAndPause" fullname="SOLITUDE.Tests.ApplicationCompositionTests.FailedReplacementPreservesOldModalAndPause" methodname="FailedReplacementPreservesOldModalAndPause" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="1136954216" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000135" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1014" name="HotbarSelectionIsTransientAndClearsWhenEmptyOrShrunk" fullname="SOLITUDE.Tests.ApplicationCompositionTests.HotbarSelectionIsTransientAndClearsWhenEmptyOrShrunk" methodname="HotbarSelectionIsTransientAndClearsWhenEmptyOrShrunk" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="709872681" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001492" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1009" name="OwnerUnregisterClosesModalAndCancelsGesture" fullname="SOLITUDE.Tests.ApplicationCompositionTests.OwnerUnregisterClosesModalAndCancelsGesture" methodname="OwnerUnregisterClosesModalAndCancelsGesture" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="1324411531" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000340" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1015" name="PresentersCannotIssueGameplayInputWhileIndependentPauseBlocksPointer" fullname="SOLITUDE.Tests.ApplicationCompositionTests.PresentersCannotIssueGameplayInputWhileIndependentPauseBlocksPointer" methodname="PresentersCannotIssueGameplayInputWhileIndependentPauseBlocksPointer" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="2123319502" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000224" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1011" name="PresentersTransferUsingRenderedAddressesAndKeepPartialRemainders" fullname="SOLITUDE.Tests.ApplicationCompositionTests.PresentersTransferUsingRenderedAddressesAndKeepPartialRemainders" methodname="PresentersTransferUsingRenderedAddressesAndKeepPartialRemainders" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="771931363" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001050" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1005" name="ReplacementNeverEnablesGameplayBetweenScreens" fullname="SOLITUDE.Tests.ApplicationCompositionTests.ReplacementNeverEnablesGameplayBetweenScreens" methodname="ReplacementNeverEnablesGameplayBetweenScreens" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="289096502" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001446" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1012" name="ResizeInvalidatesOldViewEventsAndClearsSelectionTooltip" fullname="SOLITUDE.Tests.ApplicationCompositionTests.ResizeInvalidatesOldViewEventsAndClearsSelectionTooltip" methodname="ResizeInvalidatesOldViewEventsAndClearsSelectionTooltip" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="602893791" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000717" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1008" name="StaleProximityCloseCannotCloseReplacementTarget" fullname="SOLITUDE.Tests.ApplicationCompositionTests.StaleProximityCloseCannotCloseReplacementTarget" methodname="StaleProximityCloseCannotCloseReplacementTarget" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="37664709" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000579" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1010" name="UnreadyAndTransitionPoliciesRejectOpenAndInput" fullname="SOLITUDE.Tests.ApplicationCompositionTests.UnreadyAndTransitionPoliciesRejectOpenAndInput" methodname="UnreadyAndTransitionPoliciesRejectOpenAndInput" classname="SOLITUDE.Tests.ApplicationCompositionTests" runstate="Runnable" seed="35150731" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000176" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1017" name="SaveRecoveryTests" fullname="SOLITUDE.Tests.SaveRecoveryTests" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.006027" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1028" name="ExplicitResetPreservesValidBackupOfBlockedPrimary" fullname="SOLITUDE.Tests.SaveRecoveryTests.ExplicitResetPreservesValidBackupOfBlockedPrimary" methodname="ExplicitResetPreservesValidBackupOfBlockedPrimary" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="506866792" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001142" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1029" name="FailedCommitLeavesSessionDirtyUntilRetry" fullname="SOLITUDE.Tests.SaveRecoveryTests.FailedCommitLeavesSessionDirtyUntilRetry" methodname="FailedCommitLeavesSessionDirtyUntilRetry" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="381246829" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001482" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1026" name="FailedPromotionIsRetryableAndKeepsAllCommittedFiles" fullname="SOLITUDE.Tests.SaveRecoveryTests.FailedPromotionIsRetryableAndKeepsAllCommittedFiles" methodname="FailedPromotionIsRetryableAndKeepsAllCommittedFiles" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="556897950" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000353" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1027" name="FailureBeforeTemporaryWriteCannotTouchPrimary" fullname="SOLITUDE.Tests.SaveRecoveryTests.FailureBeforeTemporaryWriteCannotTouchPrimary" methodname="FailureBeforeTemporaryWriteCannotTouchPrimary" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="708024749" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000130" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1023" name="IncompatiblePrimaryCannotSilentlyRollBack" fullname="SOLITUDE.Tests.SaveRecoveryTests.IncompatiblePrimaryCannotSilentlyRollBack" methodname="IncompatiblePrimaryCannotSilentlyRollBack" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="1318625156" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000096" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1024" name="InvalidBackupAndPrimaryRemainIntact" fullname="SOLITUDE.Tests.SaveRecoveryTests.InvalidBackupAndPrimaryRemainIntact" methodname="InvalidBackupAndPrimaryRemainIntact" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="369529129" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000097" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1018" name="NoCommittedFilesStartsFreshButTemporaryAloneDoesNot" fullname="SOLITUDE.Tests.SaveRecoveryTests.NoCommittedFilesStartsFreshButTemporaryAloneDoesNot" methodname="NoCommittedFilesStartsFreshButTemporaryAloneDoesNot" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="1066167596" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000092" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1025" name="ReadErrorsNeverBecomeFreshOrBackupRecovery" fullname="SOLITUDE.Tests.SaveRecoveryTests.ReadErrorsNeverBecomeFreshOrBackupRecovery" methodname="ReadErrorsNeverBecomeFreshOrBackupRecovery" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="1503207193" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000103" asserts="0">
+              <properties />
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1022" name="RecoveryPreservesBackupAndQuarantinesCorruptPrimary" fullname="SOLITUDE.Tests.SaveRecoveryTests.RecoveryPreservesBackupAndQuarantinesCorruptPrimary" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000794" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1020" name="RecoveryPreservesBackupAndQuarantinesCorruptPrimary(False)" fullname="SOLITUDE.Tests.SaveRecoveryTests.RecoveryPreservesBackupAndQuarantinesCorruptPrimary(False)" methodname="RecoveryPreservesBackupAndQuarantinesCorruptPrimary" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="1628308266" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000312" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1021" name="RecoveryPreservesBackupAndQuarantinesCorruptPrimary(True)" fullname="SOLITUDE.Tests.SaveRecoveryTests.RecoveryPreservesBackupAndQuarantinesCorruptPrimary(True)" methodname="RecoveryPreservesBackupAndQuarantinesCorruptPrimary" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="1536834139" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000075" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="1019" name="ValidPrimaryWinsOverBackupAndTemporary" fullname="SOLITUDE.Tests.SaveRecoveryTests.ValidPrimaryWinsOverBackupAndTemporary" methodname="ValidPrimaryWinsOverBackupAndTemporary" classname="SOLITUDE.Tests.SaveRecoveryTests" runstate="Runnable" seed="50999278" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000163" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1030" name="ScrubberScreenCoordinatorTests" fullname="SOLITUDE.Tests.ScrubberScreenCoordinatorTests" classname="SOLITUDE.Tests.ScrubberScreenCoordinatorTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001487" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1032" name="BindingFailureReleasesLeaseAndCanBeRetried" fullname="SOLITUDE.Tests.ScrubberScreenCoordinatorTests.BindingFailureReleasesLeaseAndCanBeRetried" methodname="BindingFailureReleasesLeaseAndCanBeRetried" classname="SOLITUDE.Tests.ScrubberScreenCoordinatorTests" runstate="Runnable" seed="732634088" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000529" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1031" name="PrimaryScreenBlocksWorldAndInventoryWithoutPausing" fullname="SOLITUDE.Tests.ScrubberScreenCoordinatorTests.PrimaryScreenBlocksWorldAndInventoryWithoutPausing" methodname="PrimaryScreenBlocksWorldAndInventoryWithoutPausing" classname="SOLITUDE.Tests.ScrubberScreenCoordinatorTests" runstate="Runnable" seed="2126768000" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000233" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1033" name="UnreadyPausedAndTransitioningScreensCannotOpen" fullname="SOLITUDE.Tests.ScrubberScreenCoordinatorTests.UnreadyPausedAndTransitioningScreensCannotOpen" methodname="UnreadyPausedAndTransitioningScreensCannotOpen" classname="SOLITUDE.Tests.ScrubberScreenCoordinatorTests" runstate="Runnable" seed="44609816" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000185" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1034" name="TaskJournalPresenterTests" fullname="SOLITUDE.Tests.TaskJournalPresenterTests" classname="SOLITUDE.Tests.TaskJournalPresenterTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.009400" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1038" name="LabelsKeepFailureConditionAvailabilityAndCopyLiteral" fullname="SOLITUDE.Tests.TaskJournalPresenterTests.LabelsKeepFailureConditionAvailabilityAndCopyLiteral" methodname="LabelsKeepFailureConditionAvailabilityAndCopyLiteral" classname="SOLITUDE.Tests.TaskJournalPresenterTests" runstate="Runnable" seed="1217361160" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.006404" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1039" name="MissingAndFailingDisplayCannotUndoSourceWritesOrLeakObservation" fullname="SOLITUDE.Tests.TaskJournalPresenterTests.MissingAndFailingDisplayCannotUndoSourceWritesOrLeakObservation" methodname="MissingAndFailingDisplayCannotUndoSourceWritesOrLeakObservation" classname="SOLITUDE.Tests.TaskJournalPresenterTests" runstate="Runnable" seed="1168724713" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000403" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1037" name="RemovalChoosesNextThenPreviousThenNoneAndKeepsTab" fullname="SOLITUDE.Tests.TaskJournalPresenterTests.RemovalChoosesNextThenPreviousThenNoneAndKeepsTab" methodname="RemovalChoosesNextThenPreviousThenNoneAndKeepsTab" classname="SOLITUDE.Tests.TaskJournalPresenterTests" runstate="Runnable" seed="357570094" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001139" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1036" name="RequiredFirstRenderPropagatesFailureAndClearsVisibility" fullname="SOLITUDE.Tests.TaskJournalPresenterTests.RequiredFirstRenderPropagatesFailureAndClearsVisibility" methodname="RequiredFirstRenderPropagatesFailureAndClearsVisibility" classname="SOLITUDE.Tests.TaskJournalPresenterTests" runstate="Runnable" seed="58106898" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000173" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1035" name="SelectionAndReopenRetainIdentityFocusAndScroll" fullname="SOLITUDE.Tests.TaskJournalPresenterTests.SelectionAndReopenRetainIdentityFocusAndScroll" methodname="SelectionAndReopenRetainIdentityFocusAndScroll" classname="SOLITUDE.Tests.TaskJournalPresenterTests" runstate="Runnable" seed="1114823811" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000416" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1040" name="TaskJournalScreenCoordinatorTests" fullname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests" classname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.002326" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1043" name="FailedShowAndHideReleaseBothLeasesAndBackConsumesOnlyOpenScreen" fullname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests.FailedShowAndHideReleaseBothLeasesAndBackConsumesOnlyOpenScreen" methodname="FailedShowAndHideReleaseBothLeasesAndBackConsumesOnlyOpenScreen" classname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests" runstate="Runnable" seed="1413384436" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000687" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1045" name="MissingDisplayAndDisposedCoordinatorNeverAcquireOwnership" fullname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests.MissingDisplayAndDisposedCoordinatorNeverAcquireOwnership" methodname="MissingDisplayAndDisposedCoordinatorNeverAcquireOwnership" classname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests" runstate="Runnable" seed="1584906818" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000130" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1042" name="OtherPrimaryPauseUnreadyAndTransitionRequestsLeaveOwnersUntouched" fullname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests.OtherPrimaryPauseUnreadyAndTransitionRequestsLeaveOwnersUntouched" methodname="OtherPrimaryPauseUnreadyAndTransitionRequestsLeaveOwnersUntouched" classname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests" runstate="Runnable" seed="141041338" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000182" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1041" name="ReadyOpenPausesAndGatesWithoutChangingBaseSpeedOrOtherPauseOwnership" fullname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests.ReadyOpenPausesAndGatesWithoutChangingBaseSpeedOrOtherPauseOwnership" methodname="ReadyOpenPausesAndGatesWithoutChangingBaseSpeedOrOtherPauseOwnership" classname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests" runstate="Runnable" seed="1979527342" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000202" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1044" name="TransitionAndLostBindingCloseSafelyIncludingDuringShow" fullname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests.TransitionAndLostBindingCloseSafelyIncludingDuringShow" methodname="TransitionAndLostBindingCloseSafelyIncludingDuringShow" classname="SOLITUDE.Tests.TaskJournalScreenCoordinatorTests" runstate="Runnable" seed="1593975407" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000218" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1096" name="SOLITUDE.Tests.Domain.dll" fullname="/private/tmp/solitude-task-journal-p1-s4/Library/ScriptAssemblies/SOLITUDE.Tests.Domain.dll" runstate="Runnable" testcasecount="43" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.059719" total="43" passed="43" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="60136" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1097" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="43" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.056734" total="43" passed="43" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1098" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="43" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.056341" total="43" passed="43" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1049" name="ContainerBoundaryTests" fullname="SOLITUDE.Tests.ContainerBoundaryTests" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" testcasecount="24" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.027775" total="24" passed="24" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1052" name="AcceptancePolicyIsFrozenAndPlanningRejectsReentrantCommands" fullname="SOLITUDE.Tests.ContainerBoundaryTests.AcceptancePolicyIsFrozenAndPlanningRejectsReentrantCommands" methodname="AcceptancePolicyIsFrozenAndPlanningRejectsReentrantCommands" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="1650475472" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000545" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1070" name="CompiledLootPreservesSeededAlgorithmAndCandidateOrder" fullname="SOLITUDE.Tests.ContainerBoundaryTests.CompiledLootPreservesSeededAlgorithmAndCandidateOrder" methodname="CompiledLootPreservesSeededAlgorithmAndCandidateOrder" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="252780061" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.005583" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1073" name="DomainHasNoUnityReferencesOrPublicStorageWrites" fullname="SOLITUDE.Tests.ContainerBoundaryTests.DomainHasNoUnityReferencesOrPublicStorageWrites" methodname="DomainHasNoUnityReferencesOrPublicStorageWrites" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="1207413079" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000919" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1053" name="FailedInitialLootNeverPublishesAnOwner" fullname="SOLITUDE.Tests.ContainerBoundaryTests.FailedInitialLootNeverPublishesAnOwner" methodname="FailedInitialLootNeverPublishesAnOwner" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="1870795194" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001006" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1066" name="FailedOwnerRestorePreservesUnloadedRecordAndBlocksAutosave" fullname="SOLITUDE.Tests.ContainerBoundaryTests.FailedOwnerRestorePreservesUnloadedRecordAndBlocksAutosave" methodname="FailedOwnerRestorePreservesUnloadedRecordAndBlocksAutosave" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="152401265" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001938" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1065" name="FailedRestoreDoesNotReplaceLiveStateOrDirtySession" fullname="SOLITUDE.Tests.ContainerBoundaryTests.FailedRestoreDoesNotReplaceLiveStateOrDirtySession" methodname="FailedRestoreDoesNotReplaceLiveStateOrDirtySession" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="1522304067" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000778" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1064" name="FormerlyStackableItemsSplitWithoutLosingReservedSlots" fullname="SOLITUDE.Tests.ContainerBoundaryTests.FormerlyStackableItemsSplitWithoutLosingReservedSlots" methodname="FormerlyStackableItemsSplitWithoutLosingReservedSlots" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="428120024" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000687" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1050" name="InvalidCatalogAndLootAuthoringAreRejected" fullname="SOLITUDE.Tests.ContainerBoundaryTests.InvalidCatalogAndLootAuthoringAreRejected" methodname="InvalidCatalogAndLootAuthoringAreRejected" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="693001236" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000377" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1051" name="InvalidGrantsAndRemovalsLeaveRevisionsAndDirtyStateUnchanged" fullname="SOLITUDE.Tests.ContainerBoundaryTests.InvalidGrantsAndRemovalsLeaveRevisionsAndDirtyStateUnchanged" methodname="InvalidGrantsAndRemovalsLeaveRevisionsAndDirtyStateUnchanged" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="631351419" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000302" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1068" name="InvalidUnloadedSchemaFailsBeforeAnyOwnerIsPublished" fullname="SOLITUDE.Tests.ContainerBoundaryTests.InvalidUnloadedSchemaFailsBeforeAnyOwnerIsPublished" methodname="InvalidUnloadedSchemaFailsBeforeAnyOwnerIsPublished" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="200357205" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000481" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1071" name="NewWorldReleaseCannotRetainEmptyLockerRecordsOrOldOwners" fullname="SOLITUDE.Tests.ContainerBoundaryTests.NewWorldReleaseCannotRetainEmptyLockerRecordsOrOldOwners" methodname="NewWorldReleaseCannotRetainEmptyLockerRecordsOrOldOwners" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="208485959" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000422" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1055" name="NonstackableGrantUsesOnePerSlotAndIsAtomic" fullname="SOLITUDE.Tests.ContainerBoundaryTests.NonstackableGrantUsesOnePerSlotAndIsAtomic" methodname="NonstackableGrantUsesOnePerSlotAndIsAtomic" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="667001979" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000572" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1072" name="NoOpsDoNotDirtyOrPublish" fullname="SOLITUDE.Tests.ContainerBoundaryTests.NoOpsDoNotDirtyOrPublish" methodname="NoOpsDoNotDirtyOrPublish" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="55626321" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000449" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1067" name="NormalizationDirtiesOnlyChangedSavedRecords" fullname="SOLITUDE.Tests.ContainerBoundaryTests.NormalizationDirtiesOnlyChangedSavedRecords" methodname="NormalizationDirtiesOnlyChangedSavedRecords" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="2069529178" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001013" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1056" name="ObserversSeeBothCommittedSidesAndCannotReenterOrCapture" fullname="SOLITUDE.Tests.ContainerBoundaryTests.ObserversSeeBothCommittedSidesAndCannotReenterOrCapture" methodname="ObserversSeeBothCommittedSidesAndCannotReenterOrCapture" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="162871617" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001020" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1063" name="OversizedRestorePreservesAnchorsAndSplitsDeterministically" fullname="SOLITUDE.Tests.ContainerBoundaryTests.OversizedRestorePreservesAnchorsAndSplitsDeterministically" methodname="OversizedRestorePreservesAnchorsAndSplitsDeterministically" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="653318935" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001371" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1054" name="PartialMergeReportsRemainderAndCommittedAddresses" fullname="SOLITUDE.Tests.ContainerBoundaryTests.PartialMergeReportsRemainderAndCommittedAddresses" methodname="PartialMergeReportsRemainderAndCommittedAddresses" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="1160638073" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000953" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1060" name="RegistrationGenerationPreventsOldHandleFromAddressingReplacement" fullname="SOLITUDE.Tests.ContainerBoundaryTests.RegistrationGenerationPreventsOldHandleFromAddressingReplacement" methodname="RegistrationGenerationPreventsOldHandleFromAddressingReplacement" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="219000457" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000381" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1069" name="RejectedLootCandidateCannotPolluteLaterCandidateCapacity" fullname="SOLITUDE.Tests.ContainerBoundaryTests.RejectedLootCandidateCannotPolluteLaterCandidateCapacity" methodname="RejectedLootCandidateCannotPolluteLaterCandidateCapacity" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="1384542694" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000556" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1061" name="ResizeRefusesTruncationAndRegrowthDoesNotReviveOldAddresses" fullname="SOLITUDE.Tests.ContainerBoundaryTests.ResizeRefusesTruncationAndRegrowthDoesNotReviveOldAddresses" methodname="ResizeRefusesTruncationAndRegrowthDoesNotReviveOldAddresses" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="1230801213" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000427" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1062" name="RestoreResizeAndUnregisterCancelSourceGesture" fullname="SOLITUDE.Tests.ContainerBoundaryTests.RestoreResizeAndUnregisterCancelSourceGesture" methodname="RestoreResizeAndUnregisterCancelSourceGesture" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="796508233" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000466" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1058" name="SnapshotsAndDtosCannotMutateLiveState" fullname="SOLITUDE.Tests.ContainerBoundaryTests.SnapshotsAndDtosCannotMutateLiveState" methodname="SnapshotsAndDtosCannotMutateLiveState" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="795603897" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001024" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1059" name="StaleSourceAndTargetAddressesCannotChangeOwnership" fullname="SOLITUDE.Tests.ContainerBoundaryTests.StaleSourceAndTargetAddressesCannotChangeOwnership" methodname="StaleSourceAndTargetAddressesCannotChangeOwnership" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="1193929502" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000333" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1057" name="ThrowingObserverDoesNotSuppressOtherObserversOrPersistence" fullname="SOLITUDE.Tests.ContainerBoundaryTests.ThrowingObserverDoesNotSuppressOtherObserversOrPersistence" methodname="ThrowingObserverDoesNotSuppressOtherObserversOrPersistence" classname="SOLITUDE.Tests.ContainerBoundaryTests" runstate="Runnable" seed="131766347" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000539" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1074" name="RestorationTests" fullname="SOLITUDE.Tests.RestorationTests" classname="SOLITUDE.Tests.RestorationTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.005525" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1077" name="BusyAndUnavailableAttemptsDoNotConsume" fullname="SOLITUDE.Tests.RestorationTests.BusyAndUnavailableAttemptsDoNotConsume" methodname="BusyAndUnavailableAttemptsDoNotConsume" classname="SOLITUDE.Tests.RestorationTests" runstate="Runnable" seed="2110612145" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000766" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1075" name="InstallationCommitsBothFactsBeforeObserversAndOnlyOnce" fullname="SOLITUDE.Tests.RestorationTests.InstallationCommitsBothFactsBeforeObserversAndOnlyOnce" methodname="InstallationCommitsBothFactsBeforeObserversAndOnlyOnce" classname="SOLITUDE.Tests.RestorationTests" runstate="Runnable" seed="676729562" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000533" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1076" name="MissingWrongAndNonInventoryItemsCannotRestore" fullname="SOLITUDE.Tests.RestorationTests.MissingWrongAndNonInventoryItemsCannotRestore" methodname="MissingWrongAndNonInventoryItemsCannotRestore" classname="SOLITUDE.Tests.RestorationTests" runstate="Runnable" seed="1587543994" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000361" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1078" name="ObserverFailuresAndReentryDoNotStopOtherConsumers" fullname="SOLITUDE.Tests.RestorationTests.ObserverFailuresAndReentryDoNotStopOtherConsumers" methodname="ObserverFailuresAndReentryDoNotStopOtherConsumers" classname="SOLITUDE.Tests.RestorationTests" runstate="Runnable" seed="35063622" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000451" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1080" name="StaleRemovalCannotChangeInventory" fullname="SOLITUDE.Tests.RestorationTests.StaleRemovalCannotChangeInventory" methodname="StaleRemovalCannotChangeInventory" classname="SOLITUDE.Tests.RestorationTests" runstate="Runnable" seed="980608265" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000227" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1079" name="SystemsAreIndependentAndPickupRewardCanBeInstalled" fullname="SOLITUDE.Tests.RestorationTests.SystemsAreIndependentAndPickupRewardCanBeInstalled" methodname="SystemsAreIndependentAndPickupRewardCanBeInstalled" classname="SOLITUDE.Tests.RestorationTests" runstate="Runnable" seed="622778991" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000827" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1081" name="ScrubberEncounterTests" fullname="SOLITUDE.Tests.ScrubberEncounterTests" classname="SOLITUDE.Tests.ScrubberEncounterTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.004389" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1082" name="FreshEncounterDescribesStoppedFlowAndBlownFuse" fullname="SOLITUDE.Tests.ScrubberEncounterTests.FreshEncounterDescribesStoppedFlowAndBlownFuse" methodname="FreshEncounterDescribesStoppedFlowAndBlownFuse" classname="SOLITUDE.Tests.ScrubberEncounterTests" runstate="Runnable" seed="857392120" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000382" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1084" name="MissingWrongHotbarAndLockerItemsCannotRepair" fullname="SOLITUDE.Tests.ScrubberEncounterTests.MissingWrongHotbarAndLockerItemsCannotRepair" methodname="MissingWrongHotbarAndLockerItemsCannotRepair" classname="SOLITUDE.Tests.ScrubberEncounterTests" runstate="Runnable" seed="1404556276" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000364" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1086" name="ObserverFailureCannotUndoRepairOrPreventOtherObservers" fullname="SOLITUDE.Tests.ScrubberEncounterTests.ObserverFailureCannotUndoRepairOrPreventOtherObservers" methodname="ObserverFailureCannotUndoRepairOrPreventOtherObservers" classname="SOLITUDE.Tests.ScrubberEncounterTests" runstate="Runnable" seed="37142337" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000365" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1085" name="RemovedFuseAndUnavailableOrBusyInventoryDoNotChangeFault" fullname="SOLITUDE.Tests.ScrubberEncounterTests.RemovedFuseAndUnavailableOrBusyInventoryDoNotChangeFault" methodname="RemovedFuseAndUnavailableOrBusyInventoryDoNotChangeFault" classname="SOLITUDE.Tests.ScrubberEncounterTests" runstate="Runnable" seed="1666181490" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000300" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1083" name="RepairCommitsBothFactsBeforeNotificationsAndRejectsReentry" fullname="SOLITUDE.Tests.ScrubberEncounterTests.RepairCommitsBothFactsBeforeNotificationsAndRejectsReentry" methodname="RepairCommitsBothFactsBeforeNotificationsAndRejectsReentry" classname="SOLITUDE.Tests.ScrubberEncounterTests" runstate="Runnable" seed="1270324734" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000339" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1087" name="RestartAndFiveSecondRecoveryAreConfirmedOnce" fullname="SOLITUDE.Tests.ScrubberEncounterTests.RestartAndFiveSecondRecoveryAreConfirmedOnce" methodname="RestartAndFiveSecondRecoveryAreConfirmedOnce" classname="SOLITUDE.Tests.ScrubberEncounterTests" runstate="Runnable" seed="1574631160" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000986" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1088" name="TaskJournalTests" fullname="SOLITUDE.Tests.TaskJournalTests" classname="SOLITUDE.Tests.TaskJournalTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.019072" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1092" name="ActiveUpdatesAndAvailabilityKeepDiscoveryOrder" fullname="SOLITUDE.Tests.TaskJournalTests.ActiveUpdatesAndAvailabilityKeepDiscoveryOrder" methodname="ActiveUpdatesAndAvailabilityKeepDiscoveryOrder" classname="SOLITUDE.Tests.TaskJournalTests" runstate="Runnable" seed="1642848568" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000532" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1095" name="DetachmentRetainsRecordsAndSessionDisposalReleasesOnlyItsOwnState" fullname="SOLITUDE.Tests.TaskJournalTests.DetachmentRetainsRecordsAndSessionDisposalReleasesOnlyItsOwnState" methodname="DetachmentRetainsRecordsAndSessionDisposalReleasesOnlyItsOwnState" classname="SOLITUDE.Tests.TaskJournalTests" runstate="Runnable" seed="2091101320" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000272" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1089" name="HiddenProgressAndLateTerminalDiscoveryExposeOnlyCurrentFact" fullname="SOLITUDE.Tests.TaskJournalTests.HiddenProgressAndLateTerminalDiscoveryExposeOnlyCurrentFact" methodname="HiddenProgressAndLateTerminalDiscoveryExposeOnlyCurrentFact" classname="SOLITUDE.Tests.TaskJournalTests" runstate="Runnable" seed="1247437092" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000405" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1094" name="ObservationIsGapFreeIsolatedAndRejectsEveryReentrantMutation" fullname="SOLITUDE.Tests.TaskJournalTests.ObservationIsGapFreeIsolatedAndRejectsEveryReentrantMutation" methodname="ObservationIsGapFreeIsolatedAndRejectsEveryReentrantMutation" classname="SOLITUDE.Tests.TaskJournalTests" runstate="Runnable" seed="1466234681" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000661" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1090" name="RepeatedWritesAndInvalidTransitionsPreserveImmutableAcceptedSnapshot" fullname="SOLITUDE.Tests.TaskJournalTests.RepeatedWritesAndInvalidTransitionsPreserveImmutableAcceptedSnapshot" methodname="RepeatedWritesAndInvalidTransitionsPreserveImmutableAcceptedSnapshot" classname="SOLITUDE.Tests.TaskJournalTests" runstate="Runnable" seed="143869436" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000346" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1091" name="SourceOwnershipAndGenerationsPreventStaleOrCrossScopeWrites" fullname="SOLITUDE.Tests.TaskJournalTests.SourceOwnershipAndGenerationsPreventStaleOrCrossScopeWrites" methodname="SourceOwnershipAndGenerationsPreventStaleOrCrossScopeWrites" classname="SOLITUDE.Tests.TaskJournalTests" runstate="Runnable" seed="37600192" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000388" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1093" name="StagesAreSourceOwnedAndFailureAndAbandonmentRemainTerminal" fullname="SOLITUDE.Tests.TaskJournalTests.StagesAreSourceOwnedAndFailureAndAbandonmentRemainTerminal" methodname="StagesAreSourceOwnedAndFailureAndAbandonmentRemainTerminal" classname="SOLITUDE.Tests.TaskJournalTests" runstate="Runnable" seed="647572032" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000396" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1174" name="SOLITUDE.Tests.EditMode.dll" fullname="/private/tmp/solitude-task-journal-p1-s4/Library/ScriptAssemblies/SOLITUDE.Tests.EditMode.dll" runstate="Runnable" testcasecount="63" result="Passed" start-time="2026-10-08 17:16:20Z" end-time="2026-10-08 17:16:23Z" duration="2.210918" total="63" passed="63" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="60136" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1175" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="63" result="Passed" start-time="2026-10-08 17:16:20Z" end-time="2026-10-08 17:16:23Z" duration="2.210313" total="63" passed="63" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1176" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="63" result="Passed" start-time="2026-10-08 17:16:20Z" end-time="2026-10-08 17:16:23Z" duration="2.209047" total="63" passed="63" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1099" name="AuthoringBoundaryTests" fullname="SOLITUDE.Tests.AuthoringBoundaryTests" classname="SOLITUDE.Tests.AuthoringBoundaryTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001489" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1100" name="AuthoringEditsDoNotChangeRuntimeRulesOrPresentation" fullname="SOLITUDE.Tests.AuthoringBoundaryTests.AuthoringEditsDoNotChangeRuntimeRulesOrPresentation" methodname="AuthoringEditsDoNotChangeRuntimeRulesOrPresentation" classname="SOLITUDE.Tests.AuthoringBoundaryTests" runstate="Runnable" seed="1469199185" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.001121" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1101" name="ContainerPersistenceTests" fullname="SOLITUDE.Tests.ContainerPersistenceTests" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" testcasecount="20" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.016844" total="20" passed="20" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1119" name="DomainChangesMarkSessionDirtyAndResetClearsLiveOwners" fullname="SOLITUDE.Tests.ContainerPersistenceTests.DomainChangesMarkSessionDirtyAndResetClearsLiveOwners" methodname="DomainChangesMarkSessionDirtyAndResetClearsLiveOwners" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1240633963" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000365" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1116" name="DuplicateIdentityAndDuplicateModelAreRejected" fullname="SOLITUDE.Tests.ContainerPersistenceTests.DuplicateIdentityAndDuplicateModelAreRejected" methodname="DuplicateIdentityAndDuplicateModelAreRejected" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="2140365407" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000187" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1118" name="DuplicateSavedSlotsAreRejectedBeforeMutation" fullname="SOLITUDE.Tests.ContainerPersistenceTests.DuplicateSavedSlotsAreRejectedBeforeMutation" methodname="DuplicateSavedSlotsAreRejectedBeforeMutation" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1319172947" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000336" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1111" name="ExternalQuantityChangeInvalidatesGesture" fullname="SOLITUDE.Tests.ContainerPersistenceTests.ExternalQuantityChangeInvalidatesGesture" methodname="ExternalQuantityChangeInvalidatesGesture" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1252460470" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000157" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1110" name="ExternalReplacementInvalidatesGesture" fullname="SOLITUDE.Tests.ContainerPersistenceTests.ExternalReplacementInvalidatesGesture" methodname="ExternalReplacementInvalidatesGesture" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1989020188" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000265" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1121" name="FileReplacementRetainsPreviousCompleteSnapshot" fullname="SOLITUDE.Tests.ContainerPersistenceTests.FileReplacementRetainsPreviousCompleteSnapshot" methodname="FileReplacementRetainsPreviousCompleteSnapshot" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1519825910" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.005120" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1106" name="FullMergeClearsOnlySource" fullname="SOLITUDE.Tests.ContainerPersistenceTests.FullMergeClearsOnlySource" methodname="FullMergeClearsOnlySource" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="527677016" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000193" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1107" name="FullTargetLeavesSourceUntouched" fullname="SOLITUDE.Tests.ContainerPersistenceTests.FullTargetLeavesSourceUntouched" methodname="FullTargetLeavesSourceUntouched" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="226076802" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000145" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1117" name="InvalidRestoreDoesNotClearLiveOrSavedContents" fullname="SOLITUDE.Tests.ContainerPersistenceTests.InvalidRestoreDoesNotClearLiveOrSavedContents" methodname="InvalidRestoreDoesNotClearLiveOrSavedContents" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1456947394" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000387" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1113" name="LockerInventoryAndHotbarRoundTripTogether" fullname="SOLITUDE.Tests.ContainerPersistenceTests.LockerInventoryAndHotbarRoundTripTogether" methodname="LockerInventoryAndHotbarRoundTripTogether" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1847815170" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000599" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1104" name="MoveToEmptySlotPreservesStack" fullname="SOLITUDE.Tests.ContainerPersistenceTests.MoveToEmptySlotPreservesStack" methodname="MoveToEmptySlotPreservesStack" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="730632711" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000135" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1105" name="PartialMergeLeavesRemainderInSource" fullname="SOLITUDE.Tests.ContainerPersistenceTests.PartialMergeLeavesRemainderInSource" methodname="PartialMergeLeavesRemainderInSource" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1174617185" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000149" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1102" name="PreviewAndCancelKeepSourceOwnership" fullname="SOLITUDE.Tests.ContainerPersistenceTests.PreviewAndCancelKeepSourceOwnership" methodname="PreviewAndCancelKeepSourceOwnership" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1392107653" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000155" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1109" name="RejectedTargetAndSelfDropDoNotChangeContents" fullname="SOLITUDE.Tests.ContainerPersistenceTests.RejectedTargetAndSelfDropDoNotChangeContents" methodname="RejectedTargetAndSelfDropDoNotChangeContents" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1030334498" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000182" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1120" name="RepeatedTransfersConserveQuantities" fullname="SOLITUDE.Tests.ContainerPersistenceTests.RepeatedTransfersConserveQuantities" methodname="RepeatedTransfersConserveQuantities" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="2105591128" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.004865" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1112" name="SavingDuringDragRetainsEveryItem" fullname="SOLITUDE.Tests.ContainerPersistenceTests.SavingDuringDragRetainsEveryItem" methodname="SavingDuringDragRetainsEveryItem" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1202256153" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000313" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1103" name="SwapAndEndDragPreserveBothStacks" fullname="SOLITUDE.Tests.ContainerPersistenceTests.SwapAndEndDragPreserveBothStacks" methodname="SwapAndEndDragPreserveBothStacks" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1032649210" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000206" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1108" name="SwapChecksReverseAcceptanceBeforeMutating" fullname="SOLITUDE.Tests.ContainerPersistenceTests.SwapChecksReverseAcceptanceBeforeMutating" methodname="SwapChecksReverseAcceptanceBeforeMutating" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1683344658" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000306" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1115" name="UnregisterRetainsStateForSceneReload" fullname="SOLITUDE.Tests.ContainerPersistenceTests.UnregisterRetainsStateForSceneReload" methodname="UnregisterRetainsStateForSceneReload" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1288081965" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000200" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1114" name="VersionOneSaveKeepsLockerRecordsWhenAddingPlayer" fullname="SOLITUDE.Tests.ContainerPersistenceTests.VersionOneSaveKeepsLockerRecordsWhenAddingPlayer" methodname="VersionOneSaveKeepsLockerRecordsWhenAddingPlayer" classname="SOLITUDE.Tests.ContainerPersistenceTests" runstate="Runnable" seed="1086637687" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000344" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1122" name="PickupPersistenceTests" fullname="SOLITUDE.Tests.PickupPersistenceTests" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.105637" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1128" name="AlteredRewardAndUnknownItemAreRejected" fullname="SOLITUDE.Tests.PickupPersistenceTests.AlteredRewardAndUnknownItemAreRejected" methodname="AlteredRewardAndUnknownItemAreRejected" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="845589918" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000512" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1123" name="CollectionRoundTripPreservesInventoryAndFact" fullname="SOLITUDE.Tests.PickupPersistenceTests.CollectionRoundTripPreservesInventoryAndFact" methodname="CollectionRoundTripPreservesInventoryAndFact" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="578475132" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000293" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1127" name="DuplicateOrMissingIdentityCannotGrantReward" fullname="SOLITUDE.Tests.PickupPersistenceTests.DuplicateOrMissingIdentityCannotGrantReward" methodname="DuplicateOrMissingIdentityCannotGrantReward" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1737407128" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000341" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1135" name="FailedWriteKeepsOldSnapshotAndDirtyStateForCompleteRetry" fullname="SOLITUDE.Tests.PickupPersistenceTests.FailedWriteKeepsOldSnapshotAndDirtyStateForCompleteRetry" methodname="FailedWriteKeepsOldSnapshotAndDirtyStateForCompleteRetry" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="972294290" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.002890" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1126" name="InstancesSharingRewardCollectIndependently" fullname="SOLITUDE.Tests.PickupPersistenceTests.InstancesSharingRewardCollectIndependently" methodname="InstancesSharingRewardCollectIndependently" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="2094503761" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000264" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1134" name="LoadedFactsAreValidatedDeduplicatedAndSorted" fullname="SOLITUDE.Tests.PickupPersistenceTests.LoadedFactsAreValidatedDeduplicatedAndSorted" methodname="LoadedFactsAreValidatedDeduplicatedAndSorted" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1174668560" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000499" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1124" name="PartialCapacityDoesNotMutateAnySlotOrFact" fullname="SOLITUDE.Tests.PickupPersistenceTests.PartialCapacityDoesNotMutateAnySlotOrFact" methodname="PartialCapacityDoesNotMutateAnySlotOrFact" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="760383333" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000242" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1125" name="ReentrantCollectionAndCaptureCannotObservePartialTransaction" fullname="SOLITUDE.Tests.PickupPersistenceTests.ReentrantCollectionAndCaptureCannotObservePartialTransaction" methodname="ReentrantCollectionAndCaptureCannotObservePartialTransaction" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1527616699" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000377" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1132" name="ResetClearsInventoryAndCollectionFacts" fullname="SOLITUDE.Tests.PickupPersistenceTests.ResetClearsInventoryAndCollectionFacts" methodname="ResetClearsInventoryAndCollectionFacts" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="539125611" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000157" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1131" name="SceneScopeReleasesBindingsForNeverActivePickups" fullname="SOLITUDE.Tests.PickupPersistenceTests.SceneScopeReleasesBindingsForNeverActivePickups" methodname="SceneScopeReleasesBindingsForNeverActivePickups" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1121630302" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.004380" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1130" name="SceneUnregistrationRetainsCollectionFact" fullname="SOLITUDE.Tests.PickupPersistenceTests.SceneUnregistrationRetainsCollectionFact" methodname="SceneUnregistrationRetainsCollectionFact" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="793306133" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000219" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1129" name="UnregisteredInventoryCannotReceivePersistentPickup" fullname="SOLITUDE.Tests.PickupPersistenceTests.UnregisteredInventoryCannotReceivePersistentPickup" methodname="UnregisteredInventoryCannotReceivePersistentPickup" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="867554264" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000139" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1133" name="VersionOneMigrationPreservesExistingWorldAndContainers" fullname="SOLITUDE.Tests.PickupPersistenceTests.VersionOneMigrationPreservesExistingWorldAndContainers" methodname="VersionOneMigrationPreservesExistingWorldAndContainers" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1399069521" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:10Z" duration="0.000259" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1136" name="WorldPresentationStaysCollectedAfterSceneUnloadAndReload" fullname="SOLITUDE.Tests.PickupPersistenceTests.WorldPresentationStaysCollectedAfterSceneUnloadAndReload" methodname="WorldPresentationStaysCollectedAfterSceneUnloadAndReload" classname="SOLITUDE.Tests.PickupPersistenceTests" runstate="Runnable" seed="1625713745" result="Passed" start-time="2026-10-08 17:16:10Z" end-time="2026-10-08 17:16:14Z" duration="4.102703" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1137" name="RestorationJunctionTests" fullname="SOLITUDE.Tests.RestorationJunctionTests" classname="SOLITUDE.Tests.RestorationJunctionTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.049274" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1138" name="DiagnosisInstallationAndEnableCyclesKeepState" fullname="SOLITUDE.Tests.RestorationJunctionTests.DiagnosisInstallationAndEnableCyclesKeepState" methodname="DiagnosisInstallationAndEnableCyclesKeepState" classname="SOLITUDE.Tests.RestorationJunctionTests" runstate="Runnable" seed="509768859" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.002449" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1140" name="FocusedPromptRefreshesWithoutAnotherFocusEvent" fullname="SOLITUDE.Tests.RestorationJunctionTests.FocusedPromptRefreshesWithoutAnotherFocusEvent" methodname="FocusedPromptRefreshesWithoutAnotherFocusEvent" classname="SOLITUDE.Tests.RestorationJunctionTests" runstate="Runnable" seed="493651375" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.043854" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1139" name="MissingConfigurationAndReleasedOrDisabledBindingRejectWithoutLoss" fullname="SOLITUDE.Tests.RestorationJunctionTests.MissingConfigurationAndReleasedOrDisabledBindingRejectWithoutLoss" methodname="MissingConfigurationAndReleasedOrDisabledBindingRejectWithoutLoss" classname="SOLITUDE.Tests.RestorationJunctionTests" runstate="Runnable" seed="859435482" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.000497" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1141" name="SceneReleaseClearsInjectedJunctionBinding" fullname="SOLITUDE.Tests.RestorationJunctionTests.SceneReleaseClearsInjectedJunctionBinding" methodname="SceneReleaseClearsInjectedJunctionBinding" classname="SOLITUDE.Tests.RestorationJunctionTests" runstate="Runnable" seed="636925419" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.001287" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1142" name="SaveJsonCodecTests" fullname="SOLITUDE.Tests.SaveJsonCodecTests" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.025186" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1151" name="CompleteSnapshotRoundTripsInventoryAndWorldFactsTogether" fullname="SOLITUDE.Tests.SaveJsonCodecTests.CompleteSnapshotRoundTripsInventoryAndWorldFactsTogether" methodname="CompleteSnapshotRoundTripsInventoryAndWorldFactsTogether" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="875683134" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.010416" asserts="0">
+              <properties />
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1148" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.003343" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1143" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{}&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{}&quot;)" methodname="IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1284769838" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.001524" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1144" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2}&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2}&quot;)" methodname="IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1077382057" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.000083" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1145" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2,\&quot;version\&quot;:2}&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2,\&quot;version\&quot;:2}&quot;)" methodname="IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="774427816" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.000726" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1146" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;null&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;null&quot;)" methodname="IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1095624014" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.000110" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="1147" name="IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2&quot;)" fullname="SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(&quot;{\&quot;version\&quot;:2&quot;)" methodname="IncompleteSnapshotsDoNotBecomeEmptyWorlds" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1759382409" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.000069" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+            <test-case id="1152" name="RealFilesRecoverBackupWithoutOverwritingItWithCorruption" fullname="SOLITUDE.Tests.SaveJsonCodecTests.RealFilesRecoverBackupWithoutOverwritingItWithCorruption" methodname="RealFilesRecoverBackupWithoutOverwritingItWithCorruption" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1799688443" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.007739" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1149" name="TrailingContentAndWrongTypesAreRejected" fullname="SOLITUDE.Tests.SaveJsonCodecTests.TrailingContentAndWrongTypesAreRejected" methodname="TrailingContentAndWrongTypesAreRejected" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="2121482897" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.000370" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1150" name="UnknownItemsAndFutureVersionsAreIncompatible" fullname="SOLITUDE.Tests.SaveJsonCodecTests.UnknownItemsAndFutureVersionsAreIncompatible" methodname="UnknownItemsAndFutureVersionsAreIncompatible" classname="SOLITUDE.Tests.SaveJsonCodecTests" runstate="Runnable" seed="1086823988" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.000365" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1153" name="ScrubberEncounterAuthoringTests" fullname="SOLITUDE.Tests.ScrubberEncounterAuthoringTests" classname="SOLITUDE.Tests.ScrubberEncounterAuthoringTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.302124" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1155" name="FuseCatalogAndSceneInstanceHaveDistinctStableIdentities" fullname="SOLITUDE.Tests.ScrubberEncounterAuthoringTests.FuseCatalogAndSceneInstanceHaveDistinctStableIdentities" methodname="FuseCatalogAndSceneInstanceHaveDistinctStableIdentities" classname="SOLITUDE.Tests.ScrubberEncounterAuthoringTests" runstate="Runnable" seed="319742585" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.086183" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1154" name="JournalPrefabAndBuilderKeepAuthoredControlsAndSourceBindings" fullname="SOLITUDE.Tests.ScrubberEncounterAuthoringTests.JournalPrefabAndBuilderKeepAuthoredControlsAndSourceBindings" methodname="JournalPrefabAndBuilderKeepAuthoredControlsAndSourceBindings" classname="SOLITUDE.Tests.ScrubberEncounterAuthoringTests" runstate="Runnable" seed="630580443" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.214991" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1156" name="ScrubberTaskSourceTests" fullname="SOLITUDE.Tests.ScrubberTaskSourceTests" classname="SOLITUDE.Tests.ScrubberTaskSourceTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.024928" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1158" name="BlockedAccessTriggeredAndIneligibleFocusDoNotDiscover" fullname="SOLITUDE.Tests.ScrubberTaskSourceTests.BlockedAccessTriggeredAndIneligibleFocusDoNotDiscover" methodname="BlockedAccessTriggeredAndIneligibleFocusDoNotDiscover" classname="SOLITUDE.Tests.ScrubberTaskSourceTests" runstate="Runnable" seed="68461820" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.006592" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1159" name="ConfirmedRepairStagesAndLateCompletedAccessFollowEquipment" fullname="SOLITUDE.Tests.ScrubberTaskSourceTests.ConfirmedRepairStagesAndLateCompletedAccessFollowEquipment" methodname="ConfirmedRepairStagesAndLateCompletedAccessFollowEquipment" classname="SOLITUDE.Tests.ScrubberTaskSourceTests" runstate="Runnable" seed="786187280" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.003112" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1161" name="DisableRetainsUnavailableTaskAndReattachmentReconcilesCurrentStage" fullname="SOLITUDE.Tests.ScrubberTaskSourceTests.DisableRetainsUnavailableTaskAndReattachmentReconcilesCurrentStage" methodname="DisableRetainsUnavailableTaskAndReattachmentReconcilesCurrentStage" classname="SOLITUDE.Tests.ScrubberTaskSourceTests" runstate="Runnable" seed="1169525210" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.001653" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1157" name="EligibleFaultFocusAndSuccessfulAccessShareOneOccurrence" fullname="SOLITUDE.Tests.ScrubberTaskSourceTests.EligibleFaultFocusAndSuccessfulAccessShareOneOccurrence" methodname="EligibleFaultFocusAndSuccessfulAccessShareOneOccurrence" classname="SOLITUDE.Tests.ScrubberTaskSourceTests" runstate="Runnable" seed="332160658" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.001014" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1162" name="ObserverErrorsAndDetachedSourceCannotUndoEquipmentTransactions" fullname="SOLITUDE.Tests.ScrubberTaskSourceTests.ObserverErrorsAndDetachedSourceCannotUndoEquipmentTransactions" methodname="ObserverErrorsAndDetachedSourceCannotUndoEquipmentTransactions" classname="SOLITUDE.Tests.ScrubberTaskSourceTests" runstate="Runnable" seed="1823912664" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.006598" asserts="0">
+              <properties />
+              <output><![CDATA[InvalidOperationException: access observer
+SOLITUDE.Tests.ScrubberTaskSourceTests+<>c.<ObserverErrorsAndDetachedSourceCannotUndoEquipmentTransactions>b__22_1 (SOLITUDE.Player.PlayerInteractor _) (at Assets/_Project/Tests/Editor/ScrubberTaskSourceTests.cs:112)
+SOLITUDE.World.ScrubberEncounter.ScrubberAccess.Interact (SOLITUDE.Player.PlayerInteractor player) (at Assets/_Project/Features/World/ScrubberEncounter/ScrubberAccess.cs:21)
+UnityEngine.Debug:LogException(Exception)
+SOLITUDE.World.ScrubberEncounter.ScrubberAccess:Interact(PlayerInteractor) (at Assets/_Project/Features/World/ScrubberEncounter/ScrubberAccess.cs:21)
+SOLITUDE.Tests.ScrubberTaskSourceTests:ObserverErrorsAndDetachedSourceCannotUndoEquipmentTransactions() (at Assets/_Project/Tests/Editor/ScrubberTaskSourceTests.cs:114)
+System.Reflection.MethodBase:Invoke(Object, Object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod(MethodInfo, Object, Object[])
+NUnit.Framework.Internal.MethodWrapper:Invoke(Object, Object[])
+NUnit.Framework.Internal.Commands.TestMethodCommand:RunNonAsyncTestMethod(ITestExecutionContext)
+NUnit.Framework.Internal.Commands.TestMethodCommand:RunTestMethod(ITestExecutionContext)
+NUnit.Framework.Internal.Commands.TestMethodCommand:Execute(ITestExecutionContext)
+UnityEditor.EditorApplication:Internal_CallUpdateFunctions() (at /Users/bokken/build/output/unity/unity/Editor/Mono/EditorApplication.cs:412)
+
+]]></output>
+            </test-case>
+            <test-case id="1160" name="OperationalFocusStaysHiddenUntilSuccessfulAccess" fullname="SOLITUDE.Tests.ScrubberTaskSourceTests.OperationalFocusStaysHiddenUntilSuccessfulAccess" methodname="OperationalFocusStaysHiddenUntilSuccessfulAccess" classname="SOLITUDE.Tests.ScrubberTaskSourceTests" runstate="Runnable" seed="1547924309" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.001055" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1163" name="TaskJournalCompositionTests" fullname="SOLITUDE.Tests.TaskJournalCompositionTests" classname="SOLITUDE.Tests.TaskJournalCompositionTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.001851" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1165" name="IndependentSessionDoesNotCarryJournalStateThroughContainerSave" fullname="SOLITUDE.Tests.TaskJournalCompositionTests.IndependentSessionDoesNotCarryJournalStateThroughContainerSave" methodname="IndependentSessionDoesNotCarryJournalStateThroughContainerSave" classname="SOLITUDE.Tests.TaskJournalCompositionTests" runstate="Runnable" seed="406203384" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.000262" asserts="0">
+              <properties />
+            </test-case>
+            <test-case id="1164" name="SceneReleaseRemovesOnlyItsScopeAndOptionalInitializerIsCompatible" fullname="SOLITUDE.Tests.TaskJournalCompositionTests.SceneReleaseRemovesOnlyItsScopeAndOptionalInitializerIsCompatible" methodname="SceneReleaseRemovesOnlyItsScopeAndOptionalInitializerIsCompatible" classname="SOLITUDE.Tests.TaskJournalCompositionTests" runstate="Runnable" seed="1601576429" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:14Z" duration="0.000681" asserts="0">
+              <properties />
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1166" name="TaskJournalInputTests" fullname="SOLITUDE.Tests.TaskJournalInputTests" classname="SOLITUDE.Tests.TaskJournalInputTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-08 17:16:17Z" end-time="2026-10-08 17:16:17Z" duration="0.144684" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1167" name="SharedKeyboardRoutesJournalBackAndPreservesOtherOwners" fullname="SOLITUDE.Tests.TaskJournalInputTests.SharedKeyboardRoutesJournalBackAndPreservesOtherOwners" methodname="SharedKeyboardRoutesJournalBackAndPreservesOtherOwners" classname="SOLITUDE.Tests.TaskJournalInputTests" runstate="Runnable" seed="2099675818" result="Passed" start-time="2026-10-08 17:16:14Z" end-time="2026-10-08 17:16:17Z" duration="2.856521" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1168" name="UnityInputCompositionTests" fullname="SOLITUDE.Tests.UnityInputCompositionTests" classname="SOLITUDE.Tests.UnityInputCompositionTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-08 17:16:20Z" end-time="2026-10-08 17:16:20Z" duration="0.145538" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1169" name="RealKeyboardAndEventSystemSharePolicyAndSurviveTeardownOrder" fullname="SOLITUDE.Tests.UnityInputCompositionTests.RealKeyboardAndEventSystemSharePolicyAndSurviveTeardownOrder" methodname="RealKeyboardAndEventSystemSharePolicyAndSurviveTeardownOrder" classname="SOLITUDE.Tests.UnityInputCompositionTests" runstate="Runnable" seed="1689818205" result="Passed" start-time="2026-10-08 17:16:17Z" end-time="2026-10-08 17:16:20Z" duration="3.276221" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1170" name="ValidationTests" fullname="SOLITUDE.Tests.ValidationTests" classname="SOLITUDE.Tests.ValidationTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-08 17:16:20Z" end-time="2026-10-08 17:16:23Z" duration="2.055470" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1172" name="InvalidEndpointHasStableCodeAndField" fullname="SOLITUDE.Tests.ValidationTests.InvalidEndpointHasStableCodeAndField" methodname="InvalidEndpointHasStableCodeAndField" classname="SOLITUDE.Tests.ValidationTests" runstate="Runnable" seed="930806810" result="Passed" start-time="2026-10-08 17:16:20Z" end-time="2026-10-08 17:16:20Z" duration="0.011325" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1171" name="MissingCompositionCannotPassAsDirectEntry" fullname="SOLITUDE.Tests.ValidationTests.MissingCompositionCannotPassAsDirectEntry" methodname="MissingCompositionCannotPassAsDirectEntry" classname="SOLITUDE.Tests.ValidationTests" runstate="Runnable" seed="992727937" result="Passed" start-time="2026-10-08 17:16:20Z" end-time="2026-10-08 17:16:20Z" duration="0.000561" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1173" name="ProjectValidationIsDeterministicAndDoesNotChangeSceneDirtiness" fullname="SOLITUDE.Tests.ValidationTests.ProjectValidationIsDeterministicAndDoesNotChangeSceneDirtiness" methodname="ProjectValidationIsDeterministicAndDoesNotChangeSceneDirtiness" classname="SOLITUDE.Tests.ValidationTests" runstate="Runnable" seed="1205683250" result="Passed" start-time="2026-10-08 17:16:20Z" end-time="2026-10-08 17:16:23Z" duration="2.042382" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

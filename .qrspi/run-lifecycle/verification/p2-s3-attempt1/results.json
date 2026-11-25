@@ -1,0 +1,58 @@
+{
+  "status": "Failed",
+  "error": "playmode: exit 8; see /private/tmp/solitude-run-lifecycle-p2-s3-attempt1/playmode.runner.log",
+  "results": [
+    {
+      "name": "copy-Assets",
+      "seconds": 0.69,
+      "exit": 0
+    },
+    {
+      "name": "copy-Packages",
+      "seconds": 0.02,
+      "exit": 0
+    },
+    {
+      "name": "copy-ProjectSettings",
+      "seconds": 0.03,
+      "exit": 0
+    },
+    {
+      "name": "prepare-git",
+      "seconds": 0.01,
+      "exit": 0
+    },
+    {
+      "name": "reset-verification-index",
+      "seconds": 0.01,
+      "exit": 0
+    },
+    {
+      "name": "copy-verification-index",
+      "seconds": 0.02,
+      "exit": 0
+    },
+    {
+      "name": "pure-tests",
+      "seconds": 3.81,
+      "exit": 0
+    },
+    {
+      "name": "authoring",
+      "seconds": 17.79,
+      "exit": 0
+    },
+    {
+      "name": "editmode",
+      "seconds": 25.71,
+      "exit": 0,
+      "passed": 345,
+      "failed": 0
+    },
+    {
+      "name": "prepare-fixtures",
+      "seconds": 11.02,
+      "exit": 0
+    }
+  ]
+}

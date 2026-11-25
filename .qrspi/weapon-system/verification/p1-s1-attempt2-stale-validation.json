@@ -1,0 +1,28 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-validate-tags-long.cs",
+      "entry": "WeaponTagValidation.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 254,
+      "executeMs": 5780,
+      "assemblyName": "PipelineRunScript_weapon-system-validate-tags-long_7b6fecee9c5a489fb4bfe68d12b48d3f",
+      "success": false,
+      "error": "Runtime Error",
+      "errorDetails": "BuildFailedException: Unity metadata validation failed:\nVersioned asset is missing versioned metadata: Assets/_Project 2.zip.meta\nVersioned asset is missing versioned metadata: Assets/_Project 3.zip.meta\n  at SOLITUDE.Editor.UnityMetaValidator.ValidateForCI () [0x00019] in /Users/jeremyvalentine/SOLITUDE/Assets/_Project/Editor/UnityMetaValidator.cs:53 \n  at WeaponTagValidation.Run () [0x0008c] in /private/tmp/weapon-system-validate-tags-long.cs:11 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <0e19fd8bd8e94908bba2ee4f803bc6a7>:0 "
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -1,0 +1,240 @@
+{
+  "status": "Passed",
+  "platform": "macOS ARM64",
+  "results": [
+    {
+      "name": "copy-Assets",
+      "seconds": 0.66,
+      "exit": 0
+    },
+    {
+      "name": "copy-Packages",
+      "seconds": 0.02,
+      "exit": 0
+    },
+    {
+      "name": "copy-ProjectSettings",
+      "seconds": 0.02,
+      "exit": 0
+    },
+    {
+      "name": "prepare-git",
+      "seconds": 0.02,
+      "exit": 0
+    },
+    {
+      "name": "reset-verification-index",
+      "seconds": 0.01,
+      "exit": 0
+    },
+    {
+      "name": "copy-verification-index",
+      "seconds": 0.02,
+      "exit": 0
+    },
+    {
+      "name": "pure-tests",
+      "seconds": 1.53,
+      "exit": 0
+    },
+    {
+      "name": "authoring",
+      "seconds": 14.21,
+      "exit": 0
+    },
+    {
+      "name": "editmode",
+      "seconds": 25.6,
+      "exit": 0,
+      "passed": 349,
+      "failed": 0
+    },
+    {
+      "name": "prepare-fixtures",
+      "seconds": 22.19,
+      "exit": 0
+    },
+    {
+      "name": "playmode",
+      "seconds": 103.56,
+      "exit": 0,
+      "passed": 125,
+      "failed": 0
+    },
+    {
+      "name": "restore-scope",
+      "seconds": 14.56,
+      "exit": 0
+    },
+    {
+      "name": "verification-build",
+      "seconds": 45.76,
+      "exit": 0
+    },
+    {
+      "name": "shipping-build",
+      "seconds": 42.79,
+      "exit": 0
+    },
+    {
+      "name": "world-collect",
+      "seconds": 12.1,
+      "exit": 0
+    },
+    {
+      "name": "world-restart-newsave",
+      "seconds": 11.73,
+      "exit": 0
+    },
+    {
+      "name": "partial-temp",
+      "seconds": 11.72,
+      "exit": 0
+    },
+    {
+      "name": "missing-primary",
+      "seconds": 7.69,
+      "exit": 0
+    },
+    {
+      "name": "corrupt-primary",
+      "seconds": 3.41,
+      "exit": 0
+    },
+    {
+      "name": "both-corrupt",
+      "seconds": 2.5,
+      "exit": 0
+    },
+    {
+      "name": "temp-only",
+      "seconds": 2.15,
+      "exit": 0
+    },
+    {
+      "name": "incompatible-primary",
+      "seconds": 1.91,
+      "exit": 0
+    },
+    {
+      "name": "unknown-item",
+      "seconds": 2.65,
+      "exit": 0
+    },
+    {
+      "name": "capacity-primary",
+      "seconds": 1.98,
+      "exit": 0
+    },
+    {
+      "name": "capacity-backup",
+      "seconds": 2.31,
+      "exit": 0
+    },
+    {
+      "name": "read-denied",
+      "seconds": 1.91,
+      "exit": 0
+    },
+    {
+      "name": "write-before-temp",
+      "seconds": 3.0,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-before-temp",
+      "seconds": 2.06,
+      "exit": 0
+    },
+    {
+      "name": "write-after-temp",
+      "seconds": 2.06,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-after-temp",
+      "seconds": 2.23,
+      "exit": 0
+    },
+    {
+      "name": "write-before-commit",
+      "seconds": 1.84,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-before-commit",
+      "seconds": 2.36,
+      "exit": 0
+    },
+    {
+      "name": "write-after-commit",
+      "seconds": 2.08,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-after-commit",
+      "seconds": 2.26,
+      "exit": 0
+    },
+    {
+      "name": "recovery-after-receipt",
+      "seconds": 1.75,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-after-receipt",
+      "seconds": 2.54,
+      "exit": 0
+    },
+    {
+      "name": "recovery-after-temp",
+      "seconds": 11.5,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-after-temp",
+      "seconds": 11.68,
+      "exit": 0
+    },
+    {
+      "name": "recovery-before-commit",
+      "seconds": 8.11,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-before-commit",
+      "seconds": 3.02,
+      "exit": 0
+    },
+    {
+      "name": "recovery-after-commit",
+      "seconds": 1.51,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-after-commit",
+      "seconds": 2.16,
+      "exit": 0
+    },
+    {
+      "name": "lifecycle-write",
+      "seconds": 2.1,
+      "exit": 0
+    },
+    {
+      "name": "lifecycle-resume",
+      "seconds": 2.22,
+      "exit": 0
+    },
+    {
+      "name": "lifecycle-fallback",
+      "seconds": 1.89,
+      "exit": 0
+    },
+    {
+      "name": "lifecycle-unavailable-scene",
+      "seconds": 1.95,
+      "exit": 0
+    }
+  ]
+}

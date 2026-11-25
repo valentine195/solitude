@@ -1,0 +1,46 @@
+if(UnityEditor.EditorApplication.isPlaying)throw new System.Exception("Probe requires edit mode");
+var original=UnityEngine.SceneManagement.SceneManager.GetActiveScene();bool originallyDirty=original.isDirty;
+var fixture=UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,UnityEditor.SceneManagement.NewSceneMode.Additive);
+UnityEngine.SceneManagement.SceneManager.SetActiveScene(fixture);
+var objects=new System.Collections.Generic.List<UnityEngine.Object>();
+SOLITUDE.Application.InputPolicyCoordinator policy=null;SOLITUDE.Application.HotbarSelectionState selection=null;
+try {
+ var checks=new System.Collections.Generic.List<string>();
+ var db=UnityEngine.ScriptableObject.CreateInstance<SOLITUDE.Items.ItemDatabase>();objects.Add(db);
+ var food=UnityEngine.ScriptableObject.CreateInstance<SOLITUDE.Items.ItemDefinition>();objects.Add(food);food.ConsumableKind=SOLITUDE.Vitals.VitalConsumableKind.Food;food.RestorationAmount=25;
+ var medical=UnityEngine.ScriptableObject.CreateInstance<SOLITUDE.Items.ItemDefinition>();objects.Add(medical);medical.ConsumableKind=SOLITUDE.Vitals.VitalConsumableKind.Medical;medical.RestorationAmount=25;
+ var tool=UnityEngine.ScriptableObject.CreateInstance<SOLITUDE.Items.ItemDefinition>();objects.Add(tool);
+ var field=typeof(SOLITUDE.Items.ItemDefinition).GetField("itemId",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic);field.SetValue(food,"probe-food");field.SetValue(medical,"probe-medical");field.SetValue(tool,"probe-tool");
+ var serialized=new UnityEditor.SerializedObject(db);var items=serialized.FindProperty("items");items.arraySize=3;items.GetArrayElementAtIndex(0).objectReferenceValue=food;items.GetArrayElementAtIndex(1).objectReferenceValue=medical;items.GetArrayElementAtIndex(2).objectReferenceValue=tool;serialized.ApplyModifiedPropertiesWithoutUndo();
+ var presentations=db.BuildPresentationCatalog();food.RestorationAmount=50;
+ if(presentations.Consumables.Resolve(food.ItemId).Amount!=25||presentations.Consumables.Resolve(tool.ItemId).Supported)throw new System.Exception("Catalog must freeze metadata and default old items to None");checks.Add("stable/frozen effect catalog and default non-consumable");
+ var commands=new SOLITUDE.Containers.ContainerCommandService(db.BuildRuntimeCatalog());var hotbar=commands.Register("probe-hotbar",3);
+ selection=new SOLITUDE.Application.HotbarSelectionState(hotbar);policy=new SOLITUDE.Application.InputPolicyCoordinator(new SOLITUDE.Application.PauseCoordinator());policy.SetReady(true);
+ var host=new UnityEngine.GameObject("TransientVitalsProbe");var player=host.AddComponent<SOLITUDE.Player.PlayerVitalsController>();player.ResetForAwakening();var feature=host.AddComponent<SOLITUDE.Player.PlayerVitalsComposition>();feature.Configure(player);
+ feature.Initialize(new SOLITUDE.Composition.SceneFeatureContext(commands,null,presentations,policy,null,null,"probe",null,null,hotbar,selection));
+ var use=feature.ItemUse;if(use==null)throw new System.Exception("Composition use coordinator missing");
+ commands.Grant(hotbar.Handle,food.ItemId,2);selection.Select(0);player.Vitals.Health.Set(40);player.Damage(10);player.Vitals.Hunger.Set(90);
+ int inventoryErrors=0,vitalErrors=0;bool coherent=true;
+ commands.ObserverError+=e=>inventoryErrors++;player.ObserverError+=e=>vitalErrors++;
+ System.Action<SOLITUDE.Containers.ContainerChangeSet> inventoryObserver=change=>{coherent&=player.Vitals.Hunger.Current==100&&player.Vitals.Health.Current==30&&hotbar.GetSlot(0).Stack.Quantity==1;coherent&=use.TryUse().Outcome==SOLITUDE.Vitals.VitalUseOutcome.Busy&&!player.Damage(1).Accepted;throw new System.Exception("expected probe inventory observer");};
+ System.Action<SOLITUDE.Player.Vitals.Vital> vitalObserver=v=>{coherent&=hotbar.GetSlot(0).Stack.Quantity==1&&use.TryUse().Outcome==SOLITUDE.Vitals.VitalUseOutcome.Busy;player.Vitals.Health.Set(0);throw new System.Exception("expected probe vital observer");};
+ commands.Completed+=inventoryObserver;player.Vitals.Hunger.Changed+=vitalObserver;
+ var result=use.TryUse();commands.Completed-=inventoryObserver;player.Vitals.Hunger.Changed-=vitalObserver;
+ if(!result.Committed||!coherent||inventoryErrors!=1||vitalErrors!=1||player.RecoveryState.DelayRemaining!=5||player.Vitals.Health.Current!=30)throw new System.Exception("Atomic food/observer/reentrancy contract failed");checks.Add("food 90 -> 100, consumes one, delay unchanged");checks.Add("real inventory/vital observers see committed state and cannot reenter");checks.Add("observer faults remain committed exactly once");
+ if(use.TryUse().Outcome!=SOLITUDE.Vitals.VitalUseOutcome.Full||hotbar.GetSlot(0).Stack.Quantity!=1)throw new System.Exception("Full food target consumed");checks.Add("full food target retains item");
+ commands.Remove(hotbar.GetSlot(0).Address,1);commands.Grant(hotbar.Handle,medical.ItemId,1);selection.Select(0);player.Vitals.Hunger.Set(0);
+ if(!use.TryUse().Committed||player.Vitals.Health.Current!=55||player.Vitals.Hunger.Current!=0||player.RecoveryState.DelayRemaining!=5||selection.ActiveIndex!=-1)throw new System.Exception("Medical effect or selection contract failed");checks.Add("medicine crosses segment while hungry, delay preserved, last stack clears selection");
+ commands.Grant(hotbar.Handle,food.ItemId,1);selection.Select(0);player.Configure(new SOLITUDE.Vitals.VitalsRecoverySettings(maxHealth:0));player.Vitals.Oxygen.Set(99);
+ if(use.TryUse().Outcome!=SOLITUDE.Vitals.VitalUseOutcome.InvalidConfiguration||hotbar.GetSlot(0).Stack.Quantity!=1)throw new System.Exception("Invalid recovery configuration consumed food");checks.Add("invalid configuration after O2 change preserves both item and unavailable status");
+ player.Configure(new SOLITUDE.Vitals.VitalsRecoverySettings());player.Vitals.Health.Set(0);
+ if(use.TryUse().Outcome!=SOLITUDE.Vitals.VitalUseOutcome.Dead)throw new System.Exception("Dead use was accepted");checks.Add("zero health is not revived");
+ player.Vitals.Health.Set(30);using(var lease=policy.AcquirePrimaryScreen()){if(use.TryUse().Outcome!=SOLITUDE.Vitals.VitalUseOutcome.Unavailable)throw new System.Exception("Gated use accepted");}checks.Add("primary screen gates use without a time-scale assumption");
+ feature.Release();if(use.TryUse().Outcome!=SOLITUDE.Vitals.VitalUseOutcome.Unavailable||hotbar.GetSlot(0).Stack.Quantity!=1)throw new System.Exception("Released coordinator accepted use");checks.Add("released composition leaves no active use endpoint");
+ System.IO.File.WriteAllText("/private/tmp/solitude-vitals-p2-s1-runtime-probe-native.txt", "Passed\n"+string.Join("\n",checks));
+ return new {success=true,checks=checks.ToArray(),originalSceneDirtyBefore=originallyDirty};
+} finally {
+ selection?.Dispose();policy?.Dispose();
+ foreach(var o in objects)if(o!=null)UnityEngine.Object.DestroyImmediate(o);
+ UnityEngine.SceneManagement.SceneManager.SetActiveScene(original);UnityEditor.SceneManagement.EditorSceneManager.CloseScene(fixture,true);
+ if(original.isDirty!=originallyDirty)throw new System.Exception("Probe changed original scene dirty state");
+}

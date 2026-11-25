@@ -10,12 +10,13 @@ namespace SOLITUDE.Features.Interactables
     public class LockerContainer : MonoBehaviour, IContainerSource, ISaveable<ContainerSaveData>
     {
         [SerializeField] private int capacity = 12;
+        [SerializeField] private string displayName;
         [SerializeField] private SaveableId saveableId;
         [SerializeField] private LootTable lootTable;
         private Func<LockerContainer, IContainerReader> initialize;
         private Action<ContainerHandle, ContainerSaveData> restore;
         public IContainerReader Container { get; private set; }
-        public string Label => "Locker";
+        public string Label => string.IsNullOrWhiteSpace(displayName) ? "Locker" : displayName;
         public int Capacity => Container?.Capacity ?? capacity;
         public string PersistentId => (saveableId != null ? saveableId : GetComponent<SaveableId>()).Value;
         public LootTable Loot => lootTable;

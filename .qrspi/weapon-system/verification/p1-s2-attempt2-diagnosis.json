@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-catalog-diagnosis.cs",
+      "entry": "DiagnoseWeaponCatalog.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 885,
+      "executeMs": 5735,
+      "assemblyName": "PipelineRunScript_weapon-system-catalog-diagnosis_0cd23ec6905f405189ff8a8f403f950f",
+      "success": true,
+      "result": {
+        "missingPickupCatalogEntries": [
+          "Assets/_Project/Features/Items/Definitions/ReplacementFuse/ReplacementFusePickup.asset"
+        ],
+        "metadataValid": true
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

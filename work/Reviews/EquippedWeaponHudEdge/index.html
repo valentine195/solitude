@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOLITUDE weapon readout</title>
+<style>
+@font-face { font-family: "Exo 2"; src: url(Exo2.ttf) format("truetype"); font-weight: 100 900; }
+:root {
+  --ink: #10191b;
+  --surface: #182932;
+  --rim: #a9b9b3;
+  --inset: #4b6067;
+  --text: #e7ebe8;
+  --secondary: var(--rim);
+  --health: #83d8a4;
+  --oxygen: #a8b9f2;
+  --amber: #f1ba68;
+  --space: #172b35;
+  color: var(--text);
+  background: var(--space);
+  font-family: "Exo 2", sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; overflow: hidden; }
+#view { position: absolute; width: 1920px; height: 1080px; overflow: hidden; transform-origin: top left; }
+.world { position: absolute; left: 64px; top: 0; width: 1792px; image-rendering: pixelated; }
+.instruments { position: absolute; top: 24px; left: 24px; display: flex; align-items: flex-start; flex-direction: column; }
+.health {
+  position: relative; width: 364px; height: 82px; background: var(--ink);
+  clip-path: polygon(0 0, 342px 0, 100% 22px, 100% 34px, 340px 100%, 0 100%);
+}
+.health::before { content: ""; position: absolute; inset: 0; background: var(--rim); clip-path: polygon(0 0, 342px 0, 100% 22px, 100% 23px, 341px 1px, 0 1px); }
+.health-label { position: absolute; top: 4px; left: 16px; display: flex; align-items: center; gap: 12px; height: 36px; font-size: 30px; font-weight: 800; }
+.cross { width: 20px; height: 20px; background: var(--health); clip-path: polygon(30% 0, 70% 0, 70% 30%, 100% 30%, 100% 70%, 70% 70%, 70% 100%, 30% 100%, 30% 70%, 0 70%, 0 30%, 30% 30%); }
+.health-meter { position: absolute; top: 45px; left: 16px; display: flex; width: 324px; gap: 0; height: 22px; }
+.health-meter i { flex: 1; background: var(--health); clip-path: polygon(11px 0, 100% 0, calc(100% - 11px) 100%, 0 100%); }
+.health-meter i + i { margin-left: -4px; }
+.health-meter i:last-child { background: #263f36; }
+.oxygen {
+  position: relative; width: 280px; height: 44px; background: var(--ink);
+  clip-path: polygon(0 0, 100% 0, 100% 6px, 261px 100%, 0 100%);
+}
+.oxygen-label { position: absolute; top: 4px; left: 16px; font-size: 25px; font-weight: 800; }
+.oxygen-meter { position: absolute; top: 12px; left: 65px; width: 192px; height: 16px; background: #303a51; clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+.oxygen-meter::before { content: ""; display: block; height: 100%; width: 76%; background: var(--oxygen); clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+.crew {
+  margin-top: 8px; min-width: 304px; height: 38px; display: flex; align-items: center; gap: 9px; padding: 8px 17px 8px 14px;
+  color: var(--secondary); background: var(--surface); border-top: 1px solid var(--inset);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+  font-size: 20px; line-height: 1; white-space: nowrap;
+}
+.crew strong { color: var(--text); letter-spacing: .055em; font-weight: 800; }
+.crew-mark { position: relative; display: inline-block; width: 17px; height: 17px; color: var(--rim); }
+.wrench::before { content: ""; display: block; width: 100%; height: 100%; background: currentColor; clip-path: polygon(63% 0, 83% 0, 60% 25%, 73% 38%, 100% 16%, 100% 38%, 76% 61%, 58% 57%, 22% 95%, 8% 100%, 0 92%, 5% 78%, 43% 42%, 40% 25%); }
+.gear::before, .gear::after { content: ""; position: absolute; }
+.gear::before { inset: 0; background: currentColor; clip-path: polygon(39% 0,61% 0,64% 15%,74% 20%,87% 13%,100% 31%,89% 42%,89% 57%,100% 69%,87% 87%,74% 80%,64% 85%,61% 100%,39% 100%,36% 85%,26% 80%,13% 87%,0 69%,11% 57%,11% 42%,0 31%,13% 13%,26% 20%,36% 15%); }
+.gear::after { inset: 6px; border-radius: 50%; background: var(--surface); }
+.separator { color: var(--rim); }
+.hunger {
+  display: none; align-items: center; gap: 9px; width: 185px; height: 34px; margin-top: 8px; padding-left: 14px;
+  color: var(--ink); background: var(--amber); font-size: 21px; font-weight: 800;
+  clip-path: polygon(0 0, 100% 0, 168px 100%, 0 100%);
+}
+.warning-icon { width: 20px; height: 18px; background: var(--ink); clip-path: polygon(50% 0, 100% 100%, 0 100%); text-align: center; color: var(--amber); font-size: 13px; line-height: 23px; }
+[data-warning="true"] .hunger { display: flex; }
+.weapon {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  color: var(--text);
+}
+.weapon[hidden] { display: none; }
+.weapon-name {
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.15;
+  text-shadow: 0 1px 3px var(--ink), 0 1px 5px var(--ink);
+}
+.weapon-icon {
+  display: block;
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: brightness(1.75) saturate(.65) drop-shadow(0 1px 2px var(--ink));
+}
+</style>
+</head>
+<body>
+<main id="view" aria-label="SOLITUDE exploration HUD preview">
+  <img class="world" src="maintenance-room.png" alt="">
+  <section class="instruments" aria-label="Crew and vitals">
+    <div class="health" aria-label="Health, three of four segments">
+      <div class="health-label"><span class="cross"></span> HEALTH</div>
+      <div class="health-meter"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="oxygen" aria-label="Oxygen, 76 percent">
+      <div class="oxygen-label">O₂</div>
+      <div class="oxygen-meter"></div>
+    </div>
+    <div class="crew"><span class="crew-mark wrench" aria-hidden="true"></span><strong>ENGINEER</strong><span class="separator" aria-hidden="true">·</span><span class="specialty">Electrical</span></div>
+    <div class="hunger"><span class="warning-icon" aria-hidden="true">!</span> HUNGRY</div>
+  </section>
+  <section class="weapon" aria-label="Weapon in hand">
+    <span class="weapon-name">Maintenance Wrench</span>
+    <img class="weapon-icon" src="wrench.png" alt="">
+  </section>
+</main>
+<script>
+const viewport = document.querySelector("#view");
+const preview = new URLSearchParams(location.search);
+if (preview.get("crew") === "technician") {
+  document.querySelector(".crew strong").textContent = "TECHNICIAN";
+  document.querySelector(".specialty").textContent = "Field Repair";
+  document.querySelector(".crew-mark").classList.replace("wrench", "gear");
+}
+viewport.dataset.warning = String(preview.has("warning"));
+document.querySelector(".weapon").hidden = preview.has("unarmed");
+function layout() {
+  const scale = Math.min(innerWidth / 1920, innerHeight / 1080);
+  viewport.style.left = (innerWidth - 1920 * scale) / 2 + "px";
+  viewport.style.top = (innerHeight - 1080 * scale) / 2 + "px";
+  viewport.style.transform = `scale(${scale})`;
+}
+addEventListener("resize", layout);
+layout();
+</script>
+</body>
+</html>

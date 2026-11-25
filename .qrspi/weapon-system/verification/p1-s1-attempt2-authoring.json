@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-validate-tags-long.cs",
+      "entry": "WeaponTagValidation.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 873,
+      "executeMs": 878,
+      "assemblyName": "PipelineRunScript_weapon-system-validate-tags-long_6bb9a920cdf3435eb64dd0939e8f4583",
+      "success": true,
+      "result": {
+        "registriesValidated": true,
+        "metadataValidated": true,
+        "repeatAuthoringPreservedIdentities": true,
+        "definitions": 10
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

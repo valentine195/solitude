@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="43" result="Failed(Child)" total="43" passed="37" failed="6" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-08 20:03:19Z" end-time="2026-10-08 20:03:40Z" duration="21.7636668">
+  <test-suite type="TestSuite" id="1060" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="43" result="Failed" site="Child" start-time="2026-10-08 20:03:19Z" end-time="2026-10-08 20:03:40Z" duration="21.763667" total="43" passed="37" failed="6" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1054" name="SOLITUDE.Tests.PlayMode.dll" fullname="/private/tmp/solitude-task-journal-p2-s2/Library/ScriptAssemblies/SOLITUDE.Tests.PlayMode.dll" runstate="Runnable" testcasecount="43" result="Failed" site="Child" start-time="2026-10-08 20:03:19Z" end-time="2026-10-08 20:03:40Z" duration="21.757111" total="43" passed="37" failed="6" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="75242" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1055" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="43" result="Failed" site="Child" start-time="2026-10-08 20:03:19Z" end-time="2026-10-08 20:03:40Z" duration="21.756325" total="43" passed="37" failed="6" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1056" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="43" result="Failed" site="Child" start-time="2026-10-08 20:03:19Z" end-time="2026-10-08 20:03:40Z" duration="21.755751" total="43" passed="37" failed="6" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestFixture" id="1001" name="InteractionScopeLifecycleTests" fullname="SOLITUDE.Tests.InteractionScopeLifecycleTests" classname="SOLITUDE.Tests.InteractionScopeLifecycleTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-08 20:03:19Z" end-time="2026-10-08 20:03:22Z" duration="3.568210" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1004" name="AuthoredInactiveFeedbackRootActivatesAndCanShowAgainAfterHide" fullname="SOLITUDE.Tests.InteractionScopeLifecycleTests.AuthoredInactiveFeedbackRootActivatesAndCanShowAgainAfterHide" methodname="AuthoredInactiveFeedbackRootActivatesAndCanShowAgainAfterHide" classname="SOLITUDE.Tests.InteractionScopeLifecycleTests" runstate="Runnable" seed="1959686870" result="Passed" start-time="2026-10-08 20:03:19Z" end-time="2026-10-08 20:03:19Z" duration="0.083580" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1003" name="DestroyedUIUnsubscribesBeforeTheSceneScopeIsReleased" fullname="SOLITUDE.Tests.InteractionScopeLifecycleTests.DestroyedUIUnsubscribesBeforeTheSceneScopeIsReleased" methodname="DestroyedUIUnsubscribesBeforeTheSceneScopeIsReleased" classname="SOLITUDE.Tests.InteractionScopeLifecycleTests" runstate="Runnable" seed="1690655476" result="Passed" start-time="2026-10-08 20:03:19Z" end-time="2026-10-08 20:03:19Z" duration="0.003311" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1005" name="FeedbackServicesNeverRenderIntoEachOthersViews" fullname="SOLITUDE.Tests.InteractionScopeLifecycleTests.FeedbackServicesNeverRenderIntoEachOthersViews" methodname="FeedbackServicesNeverRenderIntoEachOthersViews" classname="SOLITUDE.Tests.InteractionScopeLifecycleTests" runstate="Runnable" seed="1640517775" result="Passed" start-time="2026-10-08 20:03:19Z" end-time="2026-10-08 20:03:19Z" duration="0.001746" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1006" name="InactiveFeatureFeedbackReceiversBindAndSceneReleaseStopsContactFragments" fullname="SOLITUDE.Tests.InteractionScopeLifecycleTests.InactiveFeatureFeedbackReceiversBindAndSceneReleaseStopsContactFragments" methodname="InactiveFeatureFeedbackReceiversBindAndSceneReleaseStopsContactFragments" classname="SOLITUDE.Tests.InteractionScopeLifecycleTests" runstate="Runnable" seed="1443919513" result="Passed" start-time="2026-10-08 20:03:19Z" end-time="2026-10-08 20:03:22Z" duration="3.302231" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[SOLITUDE start: access granted. The next area is not built yet.
+[SOLITUDE first contact] ...caretaker?
+]]></output>
+            </test-case>
+            <test-case id="1002" name="PlayerFocusTriggerAndFeedbackKeepTheirExistingSemantics" fullname="SOLITUDE.Tests.InteractionScopeLifecycleTests.PlayerFocusTriggerAndFeedbackKeepTheirExistingSemantics" methodname="PlayerFocusTriggerAndFeedbackKeepTheirExistingSemantics" classname="SOLITUDE.Tests.InteractionScopeLifecycleTests" runstate="Runnable" seed="1380034510" result="Passed" start-time="2026-10-08 20:03:22Z" end-time="2026-10-08 20:03:22Z" duration="0.035620" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1007" name="StandaloneDirectEntryOwnsAndReleasesItsFeedbackWithoutSessionBootstrap" fullname="SOLITUDE.Tests.InteractionScopeLifecycleTests.StandaloneDirectEntryOwnsAndReleasesItsFeedbackWithoutSessionBootstrap" methodname="StandaloneDirectEntryOwnsAndReleasesItsFeedbackWithoutSessionBootstrap" classname="SOLITUDE.Tests.InteractionScopeLifecycleTests" runstate="Runnable" seed="70586528" result="Passed" start-time="2026-10-08 20:03:22Z" end-time="2026-10-08 20:03:22Z" duration="0.129790" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[SOLITUDE start: access granted. The next area is not built yet.
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1008" name="ProductionLifecycleTests" fullname="SOLITUDE.Tests.ProductionLifecycleTests" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-10-08 20:03:22Z" end-time="2026-10-08 20:03:24Z" duration="1.967167" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1011" name="AdditiveTargetUnloadClosesOnlyItsModalAndInvalidatesHandle" fullname="SOLITUDE.Tests.ProductionLifecycleTests.AdditiveTargetUnloadClosesOnlyItsModalAndInvalidatesHandle" methodname="AdditiveTargetUnloadClosesOnlyItsModalAndInvalidatesHandle" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="908945591" result="Passed" start-time="2026-10-08 20:03:22Z" end-time="2026-10-08 20:03:23Z" duration="0.403461" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1012" name="CollectionSurvivesActualPlayerSceneReloadAndNewSaveClearsIt" fullname="SOLITUDE.Tests.ProductionLifecycleTests.CollectionSurvivesActualPlayerSceneReloadAndNewSaveClearsIt" methodname="CollectionSurvivesActualPlayerSceneReloadAndNewSaveClearsIt" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="197535781" result="Passed" start-time="2026-10-08 20:03:23Z" end-time="2026-10-08 20:03:23Z" duration="0.342109" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1014" name="DestroyedViewsBeforeScopeDoNotBreakPauseOrInputCleanup" fullname="SOLITUDE.Tests.ProductionLifecycleTests.DestroyedViewsBeforeScopeDoNotBreakPauseOrInputCleanup" methodname="DestroyedViewsBeforeScopeDoNotBreakPauseOrInputCleanup" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="719961006" result="Passed" start-time="2026-10-08 20:03:23Z" end-time="2026-10-08 20:03:23Z" duration="0.136191" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1013" name="DuplicateBootstrapLeavesExistingGraphAndUnrelatedObjectsAlive" fullname="SOLITUDE.Tests.ProductionLifecycleTests.DuplicateBootstrapLeavesExistingGraphAndUnrelatedObjectsAlive" methodname="DuplicateBootstrapLeavesExistingGraphAndUnrelatedObjectsAlive" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="1611461019" result="Passed" start-time="2026-10-08 20:03:23Z" end-time="2026-10-08 20:03:23Z" duration="0.125656" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1015" name="EventSystemAndInputDestroyedBeforeScopeReleaseSafely" fullname="SOLITUDE.Tests.ProductionLifecycleTests.EventSystemAndInputDestroyedBeforeScopeReleaseSafely" methodname="EventSystemAndInputDestroyedBeforeScopeReleaseSafely" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="1127431651" result="Passed" start-time="2026-10-08 20:03:23Z" end-time="2026-10-08 20:03:23Z" duration="0.138727" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1009" name="RepeatedSceneTransitionsDisposeInteractionViewsAndEventSubscriptions" fullname="SOLITUDE.Tests.ProductionLifecycleTests.RepeatedSceneTransitionsDisposeInteractionViewsAndEventSubscriptions" methodname="RepeatedSceneTransitionsDisposeInteractionViewsAndEventSubscriptions" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="2039633085" result="Passed" start-time="2026-10-08 20:03:23Z" end-time="2026-10-08 20:03:24Z" duration="0.610910" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1010" name="StartupAndInactiveBindingsStaySingleAcrossEnableCycles" fullname="SOLITUDE.Tests.ProductionLifecycleTests.StartupAndInactiveBindingsStaySingleAcrossEnableCycles" methodname="StartupAndInactiveBindingsStaySingleAcrossEnableCycles" classname="SOLITUDE.Tests.ProductionLifecycleTests" runstate="Runnable" seed="1441605774" result="Passed" start-time="2026-10-08 20:03:24Z" end-time="2026-10-08 20:03:24Z" duration="0.204369" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1016" name="RestorationDemoLifecycleTests" fullname="SOLITUDE.Tests.RestorationDemoLifecycleTests" classname="SOLITUDE.Tests.RestorationDemoLifecycleTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-08 20:03:24Z" end-time="2026-10-08 20:03:26Z" duration="1.473573" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1017" name="DemoCompletesReloadsAndNeverReadsOrWritesNormalSave" fullname="SOLITUDE.Tests.RestorationDemoLifecycleTests.DemoCompletesReloadsAndNeverReadsOrWritesNormalSave" methodname="DemoCompletesReloadsAndNeverReadsOrWritesNormalSave" classname="SOLITUDE.Tests.RestorationDemoLifecycleTests" runstate="Runnable" seed="1733175756" result="Passed" start-time="2026-10-08 20:03:24Z" end-time="2026-10-08 20:03:25Z" duration="1.229383" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1018" name="ExistingProductionSessionRejectsDemoWithoutReset" fullname="SOLITUDE.Tests.RestorationDemoLifecycleTests.ExistingProductionSessionRejectsDemoWithoutReset" methodname="ExistingProductionSessionRejectsDemoWithoutReset" classname="SOLITUDE.Tests.RestorationDemoLifecycleTests" runstate="Runnable" seed="1011777409" result="Passed" start-time="2026-10-08 20:03:25Z" end-time="2026-10-08 20:03:26Z" duration="0.242784" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[GameCompositionRoot] Runtime unavailable; save preserved: Demo and production sessions cannot be mixed. Stop Play mode and open the scene directly.
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1019" name="RestorationDoorTests" fullname="SOLITUDE.Tests.RestorationDoorTests" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-08 20:03:26Z" end-time="2026-10-08 20:03:28Z" duration="2.024423" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1022" name="LateEnableReenableAndMissingSystemReconcileWithoutOpening" fullname="SOLITUDE.Tests.RestorationDoorTests.LateEnableReenableAndMissingSystemReconcileWithoutOpening" methodname="LateEnableReenableAndMissingSystemReconcileWithoutOpening" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" seed="386152716" result="Passed" start-time="2026-10-08 20:03:26Z" end-time="2026-10-08 20:03:26Z" duration="0.005637" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1020" name="OfflineDirectAndPlayerCallsBlockThenRestorationPermitsOpening" fullname="SOLITUDE.Tests.RestorationDoorTests.OfflineDirectAndPlayerCallsBlockThenRestorationPermitsOpening" methodname="OfflineDirectAndPlayerCallsBlockThenRestorationPermitsOpening" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" seed="470208906" result="Passed" start-time="2026-10-08 20:03:26Z" end-time="2026-10-08 20:03:27Z" duration="1.009621" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1021" name="UngatedDoorPreservesOpeningBehavior" fullname="SOLITUDE.Tests.RestorationDoorTests.UngatedDoorPreservesOpeningBehavior" methodname="UngatedDoorPreservesOpeningBehavior" classname="SOLITUDE.Tests.RestorationDoorTests" runstate="Runnable" seed="1985705184" result="Passed" start-time="2026-10-08 20:03:27Z" end-time="2026-10-08 20:03:28Z" duration="1.004413" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1023" name="RestorationSliceTests" fullname="SOLITUDE.Tests.RestorationSliceTests" classname="SOLITUDE.Tests.RestorationSliceTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-08 20:03:28Z" end-time="2026-10-08 20:03:31Z" duration="2.964433" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1024" name="FullLoopThroughSceneTargetingTransferPassageAndReload" fullname="SOLITUDE.Tests.RestorationSliceTests.FullLoopThroughSceneTargetingTransferPassageAndReload" methodname="FullLoopThroughSceneTargetingTransferPassageAndReload" classname="SOLITUDE.Tests.RestorationSliceTests" runstate="Runnable" seed="677067381" result="Passed" start-time="2026-10-08 20:03:28Z" end-time="2026-10-08 20:03:31Z" duration="2.961505" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1025" name="RestorationTerminalTests" fullname="SOLITUDE.Tests.RestorationTerminalTests" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-08 20:03:31Z" end-time="2026-10-08 20:03:31Z" duration="0.025773" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1030" name="DestroyedSystemTurnsOffPresentation" fullname="SOLITUDE.Tests.RestorationTerminalTests.DestroyedSystemTurnsOffPresentation" methodname="DestroyedSystemTurnsOffPresentation" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" seed="157291980" result="Passed" start-time="2026-10-08 20:03:31Z" end-time="2026-10-08 20:03:31Z" duration="0.002358" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1029" name="FailingEarlierSubscriberDoesNotPreventTerminalPower" fullname="SOLITUDE.Tests.RestorationTerminalTests.FailingEarlierSubscriberDoesNotPreventTerminalPower" methodname="FailingEarlierSubscriberDoesNotPreventTerminalPower" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" seed="55429073" result="Passed" start-time="2026-10-08 20:03:31Z" end-time="2026-10-08 20:03:31Z" duration="0.018462" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[InvalidOperationException: terminal observer fixture
+SOLITUDE.Tests.RestorationTerminalTests+<>c.<FailingEarlierSubscriberDoesNotPreventTerminalPower>b__16_0 () (at Assets/_Project/Tests/PlayMode/RestorationTerminalTests.cs:82)
+SOLITUDE.Restoration.RestorableSystemState.Publish () (at Assets/_Project/Domain/Restoration/RestorableSystemState.cs:47)
+UnityEngine.Debug:LogException(Exception)
+SOLITUDE.Restoration.RestorableSystemState:Publish() (at Assets/_Project/Domain/Restoration/RestorableSystemState.cs:52)
+SOLITUDE.Restoration.RestorableSystemState:TryRestore(ContainerCommandService, IContainerReader, String) (at Assets/_Project/Domain/Restoration/RestorableSystemState.cs:35)
+SOLITUDE.Tests.RestorationTerminalTests:Restore() (at Assets/_Project/Tests/PlayMode/RestorationTerminalTests.cs:35)
+SOLITUDE.Tests.RestorationTerminalTests:FailingEarlierSubscriberDoesNotPreventTerminalPower() (at Assets/_Project/Tests/PlayMode/RestorationTerminalTests.cs:85)
+System.Reflection.MethodBase:Invoke(Object, Object[])
+NUnit.Framework.Internal.Reflect:InvokeMethod(MethodInfo, Object, Object[])
+NUnit.Framework.Internal.MethodWrapper:Invoke(Object, Object[])
+NUnit.Framework.Internal.Commands.TestMethodCommand:RunNonAsyncTestMethod(ITestExecutionContext)
+NUnit.Framework.Internal.Commands.TestMethodCommand:RunTestMethod(ITestExecutionContext)
+NUnit.Framework.Internal.Commands.TestMethodCommand:Execute(ITestExecutionContext)
+UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+]]></output>
+            </test-case>
+            <test-case id="1027" name="LateEnableAndEnableCyclesReconcileWithoutRepeatedInstallation" fullname="SOLITUDE.Tests.RestorationTerminalTests.LateEnableAndEnableCyclesReconcileWithoutRepeatedInstallation" methodname="LateEnableAndEnableCyclesReconcileWithoutRepeatedInstallation" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" seed="1299859568" result="Passed" start-time="2026-10-08 20:03:31Z" end-time="2026-10-08 20:03:31Z" duration="0.000775" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1028" name="OtherSystemsAndMissingDependenciesStayOffline" fullname="SOLITUDE.Tests.RestorationTerminalTests.OtherSystemsAndMissingDependenciesStayOffline" methodname="OtherSystemsAndMissingDependenciesStayOffline" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" seed="503237872" result="Passed" start-time="2026-10-08 20:03:31Z" end-time="2026-10-08 20:03:31Z" duration="0.000367" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1026" name="PowerChangesScreenAndDisplaysRepeatableConfiguredContent" fullname="SOLITUDE.Tests.RestorationTerminalTests.PowerChangesScreenAndDisplaysRepeatableConfiguredContent" methodname="PowerChangesScreenAndDisplaysRepeatableConfiguredContent" classname="SOLITUDE.Tests.RestorationTerminalTests" runstate="Runnable" seed="1895461987" result="Passed" start-time="2026-10-08 20:03:31Z" end-time="2026-10-08 20:03:31Z" duration="0.001854" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1031" name="ScrubberEncounterLifecycleTests" fullname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" classname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" runstate="Runnable" testcasecount="5" result="Failed" site="Child" start-time="2026-10-08 20:03:31Z" end-time="2026-10-08 20:03:32Z" duration="1.931419" total="5" passed="3" failed="2" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1033" name="BackRoutesJournalThenFeatureThenContainerAndActivationKeepsSingleBindings" fullname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests.BackRoutesJournalThenFeatureThenContainerAndActivationKeepsSingleBindings" methodname="BackRoutesJournalThenFeatureThenContainerAndActivationKeepsSingleBindings" classname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" runstate="Runnable" seed="1903243845" result="Passed" start-time="2026-10-08 20:03:31Z" end-time="2026-10-08 20:03:31Z" duration="0.366254" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1032" name="LaterFeatureFailureUnwindsAllBoundFeaturesAndSceneLeases" fullname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests.LaterFeatureFailureUnwindsAllBoundFeaturesAndSceneLeases" methodname="LaterFeatureFailureUnwindsAllBoundFeaturesAndSceneLeases" classname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" runstate="Runnable" seed="1751462402" result="Passed" start-time="2026-10-08 20:03:31Z" end-time="2026-10-08 20:03:31Z" duration="0.358579" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1036" name="ProductionSessionRejectsScrubberWithoutChangingInventoryOrSave" fullname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests.ProductionSessionRejectsScrubberWithoutChangingInventoryOrSave" methodname="ProductionSessionRejectsScrubberWithoutChangingInventoryOrSave" classname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" runstate="Runnable" seed="38451943" result="Passed" start-time="2026-10-08 20:03:31Z" end-time="2026-10-08 20:03:32Z" duration="0.644567" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[[GameCompositionRoot] Runtime unavailable; save preserved: Demo and production sessions cannot be mixed. Stop Play mode and open the scene directly.
+]]></output>
+            </test-case>
+            <test-case id="1034" name="ReloadResetsEveryStateTogetherAndReleasesOldEndpoints" fullname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests.ReloadResetsEveryStateTogetherAndReleasesOldEndpoints" methodname="ReloadResetsEveryStateTogetherAndReleasesOldEndpoints" classname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" runstate="Runnable" seed="813043576" result="Failed" start-time="2026-10-08 20:03:32Z" end-time="2026-10-08 20:03:32Z" duration="0.207979" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[Unhandled log message: '[Exception] MissingReferenceException: The object of type 'SOLITUDE.Containers.ContainerSlotView' has been destroyed but you are still trying to access it.
+Your script should either check if it is null or you should not destroy the object.'. Use UnityEngine.TestTools.LogAssert.Expect]]></message>
+                <stack-trace><![CDATA[UnityEngine.Object+MarshalledUnityObject.TryThrowEditorNullExceptionObject (UnityEngine.Object unityObj, System.String parameterName) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/UnityEngineObject.bindings.cs:1171)
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/BindingsHelpers.cs:21)
+UnityEngine.Component.get_gameObject () (at <96f8d63efb624ec38a97de0dc4a4387a>:0)
+SOLITUDE.Containers.ContainerView.Build (System.String text, System.Int32 capacity, System.Int64 generation) (at Assets/_Project/Systems/Containers/Views/ContainerView.cs:56)
+SOLITUDE.Application.ContainerPresenter.Rebuild () (at Assets/_Project/Application/ContainerPresenter.cs:75)
+SOLITUDE.Containers.Container.PublishCapacity (System.Action`1[T] report) (at Assets/_Project/Domain/Container.cs:43)
+SOLITUDE.Containers.ContainerCommandService:Report(Exception) (at Assets/_Project/Domain/ContainerCommandService.cs:274)
+SOLITUDE.Containers.Container:PublishCapacity(Action`1) (at Assets/_Project/Domain/Container.cs:43)
+SOLITUDE.Containers.ContainerCommandService:Unregister(ContainerHandle) (at Assets/_Project/Domain/ContainerCommandService.cs:64)
+SOLITUDE.SaveLoad.ContainerBinding:Dispose() (at Assets/_Project/Domain/ContainerSaveSession.cs:134)
+SOLITUDE.Composition.SceneBindings:Release() (at Assets/_Project/Core/Composition/SceneBindings.cs:304)
+SOLITUDE.Composition.GameCompositionRoot:ReleaseScene(Scene) (at Assets/_Project/Core/Composition/GameCompositionRoot.cs:144)
+SOLITUDE.Composition.<>c__DisplayClass34_0:<BindScene>b__0() (at Assets/_Project/Core/Composition/GameCompositionRoot.cs:134)
+SOLITUDE.Composition.SceneBindings:OnDestroy() (at Assets/_Project/Core/Composition/SceneBindings.cs:307)
+
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[MissingReferenceException: The object of type 'SOLITUDE.Containers.ContainerSlotView' has been destroyed but you are still trying to access it.
+Your script should either check if it is null or you should not destroy the object.
+UnityEngine.Object+MarshalledUnityObject.TryThrowEditorNullExceptionObject (UnityEngine.Object unityObj, System.String parameterName) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/UnityEngineObject.bindings.cs:1171)
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/BindingsHelpers.cs:21)
+UnityEngine.Component.get_gameObject () (at <96f8d63efb624ec38a97de0dc4a4387a>:0)
+SOLITUDE.Containers.ContainerView.Build (System.String text, System.Int32 capacity, System.Int64 generation) (at Assets/_Project/Systems/Containers/Views/ContainerView.cs:56)
+SOLITUDE.Application.ContainerPresenter.Rebuild () (at Assets/_Project/Application/ContainerPresenter.cs:75)
+SOLITUDE.Containers.Container.PublishCapacity (System.Action`1[T] report) (at Assets/_Project/Domain/Container.cs:43)
+UnityEngine.Debug:LogException(Exception)
+SOLITUDE.Containers.ContainerCommandService:Report(Exception) (at Assets/_Project/Domain/ContainerCommandService.cs:274)
+SOLITUDE.Containers.Container:PublishCapacity(Action`1) (at Assets/_Project/Domain/Container.cs:43)
+SOLITUDE.Containers.ContainerCommandService:Unregister(ContainerHandle) (at Assets/_Project/Domain/ContainerCommandService.cs:64)
+SOLITUDE.SaveLoad.ContainerBinding:Dispose() (at Assets/_Project/Domain/ContainerSaveSession.cs:134)
+SOLITUDE.Composition.SceneBindings:Release() (at Assets/_Project/Core/Composition/SceneBindings.cs:304)
+SOLITUDE.Composition.GameCompositionRoot:ReleaseScene(Scene) (at Assets/_Project/Core/Composition/GameCompositionRoot.cs:144)
+SOLITUDE.Composition.<>c__DisplayClass34_0:<BindScene>b__0() (at Assets/_Project/Core/Composition/GameCompositionRoot.cs:134)
+SOLITUDE.Composition.SceneBindings:OnDestroy() (at Assets/_Project/Core/Composition/SceneBindings.cs:307)
+
+]]></output>
+            </test-case>
+            <test-case id="1035" name="ScrubberSessionRejectsProductionWithoutWritingEncounterItems" fullname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests.ScrubberSessionRejectsProductionWithoutWritingEncounterItems" methodname="ScrubberSessionRejectsProductionWithoutWritingEncounterItems" classname="SOLITUDE.Tests.ScrubberEncounterLifecycleTests" runstate="Runnable" seed="615331976" result="Failed" start-time="2026-10-08 20:03:32Z" end-time="2026-10-08 20:03:32Z" duration="0.352084" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[Unhandled log message: '[Exception] MissingReferenceException: The object of type 'SOLITUDE.Containers.ContainerSlotView' has been destroyed but you are still trying to access it.
+Your script should either check if it is null or you should not destroy the object.'. Use UnityEngine.TestTools.LogAssert.Expect]]></message>
+                <stack-trace><![CDATA[UnityEngine.Object+MarshalledUnityObject.TryThrowEditorNullExceptionObject (UnityEngine.Object unityObj, System.String parameterName) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/UnityEngineObject.bindings.cs:1171)
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/BindingsHelpers.cs:21)
+UnityEngine.Component.get_gameObject () (at <96f8d63efb624ec38a97de0dc4a4387a>:0)
+SOLITUDE.Containers.ContainerView.Build (System.String text, System.Int32 capacity, System.Int64 generation) (at Assets/_Project/Systems/Containers/Views/ContainerView.cs:56)
+SOLITUDE.Application.ContainerPresenter.Rebuild () (at Assets/_Project/Application/ContainerPresenter.cs:75)
+SOLITUDE.Containers.Container.PublishCapacity (System.Action`1[T] report) (at Assets/_Project/Domain/Container.cs:43)
+SOLITUDE.Containers.ContainerCommandService:Report(Exception) (at Assets/_Project/Domain/ContainerCommandService.cs:274)
+SOLITUDE.Containers.Container:PublishCapacity(Action`1) (at Assets/_Project/Domain/Container.cs:43)
+SOLITUDE.Containers.ContainerCommandService:Unregister(ContainerHandle) (at Assets/_Project/Domain/ContainerCommandService.cs:64)
+SOLITUDE.SaveLoad.ContainerBinding:Dispose() (at Assets/_Project/Domain/ContainerSaveSession.cs:134)
+SOLITUDE.Composition.SceneBindings:Release() (at Assets/_Project/Core/Composition/SceneBindings.cs:304)
+SOLITUDE.Composition.GameCompositionRoot:ReleaseScene(Scene) (at Assets/_Project/Core/Composition/GameCompositionRoot.cs:144)
+SOLITUDE.Composition.<>c__DisplayClass34_0:<BindScene>b__0() (at Assets/_Project/Core/Composition/GameCompositionRoot.cs:134)
+SOLITUDE.Composition.SceneBindings:OnDestroy() (at Assets/_Project/Core/Composition/SceneBindings.cs:307)
+
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[MissingReferenceException: The object of type 'SOLITUDE.Containers.ContainerSlotView' has been destroyed but you are still trying to access it.
+Your script should either check if it is null or you should not destroy the object.
+UnityEngine.Object+MarshalledUnityObject.TryThrowEditorNullExceptionObject (UnityEngine.Object unityObj, System.String parameterName) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/UnityEngineObject.bindings.cs:1171)
+UnityEngine.Bindings.ThrowHelper.ThrowNullReferenceException (System.Object obj) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/BindingsHelpers.cs:21)
+UnityEngine.Component.get_gameObject () (at <96f8d63efb624ec38a97de0dc4a4387a>:0)
+SOLITUDE.Containers.ContainerView.Build (System.String text, System.Int32 capacity, System.Int64 generation) (at Assets/_Project/Systems/Containers/Views/ContainerView.cs:56)
+SOLITUDE.Application.ContainerPresenter.Rebuild () (at Assets/_Project/Application/ContainerPresenter.cs:75)
+SOLITUDE.Containers.Container.PublishCapacity (System.Action`1[T] report) (at Assets/_Project/Domain/Container.cs:43)
+UnityEngine.Debug:LogException(Exception)
+SOLITUDE.Containers.ContainerCommandService:Report(Exception) (at Assets/_Project/Domain/ContainerCommandService.cs:274)
+SOLITUDE.Containers.Container:PublishCapacity(Action`1) (at Assets/_Project/Domain/Container.cs:43)
+SOLITUDE.Containers.ContainerCommandService:Unregister(ContainerHandle) (at Assets/_Project/Domain/ContainerCommandService.cs:64)
+SOLITUDE.SaveLoad.ContainerBinding:Dispose() (at Assets/_Project/Domain/ContainerSaveSession.cs:134)
+SOLITUDE.Composition.SceneBindings:Release() (at Assets/_Project/Core/Composition/SceneBindings.cs:304)
+SOLITUDE.Composition.GameCompositionRoot:ReleaseScene(Scene) (at Assets/_Project/Core/Composition/GameCompositionRoot.cs:144)
+SOLITUDE.Composition.<>c__DisplayClass34_0:<BindScene>b__0() (at Assets/_Project/Core/Composition/GameCompositionRoot.cs:134)
+SOLITUDE.Composition.SceneBindings:OnDestroy() (at Assets/_Project/Core/Composition/SceneBindings.cs:307)
+
+[GameCompositionRoot] Runtime unavailable; save preserved: Demo and production sessions cannot be mixed. Stop Play mode and open the scene directly.
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1037" name="ScrubberEncounterSliceTests" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" testcasecount="7" result="Failed" site="Child" start-time="2026-10-08 20:03:32Z" end-time="2026-10-08 20:03:39Z" duration="6.647808" total="7" passed="5" failed="2" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1039" name="ActionNavigationUsesAmberWithoutActivatingOrRecoloringFault" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.ActionNavigationUsesAmberWithoutActivatingOrRecoloringFault" methodname="ActionNavigationUsesAmberWithoutActivatingOrRecoloringFault" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="403639343" result="Passed" start-time="2026-10-08 20:03:32Z" end-time="2026-10-08 20:03:33Z" duration="0.171997" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1043" name="CompletionNotificationDefersExpiresAndNeverReplays" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.CompletionNotificationDefersExpiresAndNeverReplays" methodname="CompletionNotificationDefersExpiresAndNeverReplays" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="1950358445" result="Failed" start-time="2026-10-08 20:03:33Z" end-time="2026-10-08 20:03:33Z" duration="0.202233" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at SOLITUDE.Tests.ScrubberEncounterSliceTests+<CompletionNotificationDefersExpiresAndNeverReplays>d__12.MoveNext () [0x0025f] in /private/tmp/solitude-task-journal-p2-s2/Assets/_Project/Tests/PlayMode/ScrubberEncounterSliceTests.cs:209
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1038" name="ComposedScreenOwnsInputAndReopensAfterLeavingProximity" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.ComposedScreenOwnsInputAndReopensAfterLeavingProximity" methodname="ComposedScreenOwnsInputAndReopensAfterLeavingProximity" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="434391236" result="Passed" start-time="2026-10-08 20:03:33Z" end-time="2026-10-08 20:03:33Z" duration="0.176797" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1044" name="FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" methodname="FaultedRoomCanBeInspectedWithoutChangingVitalsOrSave" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="650883339" result="Passed" start-time="2026-10-08 20:03:33Z" end-time="2026-10-08 20:03:33Z" duration="0.119689" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1040" name="FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput" methodname="FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="1627952329" result="Failed" start-time="2026-10-08 20:03:33Z" end-time="2026-10-08 20:03:33Z" duration="0.109334" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Expected: same as <Replacement fuse (SOLITUDE.Items.WorldPickup)>
+  But was:  null
+]]></message>
+                <stack-trace><![CDATA[at SOLITUDE.Tests.ScrubberEncounterSliceTests+<FusePickupRejectsFullInventoryThenCollectsExactlyOnceThroughInput>d__9.MoveNext () [0x002ff] in /private/tmp/solitude-task-journal-p2-s2/Assets/_Project/Tests/PlayMode/ScrubberEncounterSliceTests.cs:138
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+            </test-case>
+            <test-case id="1042" name="RecoveryContinuesWithScreenOpenAndAwayButActualPauseSuspendsIt" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.RecoveryContinuesWithScreenOpenAndAwayButActualPauseSuspendsIt" methodname="RecoveryContinuesWithScreenOpenAndAwayButActualPauseSuspendsIt" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="1798961351" result="Passed" start-time="2026-10-08 20:03:33Z" end-time="2026-10-08 20:03:39Z" duration="5.559821" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1041" name="RepairScreenRechecksInventoryAndKeepsRepairedScrubberOffline" fullname="SOLITUDE.Tests.ScrubberEncounterSliceTests.RepairScreenRechecksInventoryAndKeepsRepairedScrubberOffline" methodname="RepairScreenRechecksInventoryAndKeepsRepairedScrubberOffline" classname="SOLITUDE.Tests.ScrubberEncounterSliceTests" runstate="Runnable" seed="1969145656" result="Passed" start-time="2026-10-08 20:03:39Z" end-time="2026-10-08 20:03:39Z" duration="0.304271" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1045" name="TaskJournalNoticeTests" fullname="SOLITUDE.Tests.TaskJournalNoticeTests" classname="SOLITUDE.Tests.TaskJournalNoticeTests" runstate="Runnable" testcasecount="3" result="Failed" site="Child" start-time="2026-10-08 20:03:39Z" end-time="2026-10-08 20:03:40Z" duration="0.453126" total="3" passed="2" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1046" name="ActualFocusAndRepairProduceSingleNoticesWithoutFocusTheft" fullname="SOLITUDE.Tests.TaskJournalNoticeTests.ActualFocusAndRepairProduceSingleNoticesWithoutFocusTheft" methodname="ActualFocusAndRepairProduceSingleNoticesWithoutFocusTheft" classname="SOLITUDE.Tests.TaskJournalNoticeTests" runstate="Runnable" seed="538751037" result="Failed" start-time="2026-10-08 20:03:39Z" end-time="2026-10-08 20:03:39Z" duration="0.126936" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at SOLITUDE.Tests.TaskJournalNoticeTests+<ActualFocusAndRepairProduceSingleNoticesWithoutFocusTheft>d__10.MoveNext () [0x00255] in /private/tmp/solitude-task-journal-p2-s2/Assets/_Project/Tests/PlayMode/TaskJournalNoticeTests.cs:70
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[[PlayerInteractor] No target
+]]></output>
+            </test-case>
+            <test-case id="1048" name="FailedFixtureCoalescesAndSceneReleaseDropsPendingLane" fullname="SOLITUDE.Tests.TaskJournalNoticeTests.FailedFixtureCoalescesAndSceneReleaseDropsPendingLane" methodname="FailedFixtureCoalescesAndSceneReleaseDropsPendingLane" classname="SOLITUDE.Tests.TaskJournalNoticeTests" runstate="Runnable" seed="1625796228" result="Passed" start-time="2026-10-08 20:03:39Z" end-time="2026-10-08 20:03:39Z" duration="0.203299" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1047" name="JournalInventoryTransferAndPauseHideAndResumeRemainingDwell" fullname="SOLITUDE.Tests.TaskJournalNoticeTests.JournalInventoryTransferAndPauseHideAndResumeRemainingDwell" methodname="JournalInventoryTransferAndPauseHideAndResumeRemainingDwell" classname="SOLITUDE.Tests.TaskJournalNoticeTests" runstate="Runnable" seed="1749106944" result="Passed" start-time="2026-10-08 20:03:39Z" end-time="2026-10-08 20:03:40Z" duration="0.120584" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1049" name="TaskJournalSliceTests" fullname="SOLITUDE.Tests.TaskJournalSliceTests" classname="SOLITUDE.Tests.TaskJournalSliceTests" runstate="Runnable" testcasecount="4" result="Failed" site="Child" start-time="2026-10-08 20:03:40Z" end-time="2026-10-08 20:03:40Z" duration="0.697033" total="4" passed="3" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-case id="1050" name="ActualDemoDiscoversRepairsPausesCompletesAndResets" fullname="SOLITUDE.Tests.TaskJournalSliceTests.ActualDemoDiscoversRepairsPausesCompletesAndResets" methodname="ActualDemoDiscoversRepairsPausesCompletesAndResets" classname="SOLITUDE.Tests.TaskJournalSliceTests" runstate="Runnable" seed="1683508312" result="Failed" start-time="2026-10-08 20:03:40Z" end-time="2026-10-08 20:03:40Z" duration="0.141927" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <failure>
+                <message><![CDATA[  Expected: True
+  But was:  False
+]]></message>
+                <stack-trace><![CDATA[at SOLITUDE.Tests.TaskJournalSliceTests+<ActualDemoDiscoversRepairsPausesCompletesAndResets>d__9.MoveNext () [0x0049d] in /private/tmp/solitude-task-journal-p2-s2/Assets/_Project/Tests/PlayMode/TaskJournalSliceTests.cs:77
+at UnityEngine.TestTools.TestEnumerator+<Execute>d__8.MoveNext () [0x0003a] in ./Library/PackageCache/com.unity.test-framework@80f691d4262b/UnityEngine.TestRunner/NUnitExtensions/Attributes/TestEnumerator.cs:52
+]]></stack-trace>
+              </failure>
+              <output><![CDATA[[PlayerInteractor] No target
+]]></output>
+            </test-case>
+            <test-case id="1053" name="ConcreteRenderFailureClosesJournalAndPreservesAcceptedSourceWrites" fullname="SOLITUDE.Tests.TaskJournalSliceTests.ConcreteRenderFailureClosesJournalAndPreservesAcceptedSourceWrites" methodname="ConcreteRenderFailureClosesJournalAndPreservesAcceptedSourceWrites" classname="SOLITUDE.Tests.TaskJournalSliceTests" runstate="Runnable" seed="200165375" result="Passed" start-time="2026-10-08 20:03:40Z" end-time="2026-10-08 20:03:40Z" duration="0.286053" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[NullReferenceException: Object reference not set to an instance of an object
+SOLITUDE.Tasks.UI.TaskJournalView.Render (SOLITUDE.Application.TaskJournalPresentation state) (at Assets/_Project/Systems/Tasks/UI/TaskJournalView.cs:103)
+SOLITUDE.Application.TaskJournalPresenter.SetVisible (System.Boolean value, System.Boolean requireRender) (at Assets/_Project/Application/Tasks/TaskJournalPresenter.cs:108)
+SOLITUDE.Tasks.UI.TaskJournalView.Show () (at Assets/_Project/Systems/Tasks/UI/TaskJournalView.cs:59)
+SOLITUDE.Application.TaskJournalScreenCoordinator.Open () (at Assets/_Project/Application/Tasks/TaskJournalScreenCoordinator.cs:29)
+UnityEngine.Debug:LogException(Exception)
+SOLITUDE.Application.TaskJournalScreenCoordinator:Report(Exception) (at Assets/_Project/Application/Tasks/TaskJournalScreenCoordinator.cs:54)
+SOLITUDE.Application.TaskJournalScreenCoordinator:Open() (at Assets/_Project/Application/Tasks/TaskJournalScreenCoordinator.cs:33)
+SOLITUDE.Application.TaskJournalScreenCoordinator:Toggle() (at Assets/_Project/Application/Tasks/TaskJournalScreenCoordinator.cs:17)
+SOLITUDE.Core.Input.UnityInputHost:ToggleJournal(CallbackContext) (at Assets/_Project/Core/Input/UnityInputHost.cs:95)
+UnityEngine.InputSystem.LowLevel.<>c__DisplayClass10_0:<set_onUpdate>b__0(NativeInputUpdateType, NativeInputEventBuffer*)
+UnityEngineInternal.Input.NativeInputSystem:ProcessInputUpdate(NativeInputUpdateType, IntPtr) (at /Users/bokken/build/output/unity/unity/Modules/Input/Private/Input.cs:161)
+UnityEngineInternal.Input.NativeInputSystem:Update(NativeInputUpdateType)
+UnityEngine.InputSystem.InputSystem:Update()
+SOLITUDE.Tests.TaskJournalSliceTests:Press(Key[]) (at Assets/_Project/Tests/PlayMode/TaskJournalSliceTests.cs:50)
+SOLITUDE.Tests.<ConcreteRenderFailureClosesJournalAndPreservesAcceptedSourceWrites>d__12:MoveNext() (at Assets/_Project/Tests/PlayMode/TaskJournalSliceTests.cs:146)
+UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+NullReferenceException: Object reference not set to an instance of an object
+SOLITUDE.Tasks.UI.TaskJournalView.Render (SOLITUDE.Application.TaskJournalPresentation state) (at Assets/_Project/Systems/Tasks/UI/TaskJournalView.cs:103)
+SOLITUDE.Application.TaskJournalPresenter.Render () (at Assets/_Project/Application/Tasks/TaskJournalPresenter.cs:130)
+UnityEngine.Debug:LogException(Exception)
+SOLITUDE.Tasks.UI.TaskJournalView:PresentationFailed(Exception) (at Assets/_Project/Systems/Tasks/UI/TaskJournalView.cs:130)
+SOLITUDE.Application.TaskJournalPresenter:Render() (at Assets/_Project/Application/Tasks/TaskJournalPresenter.cs:134)
+SOLITUDE.Application.TaskJournalPresenter:Changed(TaskJournalChange) (at Assets/_Project/Application/Tasks/TaskJournalPresenter.cs:86)
+SOLITUDE.Tasks.TaskJournal:Notify(TaskJournalSnapshot, TaskChangeCause) (at Assets/_Project/Domain/Tasks/TaskJournal.cs:156)
+SOLITUDE.Tasks.TaskJournal:Publish(Publisher, String, TaskSnapshot) (at Assets/_Project/Domain/Tasks/TaskJournal.cs:82)
+SOLITUDE.Tasks.Publisher:Publish(String, TaskSnapshot) (at Assets/_Project/Domain/Tasks/TaskJournal.cs:25)
+SOLITUDE.Tests.<ConcreteRenderFailureClosesJournalAndPreservesAcceptedSourceWrites>d__12:MoveNext() (at Assets/_Project/Tests/PlayMode/TaskJournalSliceTests.cs:154)
+UnityEngine.SetupCoroutine:InvokeMoveNext(IEnumerator, IntPtr) (at /Users/bokken/build/output/unity/unity/Runtime/Export/Scripting/Coroutines.cs:17)
+
+]]></output>
+            </test-case>
+            <test-case id="1052" name="KeyboardNavigationRevealsOverflowRowsAndRetainsScrollOnReopen" fullname="SOLITUDE.Tests.TaskJournalSliceTests.KeyboardNavigationRevealsOverflowRowsAndRetainsScrollOnReopen" methodname="KeyboardNavigationRevealsOverflowRowsAndRetainsScrollOnReopen" classname="SOLITUDE.Tests.TaskJournalSliceTests" runstate="Runnable" seed="880074123" result="Passed" start-time="2026-10-08 20:03:40Z" end-time="2026-10-08 20:03:40Z" duration="0.175614" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1051" name="UnavailableSourceAndFailedFixtureStayLiteralWhileViewTeardownReleasesPause" fullname="SOLITUDE.Tests.TaskJournalSliceTests.UnavailableSourceAndFailedFixtureStayLiteralWhileViewTeardownReleasesPause" methodname="UnavailableSourceAndFailedFixtureStayLiteralWhileViewTeardownReleasesPause" classname="SOLITUDE.Tests.TaskJournalSliceTests" runstate="Runnable" seed="843181786" result="Passed" start-time="2026-10-08 20:03:40Z" end-time="2026-10-08 20:03:40Z" duration="0.089649" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

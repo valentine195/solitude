@@ -1,0 +1,37 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-validate-melee.cs",
+      "entry": "ValidateMelee.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 5729,
+      "executeMs": 3847,
+      "assemblyName": "PipelineRunScript_weapon-system-validate-melee_f8e10eea7cf0416484e874e1240643fc",
+      "success": true,
+      "result": {
+        "metadataValid": true,
+        "tagsValid": true,
+        "capabilitiesValid": true,
+        "targets": -5,
+        "blockers": -5,
+        "damage": 10,
+        "range": 1.25,
+        "arc": 90,
+        "total": 0.55
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

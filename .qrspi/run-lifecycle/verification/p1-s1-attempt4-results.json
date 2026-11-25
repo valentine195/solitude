@@ -1,0 +1,220 @@
+{
+  "status": "Passed",
+  "platform": "macOS ARM64",
+  "results": [
+    {
+      "name": "copy-Assets",
+      "seconds": 0.73,
+      "exit": 0
+    },
+    {
+      "name": "copy-Packages",
+      "seconds": 0.02,
+      "exit": 0
+    },
+    {
+      "name": "copy-ProjectSettings",
+      "seconds": 0.02,
+      "exit": 0
+    },
+    {
+      "name": "prepare-git",
+      "seconds": 0.01,
+      "exit": 0
+    },
+    {
+      "name": "reset-verification-index",
+      "seconds": 0.01,
+      "exit": 0
+    },
+    {
+      "name": "copy-verification-index",
+      "seconds": 0.02,
+      "exit": 0
+    },
+    {
+      "name": "pure-tests",
+      "seconds": 1.45,
+      "exit": 0
+    },
+    {
+      "name": "authoring",
+      "seconds": 14.51,
+      "exit": 0
+    },
+    {
+      "name": "editmode",
+      "seconds": 25.21,
+      "exit": 0,
+      "passed": 343,
+      "failed": 0
+    },
+    {
+      "name": "prepare-fixtures",
+      "seconds": 9.7,
+      "exit": 0
+    },
+    {
+      "name": "playmode",
+      "seconds": 89.13,
+      "exit": 0,
+      "passed": 111,
+      "failed": 0
+    },
+    {
+      "name": "restore-scope",
+      "seconds": 9.99,
+      "exit": 0
+    },
+    {
+      "name": "verification-build",
+      "seconds": 80.73,
+      "exit": 0
+    },
+    {
+      "name": "shipping-build",
+      "seconds": 36.31,
+      "exit": 0
+    },
+    {
+      "name": "world-collect",
+      "seconds": 3.25,
+      "exit": 0
+    },
+    {
+      "name": "world-restart-newsave",
+      "seconds": 1.13,
+      "exit": 0
+    },
+    {
+      "name": "partial-temp",
+      "seconds": 1.05,
+      "exit": 0
+    },
+    {
+      "name": "missing-primary",
+      "seconds": 1.07,
+      "exit": 0
+    },
+    {
+      "name": "corrupt-primary",
+      "seconds": 1.07,
+      "exit": 0
+    },
+    {
+      "name": "both-corrupt",
+      "seconds": 1.06,
+      "exit": 0
+    },
+    {
+      "name": "temp-only",
+      "seconds": 1.01,
+      "exit": 0
+    },
+    {
+      "name": "incompatible-primary",
+      "seconds": 0.99,
+      "exit": 0
+    },
+    {
+      "name": "unknown-item",
+      "seconds": 1.01,
+      "exit": 0
+    },
+    {
+      "name": "capacity-primary",
+      "seconds": 1.07,
+      "exit": 0
+    },
+    {
+      "name": "capacity-backup",
+      "seconds": 1.17,
+      "exit": 0
+    },
+    {
+      "name": "read-denied",
+      "seconds": 1.01,
+      "exit": 0
+    },
+    {
+      "name": "write-before-temp",
+      "seconds": 1.0,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-before-temp",
+      "seconds": 1.07,
+      "exit": 0
+    },
+    {
+      "name": "write-after-temp",
+      "seconds": 1.0,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-after-temp",
+      "seconds": 1.08,
+      "exit": 0
+    },
+    {
+      "name": "write-before-commit",
+      "seconds": 1.0,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-before-commit",
+      "seconds": 1.12,
+      "exit": 0
+    },
+    {
+      "name": "write-after-commit",
+      "seconds": 1.01,
+      "exit": -9
+    },
+    {
+      "name": "restart-write-after-commit",
+      "seconds": 1.12,
+      "exit": 0
+    },
+    {
+      "name": "recovery-after-receipt",
+      "seconds": 0.9,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-after-receipt",
+      "seconds": 1.06,
+      "exit": 0
+    },
+    {
+      "name": "recovery-after-temp",
+      "seconds": 0.94,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-after-temp",
+      "seconds": 1.06,
+      "exit": 0
+    },
+    {
+      "name": "recovery-before-commit",
+      "seconds": 0.94,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-before-commit",
+      "seconds": 1.08,
+      "exit": 0
+    },
+    {
+      "name": "recovery-after-commit",
+      "seconds": 0.89,
+      "exit": -9
+    },
+    {
+      "name": "restart-recovery-after-commit",
+      "seconds": 1.09,
+      "exit": 0
+    }
+  ]
+}

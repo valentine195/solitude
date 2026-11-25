@@ -14,10 +14,12 @@ settings. Existing Wakeup scene authoring is unchanged.
   seen position. After three seconds of searching it returns to patrol. An
   unreachable last-seen position also times out.
 - Red: pursues a confirmed intruder at short range. Within 1.8 world units it
-  stops and flashes for 0.65 seconds before attempting a stun pulse.
+  projects an amber aiming line that brightens and widens over 0.65 seconds.
+  The blue-white discharge follows that line and ends at first contact.
 - Aiming locks at the start of the warning; a sideways dodge can miss the shot.
   Solid walls/cover block both sight and the pulse. Leaving range or breaking
-  sight cancels the warning. A shot is followed by a 1.6 second recovery.
+  sight cancels the warning. Knocking SEC-0 back during its charge interrupts
+  the shot. Both an interrupted charge and a fired shot open a 1.6 second recovery.
 - A hit immobilizes the player for 0.8 seconds, without dealing health damage.
   Held movement resumes after the stun. Repeated hits extend the remaining
   duration rather than accumulating movement locks.

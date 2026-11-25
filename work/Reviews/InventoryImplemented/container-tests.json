@@ -1,0 +1,196 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.08,
+      "summary": {
+        "total": 24,
+        "passed": 24,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.AcceptancePolicyIsFrozenAndPlanningRejectsReentrantCommands",
+          "Status": "Passed",
+          "Duration": 0.0195443,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.CompiledLootPreservesSeededAlgorithmAndCandidateOrder",
+          "Status": "Passed",
+          "Duration": 0.0022376,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.DomainHasNoUnityReferencesOrPublicStorageWrites",
+          "Status": "Passed",
+          "Duration": 0.0009004,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.FailedInitialLootNeverPublishesAnOwner",
+          "Status": "Passed",
+          "Duration": 0.0043359,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.FailedOwnerRestorePreservesUnloadedRecordAndBlocksAutosave",
+          "Status": "Passed",
+          "Duration": 0.0019378,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.FailedRestoreDoesNotReplaceLiveStateOrDirtySession",
+          "Status": "Passed",
+          "Duration": 0.0007462,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.FormerlyStackableItemsSplitWithoutLosingReservedSlots",
+          "Status": "Passed",
+          "Duration": 0.0009006,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.InvalidCatalogAndLootAuthoringAreRejected",
+          "Status": "Passed",
+          "Duration": 0.0005222,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.InvalidGrantsAndRemovalsLeaveRevisionsAndDirtyStateUnchanged",
+          "Status": "Passed",
+          "Duration": 0.0007829,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.InvalidUnloadedSchemaFailsBeforeAnyOwnerIsPublished",
+          "Status": "Passed",
+          "Duration": 0.0006546,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.NewWorldReleaseCannotRetainEmptyLockerRecordsOrOldOwners",
+          "Status": "Passed",
+          "Duration": 0.0007099,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.NonstackableGrantUsesOnePerSlotAndIsAtomic",
+          "Status": "Passed",
+          "Duration": 0.0006967,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.NoOpsDoNotDirtyOrPublish",
+          "Status": "Passed",
+          "Duration": 0.0009882,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.NormalizationDirtiesOnlyChangedSavedRecords",
+          "Status": "Passed",
+          "Duration": 0.0015386,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.ObserversSeeBothCommittedSidesAndCannotReenterOrCapture",
+          "Status": "Passed",
+          "Duration": 0.0009568,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.OversizedRestorePreservesAnchorsAndSplitsDeterministically",
+          "Status": "Passed",
+          "Duration": 0.0011079,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.PartialMergeReportsRemainderAndCommittedAddresses",
+          "Status": "Passed",
+          "Duration": 0.0008129,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.RegistrationGenerationPreventsOldHandleFromAddressingReplacement",
+          "Status": "Passed",
+          "Duration": 0.0003373,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.RejectedLootCandidateCannotPolluteLaterCandidateCapacity",
+          "Status": "Passed",
+          "Duration": 0.0004854,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.ResizeRefusesTruncationAndRegrowthDoesNotReviveOldAddresses",
+          "Status": "Passed",
+          "Duration": 0.000302,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.RestoreResizeAndUnregisterCancelSourceGesture",
+          "Status": "Passed",
+          "Duration": 0.0006902,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.SnapshotsAndDtosCannotMutateLiveState",
+          "Status": "Passed",
+          "Duration": 0.0005657,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.StaleSourceAndTargetAddressesCannotChangeOwnership",
+          "Status": "Passed",
+          "Duration": 0.0002211,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ContainerBoundaryTests.ThrowingObserverDoesNotSuppressOtherObserversOrPersistence",
+          "Status": "Passed",
+          "Duration": 0.0004344,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

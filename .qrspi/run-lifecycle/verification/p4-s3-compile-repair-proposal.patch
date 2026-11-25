@@ -1,0 +1,11 @@
+--- a/Assets/_Project/Editor/RunLifecycleAuthoring.cs
++++ b/Assets/_Project/Editor/RunLifecycleAuthoring.cs
+@@ -160,7 +160,7 @@
+             var camera = InScene<Camera>(SceneManager.GetActiveScene()).Single(c => c.CompareTag("MainCamera"));
+             var rt = new RenderTexture(896,576,24,RenderTextureFormat.ARGB32); rt.filterMode = FilterMode.Point; rt.antiAliasing = 1; rt.Create();
+             var target = camera.targetTexture; var active = RenderTexture.active; var aspect = camera.aspect;
+-            var pixel = camera.GetComponent<UnityEngine.U2D.PixelPerfectCamera>(); bool pixelEnabled = pixel != null && pixel.enabled;
++            var pixel = camera.GetComponent<UnityEngine.Rendering.Universal.PixelPerfectCamera>(); bool pixelEnabled = pixel != null && pixel.enabled;
+             Texture2D image = null;
+             try
+             {

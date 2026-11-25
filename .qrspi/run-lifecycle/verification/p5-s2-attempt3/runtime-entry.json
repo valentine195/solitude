@@ -1,0 +1,29 @@
+{
+  "success": true,
+  "command": "command eval",
+  "data": {
+    "command": "eval",
+    "parameters": {
+      "code": "return new { frame = UnityEngine.Time.frameCount, time = UnityEngine.Time.time, state = UnityEngine.Object.FindFirstObjectByType<SOLITUDE.Composition.GameCompositionRoot>().State.ToString(), inventoryEmpty = System.Linq.Enumerable.All(UnityEngine.Object.FindFirstObjectByType<SOLITUDE.Player.PlayerInventory>().Container.GetSlots(), s => s.IsEmpty), hotbarEmpty = System.Linq.Enumerable.All(UnityEngine.Object.FindFirstObjectByType<SOLITUDE.Hotbar.Hotbar>().Container.GetSlots(), s => s.IsEmpty) };"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": true,
+      "result": {
+        "frame": 71581,
+        "time": 145.509857,
+        "state": "Ready",
+        "inventoryEmpty": true,
+        "hotbarEmpty": true
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7801,
+      "projectPath": "/private/tmp/solitude-run-lifecycle-p4-s1"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

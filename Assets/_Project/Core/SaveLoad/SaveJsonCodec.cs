@@ -135,7 +135,33 @@ namespace SOLITUDE.SaveLoad
                 // Use the validated, case-sensitive wire fact; aliases cannot override it during conversion.
                 foreach (var property in new System.Collections.Generic.List<JProperty>(obj.Properties()))
                     if (string.Equals(property.Name, "startingLoadoutInitialized", StringComparison.OrdinalIgnoreCase)) property.Remove();
+                var equipmentToken = obj["playerEquipment"];
+                PlayerEquipmentRecord equipment = null;
+                if (equipmentToken != null && equipmentToken.Type != JTokenType.Null)
+                {
+                    if (version < 4 || equipmentToken is not JObject record)
+                        throw new SaveCandidateException("Invalid saved equipment record.");
+                    equipment = new PlayerEquipmentRecord
+                    {
+                        weaponItemId = EquipmentId(record, "weaponItemId"),
+                        toolItemId = EquipmentId(record, "toolItemId"),
+                        pinnedItemId = EquipmentId(record, "pinnedItemId"),
+                        activeSlot = (PlayerEquipmentSlot)Required(record, "activeSlot", JTokenType.Integer).Value<int>(),
+                        separateStorage = record["separateStorage"] == null ? false :
+                            Required(record, "separateStorage", JTokenType.Boolean).Value<bool>()
+                    };
+                    var quickUse = record["additionalQuickUseItems"];
+                    if (quickUse != null && quickUse.Type != JTokenType.Null)
+                    {
+                        if (quickUse is not JArray slots || slots.Count != PlayerEquipmentRecord.QuickUseCount - 1)
+                            throw new SaveCandidateException("Invalid additional Quick Use slots.");
+                        for (int i = 0; i < slots.Count; i++) equipment.SetQuickUseItem(i + 1, EquipmentId(slots[i], "additionalQuickUseItems"));
+                    }
+                }
+                foreach (var property in new System.Collections.Generic.List<JProperty>(obj.Properties()))
+                    if (string.Equals(property.Name, "playerEquipment", StringComparison.OrdinalIgnoreCase)) property.Remove();
                 var source = obj.ToObject<SaveGameData>();
+                source.playerEquipment = equipment;
                 source.version = version; source.worldSeed = worldSeed; source.startingLoadoutInitialized = initialized;
                 return new ContainerSaveSession(source, catalog).Capture();
             }
@@ -143,11 +169,25 @@ namespace SOLITUDE.SaveLoad
             catch (Exception error) when (error is JsonException || error is InvalidDataException || error is OverflowException || error is ArgumentException || error is FormatException)
             { throw new SaveCandidateException("Invalid save snapshot: " + error.Message); }
         }
+        private string EquipmentId(JObject record, string field) => EquipmentId(record[field], field);
+
+        private string EquipmentId(JToken token, string field)
+        {
+            if (token == null || (token.Type != JTokenType.Null && token.Type != JTokenType.String))
+                throw new SaveCandidateException("Missing or invalid " + field);
+            if (token.Type == JTokenType.Null) return null;
+            string id = token.Value<string>();
+            if (string.IsNullOrWhiteSpace(id)) throw new SaveCandidateException("Empty equipment identity.");
+            return catalog.TryGet(id, out var item) ? item.ItemId : id;
+        }
+
         public string Encode(SaveGameData data)
         {
             if (data == null) return JsonConvert.SerializeObject(data, Formatting.Indented);
             var obj = JObject.FromObject(data);
             if (data.version < 4) obj.Remove("startingLoadoutInitialized");
+            if (data.playerEquipment == null || data.version < 4) obj.Remove("playerEquipment");
+            else if (obj["playerEquipment"] is JObject equipment) equipment.Remove("ActiveItemId");
             return obj.ToString(Formatting.Indented);
         }
     }

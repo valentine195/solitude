@@ -1,0 +1,96 @@
+{
+  "version": 3,
+  "worldSeed": 12346,
+  "containers": [
+    {
+      "saveableId": "player.inventory",
+      "state": {
+        "slots": []
+      }
+    },
+    {
+      "saveableId": "player.hotbar",
+      "state": {
+        "slots": [
+          {
+            "index": 0,
+            "itemId": "a40fd59f5dcc842bd8be23ae75cd7333",
+            "quantity": 1
+          }
+        ]
+      }
+    },
+    {
+      "saveableId": "c7320c2a-7a48-41c9-98b4-bf5976399466",
+      "state": {
+        "slots": [
+          {
+            "index": 0,
+            "itemId": "c756a156ba7f34cb2b65e32264413a60",
+            "quantity": 2
+          }
+        ]
+      }
+    }
+  ],
+  "collectedPickupIds": [],
+  "survivor": {
+    "id": "f4c87f71-2a54-45be-9283-c2c22a9d1030",
+    "status": 1,
+    "scenePath": "Assets/_Project/Scenes/Wakeup.unity",
+    "x": -0.88999998569488525,
+    "y": -2.4000000953674316,
+    "z": 0.0,
+    "health": {
+      "current": 100.0,
+      "max": 100.0
+    },
+    "oxygen": {
+      "current": 100.0,
+      "max": 100.0
+    },
+    "hunger": {
+      "current": 99.993860360933454,
+      "max": 100.0
+    },
+    "recoveryDelayRemaining": 0.0
+  },
+  "expedition": {
+    "id": "b9040422-57a6-434c-a3c3-16def27e5bf1",
+    "defeatedEncounterIds": [],
+    "collectedSupplySourceIds": [
+      "expedition.supply.ration"
+    ]
+  },
+  "ship": {
+    "repairs": [
+      {
+        "id": "route.scrubber",
+        "installed": false,
+        "running": false,
+        "recoverySeconds": 0.0
+      }
+    ],
+    "doors": [
+      {
+        "id": "route.shortcut",
+        "powered": false,
+        "unlocked": false,
+        "open": false
+      }
+    ],
+    "criticalSources": [
+      {
+        "id": "route.fuse-source",
+        "objectiveId": "route.scrubber",
+        "available": true,
+        "itemId": "4716e84c715564ad2ac79c4be74037dd",
+        "sharedOwnerIds": [
+          "c7320c2a-7a48-41c9-98b4-bf5976399466"
+        ]
+      }
+    ],
+    "permanentDiscoveryIds": []
+  },
+  "pendingDeath": null
+}

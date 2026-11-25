@@ -1,0 +1,161 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 0.61,
+      "summary": {
+        "total": 19,
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidAssignmentsNeverProducePartialCatalogs",
+          "Status": "Passed",
+          "Duration": 0.0181785,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"BaseDamage\",0.0f)",
+          "Status": "Passed",
+          "Duration": 0.0007569,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"BaseDamage\",float.NaN)",
+          "Status": "Passed",
+          "Duration": 0.0002524,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"RangeTiles\",-1.0f)",
+          "Status": "Passed",
+          "Duration": 0.0002353,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"RangeTiles\",float.PositiveInfinity)",
+          "Status": "Passed",
+          "Duration": 0.0002194,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"ArcDegrees\",0.0f)",
+          "Status": "Passed",
+          "Duration": 0.0002132,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"ArcDegrees\",361.0f)",
+          "Status": "Passed",
+          "Duration": 0.0002106,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"Windup\",-1.0f)",
+          "Status": "Passed",
+          "Duration": 0.0002091,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"ActiveDuration\",0.0f)",
+          "Status": "Passed",
+          "Duration": 0.0002252,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"Recovery\",float.NaN)",
+          "Status": "Passed",
+          "Duration": 0.0002305,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"MovementFactor\",-1.0f)",
+          "Status": "Passed",
+          "Duration": 0.0002162,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"MovementFactor\",1.1f)",
+          "Status": "Passed",
+          "Duration": 0.000213,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"KnockbackTiles\",-1.0f)",
+          "Status": "Passed",
+          "Duration": 0.0002197,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"KnockbackDuration\",0.0f)",
+          "Status": "Passed",
+          "Duration": 0.0002248,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.InvalidNumbersFailBeforeExecution(\"FlashDuration\",-1.0f)",
+          "Status": "Passed",
+          "Duration": 0.0002136,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.LegacyActionlessItemsAndConsumablesStillCompileWithoutRegistry",
+          "Status": "Passed",
+          "Duration": 0.0043303,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.OptionalPresentationIsSafeAndZeroWindupRecoveryAreAllowed",
+          "Status": "Passed",
+          "Duration": 0.0009016,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.ReusableActionsCompileIndependentImmutableConfigurations",
+          "Status": "Passed",
+          "Duration": 0.0011655,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.ItemActionAuthoringTests.ShippedWrenchHasConfiguredPrimaryAndSixTags",
+          "Status": "Passed",
+          "Duration": 0.0081088,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

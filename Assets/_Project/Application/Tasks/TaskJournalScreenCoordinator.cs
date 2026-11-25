@@ -15,14 +15,17 @@ namespace SOLITUDE.Application
         public TaskJournalScreenCoordinator(InputPolicyCoordinator policy, PauseCoordinator pause, ITaskJournalScreenDisplay display)
         { this.policy = policy; this.pause = pause; this.display = display; policy.Changed += PolicyChanged; }
         public OpenResult Toggle() { if (IsOpen) { Close(); return OpenResult.Closed; } return Open(); }
-        public OpenResult Open()
+        public OpenResult Open() => Open(false);
+        // The caller holds a pause lease while closing the previous screen.
+        public OpenResult OpenDuringPausedHandoff() => Open(true);
+        private OpenResult Open(bool duringPausedHandoff)
         {
             if (disposed || display == null || opening || closing) return OpenResult.Unavailable;
             if (IsOpen) return OpenResult.Opened;
             opening = true;
             try
             {
-                screenLease = policy.AcquirePrimaryScreen();
+                screenLease = policy.AcquirePrimaryScreen(duringPausedHandoff);
                 if (screenLease == null) return OpenResult.Unavailable;
                 pauseLease = pause.Acquire();
                 if (!policy.Ready) { Close(); return OpenResult.Unavailable; }

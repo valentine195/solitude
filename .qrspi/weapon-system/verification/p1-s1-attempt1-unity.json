@@ -1,0 +1,280 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 5.82,
+      "summary": {
+        "total": 36,
+        "passed": 36,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.CompiledRegistrySetsAndQueriesFreezeTheirInputs",
+          "Status": "Passed",
+          "Duration": 0.0089522,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.DirectCollectionPredicatesMatchTheirConditions",
+          "Status": "Passed",
+          "Duration": 0.0004478,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.DuplicateAssignmentsAndInvalidMatchModesAreRejected",
+          "Status": "Passed",
+          "Duration": 0.0003892,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.EmptyPredicatesAndWholeQueriesHaveDifferentAnySemantics",
+          "Status": "Passed",
+          "Duration": 0.00028,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.EmptyRegistryIsValidButMissingIdentityLookupIsNot",
+          "Status": "Passed",
+          "Duration": 0.0010652,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.ExactAndHierarchicalMatchingAreDirectional(\"melee\",\"melee\",True,True)",
+          "Status": "Passed",
+          "Duration": 0.0010858,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.ExactAndHierarchicalMatchingAreDirectional(\"melee\",\"weapon\",False,True)",
+          "Status": "Passed",
+          "Duration": 0.0001126,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.ExactAndHierarchicalMatchingAreDirectional(\"weapon\",\"melee\",False,False)",
+          "Status": "Passed",
+          "Duration": 0.0001017,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.ExactAndHierarchicalMatchingAreDirectional(\"mechanical\",\"weapon\",False,False)",
+          "Status": "Passed",
+          "Duration": 0.0000992,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.FullNameUniquenessIncludesParentsAndIsCaseSensitive",
+          "Status": "Passed",
+          "Duration": 0.000298,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.InvalidDefinitionsProduceDeterministicDiagnosticsAndNoRegistry(\"missing\")",
+          "Status": "Passed",
+          "Duration": 0.0011269,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.InvalidDefinitionsProduceDeterministicDiagnosticsAndNoRegistry(\"emptyId\")",
+          "Status": "Passed",
+          "Duration": 0.0001564,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.InvalidDefinitionsProduceDeterministicDiagnosticsAndNoRegistry(\"duplicateId\")",
+          "Status": "Passed",
+          "Duration": 0.0001483,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.InvalidDefinitionsProduceDeterministicDiagnosticsAndNoRegistry(\"badSegment\")",
+          "Status": "Passed",
+          "Duration": 0.000127,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.InvalidDefinitionsProduceDeterministicDiagnosticsAndNoRegistry(\"duplicateName\")",
+          "Status": "Passed",
+          "Duration": 0.0001427,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.InvalidDefinitionsProduceDeterministicDiagnosticsAndNoRegistry(\"missingParent\")",
+          "Status": "Passed",
+          "Duration": 0.0001292,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.InvalidDefinitionsProduceDeterministicDiagnosticsAndNoRegistry(\"selfParent\")",
+          "Status": "Passed",
+          "Duration": 0.0001194,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.InvalidDefinitionsProduceDeterministicDiagnosticsAndNoRegistry(\"cycle\")",
+          "Status": "Passed",
+          "Duration": 0.000135,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.MalformedSegmentsAreRejected(null)",
+          "Status": "Passed",
+          "Duration": 0.000316,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.MalformedSegmentsAreRejected(\"\")",
+          "Status": "Passed",
+          "Duration": 0.0000982,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.MalformedSegmentsAreRejected(\"1Weapon\")",
+          "Status": "Passed",
+          "Duration": 0.000101,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.MalformedSegmentsAreRejected(\"Bad Name\")",
+          "Status": "Passed",
+          "Duration": 0.0000903,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.MalformedSegmentsAreRejected(\"Bad-Name\")",
+          "Status": "Passed",
+          "Duration": 0.0000907,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.MissingAndForeignReferencesCannotMasqueradeAsEmptyConditions",
+          "Status": "Passed",
+          "Duration": 0.0007401,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.MultipleClassificationsRetainExplicitAssignmentsAndAncestors",
+          "Status": "Passed",
+          "Duration": 0.0005743,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.QueryUsesOneExplicitMatchModeForAllGroups",
+          "Status": "Passed",
+          "Duration": 0.000176,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagTests.RequiredAnyAndExcludedConditionsComposeWithoutBehaviorDispatch",
+          "Status": "Passed",
+          "Duration": 0.0002523,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagAuthoringTests.ClonedDefinitionCannotSilentlyReuseAnotherAssetIdentity",
+          "Status": "Passed",
+          "Duration": 0.6019686,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagAuthoringTests.EmptySourcesAndQueryGroupsCompileAgainstOneSnapshot",
+          "Status": "Passed",
+          "Duration": 0.4586696,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagAuthoringTests.InitialAuthoredRegistryContainsExactlyTheRequiredWrenchClassifications",
+          "Status": "Passed",
+          "Duration": 0.4504345,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagAuthoringTests.InvalidQueryGroupsAndMatchModeAreNotEmptyQueries",
+          "Status": "Passed",
+          "Duration": 0.4429432,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagAuthoringTests.LostChildParentIsNotReinterpretedAsARoot",
+          "Status": "Passed",
+          "Duration": 0.4786091,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagAuthoringTests.RegistryRejectsMissingDuplicateAndUnregisteredAuthoring",
+          "Status": "Passed",
+          "Duration": 0.4970248,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagAuthoringTests.RootParentContradictionAndCyclesAreRejected",
+          "Status": "Passed",
+          "Duration": 0.4470503,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagAuthoringTests.SerializedReferencesSurviveAssetMoveRenameAndReadableNameChange",
+          "Status": "Passed",
+          "Duration": 0.828631,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.GameplayTagAuthoringTests.SourceReleaseAndReconfigurationDoNotMutateSharedDefinitions",
+          "Status": "Passed",
+          "Duration": 0.4104126,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

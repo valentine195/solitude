@@ -12,6 +12,7 @@ using SOLITUDE.Player;
 using SOLITUDE.SaveLoad;
 using SOLITUDE.World.Restoration;
 using SOLITUDE.Tasks;
+using SOLITUDE.UI;
 using UnityEngine;
 namespace SOLITUDE.Composition
 {
@@ -32,6 +33,8 @@ namespace SOLITUDE.Composition
         [SerializeField] private RestorationJunction[] restorationJunctions = new RestorationJunction[0];
         [SerializeField] private SceneFeatureComposition[] features = new SceneFeatureComposition[0];
         [SerializeField] private SOLITUDE.Tasks.UI.TaskJournalView journalView;
+        [SerializeField] private SOLITUDE.UI.ShipMenuView shipMenu;
+        private PauseCoordinator menuPause;
         [SerializeField] private SOLITUDE.Tasks.UI.TaskNoticeView taskNoticeView;
         private TaskNoticeCoordinator taskNotices;
         private TaskJournal tasks;
@@ -43,6 +46,10 @@ namespace SOLITUDE.Composition
         private readonly List<SceneFeatureComposition> boundFeatures = new();
         [SerializeField] private UnityEngine.InputSystem.UI.InputSystemUIInputModule uiInput;
         private IDisposable uiLease, primaryLease;
+        private InventoryScreenView inventoryScreen;
+        private bool useCarriedEquipment;
+        private CarriedEquipment equipment;
+        public void ConfigureEquipmentFlow(bool enabled) => useCarriedEquipment = enabled;
         private PlayerItemActionComposition itemActions;
         private ItemPresentationCatalog presentations;
         private ItemCapabilityCatalog capabilities;
@@ -63,6 +70,7 @@ namespace SOLITUDE.Composition
         private SceneInteractionScope interactions;
         private Action released;
         private Guid inventoryToken, transferToken;
+        private IContainerSource inventoryTransferSource;
         private string preparingTargetLabel = "Locker";
         private bool persistentLifecycle;
         private StartingLoadoutCoordinator startingLoadout;
@@ -152,24 +160,38 @@ namespace SOLITUDE.Composition
                 foreach (var pickup in worldPickups) RegisterPickup(pickup);
                 if (!HasPlayer) return;
                 recoveryNotice.Initialize();
+                int normalCapacity = inventory.Capacity;
+                if (useCarriedEquipment)
+                    session.PrepareEquipmentInventory(normalCapacity, id =>
+                        CarriedEquipment.Eligible(capabilities, id, PlayerEquipmentSlot.Weapon) ? PlayerEquipmentSlot.Weapon :
+                        CarriedEquipment.Eligible(capabilities, id, PlayerEquipmentSlot.Tool) ? PlayerEquipmentSlot.Tool : PlayerEquipmentSlot.None);
                 var inventoryBinding = session.Register(ContainerSaveSession.PlayerInventoryId, inventory.Capacity); bindings.Add(inventoryBinding); inventory.Initialize(inventoryBinding.Container);
                 interactions = new SceneInteractionScope(); interactions.Initialize(gameObject.scene, interactor);
                 foreach (var junction in restorationJunctions)
                     if (junction != null) junction.Initialize(session.Commands, inventory.Container);
                 var hotbarBinding = session.Register(ContainerSaveSession.PlayerHotbarId, hotbar.Capacity); bindings.Add(hotbarBinding);
+                if (useCarriedEquipment)
+                {
+                    equipment = new CarriedEquipment(session, inventory.Container, hotbarBinding.Container, capabilities, presentations, normalCapacity);
+                    equipment.ValidateRestored();
+                }
                 selection = new HotbarSelectionState(hotbarBinding.Container); hotbar.Initialize(hotbarBinding.Container, selection);
                 foreach (var controller in controllers)
                     controller.Initialize(presentations, gestures, policy, controller.DefaultSource == hotbar ? selection : null);
                 foreach (var tooltip in tooltips) tooltip.Initialize(presentations);
                 heldView.Initialize(presentations); held = new HeldItemPresenter(gestures.Interaction, heldView);
                 modal = new ContainerModalCoordinator(policy, pause, gestures, this, inventory.Container);
-                inventoryModal.Initialize(() => modal.ToggleInventory(), () => modal.Close());
+                inventoryModal.Initialize(RequestInventory, () => modal.Close());
                 transferModal.Initialize(source => source is LockerContainer locker ? Open(locker) :
                     source != null && Open(source.Container, source.Label), () => modal.Close());
                 inventoryModal.RenderVisible(false); transferModal.RenderVisible(false);
+                inventoryScreen = inventoryModal.GetComponent<InventoryScreenView>();
+                inventoryScreen?.Initialize(inventory.Container, hotbar.Container, session.Commands, presentations, capabilities,
+                    gestures, policy, selection, input, () => modal.Close(), equipment);
                 foreach (var controller in controllers)
                     if (controller != inventoryModal.Controller && controller != transferModal.InventoryController && controller != transferModal.TargetController && controller.DefaultSource != null)
                         controller.BindDefaultSource();
+                if (equipment != null && inventoryScreen != null) input.InputDeviceChanged += inventoryScreen.UpdateEquipmentHud;
                 uiLease = input.ConnectUI(uiInput);
                 input.Point += Point;
                 if (taskNoticeView != null && tasks != null)
@@ -190,7 +212,7 @@ namespace SOLITUDE.Composition
                 var featureContext = new SceneFeatureContext(session.Commands, inventory.Container, presentations,
                     policy, input, tasks, taskScope, interactor, interactions.Events,
                     hotbar.Container, selection, CloseForTransition, interactions.Feedback, Open, Close,
-                    persistentLifecycle ? session : null, savedSurvivor != null && savedSurvivor.scenePath != gameObject.scene.path, capabilities);
+                    persistentLifecycle ? session : null, savedSurvivor != null && savedSurvivor.scenePath != gameObject.scene.path, capabilities, equipment);
                 foreach (var feature in features)
                 {
                     // Record before binding so a throwing initializer is also unwound.
@@ -202,7 +224,7 @@ namespace SOLITUDE.Composition
                     if (itemActions == null) itemActions = movement.gameObject.AddComponent<PlayerItemActionComposition>();
                     if (movement.GetComponent<SOLITUDE.Combat.MeleeSwingView>() == null)
                         movement.gameObject.AddComponent<SOLITUDE.Combat.MeleeSwingView>();
-                    itemActions.Bind(session.Commands, hotbar.Container, selection, capabilities, policy);
+                    itemActions.Bind(session.Commands, hotbar.Container, selection, capabilities, policy, equipment == null ? null : session);
                     primaryLease = input.BindPrimaryAction(() => { if (itemActions != null) itemActions.Request(); });
                 }
                 if (journalView != null && tasks != null)
@@ -214,10 +236,108 @@ namespace SOLITUDE.Composition
                     }
                     catch (Exception error) { journalView.Release(); Debug.LogWarning("Optional task journal UI unavailable: " + error.Message); }
                 }
-                input.Bind(movement, interactor, selection, () => modal.ToggleInventory(), Back, game.TogglePause, journalScreen);
+                if (shipMenu != null && journalScreen != null && inventoryScreen != null)
+                {
+                    menuPause = pause;
+                    shipMenu.Initialize(input, SelectShipTab,
+                        () => { input.ConsumeUIActivation(); Back(); }, () => inventoryScreen.IsHandling);
+                    inventoryScreen.MenuFocusFallback = shipMenu.InventoryFocus;
+                    journalView.VisibilityChanged += RefreshShipMenu;
+                    modal.Changed += RefreshShipMenu;
+                }
+                input.Bind(movement, interactor, selection, RequestInventory,
+                    Back, menuPause == null ? game.TogglePause : OpenInventoryFromEscape,
+                    journalScreen, equipment == null ? null : equipment.Switch,
+                    menuPause == null ? null : () => OpenShipObjectives(true),
+                    equipment == null ? null : equipment.SelectQuickUse);
             }
             catch { Release(); throw; }
         }
+        private void RequestInventory()
+        {
+            if (menuPause == null) modal.ToggleInventory();
+            else OpenShipInventory(true);
+        }
+
+        private void OpenInventoryFromEscape()
+        {
+            input.ConsumeUIActivation();
+            OpenShipInventory(false);
+        }
+
+        private void RefreshShipMenu()
+        {
+            if (journalScreen.IsOpen)
+            {
+                if (journalView.Presenter.IsVisible) shipMenu.Show(ShipMenuTab.Objectives);
+            }
+            else if (modal.Kind == ContainerModalKind.Inventory) shipMenu.Show(ShipMenuTab.Inventory);
+            else shipMenu.Hide();
+        }
+
+        private void SelectShipTab(ShipMenuTab tab)
+        {
+            input.ConsumeUIActivation();
+            switch (tab)
+            {
+                case ShipMenuTab.Inventory:
+                    OpenShipInventory(false);
+                    break;
+                case ShipMenuTab.Objectives:
+                    OpenShipObjectives(false);
+                    break;
+                default:
+                    if (!journalScreen.IsOpen && OpenShipObjectives(false) != OpenResult.Opened) return;
+                    journalView.HidePage();
+                    shipMenu.Show(tab);
+                    break;
+            }
+        }
+
+        private OpenResult OpenShipInventory(bool toggle)
+        {
+            if (journalScreen.IsOpen)
+            {
+                input.ConsumeUIActivation();
+                using var pause = menuPause.Acquire();
+                journalScreen.Close();
+                var result = modal.ToggleInventory();
+                if (result != OpenResult.Opened) journalScreen.OpenDuringPausedHandoff();
+                return result;
+            }
+            return toggle || modal.Kind == ContainerModalKind.Closed
+                ? modal.ToggleInventory() : OpenResult.Opened;
+        }
+
+        private OpenResult OpenShipObjectives(bool toggle)
+        {
+            if (modal.Kind == ContainerModalKind.Inventory)
+            {
+                input.ConsumeUIActivation();
+                using var pause = menuPause.Acquire();
+                modal.Close();
+                var result = journalScreen.OpenDuringPausedHandoff();
+                if (result != OpenResult.Opened) modal.ToggleInventory();
+                return result;
+            }
+            if (journalScreen.IsOpen && !journalView.Presenter.IsVisible)
+            {
+                try
+                {
+                    journalView.ShowPage();
+                    shipMenu.Show(ShipMenuTab.Objectives);
+                }
+                catch (Exception error)
+                {
+                    Debug.LogException(error);
+                    journalScreen.Close();
+                    return OpenResult.BindingFailed;
+                }
+                return OpenResult.Opened;
+            }
+            return toggle ? journalScreen.Toggle() : journalScreen.Open();
+        }
+
         private static void NoticeError(Exception error) => Debug.LogWarning("Optional task notice render failed: " + error.Message);
         private void Update() => taskNotices?.Advance(Time.unscaledDeltaTime);
         public IDisposable RegisterPickup(WorldPickup pickup)
@@ -238,9 +358,12 @@ namespace SOLITUDE.Composition
         }
         private bool Back()
         {
+            if (inventoryScreen != null && inventoryScreen.isActiveAndEnabled && inventoryScreen.CancelHandling()) { input?.ConsumeUIActivation(); return true; }
             if (journalScreen?.IsOpen == true) { input?.ConsumeUIActivation(); return journalScreen.Back(); }
             foreach (var feature in boundFeatures) if (feature != null && feature.TryBack()) return true;
-            return modal?.Back() ?? false;
+            if (modal?.Back() != true) return false;
+            input?.ConsumeUIActivation();
+            return true;
         }
         public void CloseForTransition()
         {
@@ -288,30 +411,57 @@ namespace SOLITUDE.Composition
             private readonly ContainerModalKind kind;
             private readonly IContainerSource inventory, target;
             private readonly ContainerController first, second;
+            private readonly bool useInventoryTransfer;
             private readonly Guid token = Guid.NewGuid();
             private bool active;
             public PreparedModal(SceneBindings scope, ContainerModalKind kind, IContainerSource inventory, IContainerSource target)
             {
                 this.scope = scope; this.kind = kind; this.inventory = inventory; this.target = target;
-                first = kind == ContainerModalKind.Inventory ? scope.inventoryModal.Controller : scope.transferModal.InventoryController;
-                second = kind == ContainerModalKind.Transfer ? scope.transferModal.TargetController : null;
+                useInventoryTransfer = kind == ContainerModalKind.Transfer && scope.inventoryScreen?.SupportsTransfer == true;
+                first = kind == ContainerModalKind.Inventory || useInventoryTransfer
+                    ? scope.inventoryModal.Controller : scope.transferModal.InventoryController;
+                second = kind == ContainerModalKind.Transfer && !useInventoryTransfer ? scope.transferModal.TargetController : null;
             }
             public void Activate()
             {
                 var previousFirst = first.CurrentSource;
                 var previousSecond = second?.CurrentSource;
+                var previousInventoryTarget = scope.inventoryTransferSource;
                 try
                 {
-                    first.Bind(inventory);
-                    second?.Bind(target);
-                    if (kind == ContainerModalKind.Inventory)
-                    { scope.inventoryModal.RenderVisible(true); scope.inventoryToken = token; }
+                    if (useInventoryTransfer)
+                    {
+                        first.Unbind();
+                        scope.inventoryScreen.BeginTransfer(target.Container, target.Label);
+                        scope.inventoryModal.RenderVisible(true);
+                        scope.inventoryTransferSource = target;
+                        scope.inventoryToken = token;
+                    }
                     else
-                    { scope.transferModal.RenderVisible(true); scope.transferToken = token; }
+                    {
+                        first.Bind(inventory);
+                        second?.Bind(target);
+                        if (kind == ContainerModalKind.Inventory)
+                        {
+                            scope.inventoryModal.RenderVisible(true);
+                            scope.inventoryToken = token;
+                        }
+                        else
+                        {
+                            scope.transferModal.RenderVisible(true);
+                            scope.transferToken = token;
+                        }
+                    }
                     active = true;
                 }
                 catch
                 {
+                    if (useInventoryTransfer)
+                    {
+                        scope.inventoryScreen.EndTransfer();
+                        if (previousInventoryTarget != null)
+                            scope.inventoryScreen.BeginTransfer(previousInventoryTarget.Container, previousInventoryTarget.Label);
+                    }
                     first.Unbind(); second?.Unbind();
                     if (previousFirst != null) first.Bind(previousFirst);
                     if (previousSecond != null) second.Bind(previousSecond);
@@ -321,9 +471,17 @@ namespace SOLITUDE.Composition
             public void Dispose()
             {
                 if (scope == null) return;
-                if (active && kind == ContainerModalKind.Inventory && scope.inventoryToken == token)
-                { first.Unbind(); if (scope.inventoryModal != null) scope.inventoryModal.RenderVisible(false); }
-                if (active && kind == ContainerModalKind.Transfer && scope.transferToken == token)
+                if (active && (kind == ContainerModalKind.Inventory || useInventoryTransfer) && scope.inventoryToken == token)
+                {
+                    first.Unbind();
+                    if (scope.inventoryModal != null) scope.inventoryModal.RenderVisible(false);
+                    if (useInventoryTransfer)
+                    {
+                        scope.inventoryScreen.EndTransfer();
+                        scope.inventoryTransferSource = null;
+                    }
+                }
+                if (active && kind == ContainerModalKind.Transfer && !useInventoryTransfer && scope.transferToken == token)
                 { first.Unbind(); second.Unbind(); if (scope.transferModal != null) scope.transferModal.RenderVisible(false); }
                 scope = null;
             }
@@ -337,6 +495,14 @@ namespace SOLITUDE.Composition
             if (itemActions != null) itemActions.Release(); itemActions = null;
             taskNotices?.Dispose(); taskNotices = null;
             if (taskNoticeView != null) taskNoticeView.Release();
+            if (menuPause != null)
+            {
+                journalView.VisibilityChanged -= RefreshShipMenu;
+                modal.Changed -= RefreshShipMenu;
+                if (inventoryScreen != null) inventoryScreen.MenuFocusFallback = null;
+                if (shipMenu != null) shipMenu.Release();
+                menuPause = null;
+            }
             journalScreen?.Dispose(); journalScreen = null; journalPresenter?.Dispose(); journalPresenter = null;
             if (journalView != null) journalView.Release();
             for (int i = boundFeatures.Count - 1; i >= 0; i--)
@@ -346,6 +512,8 @@ namespace SOLITUDE.Composition
             if (taskScope != null) tasks?.ReleaseScope(taskScope);
             tasks = null; taskScope = null;
             modal?.Dispose(); modal = null;
+            if (input != null && inventoryScreen != null) input.InputDeviceChanged -= inventoryScreen.UpdateEquipmentHud;
+            inventoryScreen?.Release(); inventoryScreen = null;
             if (input != null && selection != null) { input.Point -= Point; input.Bind(null, null, null, null, null, null); }
             uiLease?.Dispose(); uiLease = null;
             held?.Dispose(); held = null;
@@ -357,7 +525,7 @@ namespace SOLITUDE.Composition
             foreach (var source in lockers) { source.Release(); if (source != null) source.GetComponent<Locker>()?.Release(); }
             foreach (var junction in restorationJunctions) if (junction != null) junction.ReleaseBinding();
             foreach (var binding in bindings) binding.Dispose(); bindings.Clear();
-            startingLoadout = null; inventory?.Release(); hotbar?.Release(); session = null; gestures = null; capabilities = null; persistentLifecycle = false;
+            startingLoadout = null; equipment = null; useCarriedEquipment = false; inventory?.Release(); hotbar?.Release(); session = null; gestures = null; capabilities = null; persistentLifecycle = false;
         }
         private void OnDestroy() { var notify = released; released = null; notify?.Invoke(); Release(); }
     }

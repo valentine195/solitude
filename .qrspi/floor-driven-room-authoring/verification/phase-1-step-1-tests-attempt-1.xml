@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="5" result="Failed(Child)" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.0283268">
+  <test-suite type="TestSuite" id="1000" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="348" result="Failed" site="Child" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.028327" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1418" name="SOLITUDE.Tests.EditMode.dll" fullname="/private/tmp/solitude-room-authoring-phase1/Library/ScriptAssemblies/SOLITUDE.Tests.EditMode.dll" runstate="Runnable" testcasecount="125" result="Failed" site="Child" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.021012" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="34534" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1419" name="SOLITUDE" fullname="SOLITUDE" runstate="Runnable" testcasecount="125" result="Failed" site="Child" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.019585" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1420" name="Tests" fullname="SOLITUDE.Tests" runstate="Runnable" testcasecount="125" result="Failed" site="Child" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.018210" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="1421" name="RoomAuthoring" fullname="SOLITUDE.Tests.RoomAuthoring" runstate="Runnable" testcasecount="5" result="Failed" site="Child" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.016333" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestFixture" id="1412" name="RoomAuthoringCreationTests" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" testcasecount="5" result="Failed" site="Child" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.015564" total="5" passed="0" failed="5" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-case id="1413" name="AdjacentRoomsShareStyleWithoutSharingIdentityOrOutput" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.AdjacentRoomsShareStyleWithoutSharingIdentityOrOutput" methodname="AdjacentRoomsShareStyleWithoutSharingIdentityOrOutput" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" seed="1647861523" result="Failed" label="Error" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.005588" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.InvalidOperationException : Cannot create a new scene additively with an untitled scene unsaved.]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at (wrapper managed-to-native) UnityEditor.SceneManagement.EditorSceneManager.NewScene_Injected(UnityEditor.SceneManagement.NewSceneSetup,UnityEditor.SceneManagement.NewSceneMode,UnityEngine.SceneManagement.Scene&)
+  at UnityEditor.SceneManagement.EditorSceneManager.NewScene (UnityEditor.SceneManagement.NewSceneSetup setup, UnityEditor.SceneManagement.NewSceneMode mode) [0x00000] in <9ff7ca489a72435d8c46dd87dddd968a>:0 
+  at SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.SetUp () [0x0000b] in /private/tmp/solitude-room-authoring-phase1/Assets/_Project/Tests/Editor/RoomAuthoringCreationTests.cs:22 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <0e19fd8bd8e94908bba2ee4f803bc6a7>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1417" name="CreationPreservesExistingSceneObjectsAndRuntimeAssemblyBoundary" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.CreationPreservesExistingSceneObjectsAndRuntimeAssemblyBoundary" methodname="CreationPreservesExistingSceneObjectsAndRuntimeAssemblyBoundary" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" seed="1407895896" result="Failed" label="Error" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.000190" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.InvalidOperationException : Cannot create a new scene additively with an untitled scene unsaved.]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at (wrapper managed-to-native) UnityEditor.SceneManagement.EditorSceneManager.NewScene_Injected(UnityEditor.SceneManagement.NewSceneSetup,UnityEditor.SceneManagement.NewSceneMode,UnityEngine.SceneManagement.Scene&)
+  at UnityEditor.SceneManagement.EditorSceneManager.NewScene (UnityEditor.SceneManagement.NewSceneSetup setup, UnityEditor.SceneManagement.NewSceneMode mode) [0x00000] in <9ff7ca489a72435d8c46dd87dddd968a>:0 
+  at SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.SetUp () [0x0000b] in /private/tmp/solitude-room-authoring-phase1/Assets/_Project/Tests/Editor/RoomAuthoringCreationTests.cs:22 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <0e19fd8bd8e94908bba2ee4f803bc6a7>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1416" name="DuplicateIdentityAndForeignOutputAreDiagnosedWithoutRepair" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.DuplicateIdentityAndForeignOutputAreDiagnosedWithoutRepair" methodname="DuplicateIdentityAndForeignOutputAreDiagnosedWithoutRepair" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" seed="1917294109" result="Failed" label="Error" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.000102" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.InvalidOperationException : Cannot create a new scene additively with an untitled scene unsaved.]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at (wrapper managed-to-native) UnityEditor.SceneManagement.EditorSceneManager.NewScene_Injected(UnityEditor.SceneManagement.NewSceneSetup,UnityEditor.SceneManagement.NewSceneMode,UnityEngine.SceneManagement.Scene&)
+  at UnityEditor.SceneManagement.EditorSceneManager.NewScene (UnityEditor.SceneManagement.NewSceneSetup setup, UnityEditor.SceneManagement.NewSceneMode mode) [0x00000] in <9ff7ca489a72435d8c46dd87dddd968a>:0 
+  at SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.SetUp () [0x0000b] in /private/tmp/solitude-room-authoring-phase1/Assets/_Project/Tests/Editor/RoomAuthoringCreationTests.cs:22 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <0e19fd8bd8e94908bba2ee4f803bc6a7>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1415" name="NewRoomHasNativeGridAndSeparateInactiveAuthoringMask" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.NewRoomHasNativeGridAndSeparateInactiveAuthoringMask" methodname="NewRoomHasNativeGridAndSeparateInactiveAuthoringMask" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" seed="2048647037" result="Failed" label="Error" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.000091" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.InvalidOperationException : Cannot create a new scene additively with an untitled scene unsaved.]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at (wrapper managed-to-native) UnityEditor.SceneManagement.EditorSceneManager.NewScene_Injected(UnityEditor.SceneManagement.NewSceneSetup,UnityEditor.SceneManagement.NewSceneMode,UnityEngine.SceneManagement.Scene&)
+  at UnityEditor.SceneManagement.EditorSceneManager.NewScene (UnityEditor.SceneManagement.NewSceneSetup setup, UnityEditor.SceneManagement.NewSceneMode mode) [0x00000] in <9ff7ca489a72435d8c46dd87dddd968a>:0 
+  at SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.SetUp () [0x0000b] in /private/tmp/solitude-room-authoring-phase1/Assets/_Project/Tests/Editor/RoomAuthoringCreationTests.cs:22 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <0e19fd8bd8e94908bba2ee4f803bc6a7>:0 ]]></stack-trace>
+                </failure>
+              </test-case>
+              <test-case id="1414" name="StyleChangeAndDeletingOutputDoNotChangeAuthoredCellsOrIdentity" fullname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.StyleChangeAndDeletingOutputDoNotChangeAuthoredCellsOrIdentity" methodname="StyleChangeAndDeletingOutputDoNotChangeAuthoredCellsOrIdentity" classname="SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests" runstate="Runnable" seed="1572468754" result="Failed" label="Error" start-time="2026-10-19 20:46:47Z" end-time="2026-10-19 20:46:47Z" duration="0.000093" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <failure>
+                  <message><![CDATA[SetUp : System.InvalidOperationException : Cannot create a new scene additively with an untitled scene unsaved.]]></message>
+                  <stack-trace><![CDATA[--SetUp
+  at (wrapper managed-to-native) UnityEditor.SceneManagement.EditorSceneManager.NewScene_Injected(UnityEditor.SceneManagement.NewSceneSetup,UnityEditor.SceneManagement.NewSceneMode,UnityEngine.SceneManagement.Scene&)
+  at UnityEditor.SceneManagement.EditorSceneManager.NewScene (UnityEditor.SceneManagement.NewSceneSetup setup, UnityEditor.SceneManagement.NewSceneMode mode) [0x00000] in <9ff7ca489a72435d8c46dd87dddd968a>:0 
+  at SOLITUDE.Tests.RoomAuthoring.RoomAuthoringCreationTests.SetUp () [0x0000b] in /private/tmp/solitude-room-authoring-phase1/Assets/_Project/Tests/Editor/RoomAuthoringCreationTests.cs:22 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <0e19fd8bd8e94908bba2ee4f803bc6a7>:0 ]]></stack-trace>
+                </failure>
+                <output><![CDATA[Saving results to: /Users/jeremyvalentine/Library/Application Support/Valmead/SOLITUDE/TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

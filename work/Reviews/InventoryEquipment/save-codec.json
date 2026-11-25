@@ -1,0 +1,336 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_tests",
+    "parameters": {
+      "mode": "editor",
+      "filter": "SaveJsonCodecTests"
+    },
+    "result": {
+      "Summary": {
+        "Total": 43,
+        "Passed": 43,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Results": [
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.CompleteSnapshotRoundTripsInventoryAndWorldFactsTogether",
+          "Status": "Passed",
+          "Duration": 0.2913259,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.ExplicitLivingWireFixtureIsValidBeforeRemovingFields",
+          "Status": "Passed",
+          "Duration": 0.0251484,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(\"{}\")",
+          "Status": "Passed",
+          "Duration": 0.0066115,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(\"{\\\"version\\\":2}\")",
+          "Status": "Passed",
+          "Duration": 0.0004488,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(\"{\\\"version\\\":2,\\\"version\\\":2}\")",
+          "Status": "Passed",
+          "Duration": 0.0030979,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(\"null\")",
+          "Status": "Passed",
+          "Duration": 0.001156,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.IncompleteSnapshotsDoNotBecomeEmptyWorlds(\"{\\\"version\\\":2\")",
+          "Status": "Passed",
+          "Duration": 0.000369,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.InterruptedEquipmentMigrationRetainsLegacySnapshotAndRetryCommitsOnce",
+          "Status": "Passed",
+          "Duration": 0.0314282,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.LegacyDecodeCompletesWithoutAddingCarriedItems(1)",
+          "Status": "Passed",
+          "Duration": 0.0186228,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.LegacyDecodeCompletesWithoutAddingCarriedItems(2)",
+          "Status": "Passed",
+          "Duration": 0.0015938,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.LegacyDecodeCompletesWithoutAddingCarriedItems(3)",
+          "Status": "Passed",
+          "Duration": 0.0012566,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.LegacyJsonRetainsContainersAndDoesNotInventAColonist(1)",
+          "Status": "Passed",
+          "Duration": 0.0022835,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.LegacyJsonRetainsContainersAndDoesNotInventAColonist(2)",
+          "Status": "Passed",
+          "Duration": 0.0010895,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.MarkerAliasesCannotOverrideTheValidatedPendingFact",
+          "Status": "Passed",
+          "Duration": 0.0012473,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(\"ship\")",
+          "Status": "Passed",
+          "Duration": 0.0014493,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(\"pendingDeath\")",
+          "Status": "Passed",
+          "Duration": 0.0010029,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(\"expedition\")",
+          "Status": "Passed",
+          "Duration": 0.0017845,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(\"survivor.health.current\")",
+          "Status": "Passed",
+          "Duration": 0.0008276,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(\"survivor.status\")",
+          "Status": "Passed",
+          "Duration": 0.0007197,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(\"expedition.collectedSupplySourceIds\")",
+          "Status": "Passed",
+          "Duration": 0.0009052,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.MissingVersionThreeFieldsDoNotDefaultToAUsableWorld(\"collectedPickupIds\")",
+          "Status": "Passed",
+          "Duration": 0.0007631,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.NonNumericVitalsAreRejected(\"NaN\")",
+          "Status": "Passed",
+          "Duration": 0.0024222,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.NonNumericVitalsAreRejected(\"Infinity\")",
+          "Status": "Passed",
+          "Duration": 0.0005706,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.PendingWireAllowsExistingLivingLifecycleWithoutCarriedContents",
+          "Status": "Passed",
+          "Duration": 0.0015005,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.PendingWireRejectsCarriedOrPartiallyGrantedItems(\"player.inventory\")",
+          "Status": "Passed",
+          "Duration": 0.0078052,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.PendingWireRejectsCarriedOrPartiallyGrantedItems(\"player.hotbar\")",
+          "Status": "Passed",
+          "Duration": 0.0013518,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.PublicVersionFourIsPendingAndLegacyWireRemainsCompleted",
+          "Status": "Passed",
+          "Duration": 0.0107915,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.RealFilesRecoverBackupWithoutOverwritingItWithCorruption",
+          "Status": "Passed",
+          "Duration": 0.0364654,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.TrailingContentAndWrongTypesAreRejected",
+          "Status": "Passed",
+          "Duration": 0.0021156,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.UnknownItemsAndFutureVersionsAreIncompatible",
+          "Status": "Passed",
+          "Duration": 0.004027,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionAliasCannotTurnPendingCarriedItemsIntoLegacyCompletion",
+          "Status": "Passed",
+          "Duration": 0.0023984,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes(\"null\")",
+          "Status": "Passed",
+          "Duration": 0.0144008,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes(\"0\")",
+          "Status": "Passed",
+          "Duration": 0.0009882,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes(\"\\\"false\\\"\")",
+          "Status": "Passed",
+          "Duration": 0.0006013,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes(\"[]\")",
+          "Status": "Passed",
+          "Duration": 0.0004541,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRejectsWrongMarkerTypes(\"{}\")",
+          "Status": "Passed",
+          "Duration": 0.0008966,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionFourRequiresMarkerAndRejectsDuplicateWireFacts",
+          "Status": "Passed",
+          "Duration": 0.0052476,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionFourWireRetainsAnExplicitBoolean(False)",
+          "Status": "Passed",
+          "Duration": 0.0096501,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionFourWireRetainsAnExplicitBoolean(True)",
+          "Status": "Passed",
+          "Duration": 0.0011003,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionThreeRoundTripsLivingShipAndExpeditionStateTogether",
+          "Status": "Passed",
+          "Duration": 0.1505855,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.VersionThreeStillRequiresTypedPermanentCollectionFacts",
+          "Status": "Passed",
+          "Duration": 0.0076883,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.WorldSeedAliasCannotOverrideTheValidatedSeed",
+          "Status": "Passed",
+          "Duration": 0.0014443,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "SOLITUDE.Tests.SaveJsonCodecTests.WrongRecordTypesAndPartialLifecycleAreRejected",
+          "Status": "Passed",
+          "Duration": 0.0026331,
+          "Message": null,
+          "StackTrace": null
+        }
+      ],
+      "Duration": 24.01,
+      "StatusPath": null,
+      "Mode": "EditMode",
+      "FilterApplied": "testname: SaveJsonCodecTests",
+      "success": true,
+      "result": null
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

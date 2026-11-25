@@ -1,0 +1,107 @@
+{
+  "frame": 12799,
+  "time": 45.7034454,
+  "state": "Ready",
+  "position": "(-0.81, -0.70, 0.00)",
+  "target": "SEC-0 (SOLITUDE.Npcs.Sec0.Sec0ExpeditionEncounter)",
+  "snapshot": {
+    "version": 3,
+    "worldSeed": 12345,
+    "containers": [
+      {
+        "saveableId": "player.inventory",
+        "state": {
+          "slots": [
+            {
+              "index": 0,
+              "itemId": "6e5908993af6643a8adaf97ed6293d16",
+              "quantity": 1
+            },
+            {
+              "index": 1,
+              "itemId": "c756a156ba7f34cb2b65e32264413a60",
+              "quantity": 1
+            },
+            {
+              "index": 2,
+              "itemId": "8d158110df66c4994b8d575233f619c5",
+              "quantity": 1
+            }
+          ]
+        }
+      },
+      {
+        "saveableId": "player.hotbar",
+        "state": {
+          "slots": []
+        }
+      }
+    ],
+    "collectedPickupIds": [
+      "3fdf3f09-02a9-468a-b61e-fb058983a028",
+      "acb277a0-d4f8-4d18-a0df-79c61334070f",
+      "route.fuse-source"
+    ],
+    "survivor": {
+      "id": "537128e5-9dc0-3dcb-375d-7820225b5191",
+      "status": 1,
+      "scenePath": "Assets/_Project/Scenes/Wakeup.unity",
+      "x": -5.705358982086182,
+      "y": -0.7000014781951904,
+      "z": 0.0,
+      "health": {
+        "current": 100.0,
+        "max": 100.0
+      },
+      "oxygen": {
+        "current": 100.0,
+        "max": 100.0
+      },
+      "hunger": {
+        "current": 85.47169735735623,
+        "max": 100.0
+      },
+      "recoveryDelayRemaining": 0.0
+    },
+    "expedition": {
+      "id": "af35aab3-edb8-ab8b-e460-cb5a7be93b7d",
+      "defeatedEncounterIds": [
+        "maintenance.sec0"
+      ],
+      "collectedSupplySourceIds": [
+        "expedition.supply.bandage"
+      ]
+    },
+    "ship": {
+      "repairs": [
+        {
+          "id": "route.scrubber",
+          "installed": true,
+          "running": true,
+          "recoverySeconds": 5.0
+        }
+      ],
+      "doors": [
+        {
+          "id": "route.shortcut",
+          "powered": true,
+          "unlocked": true,
+          "open": true
+        }
+      ],
+      "criticalSources": [
+        {
+          "id": "route.fuse-source",
+          "objectiveId": "route.scrubber",
+          "available": false,
+          "itemId": "4716e84c715564ad2ac79c4be74037dd",
+          "sharedOwnerIds": [
+            "c7320c2a-7a48-41c9-98b4-bf5976399466"
+          ]
+        }
+      ],
+      "permanentDiscoveryIds": []
+    },
+    "pendingDeath": null
+  }
+}

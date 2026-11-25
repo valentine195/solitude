@@ -42,9 +42,10 @@ namespace SOLITUDE.Application
         public void SetReady(bool value) { ready = value; Publish(); }
         public void SetTransition(bool value) { transition = value; Publish(); }
         internal void SetModal(bool value) { modal = value; Publish(); }
-        public IDisposable AcquirePrimaryScreen()
+        public IDisposable AcquirePrimaryScreen() => AcquirePrimaryScreen(false);
+        internal IDisposable AcquirePrimaryScreen(bool duringPausedHandoff)
         {
-            if (!Ready || modal || primaryScreen || pause.IsPaused) return null;
+            if (!Ready || modal || primaryScreen || (pause.IsPaused && !duringPausedHandoff)) return null;
             primaryScreen = true;
             Publish();
             return new Lease(() => { primaryScreen = false; Publish(); });

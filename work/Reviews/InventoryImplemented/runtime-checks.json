@@ -1,0 +1,29 @@
+{
+  "success": false,
+  "command": "command",
+  "data": {
+    "command": "eval_file",
+    "parameters": {
+      "file": "/Users/jeremyvalentine/SOLITUDE/work/Reviews/InventoryImplemented/verify-runtime.cs"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": false,
+      "error": "Runtime Error",
+      "errorDetails": "Object reference not set to an instance of an object"
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [
+    {
+      "code": "COMMAND_FAILED",
+      "message": "Runtime Error"
+    }
+  ],
+  "warnings": []
+}

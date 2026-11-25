@@ -1,0 +1,65 @@
+:root {
+  --map-field: #121f25;
+  --fault: #f19b92;
+}
+[hidden] { display: none !important; }
+::selection { background: var(--amber); color: var(--ink); }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--amber); outline-offset: 5px; }
+button:hover { color: var(--amber); }
+#deck-map { position: absolute; inset: 0; padding: 50px 64px 0; background: var(--ink); }
+.map-header { height: 77px; display: flex; align-items: flex-start; justify-content: space-between; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: 52px; font-weight: 720; line-height: 1; letter-spacing: -.025em; }
+.close-map, .open-map { color: var(--text); background: var(--surface); border: 0; padding: 10px 15px; font-size: 20px; display: inline-flex; align-items: center; gap: 12px; }
+kbd { font: inherit; font-size: 16px; font-weight: 680; background: var(--action-box, #23353e); padding: 4px 9px; }
+.open-map { position: absolute; right: 24px; bottom: 24px; }
+.decks { height: 58px; border-bottom: 1px solid var(--inset); }
+.decks span {
+  height: 58px; display: inline-flex; align-items: center; min-width: 191px;
+  color: var(--amber); background: transparent; border: 0; border-bottom: 3px solid var(--amber);
+  text-align: left; padding: 0 0 0 2px; font-size: 23px; font-weight: 690;
+}
+.map-layout { display: grid; grid-template-columns: 1288px 1fr; gap: 40px; padding-top: 27px; }
+.plot { position: relative; height: 708px; width: 1288px; background: var(--map-field); outline: 1px solid var(--inset); overflow: hidden; }
+#schematic { position: absolute; inset: 0; }
+.room-label { position: absolute; font-size: 24px; font-weight: 650; letter-spacing: .01em; color: var(--text); pointer-events: none; }
+.room-label span { display: block; margin-top: 4px; color: var(--secondary); font-size: 18px; font-weight: 450; }
+.cryo { left: 144px; top: 150px; }
+.locker { left: 548px; top: 250px; }
+.life { left: 876px; top: 156px; }
+.spine { left: 155px; top: 463px; color: var(--secondary); }
+.contact { left: 876px; top: 592px; color: var(--secondary); }
+.you-are-here { position: absolute; left: 470px; top: 476px; display: flex; align-items: center; gap: 10px; padding: 4px; background: var(--surface); font-size: 19px; font-weight: 680; }
+.marker { position: absolute; display: grid; place-items: center; width: 38px; height: 38px; padding: 0; color: var(--text); border: 1px solid transparent; background: var(--ink); }
+.marker[aria-pressed="true"] { border-color: var(--amber); }
+.gate-marker { left: 798px; top: 463px; }
+.objective-marker { left: 878px; top: 290px; }
+.gate-label, .goal-label { position: absolute; pointer-events: none; font-size: 19px; font-weight: 680; color: var(--text); }
+.gate-label { left: 847px; top: 467px; padding: 3px 7px; background: var(--map-field); }
+.goal-label { left: 929px; top: 299px; color: var(--amber); }
+.plot[data-systems="false"] .objective-marker,.plot[data-systems="false"] .goal-label { display: none; }
+.legend { display: flex; align-items: center; gap: 31px; margin: 0; padding: 26px 0 0; list-style: none; color: var(--secondary); font-size: 18px; }
+.legend li { display: flex; gap: 10px; align-items: center; }
+.symbol { display: inline-block; flex: none; position: relative; width: 18px; height: 18px; color: var(--text); }
+.symbol.player { transform: rotate(45deg) scale(.64); background: var(--text); }
+.symbol.objective { border: 2px solid var(--amber); border-radius: 50%; }
+.symbol.objective::after { content: ""; position: absolute; inset: 4px; border-radius: 50%; background: var(--amber); }
+.symbol.door { width: 15px; height: 11px; margin: 5px 2px 0; border: 2px solid var(--fault); }
+.symbol.door::before { content: ""; position: absolute; width: 7px; height: 7px; top: -8px; left: 2px; border: 2px solid var(--fault); border-bottom: 0; border-radius: 6px 6px 0 0; }
+.symbol.route { width: 25px; height: 3px; background: var(--amber); }
+.symbol.unsurveyed { width: 22px; height: 14px; border: 1px dashed var(--rim); }
+.inspector { min-width: 0; padding-left: 30px; border-left: 1px solid var(--inset); }
+.inspector section + section { border-top: 1px solid var(--inset); margin-top: 36px; padding-top: 30px; }
+.inspector h2 { color: var(--secondary); font-size: 20px; font-weight: 580; }
+.objective-title { display: flex; align-items: center; gap: 13px; padding: 0; margin: 11px 0 5px; color: var(--text); font-size: 33px; font-weight: 690; line-height: 1.1; background: transparent; border: 0; }
+.secondary { color: var(--secondary); font-size: 20px; }
+#route-toggle { display: inline-flex; align-items: center; gap: 12px; margin-top: 25px; padding: 11px 15px; border: 0; color: var(--text); background: var(--surface); font-size: 20px; }
+#route-toggle:hover { color: var(--amber); }
+.detail h3 { margin-top: 10px; font-size: 33px; font-weight: 690; line-height: 1.1; }
+.condition { display: flex; align-items: center; gap: 10px; margin: 14px 0 12px; font-size: 20px; color: var(--fault); }
+.condition[data-unconfirmed] { color: var(--secondary); }
+.detail p { max-width: 330px; font-size: 21px; line-height: 1.45; color: var(--secondary); }
+.layers label { display: flex; align-items: center; gap: 10px; margin-top: 15px; font-size: 21px; cursor: pointer; }
+.layers input { width: 19px; height: 19px; margin: 0; accent-color: var(--amber); cursor: pointer; }

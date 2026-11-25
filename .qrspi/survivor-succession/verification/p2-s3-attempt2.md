@@ -1,0 +1,23 @@
+# Phase 2 Step 3 attempt 2 — passed and committed
+
+Commit: a74bc2c37a0e52298923ceca0915aeca1c5526bc. Exact source snapshot: p2-s3-attempt2.source.json; base HEAD 94dee5d3994cf958d37e02efb475cdb0871fba09 plus seven scoped files. Reviewed spec SHA-256 f2253ab3429d7c5a34c8e9275f9efac61be9e3f4c30781393ad7d86e68ba85a4; approved normalized phase 2 SHA-256 9174ac5760d00bbd53f98cbbed9c5a5cd06a6b62cca9f59b5bbbb5f5a8b9054c. Approved input digests and all seven production/test bytes were rechecked unchanged before staging; staged bytes and resulting commit match the source snapshot. Disposable gate copies matched all seven source files after authoring. Working tree clean.
+
+## Required qualification
+
+Command: DOTNET_CLI_HOME=/private/tmp/solitude-succession-dotnet DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_CLI_USE_MSBUILD_SERVER=0 MSBUILDDISABLENODEREUSE=1 python3 Tools/Verification/verify.py --workspace /private/tmp/solitude-succession-p2-s3-gate --output Logs/SurvivorSuccession/p2-s3-attempt2
+
+Expected: complete results.json Passed, no failing or missing required checks. Actual: exit 0, Passed, macOS ARM64; 119 pure, 218 EditMode, 59 PlayMode, zero failures (396 tests). Authoring passed. Verification/shipping native builds passed; all 28 production-player stages passed, 42 total gate stages. See output results.json/XML/logs. This qualifies current macOS ARM64/Wakeup and existing save/recovery behavior, not durable succession/cache serialization.
+
+## Criterion-linked evidence
+
+- S2/S3/S4/S7/S8: EquippedDeathCommitsBothSourcesAndCancelsGestureWithoutAnOpenModal passes: both retained source readers emptied atomically, one published independent cache conserves six units, A permanently dead, B distinct, gesture canceled, one acknowledgment, stale A request rejected. Existing empty-death/vitals/selection/camera/held-input checks pass. Recovery source captures physics death position; no cache for empty equipment.
+- S4/S5: FullRecoveryCapacityCanScrollAndTransferTheLastSlot passes through real focus/production E binding, scroll UI event path, X/Y last-slot viewport containment, beginDrag/drop/endDrag handlers, exact seven-unit transfer and reopen scroll reset. Existing partial/full-matching-target/repeated transfers pass.
+- S6/S11/S12: PoweredDoorFirstContactAndPickupRemainLiveAcrossDeath passes: power/open door/contact and collected pickup remain intact; inventory/hotbar equipment recovered using ordinary focused modal path; root/scope/interactor retained. Installed, running Air Scrubber state and recovery progress persist across equipped death; journal closes and scrubber screen remains usable. Existing locker/pickup/persistence regressions and full player scenarios pass. No ship-system source changed, no scene reload/global reset/save schema change in death path.
+- S9: RepeatedEquippedDeathsKeepPartialCachesAndRecoverThroughInteraction passes: partial A cache remains independent from B cache, exact quantities/unique owners and source identities preserved, A subsequently recovers fully without changing B. Test-only return teleport waits one physics tick after awakening, as demonstrated by focused diagnostics; runtime interaction code unchanged.
+- S10: MissingRecoveryRejectsWithoutLosingCarriedEquipment passes. CommittedEquipmentSurvivesActivationFailureAndRetryDoesNotTransferAgain passes with real source SlotChanged fault injection: A retired, no current survivor, input gated, exact six units in inactive committed recovery owner, same receipt/successor on retry, one publication/acknowledgment, no duplicate transfer. Existing pure transaction/coordinator stale/busy/reentrancy/retry checks pass.
+
+## Actual-scene UI evidence
+
+See p2-s3-focus-investigation.md for diagnostic commands and evidence. Actual equipped death in disposable Wakeup leaves four inventory batteries plus two from final hotbar slot in a 33-slot cache. Existing focused interaction opens it. Scroll wheel handler reaches final row; existing slot UI handlers transfer final quantity two, leaving four in cache. Gameplay-scale screenshots repair-top.png and repair-bottom.png under Logs/SurvivorSuccession/p2-s3-ui show both target columns, four inventory columns and visible last row. This is a functional capacity pass; aesthetic normalization remains deferred.
+
+Five diff-check trailing-space findings are Unity-authored empty m_Name YAML fields. Kept exact authored/tested prefab bytes; no C# whitespace findings. Earlier attempts remain preserved. Phase 1 deferred positive awakening-focus coverage remains deferred. Phase 3 and final review remain outstanding; no whole-spec review verdict claimed.

@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-register-fuse.cs",
+      "entry": "RegisterExistingFuse.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 339,
+      "executeMs": 6688,
+      "assemblyName": "PipelineRunScript_weapon-system-register-fuse_a83894a6a43c4fa6948d31fb8d2933ce",
+      "success": true,
+      "result": {
+        "fuseId": "4716e84c715564ad2ac79c4be74037dd",
+        "registered": true,
+        "metadataValid": true
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

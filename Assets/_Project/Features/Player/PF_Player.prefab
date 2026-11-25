@@ -121,6 +121,7 @@ GameObject:
   - component: {fileID: 3214510096466335220}
   - component: {fileID: 1749646997042662170}
   - component: {fileID: 3458989186662488151}
+  - component: {fileID: 5802093016011820795}
   m_Layer: 0
   m_Name: PF_Player
   m_TagString: Player
@@ -189,7 +190,7 @@ MonoBehaviour:
   cameraTransform: {fileID: 0}
 --- !u!212 &4966014629260822984
 SpriteRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -233,10 +234,10 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1726185871
-  m_SortingLayer: 3
+  m_SortingLayer: 5
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -138253132303227988, guid: 90e2e39dadcc14c74b5b7c9e62c0f9b1, type: 3}
+  m_Sprite: {fileID: -2025890959, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -246,6 +247,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!50 &5089806376637266660
 Rigidbody2D:
   serializedVersion: 5
@@ -310,8 +312,8 @@ BoxCollider2D:
   m_Offset: {x: -0.018435359, y: 0.72913504}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: -0.12820514}
-    oldSize: {x: 0.875, y: 2.4375}
+    pivot: {x: 0.5, y: 0.020833334}
+    oldSize: {x: 2, y: 3}
     newSize: {x: 0.875, y: 2.4375}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -329,7 +331,7 @@ Animator:
   m_GameObject: {fileID: 5612567955522642679}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 639a0d7fe43fc420fbb70c16df6c82b2, type: 2}
+  m_Controller: {fileID: 22100000, guid: 10bc1646f814d489d981c094c5e1d82a, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -353,3 +355,238 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee70c6c7f759c446193b841aa99c2aeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SOLITUDE.Core.Animations.HumanAnimationController
+--- !u!114 &5802093016011820795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5612567955522642679}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ddffb490f0f4d09963616c5c7b421c8, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: SOLITUDE.Runtime::SOLITUDE.Combat.MeleeSwingView
+  originOffsetTiles: {x: 0, y: 1}
+  meleeTag: {fileID: 11400000, guid: ca6dc766fd7f24e0cba246345b9bbe52, type: 2}
+  bodyAnimationController: {fileID: 22100000, guid: 10bc1646f814d489d981c094c5e1d82a, type: 2}
+  bodyAnimationFrames:
+  - {fileID: 481175300, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: 481175301, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: 481175302, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: -2025890959, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+  - {fileID: 481175304, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: 481175305, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: 481175306, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: -345337566, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+  - {fileID: 481175308, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: 481175309, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: 481175310, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: 1046821875, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+  - {fileID: 481175312, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: 481175313, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: 481175314, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+  - {fileID: 684434050, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+  handPoses:
+  - frame: {fileID: -2025890959, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 71, y: 154}
+    angle: -168
+    lengthScale: 0.84
+    behindBody: 0
+    foregroundGrip: {fileID: 158140100, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+    carryBody: {fileID: 21300000, guid: b36f7a2fb5f34919afc3881329cdf0fd, type: 3}
+  - frame: {fileID: -345337566, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 184, y: 164}
+    angle: -54
+    lengthScale: 0.84
+    behindBody: 1
+  - frame: {fileID: 1046821875, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 108, y: 162}
+    angle: 121
+    lengthScale: 0.8
+    behindBody: 1
+  - frame: {fileID: 684434050, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 113, y: 163}
+    angle: -128
+    lengthScale: 0.82
+    behindBody: 0
+    foregroundGrip: {fileID: 158140101, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: -152137368, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 77, y: 152}
+    angle: -169
+    lengthScale: 0.8
+    behindBody: 0
+    foregroundGrip: {fileID: 158140102, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: -1868737579, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 66, y: 146}
+    angle: -165
+    lengthScale: 0.87
+    behindBody: 0
+    foregroundGrip: {fileID: 158140103, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 869037132, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 60, y: 179}
+    angle: -168
+    lengthScale: 0.78
+    behindBody: 0
+    foregroundGrip: {fileID: 158140104, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 1430683159, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 70, y: 146}
+    angle: -166
+    lengthScale: 0.87
+    behindBody: 0
+    foregroundGrip: {fileID: 158140105, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: -180109107, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 201, y: 209}
+    angle: -63
+    lengthScale: 0.74
+    behindBody: 1
+    foregroundGrip: {fileID: 158140120, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 1653927539, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 187, y: 175}
+    angle: -49
+    lengthScale: 0.86
+    behindBody: 1
+  - frame: {fileID: 1813329155, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 193, y: 163}
+    angle: -55
+    lengthScale: 0.88
+    behindBody: 1
+  - frame: {fileID: -1577323763, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 189, y: 176}
+    angle: -49
+    lengthScale: 0.85
+    behindBody: 1
+  - frame: {fileID: -1851396346, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 71, y: 186}
+    angle: 103
+    lengthScale: 0.82
+    behindBody: 1
+  - frame: {fileID: 2001043745, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 99, y: 168}
+    angle: 119
+    lengthScale: 0.83
+    behindBody: 1
+  - frame: {fileID: -2103920, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 191, y: 180}
+    angle: -103
+    lengthScale: 0.82
+    behindBody: 1
+  - frame: {fileID: 1836870140, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 110, y: 155}
+    angle: 122
+    lengthScale: 0.78
+    behindBody: 1
+  - frame: {fileID: 1074037136, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 187, y: 180}
+    angle: -99
+    lengthScale: 0.86
+    behindBody: 0
+    foregroundGrip: {fileID: 158140106, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: -962289399, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 115, y: 159}
+    angle: -119
+    lengthScale: 0.83
+    behindBody: 0
+    foregroundGrip: {fileID: 158140107, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 1921144481, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 66, y: 167}
+    angle: 119
+    lengthScale: 0.85
+    behindBody: 0
+    foregroundGrip: {fileID: 158140108, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: -251739478, guid: 0336c851a9ba1449e83f5aa101bb0d9a, type: 3}
+    gripPixels: {x: 121, y: 148}
+    angle: -118
+    lengthScale: 0.82
+    behindBody: 0
+    foregroundGrip: {fileID: 158140109, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 481175300, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 116, y: 246}
+    angle: -26
+    lengthScale: 0.87
+    behindBody: 0
+    foregroundGrip: {fileID: 158140110, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 481175301, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 161, y: 214}
+    angle: 180
+    lengthScale: 0.57
+    behindBody: 0
+    foregroundGrip: {fileID: 158140111, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 481175302, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 179, y: 134}
+    angle: -160
+    lengthScale: 0.83
+    behindBody: 0
+    foregroundGrip: {fileID: 158140112, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 481175303, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 121, y: 162}
+    angle: 173
+    lengthScale: 0.84
+    behindBody: 0
+    foregroundGrip: {fileID: 158140113, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 481175304, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 274, y: 246}
+    angle: 14
+    lengthScale: 0.78
+    behindBody: 1
+  - frame: {fileID: 481175305, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 250, y: 268}
+    angle: -59
+    lengthScale: 0.68
+    behindBody: 1
+  - frame: {fileID: 481175306, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 262, y: 162}
+    angle: -140
+    lengthScale: 0.76
+    behindBody: 1
+  - frame: {fileID: 481175307, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 266, y: 160}
+    angle: -162
+    lengthScale: 0.8
+    behindBody: 1
+  - frame: {fileID: 481175308, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 231, y: 288}
+    angle: -65
+    lengthScale: 0.68
+    behindBody: 1
+  - frame: {fileID: 481175309, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 86, y: 249}
+    angle: 90
+    lengthScale: 0.94
+    behindBody: 0
+    foregroundGrip: {fileID: 158140114, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 481175310, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 105, y: 164}
+    angle: 132
+    lengthScale: 0.85
+    behindBody: 0
+    foregroundGrip: {fileID: 158140115, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 481175311, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 158, y: 162}
+    angle: 153
+    lengthScale: 0.79
+    behindBody: 1
+  - frame: {fileID: 481175312, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 162, y: 287}
+    angle: 64
+    lengthScale: 0.77
+    behindBody: 0
+    foregroundGrip: {fileID: 158140116, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 481175313, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 280, y: 239}
+    angle: -81
+    lengthScale: 0.9
+    behindBody: 0
+    foregroundGrip: {fileID: 158140117, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 481175314, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 259, y: 158}
+    angle: -126
+    lengthScale: 0.85
+    behindBody: 0
+    foregroundGrip: {fileID: 158140118, guid: 196f47553950490e88869412d3c87bbf, type: 3}
+  - frame: {fileID: 481175315, guid: ea638f7f013646d6a61524ed9514b977, type: 3}
+    gripPixels: {x: 162, y: 156}
+    angle: -159
+    lengthScale: 0.79
+    behindBody: 0
+    foregroundGrip: {fileID: 158140119, guid: 196f47553950490e88869412d3c87bbf, type: 3}

@@ -63,6 +63,37 @@ namespace SOLITUDE.Tests
             Assert.AreEqual(1,bot.ShotsFired);Assert.AreEqual(0,bot.StunsLanded);
             bot.Tick(.5f);Assert.AreEqual(1,bot.ShotsFired);
         }
+        [Test] public void WarningAndDischargeFollowTheLockedShotAndThenClear()
+        {
+            Charge();
+            var line = bot.GetComponentInChildren<LineRenderer>();
+            Assert.IsTrue(line.enabled);
+            float warningWidth = line.widthMultiplier;
+            Vector3 expectedDirection = (line.GetPosition(1) - line.GetPosition(0)).normalized;
+            Place(new Vector2(.7f, -.8f));
+            bot.Tick(.4f);
+            Assert.Greater(line.widthMultiplier, warningWidth);
+            Vector3 end = line.GetPosition(1);
+            Assert.That(Vector3.Angle(expectedDirection, end - line.GetPosition(0)), Is.LessThan(.01f));
+            bot.Tick(.3f);
+            Assert.AreEqual(0, bot.StunsLanded);
+            Assert.AreEqual(end, line.GetPosition(1));
+            Assert.Greater(line.startColor.b, line.startColor.r);
+            bot.Tick(.15f);
+            Assert.IsFalse(line.enabled);
+        }
+
+        [Test] public void KnockbackDuringChargeOpensRecoveryWithoutFiring()
+        {
+            Charge();
+            Assert.IsTrue(bot.RequestKnockback(this, Vector2.up, .25f, .1f));
+            Assert.AreEqual(SecurityBotState.Recovering, bot.State);
+            Assert.IsFalse(bot.GetComponentInChildren<LineRenderer>().enabled);
+            bot.Tick(1);
+            Assert.AreEqual(0, bot.ShotsFired);
+            Assert.IsFalse(stun.IsStunned);
+        }
+
         [Test] public void DirectHitStunsWithoutChangingHealthAndReleaseUnwindsBinding()
         {
             double health=player.GetComponent<PlayerVitalsController>().Vitals.Health.Current;

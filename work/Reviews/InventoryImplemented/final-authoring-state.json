@@ -1,0 +1,29 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "eval",
+    "parameters": {
+      "code": "var p=UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.GameObject>(SOLITUDE.Editor.InventoryScreenAuthoring.ScreenPath);var so=new UnityEditor.SerializedObject(p.GetComponent<SOLITUDE.Containers.InventoryScreenView>());return new {scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene().path,sceneDirty=UnityEngine.SceneManagement.SceneManager.GetActiveScene().isDirty,distilled=so.FindProperty(\"distilledLayout\").boolValue,weaponEndpoint=so.FindProperty(\"weaponName\").objectReferenceValue!=null,rootActive=p.activeSelf};"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": true,
+      "result": {
+        "scene": "Assets/_Project/Scenes/Demos/AtmosphericScrubberEncounter.unity",
+        "sceneDirty": false,
+        "distilled": true,
+        "weaponEndpoint": true,
+        "rootActive": false
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -80,6 +80,65 @@ namespace SOLITUDE.Tests
             Assert.AreEqual(1, transactions); Assert.AreEqual(2, change.Slots.Count); Assert.AreEqual(2, result.Addresses.Count);
             Assert.AreEqual(a.GetSlot(0).Address.Revision, result.Addresses.Single(x => x.Container.Equals(a.Handle)).Revision);
         }
+        [Test] public void TransferOneMovesASingleUnitWithoutSwappingDifferentItems()
+        {
+            commands.Grant(a.Handle, "a", 5);
+            commands.Grant(b.Handle, "b", 1);
+
+            var rejected = commands.TransferOne(a.GetSlot(0).Address, b.GetSlot(0).Address);
+            Assert.AreEqual(CommandStatus.Rejected, rejected.Status);
+            Assert.AreEqual(5, a.GetSlot(0).Stack.Quantity);
+            Assert.AreEqual("b", b.GetSlot(0).Stack.ItemId);
+
+            var result = commands.TransferOne(a.GetSlot(0).Address, a.GetSlot(1).Address);
+            Assert.AreEqual(1, result.Moved);
+            Assert.AreEqual(4, a.GetSlot(0).Stack.Quantity);
+            Assert.AreEqual(1, a.GetSlot(1).Stack.Quantity);
+
+            result = commands.TransferOne(a.GetSlot(0).Address, a.GetSlot(1).Address);
+            Assert.AreEqual(1, result.Moved);
+            Assert.AreEqual(3, a.GetSlot(0).Stack.Quantity);
+            Assert.AreEqual(2, a.GetSlot(1).Stack.Quantity);
+        }
+        [Test] public void ContainerTransferFillsCompatibleStacksAtomicallyAndLeavesOverflowUntouched()
+        {
+            commands.Grant(a.Handle, "a", 6);
+            var destination = commands.Register("limited", 4, Saved((0, "a", 9), (1, "a", 8), (2, "b", 10), (3, "a", 1)),
+                receivingCapacity: 3);
+            var source = a.GetSlot(0).Address;
+            var changes = new List<ContainerChangeSet>();
+            commands.Completed += changes.Add;
+
+            Assert.AreEqual(3, commands.ContainerTransferQuantity(source, destination.Handle));
+            var result = commands.TransferToContainer(source, destination.Handle);
+            Assert.AreEqual(CommandStatus.PartialMerged, result.Status);
+            Assert.AreEqual(3, result.Moved);
+            Assert.AreEqual(3, result.Remaining);
+            Assert.AreEqual(3, a.GetSlot(0).Stack.Quantity);
+            Assert.AreEqual(10, destination.GetSlot(0).Stack.Quantity);
+            Assert.AreEqual(10, destination.GetSlot(1).Stack.Quantity);
+            Assert.AreEqual("b", destination.GetSlot(2).Stack.ItemId);
+            Assert.AreEqual(1, destination.GetSlot(3).Stack.Quantity);
+            Assert.AreEqual(1, changes.Count);
+            Assert.AreEqual(2, changes[0].Containers.Count);
+            Assert.AreEqual(CommandStatus.Stale, commands.TransferToContainer(source, destination.Handle).Status);
+            Assert.AreEqual(CommandStatus.InsufficientSpace,
+                commands.TransferToContainer(a.GetSlot(0).Address, destination.Handle).Status);
+            Assert.AreEqual(1, changes.Count);
+        }
+        [Test] public void BoundedTransfersLeaveTheReservedCopyInItsSourceSlot()
+        {
+            commands.Grant(a.Handle, "a", 6);
+            commands.Grant(b.Handle, "b", 1);
+            var source = a.GetSlot(0).Address;
+            Assert.AreEqual(3, commands.ContainerTransferQuantity(source, b.Handle, 3));
+            Assert.IsFalse(commands.CanTransfer(source, b.GetSlot(0).Address, maximum: 3));
+            Assert.AreEqual(CommandStatus.Rejected, commands.TransferUpTo(source, b.GetSlot(0).Address, 3).Status);
+            Assert.AreEqual(2, commands.TransferUpTo(source, b.GetSlot(1).Address, 2).Moved);
+            Assert.AreEqual(3, commands.TransferToContainer(a.GetSlot(0).Address, b.Handle, 3).Moved);
+            Assert.AreEqual(1, a.GetSlot(0).Stack.Quantity);
+            Assert.AreEqual(5, b.GetSlot(1).Stack.Quantity);
+        }
         [Test] public void NonstackableGrantUsesOnePerSlotAndIsAtomic()
         {
             Assert.IsTrue(commands.Grant(a.Handle, "single", 3).Succeeded);

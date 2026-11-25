@@ -1,0 +1,1 @@
+- Human selected Option A and carried-tool compatibility. Decision recorded in approach.md SHA-256 6b6e8cd6a7a2b15805b68973a134564c30022bdc28cf5b826284fe6e3b38140c. Spec draft SHA-256 02a87da88f295cfd3fae2bcb41c91067ff5326decaba9fa7e7c17d3069d027b9 is proposed for human review, not approved. No implementation/tests or plan created.

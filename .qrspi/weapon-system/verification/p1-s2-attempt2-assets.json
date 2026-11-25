@@ -1,0 +1,28 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-author-wrench.cs",
+      "entry": "AuthorWrench.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 926,
+      "executeMs": 348,
+      "assemblyName": "PipelineRunScript_weapon-system-author-wrench_9727ce6ca7a84e1285499a7ee383e78a",
+      "success": false,
+      "error": "Runtime Error",
+      "errorDetails": "ArgumentException: Item identity and stack limit must be valid.\n  at SOLITUDE.Items.ItemSpec..ctor (System.String itemId, System.Boolean stackable, System.Int32 maxStackSize) [0x0003b] in /Users/jeremyvalentine/SOLITUDE/Assets/_Project/Domain/ItemCatalog.cs:15 \n  at SOLITUDE.Items.ItemDatabase.BuildRuntimeCatalog () [0x00030] in /Users/jeremyvalentine/SOLITUDE/Assets/_Project/Features/Items/Database/ItemDatabase.cs:64 \n  at SOLITUDE.Items.ItemDatabase.BuildCapabilityCatalog () [0x00000] in /Users/jeremyvalentine/SOLITUDE/Assets/_Project/Features/Items/Database/ItemDatabase.cs:78 \n  at AuthorWrench.Run () [0x00243] in /private/tmp/weapon-system-author-wrench.cs:31 \n  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)\n  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <0e19fd8bd8e94908bba2ee4f803bc6a7>:0 "
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

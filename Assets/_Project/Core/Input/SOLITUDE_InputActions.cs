@@ -251,6 +251,16 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                     ""interactions"": """",
                     ""initialStateCheck"": false,
                     ""priority"": 0
+                },
+                {
+                    ""name"": ""SwitchEquipment"",
+                    ""type"": ""Button"",
+                    ""id"": ""87bb2551-3b62-400e-bb79-8a1f1e29c368"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
                 }
             ],
             ""bindings"": [
@@ -539,6 +549,28 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                     ""action"": ""Primary"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5190510d-d9ab-4362-961f-83ee8807014a"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""SwitchEquipment"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""08722611-e802-4700-941b-77f3b2ea87ef"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""SwitchEquipment"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -571,6 +603,36 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                     ""type"": ""Button"",
                     ""id"": ""98e3c491-0d2b-4cdb-b40f-f9acc5316103"",
                     ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Equip"",
+                    ""type"": ""Button"",
+                    ""id"": ""bb8c1a59-429a-4362-8352-f9cddbd55354"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Assign"",
+                    ""type"": ""Button"",
+                    ""id"": ""bf01a6d0-3aca-4102-8677-80393a5423fe"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false,
+                    ""priority"": 0
+                },
+                {
+                    ""name"": ""Move"",
+                    ""type"": ""Button"",
+                    ""id"": ""542ae62f-7cd5-49cc-a0bd-41d62be9e5b1"",
+                    ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false,
@@ -641,6 +703,39 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Cancel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""70783703-096c-4e75-be8f-031b95a9ead4"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Equip"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9da9ebab-5dbb-418a-80c3-6233192b297d"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Assign"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""677ea57d-cdc9-43e1-aa90-a81221937cdb"",
+                    ""path"": ""<Keyboard>/m"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1205,11 +1300,15 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         m_Gameplay_Journal = m_Gameplay.FindAction("Journal", throwIfNotFound: true);
         m_Gameplay_Use = m_Gameplay.FindAction("Use", throwIfNotFound: true);
         m_Gameplay_Primary = m_Gameplay.FindAction("Primary", throwIfNotFound: true);
+        m_Gameplay_SwitchEquipment = m_Gameplay.FindAction("SwitchEquipment", throwIfNotFound: true);
         // Container
         m_Container = asset.FindActionMap("Container", throwIfNotFound: true);
         m_Container_Point = m_Container.FindAction("Point", throwIfNotFound: true);
         m_Container_Click = m_Container.FindAction("Click", throwIfNotFound: true);
         m_Container_Cancel = m_Container.FindAction("Cancel", throwIfNotFound: true);
+        m_Container_Equip = m_Container.FindAction("Equip", throwIfNotFound: true);
+        m_Container_Assign = m_Container.FindAction("Assign", throwIfNotFound: true);
+        m_Container_Move = m_Container.FindAction("Move", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1320,6 +1419,7 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
     private readonly InputAction m_Gameplay_Journal;
     private readonly InputAction m_Gameplay_Use;
     private readonly InputAction m_Gameplay_Primary;
+    private readonly InputAction m_Gameplay_SwitchEquipment;
     /// <summary>
     /// Provides access to input actions defined in input action map "Gameplay".
     /// </summary>
@@ -1396,6 +1496,10 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         /// </summary>
         public InputAction @Primary => m_Wrapper.m_Gameplay_Primary;
         /// <summary>
+        /// Provides access to the underlying input action "Gameplay/SwitchEquipment".
+        /// </summary>
+        public InputAction @SwitchEquipment => m_Wrapper.m_Gameplay_SwitchEquipment;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_Gameplay; }
@@ -1469,6 +1573,9 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             @Primary.started += instance.OnPrimary;
             @Primary.performed += instance.OnPrimary;
             @Primary.canceled += instance.OnPrimary;
+            @SwitchEquipment.started += instance.OnSwitchEquipment;
+            @SwitchEquipment.performed += instance.OnSwitchEquipment;
+            @SwitchEquipment.canceled += instance.OnSwitchEquipment;
         }
 
         /// <summary>
@@ -1528,6 +1635,9 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             @Primary.started -= instance.OnPrimary;
             @Primary.performed -= instance.OnPrimary;
             @Primary.canceled -= instance.OnPrimary;
+            @SwitchEquipment.started -= instance.OnSwitchEquipment;
+            @SwitchEquipment.performed -= instance.OnSwitchEquipment;
+            @SwitchEquipment.canceled -= instance.OnSwitchEquipment;
         }
 
         /// <summary>
@@ -1568,6 +1678,9 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
     private readonly InputAction m_Container_Point;
     private readonly InputAction m_Container_Click;
     private readonly InputAction m_Container_Cancel;
+    private readonly InputAction m_Container_Equip;
+    private readonly InputAction m_Container_Assign;
+    private readonly InputAction m_Container_Move;
     /// <summary>
     /// Provides access to input actions defined in input action map "Container".
     /// </summary>
@@ -1591,6 +1704,18 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         /// Provides access to the underlying input action "Container/Cancel".
         /// </summary>
         public InputAction @Cancel => m_Wrapper.m_Container_Cancel;
+        /// <summary>
+        /// Provides access to the underlying input action "Container/Equip".
+        /// </summary>
+        public InputAction @Equip => m_Wrapper.m_Container_Equip;
+        /// <summary>
+        /// Provides access to the underlying input action "Container/Assign".
+        /// </summary>
+        public InputAction @Assign => m_Wrapper.m_Container_Assign;
+        /// <summary>
+        /// Provides access to the underlying input action "Container/Move".
+        /// </summary>
+        public InputAction @Move => m_Wrapper.m_Container_Move;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1626,6 +1751,15 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             @Cancel.started += instance.OnCancel;
             @Cancel.performed += instance.OnCancel;
             @Cancel.canceled += instance.OnCancel;
+            @Equip.started += instance.OnEquip;
+            @Equip.performed += instance.OnEquip;
+            @Equip.canceled += instance.OnEquip;
+            @Assign.started += instance.OnAssign;
+            @Assign.performed += instance.OnAssign;
+            @Assign.canceled += instance.OnAssign;
+            @Move.started += instance.OnMove;
+            @Move.performed += instance.OnMove;
+            @Move.canceled += instance.OnMove;
         }
 
         /// <summary>
@@ -1646,6 +1780,15 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
             @Cancel.started -= instance.OnCancel;
             @Cancel.performed -= instance.OnCancel;
             @Cancel.canceled -= instance.OnCancel;
+            @Equip.started -= instance.OnEquip;
+            @Equip.performed -= instance.OnEquip;
+            @Equip.canceled -= instance.OnEquip;
+            @Assign.started -= instance.OnAssign;
+            @Assign.performed -= instance.OnAssign;
+            @Assign.canceled -= instance.OnAssign;
+            @Move.started -= instance.OnMove;
+            @Move.performed -= instance.OnMove;
+            @Move.canceled -= instance.OnMove;
         }
 
         /// <summary>
@@ -2006,6 +2149,13 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnPrimary(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SwitchEquipment" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSwitchEquipment(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Container" which allows adding and removing callbacks.
@@ -2035,6 +2185,27 @@ public partial class @SOLITUDE_InputActions: IInputActionCollection2, IDisposabl
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCancel(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Equip" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnEquip(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Assign" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnAssign(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Move" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMove(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

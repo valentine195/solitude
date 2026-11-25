@@ -24,8 +24,14 @@ namespace SOLITUDE.Combat
                 }
                 catch (ArgumentException) { return new DamageResult(DamageOutcome.InvalidContext); }
             }
-            // Amount resolution is deliberately the configured amount for this slice.
-            return context.Target.ApplyDamage(context, context.BaseAmount);
+            double amount = context.BaseAmount;
+            if (context.SourceAction is SOLITUDE.Items.MeleeAttackAction &&
+                context.Target.Entity.TryGetComponent<EnemyMeleeResistance>(out var resistance) && resistance.isActiveAndEnabled)
+            {
+                amount = resistance.ReceivedDamage(amount);
+                if (amount == 0) return new DamageResult(DamageOutcome.Resisted);
+            }
+            return context.Target.ApplyDamage(context, amount);
         }
 
         public static bool Positive(double amount) => !double.IsNaN(amount) && !double.IsInfinity(amount) && amount > 0;

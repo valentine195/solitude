@@ -16,10 +16,12 @@ namespace SOLITUDE.Art.Editor
         public static void Props()
         {
             var src = Load("Tools/ArtSources/SOLITUDE/props-source-v01.png");
-            string[] names = {"cryopod","locker_closed","locker_open","intercom","battery","personal_shelf","clipboard"};
-            int[,] sizes = {{32,64},{32,48},{40,48},{32,32},{16,24},{32,32},{16,24}};
+            // The fifth swatch is the retired pixel battery. The production illustration is authored separately.
+            string[] names = {"cryopod","locker_closed","locker_open","intercom",null,"personal_shelf","clipboard"};
+            int[,] sizes = {{32,64},{32,48},{40,48},{32,32},{0,0},{32,32},{16,24}};
             for (int i=0;i<names.Length;i++)
             {
+                if (names[i] == null) continue;
                 int col=i%4; bool top=i<4;
                 // Generated sheet has a taller upper row; these are source regions, not assumed native pixels.
                 RectInt region=new RectInt(Mathf.RoundToInt(col*src.width/4f), top ? Mathf.RoundToInt(src.height*.42f) : 0,

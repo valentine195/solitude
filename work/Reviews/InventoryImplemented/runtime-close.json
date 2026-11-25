@@ -1,0 +1,23 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "eval",
+    "parameters": {
+      "code": "var s=UnityEngine.Object.FindAnyObjectByType<SOLITUDE.Containers.InventoryScreenView>();var f=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;var tray=(UnityEngine.RectTransform)s.GetType().GetField(\"dockedHotbarTray\",f).GetValue(s);var k=UnityEngine.InputSystem.Keyboard.current;UnityEngine.InputSystem.InputSystem.QueueStateEvent(k,new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.Escape));UnityEngine.InputSystem.InputSystem.Update();UnityEngine.InputSystem.InputSystem.QueueStateEvent(k,new UnityEngine.InputSystem.LowLevel.KeyboardState());UnityEngine.InputSystem.InputSystem.Update();if(s.isActiveAndEnabled||tray.parent.name!=\"PersistentHotbar\")throw new Exception(\"Close/dock cleanup failed\");return \"PASS: Escape closed and tray restored to PersistentHotbar\";"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": true,
+      "result": "PASS: Escape closed and tray restored to PersistentHotbar"
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

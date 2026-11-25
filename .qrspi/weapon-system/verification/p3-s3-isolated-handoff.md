@@ -1,0 +1,9 @@
+# Phase 3 Step 3 — isolated completion locator
+
+User approved separate checkout to preserve concurrent inventory/input work. Step 3 is committed at 64a4e453b86d3c8bda8ab0675bd2081681324e6f on codex/weapon-loadout-recovery in /Users/jeremyvalentine/.codex/worktrees/weapon-loadout-recovery/SOLITUDE. It is NOT merged into this main checkout. This main checkout's product files and plan markers were not advanced.
+
+Authoritative completion/evidence: /Users/jeremyvalentine/.codex/worktrees/weapon-loadout-recovery/SOLITUDE/.qrspi/weapon-system/verification/p3-s3-attempt4.md. Phase 3's markers are complete in the isolated root only; independent QRSPI phase review pending. Continue from that root for review/next phase, not from stale blocked main markers. Focused verification policy remains active.
+
+Phase 3 F1/S26 review repair is now committed at 31caf33acc2554fcd5814a9e6f1fd1773c650986 in the same isolated branch/root. Two-file codec/test repair; targeted codec evidence under p3-f1-attempt1*. Fresh review phase-3-r1 is pending. Original phase-3 FAIL review is retained. No main-checkout merge or product-file changes performed. Continue review/remaining workflow from the isolated root, whose normalized repair plan revisions are recorded there.
+
+Fresh independent review phase-3-r1 is now PASS at 31caf33acc2554fcd5814a9e6f1fd1773c650986, with no findings. Reviewed artifact: /Users/jeremyvalentine/.codex/worktrees/weapon-loadout-recovery/SOLITUDE/.qrspi/weapon-system/reviews/phase-3-r1.md (SHA-256 486e4f98fa12f5b33cb4f445a78c3e848e703ce44ad787923ff17f6fdff5581d). Caller revalidated all 72 source and 40 evidence/input hashes, exact diff, clean tree and approved provenance before logging. Phase 3 complete; next phase is 4 in isolated root. Main checkout remains unmerged and its concurrent product edits untouched.

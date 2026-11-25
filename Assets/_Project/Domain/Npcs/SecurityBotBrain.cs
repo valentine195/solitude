@@ -7,6 +7,11 @@ namespace SOLITUDE.Npcs
         private readonly double confirmation, search, windup, recovery, attackRange;
         private double timer, sightTime, investigationAge;
         public SecurityBotState State { get; private set; }
+        public float ChargeProgress => State == SecurityBotState.Charging ? (float)(timer / windup) : 0;
+        public void InterruptCharge()
+        {
+            if (State == SecurityBotState.Charging) Enter(SecurityBotState.Recovering);
+        }
         public SecurityBotBrain(double confirmation = .35, double search = 3,
             double windup = .65, double recovery = 1.6, double attackRange = 1.8)
         {

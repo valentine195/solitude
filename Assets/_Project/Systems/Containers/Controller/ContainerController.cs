@@ -34,7 +34,8 @@ namespace SOLITUDE.Containers
             Unbind();
             if (source?.Container == null || !source.Container.IsAvailable || gestures == null) throw new System.InvalidOperationException("Container panel is not composed.");
             this.source = source;
-            presenter = new ContainerPresenter(source.Container, view, source.Label, gestures, policy, tooltip, selection);
+            presenter = new ContainerPresenter(source.Container, view, source.Label, gestures, policy, tooltip, selection,
+                handlesDrag: !TryGetComponent<InventoryScreenView>(out var screen) || !screen.HandlesCarriedDrag);
         }
         public bool BindDefaultSource() { if (DefaultSource == null) return false; Bind(DefaultSource); return true; }
         public void Unbind() { presenter?.Dispose(); presenter = null; source = null; }

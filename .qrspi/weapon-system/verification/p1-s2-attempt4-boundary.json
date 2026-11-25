@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "/private/tmp/weapon-system-restore-catalog-boundary.cs",
+      "entry": "RestoreCatalogBoundary.Run",
+      "timeout_ms": "60000"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 95,
+      "executeMs": 1483,
+      "assemblyName": "PipelineRunScript_weapon-system-restore-catalog-boundary_c0b13efd50424511b034c5645c88e4d4",
+      "success": true,
+      "result": {
+        "wrenchPrimary": true,
+        "productionFuseExcluded": true,
+        "demoFuseIncluded": true,
+        "metadataValid": true
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "/Users/jeremyvalentine/SOLITUDE"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

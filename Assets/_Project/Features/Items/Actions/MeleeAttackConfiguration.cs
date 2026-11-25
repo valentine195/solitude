@@ -24,6 +24,10 @@ namespace SOLITUDE.Items
         public float StartAngle = -45;
         public float EndAngle = 45;
         public float HeldDistanceTiles = .3f;
+        [Min(0.01f), Tooltip("Width of the held sprite when fitted to the swing grip.")]
+        public float SwingWidthScale = 1f;
+        [Tooltip("Optional grip-centered weapon inserts in south, north, west, east order. Each row contains wind-up, strike, follow-through and settle.")]
+        public Sprite[] PosedWeaponFrames = Array.Empty<Sprite>();
         public LayerMask TargetLayers = Physics2D.DefaultRaycastLayers;
         public LayerMask BlockingLayers = Physics2D.DefaultRaycastLayers;
 
@@ -46,6 +50,9 @@ namespace SOLITUDE.Items
             Finite(StartAngle, nameof(StartAngle)); Finite(EndAngle, nameof(EndAngle));
             Nonnegative(HeldDistanceTiles, nameof(HeldDistanceTiles));
             if (DamageTags == null || TargetEligibility == null) throw new InvalidOperationException("Melee damage tags/query are missing.");
+            Positive(SwingWidthScale, nameof(SwingWidthScale));
+            if (PosedWeaponFrames != null && PosedWeaponFrames.Length != 0 && PosedWeaponFrames.Length != 16)
+                throw new InvalidOperationException("A posed weapon sheet must contain four phases for each of four directions.");
             return new MeleeAttackSpec(this, DamageTags.Compile(registry, compiled), TargetEligibility.Compile(registry, compiled));
         }
 
@@ -79,6 +86,10 @@ namespace SOLITUDE.Items
         public float StartAngle { get; }
         public float EndAngle { get; }
         public float HeldDistanceTiles { get; }
+        public float SwingWidthScale { get; }
+        private readonly Sprite[] posedWeaponFrames;
+        public Sprite WeaponFrame(int index) =>
+            posedWeaponFrames != null && index < posedWeaponFrames.Length && index >= 0 ? posedWeaponFrames[index] : null;
         public int TargetLayers { get; }
         public int BlockingLayers { get; }
         public AudioClip SwingSound { get; }
@@ -93,6 +104,8 @@ namespace SOLITUDE.Items
             DamageTags = damageTags; TargetEligibility = eligibility;
             RestAngle = source.RestAngle; StartAngle = source.StartAngle;
             EndAngle = source.EndAngle; HeldDistanceTiles = source.HeldDistanceTiles;
+            SwingWidthScale = source.SwingWidthScale;
+            posedWeaponFrames = (Sprite[])source.PosedWeaponFrames?.Clone();
             TargetLayers = source.TargetLayers; BlockingLayers = source.BlockingLayers;
             SwingSound = source.SwingSound; ImpactSound = source.ImpactSound; ImpactEffect = source.ImpactEffect;
         }

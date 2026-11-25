@@ -27,8 +27,10 @@ namespace SOLITUDE.Player
             initialized = true; controller.RefreshPresentation();
             if (context.Commands != null && context.Hotbar != null && context.Selection != null && context.Presentations != null)
             {
-                ItemUse = new SelectedVitalItemUseCoordinator(context.Commands, context.Hotbar,
-                    context.Selection, context.Presentations.Consumables, controller, context.Policy);
+                var equipment = context.Equipment;
+                ItemUse = new SelectedVitalItemUseCoordinator(context.Commands, equipment == null ? context.Hotbar : context.Inventory,
+                    context.Selection, context.Presentations.Consumables, controller, context.Policy,
+                    equipment == null ? null : () => equipment.SelectedQuickUseItem);
                 if (context.Input != null) useBinding = context.Input.BindVitalUse(UseSelected);
             }
         }

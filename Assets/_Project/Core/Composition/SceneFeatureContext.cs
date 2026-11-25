@@ -15,6 +15,7 @@ namespace SOLITUDE.Composition
     {
         public ContainerCommandService Commands { get; }
         public IContainerReader Inventory { get; }
+        public CarriedEquipment Equipment { get; }
         public IContainerReader Hotbar { get; }
         public HotbarSelectionState Selection { get; }
         public Action ClosePlayerScreens { get; }
@@ -39,9 +40,9 @@ namespace SOLITUDE.Composition
             IContainerReader hotbar = null, HotbarSelectionState selection = null,
             Action closePlayerScreens = null, InteractionFeedbackService feedback = null,
             Func<IContainerReader, string, bool> openContainer = null, Action<ContainerHandle> closeContainer = null,
-            ContainerSaveSession lifecycleSession = null, bool isSceneArrival = false, ItemCapabilityCatalog capabilities = null)
+            ContainerSaveSession lifecycleSession = null, bool isSceneArrival = false, ItemCapabilityCatalog capabilities = null, CarriedEquipment equipment = null)
         {
-            Capabilities = capabilities;
+            Capabilities = capabilities; Equipment = equipment;
             LifecycleSession = lifecycleSession; IsSceneArrival = isSceneArrival;
             OpenContainer = openContainer; CloseContainer = closeContainer;
             Hotbar = hotbar; Selection = selection; ClosePlayerScreens = closePlayerScreens; Feedback = feedback;

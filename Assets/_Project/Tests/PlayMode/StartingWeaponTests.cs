@@ -100,7 +100,8 @@ namespace SOLITUDE.Tests
             Assert.AreEqual(WeaponSystemTestFixtures.Wrench.ItemId, durable.containers.Find(c => c.saveableId == ContainerSaveSession.PlayerHotbarId).state.slots[0].itemId);
             InputSystem.QueueStateEvent(pad, new GamepadState { rightTrigger = 1 }); InputSystem.Update(); yield return null; yield return null;
             Assert.IsTrue(WeaponSystemTestFixtures.Actions.Runner.IsExecuting);
-            Assert.AreSame(WeaponSystemTestFixtures.Wrench.HeldSprite, WeaponSystemTestFixtures.Actions.GetComponent<MeleeSwingView>().HeldRenderer.sprite);
+            var wrenchAttack = (SOLITUDE.Items.MeleeAttackAction)WeaponSystemTestFixtures.Wrench.Actions[0].Action;
+            Assert.AreSame(wrenchAttack.Configuration.PosedWeaponFrames[0], WeaponSystemTestFixtures.Actions.GetComponent<MeleeSwingView>().HeldRenderer.sprite);
         }
     }
 }
